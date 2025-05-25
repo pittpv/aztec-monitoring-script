@@ -49,7 +49,10 @@ init_languages() {
   TRANSLATIONS["en,option5"]="5. Find PeerID in logs"
   TRANSLATIONS["en,option6"]="6. Find governanceProposerPayload in logs"
   TRANSLATIONS["en,option7"]="7. Check Proven L2 Block and Sync Proof"
+  TRANSLATIONS["en,option8"]="8. Change RPC URL"
   TRANSLATIONS["en,option0"]="0. Exit"
+  TRANSLATIONS["en,rpc_change_prompt"]="Enter new RPC URL:"
+  TRANSLATIONS["en,rpc_change_success"]="✅ RPC URL successfully updated"
   TRANSLATIONS["en,choose_option"]="Select option:"
   TRANSLATIONS["en,checking_deps"]="🔍 Checking required components:"
   TRANSLATIONS["en,missing_tools"]="Required components are missing:"
@@ -94,6 +97,12 @@ init_languages() {
   TRANSLATIONS["en,get_sync_proof"]="🔍 Fetching Sync Proof..."
   TRANSLATIONS["en,sync_proof_found"]="✅ Sync Proof:"
   TRANSLATIONS["en,sync_proof_error"]="❌ Failed to retrieve sync proof."
+  TRANSLATIONS["en,token_check"]="🔍 Checking Telegram token and ChatID..."
+  TRANSLATIONS["en,token_valid"]="✅ Telegram token is valid"
+  TRANSLATIONS["en,token_invalid"]="❌ Invalid Telegram token"
+  TRANSLATIONS["en,chatid_valid"]="✅ ChatID is valid and bot has access"
+  TRANSLATIONS["en,chatid_invalid"]="❌ Invalid ChatID or bot has no access"
+  TRANSLATIONS["en,agent_created"]="✅ Agent successfully created and configured!"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -105,7 +114,10 @@ init_languages() {
   TRANSLATIONS["ru,option5"]="5. Найти PeerID в логах"
   TRANSLATIONS["ru,option6"]="6. Найти governanceProposerPayload в логах"
   TRANSLATIONS["ru,option7"]="7. Проверить Proven L2 блок и Sync Proof"
+  TRANSLATIONS["ru,option8"]="8. Изменить RPC URL"
   TRANSLATIONS["ru,option0"]="0. Выход"
+  TRANSLATIONS["ru,rpc_change_prompt"]="Введите новый RPC URL:"
+  TRANSLATIONS["ru,rpc_change_success"]="✅ RPC URL успешно обновлен"
   TRANSLATIONS["ru,choose_option"]="Выберите опцию:"
   TRANSLATIONS["ru,checking_deps"]="🔍 Проверка необходимых компонентов:"
   TRANSLATIONS["ru,missing_tools"]="Необходимые компоненты отсутствуют:"
@@ -150,6 +162,12 @@ init_languages() {
   TRANSLATIONS["ru,get_sync_proof"]="🔍 Получение Sync Proof..."
   TRANSLATIONS["ru,sync_proof_found"]="✅ Sync Proof:"
   TRANSLATIONS["ru,sync_proof_error"]="❌ Не удалось получить sync proof."
+  TRANSLATIONS["ru,token_check"]="🔍 Проверка Telegram токена и ChatID..."
+  TRANSLATIONS["ru,token_valid"]="✅ Telegram токен действителен"
+  TRANSLATIONS["ru,token_invalid"]="❌ Неверный Telegram токен"
+  TRANSLATIONS["ru,chatid_valid"]="✅ ChatID действителен и бот имеет доступ"
+  TRANSLATIONS["ru,chatid_invalid"]="❌ Неверный ChatID или бот не имеет доступа"
+  TRANSLATIONS["ru,agent_created"]="✅ Агент успешно создан и настроен!"
 }
 
 # === Configuration ===
@@ -185,7 +203,12 @@ check_dependencies() {
           cast)
             echo -e "\n${CYAN}$(t "installing_foundry")${NC}"
             curl -L https://foundry.paradigm.xyz | bash
-            source ~/.bashrc 2>/dev/null || source ~/.zshrc 2>/dev/null
+
+            if ! grep -q 'foundry/bin'  ~/.bash_profile; then
+              echo 'export PATH="$PATH:$HOME/.foundry/bin"' >> ~/.bash_profile
+            fi
+
+            export PATH="$PATH:$HOME/.foundry/bin"
             foundryup
             ;;
 
@@ -373,49 +396,76 @@ find_governance_proposer_payload() {
   rm "$tmp_log"
 }
 
-# === Check Proven L2 Block and Sync Proof ===
-check_proven_block() {
-  echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
-
-  PROVEN_BLOCK=$(curl -s -X POST -H 'Content-Type: application/json' \
-    -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
-    http://localhost:8080 | jq -r ".result.proven.number")
-
-  if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
-    echo -e "\n${RED}$(t "proven_block_error")${NC}"
-    return
-  fi
-
-  echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
-
-  echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
-  SYNC_PROOF=$(curl -s -X POST -H 'Content-Type: application/json' \
-    -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
-    http://localhost:8080 | jq -r ".result")
-
-  if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
-    echo -e "\n${RED}$(t "sync_proof_error")${NC}"
-    return
-  fi
-
-  echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
-  echo "$SYNC_PROOF"
-}
-
 # === Create agent and cron task ===
 create_cron_agent() {
   source .env-aztec-agent
 
-  echo -e "\n${BLUE}$(t "token_prompt")${NC}"
-  read -p "> " TELEGRAM_BOT_TOKEN
+  # Function to validate Telegram bot token
+  validate_telegram_token() {
+    local token=$1
+    if [[ ! "$token" =~ ^[0-9]+:[a-zA-Z0-9_-]+$ ]]; then
+      return 1
+    fi
+    # Test token by making API call
+    local response=$(curl -s "https://api.telegram.org/bot${token}/getMe")
+    if [[ "$response" == *"ok\":true"* ]]; then
+      return 0
+    else
+      return 1
+    fi
+  }
 
-  echo -e "\n${BLUE}$(t "chatid_prompt")${NC}"
-  read -p "> " TELEGRAM_CHAT_ID
+  # Function to validate Telegram chat ID (updated version)
+  validate_telegram_chat() {
+    local token=$1
+    local chat_id=$2
+    # Test chat ID by trying to send a test message
+    local response=$(curl -s -X POST "https://api.telegram.org/bot${token}/sendMessage" \
+      -d chat_id="${chat_id}" \
+      -d text="✅ ChatID successfully linked to Aztec Agent" \
+      -d parse_mode="Markdown")
+
+    if [[ "$response" == *"ok\":true"* ]]; then
+      return 0
+    else
+      return 1
+    fi
+  }
+
+  # Get and validate Telegram bot token
+  while true; do
+    echo -e "\n${BLUE}$(t "token_prompt")${NC}"
+    read -p "> " TELEGRAM_BOT_TOKEN
+
+    if validate_telegram_token "$TELEGRAM_BOT_TOKEN"; then
+      break
+    else
+      echo -e "${RED}Invalid Telegram bot token. Please try again.${NC}"
+      echo -e "${YELLOW}Token should be in format: 1234567890:ABCdefGHIJKlmNoPQRsTUVwxyZ${NC}"
+    fi
+  done
+
+  # Get and validate Telegram chat ID
+  while true; do
+    echo -e "\n${BLUE}$(t "chatid_prompt")${NC}"
+    read -p "> " TELEGRAM_CHAT_ID
+
+    if [[ "$TELEGRAM_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
+      if validate_telegram_chat "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHAT_ID"; then
+        break
+      else
+        echo -e "${RED}Invalid Telegram chat ID or the bot doesn't have access to this chat. Please try again.${NC}"
+      fi
+    else
+      echo -e "${RED}Chat ID must be a number (can start with - for group chats). Please try again.${NC}"
+    fi
+  done
 
   mkdir -p "$AGENT_SCRIPT_PATH"
 
 cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
+export PATH="$PATH:/root/.foundry/bin"
 
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
@@ -424,8 +474,12 @@ TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
 
+# Create log file if it doesn't exist
 if [ ! -f "\$LOG_FILE" ]; then
-  touch "\$LOG_FILE" 2>/dev/null
+  touch "\$LOG_FILE" 2>/dev/null || {
+    echo "Error: Could not create log file \$LOG_FILE"
+    exit 1
+  }
 fi
 
 if [ ! -w "\$LOG_FILE" ]; then
@@ -437,45 +491,102 @@ log() {
   echo "[\$(date '+%Y-%m-%d %H:%M:%S')] \$1" >> "\$LOG_FILE"
 }
 
-get_ip_address() {
-  curl -s https://api.ipify.org
+send_telegram_message() {
+  local message="\$1"
+  curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
+    -d chat_id="\$TELEGRAM_CHAT_ID" \\
+    -d text="\$message" \\
+    -d parse_mode="Markdown" >/dev/null
 }
 
+get_ip_address() {
+  curl -s https://api.ipify.org || echo "unknown-ip"
+}
+
+# New hex to decimal conversion function
+hex_to_dec() {
+  local hex=\$1
+  # Remove 0x prefix if present
+  hex=\${hex#0x}
+  # Remove leading zeros
+  hex=\$(echo \$hex | sed 's/^0*//')
+  # If empty after removing zeros, return 0
+  [ -z "\$hex" ] && echo 0 && return
+  echo \$((16#\$hex))
+}
+
+# Check if container exists
 container_id=\$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
 
 if [ -z "\$container_id" ]; then
   log "Container 'aztec' not found."
+  ip=\$(get_ip_address)
+  send_telegram_message "❌ *Aztec Container Not Found*%0A🌐 Server: \$ip%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
   exit 0
 fi
 
+# Get current block from contract
 block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
+log "Raw cast call output: \$block_hex"
 
-if [[ -z "\$block_hex" || "\$block_hex" == *"error"* ]]; then
-  log "Error in cast call: \$block_hex"
+# Check if call was successful
+if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
+  ip=\$(get_ip_address)
+  error_msg="❌ *Block Fetch Error*%0A🌐 Server: \$ip%0A🔗 RPC: \$RPC_URL%0A💬 Error: \$block_hex%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+  send_telegram_message "\$error_msg"
+  log "\$error_msg"
   exit 0
 fi
 
-block_number=\$((block_hex))
-logs=\$(docker logs --tail 500 "\$container_id")
+# Convert hex to decimal using new function
+block_number=\$(hex_to_dec "\$block_hex")
+log "Converted block number: \$block_number"
 
+if [ -z "\$block_number" ]; then
+  log "Error: Block number conversion failed"
+  exit 0
+fi
+
+logs=\$(docker logs --tail 1000 "\$container_id" 2>&1)
 ip=\$(get_ip_address)
 
-if ! echo "\$logs" | grep -q "\$block_number"; then
-  status="❗ Aztec node is NOT processing current block \$block_number"
-  log "Block \$block_number not found in logs - sending notification."
-  curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
-    -d chat_id="\$TELEGRAM_CHAT_ID" \\
-    -d text="\$status%0A🌐 Server: \$ip"
+# Try to find the latest L2 block in logs
+log_block=\$(echo "\$logs" | grep -oP 'Downloaded L2 block \\K[0-9]+' | tail -n 1)
+
+if [ -z "\$log_block" ]; then
+  log_block="none found"
+fi
+
+# Log all information
+log "Contract block: \$block_number"
+log "Logs block: \$log_block"
+
+# Prepare status message
+if [ "\$log_block" == "none found" ]; then
+  status="❌ No blocks found in logs"
+elif [ "\$log_block" -eq "\$block_number" ]; then
+  status="✅ Node is synced (block \$block_number)"
 else
-  status="✅ Aztec node is processing current block \$block_number"
-  log "\$status"
+  blocks_diff=\$((block_number - log_block))
+  status="⚠️ Node is behind by \$blocks_diff blocks (logs: \$log_block, contract: \$block_number)"
+fi
+
+log "Status: \$status"
+
+# Check if we need to send notifications
+if [ "\$log_block" == "none found" ]; then
+  message="❌ *No blocks processed*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+  send_telegram_message "\$message"
+elif [ "\$log_block" -ne "\$block_number" ]; then
+  blocks_diff=\$((block_number - log_block))
+  message="⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+  send_telegram_message "\$message"
 fi
 
 # Send welcome message on first run
 if ! grep -q "INITIALIZED" "\$LOG_FILE"; then
-  curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
-    -d chat_id="\$TELEGRAM_CHAT_ID" \\
-    -d text="🤖 Agent successfully started on server: \$ip%0A\$status%0Aℹ️ Further notifications will be sent only if blocks are delayed."
+  welcome_msg="🤖 *Aztec Monitoring Agent Started*%0A🌐 Server: \$ip%0A\$status%0Aℹ️ Notifications will be sent for issues%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+  send_telegram_message "\$welcome_msg"
   echo "INITIALIZED" >> "\$LOG_FILE"
 fi
 EOF
@@ -490,12 +601,43 @@ EOF
   fi
 }
 
+
 # === Remove cron task and agent ===
 remove_cron_agent() {
   echo -e "\n${BLUE}$(t "removing_agent")${NC}"
   crontab -l 2>/dev/null | grep -v "$AGENT_SCRIPT_PATH/agent.sh" | crontab -
   rm -rf "$AGENT_SCRIPT_PATH"
   echo -e "\n${GREEN}$(t "agent_removed")${NC}"
+}
+
+# === Change RPC URL ===
+change_rpc_url() {
+  echo -e "\n${BLUE}$(t "rpc_change_prompt")${NC}"
+  read -p "> " NEW_RPC_URL
+
+  if [ -z "$NEW_RPC_URL" ]; then
+    echo -e "${RED}Error: RPC URL cannot be empty${NC}"
+    return 1
+  fi
+
+  # Test the new RPC URL
+  echo -e "\n${BLUE}Testing new RPC URL...${NC}"
+  response=$(curl -s -X POST -H "Content-Type: application/json" \
+    --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
+    "$NEW_RPC_URL" 2>/dev/null)
+
+  if [[ -z "$response" || "$response" == *"error"* ]]; then
+    echo -e "${RED}Error: Failed to connect to the RPC endpoint. Please check the URL and try again.${NC}"
+    return 1
+  fi
+
+  # Update the .env file
+  echo "RPC_URL=$NEW_RPC_URL" > .env-aztec-agent
+  echo -e "\n${GREEN}$(t "rpc_change_success")${NC}"
+  echo -e "${YELLOW}New RPC URL: $NEW_RPC_URL${NC}"
+
+  # Reload the environment
+  source .env-aztec-agent
 }
 
 # === Main menu ===
@@ -510,6 +652,7 @@ main_menu() {
     echo -e "${CYAN}$(t "option5")${NC}"
     echo -e "${CYAN}$(t "option6")${NC}"
     echo -e "${CYAN}$(t "option7")${NC}"
+    echo -e "${CYAN}$(t "option8")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -523,6 +666,7 @@ main_menu() {
       5) find_peer_id ;;
       6) find_governance_proposer_payload ;;
       7) check_proven_block ;;
+      8) change_rpc_url ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

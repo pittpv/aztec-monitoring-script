@@ -1,107 +1,108 @@
 # Aztec Node Monitoring Agent
 
-[🇷🇺 Русская версия](https://github.com/pittpv/aztec-monitoring-script/blob/main/ru/ "Russian version of description")
+[🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Русская версия описания")
 
 ![Bash](https://img.shields.io/badge/Bash-5.2-blue)
 ![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
 ![Telegram](https://img.shields.io/badge/Telegram-API-blue)
 
-![First Screen](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-ru-2025-05-25-05-45-23.png)
+![Main Screen](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-en-2025-05-25-05-44-01.png)
 
-## 📌 Overview
+## 📝 Description
 
-This script provides Aztec node monitoring with the following features:
+This script provides a comprehensive solution for monitoring the Aztec node, including container status checks, block synchronization verification, and Telegram notifications.
 
-* Container status check
-* Block sync monitoring
-* Telegram notifications
-* Dual language support
-* Simple cron job setup
-* Getting proof for discord role
+## 🌟 Key Features
 
-## 🛠 Features
+* 🐳 Aztec container monitoring
+* 🔗 Block freshness checks (compared to the smart contract)
+* 🔍 Log parsing for critical parameters
+* 📨 Telegram alerts on issues
+* ⏰ Cron job for automatic monitoring
 
-1. **Monitoring**:
+## 🛠️ Functionality
 
-   * Checks if the Aztec container is running
-   * Verifies that the latest block is being processed
+| Feature          | Description                                       |
+| ---------------- | ------------------------------------------------- |
+| ✅ **Container**  | Monitors the status of the Aztec Docker container |
+| 🔄 **Blocks**    | Compares local block height with on-chain height  |
+| 🤖 **Telegram**  | Instant issue alerts via Telegram                 |
+| 🌐 **Languages** | English/Russian language support                  |
+| ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-2. **Log Analysis**:
-
-   * Searches for `rollupAddress`
-   * Extracts `PeerID`
-   * Tracks changes to `governanceProposerPayload`
-   * Finds the latest proven block number and corresponding proof code (useful for acquiring the Apprentice role)
-
-3. **Notifications**:
-
-   * Telegram alerts when the node lags behind the network
-   * Welcome message upon activation
-   * Server identification via external IP address
-
-4. **Automation**:
-
-   * Sets up a cron job
-   * Runs a check every minute
-   * Log rotation support
-
-## ⚙️ Installation & Run
+## ⚙️ Installation and Launch
 
 1. **Requirements**:
-   The script checks for necessary components and offers to install missing ones.
+   The script will check for required components and offer to install any that are missing.
 
-2. **Run**:
+2. **Launch**:
 
    ```bash
-   curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/aztec-logs.sh  
-   chmod +x aztec-logs.sh  
-   ./aztec-logs.sh  
+   curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/aztec-logs.sh && chmod +x aztec-logs.sh && ./aztec-logs.sh
+   ```
+
+   For future runs:
+
+   ```bash
+   cd $HOME && ./aztec-logs.sh
    ```
 
 3. **Follow the instructions** to:
 
-   * Select language
+   * Select a language
    * Enter RPC URL
-   * Configure Telegram bot
-   * Activate monitoring
+   * Configure the Telegram bot
+   * Enable monitoring
+
+## 🖥️ Usage
+
+Main menu:
+
+1. 🔍 Check container and blocks
+2. ⚙️ Install monitoring agent
+3. 🗑️ Remove monitoring agent
+4. 🏷️ Find rollupAddress
+5. 👥 Find PeerID
+6. 🏛️ Find governanceProposerPayload
+7. 🔗 Check Proven L2 Block
+8. 🔌 Change RPC URL
+9. 🚪 Exit
 
 ## 🚀 Using the Cron Agent
 
-After installing the script, select option Install cron agent for monitoring:
+After running the script, select the option to **Install the cron monitoring agent**:
 
-* Create an agent in `~/aztec-monitor-agent`
-* Configure a cron job
-* Send an initial status message to Telegram
-* Continuously monitor the node and log output to `agent.log`
-* Send Telegram alerts if the node fails to process the current block
+* Creates an agent at `~/aztec-monitor-agent`
+* Sets up a cron job
+* Sends an initial status update to Telegram
+* Continuously monitors the node and logs to `~/aztec-monitor-agent/agent.log`
+* Sends Telegram alerts if:
 
-### For cron agent you will need:
+  * The Aztec container is not found
+  * There is a mismatch between the latest block in the logs and in the smart contract (minor differences are acceptable)
+  * There is an RPC server issue
 
-1. Get a Telegram bot token from [BotFather](https://t.me/BotFather)
-2. Find your `chat_id` using [IDBot](https://t.me/myidbot) or similar
-3. Enter the token and chat\_id during cron-agent setup
+### Requirements for Cron Agent:
 
-## 📝 Telegram Messages
+1. Get a Telegram token from [BotFather](https://t.me/BotFather)
+2. Find your `chat_id` using [IDBot](https://t.me/myidbot)
+3. Enter these in the script during cron-agent setup.
+   The script validates both token and chat ID — if entered incorrectly, you will see a warning.
 
-* **First run**:
+## ⚠️ Important
 
-  ```
-  🤖 Agent successfully launched on server: 192.168.1.1  
-  ✅ Node is processing the latest block 12345  
-  ℹ️ Further notifications will only be sent if the node falls behind  
-  ```
-
-* **Block lag alert**:
-
-  ```
-  ❗ Node is NOT processing the current block 12345  
-  🌐 Server: 192.168.1.1  
-  ```
+This script is not an official product of Aztec Protocol and is provided "as is".
 
 ## 📜 License
 
-MIT License © 2023 Aztec Monitor Project
+MIT License © 2025
 
-## 🔗 Useful Links 
+## ✍️ Feedback
 
-[RPC Launch Script](https://github.com/pittpv/sepolia-auto-install "Run a Sepolia node for RPC access")
+For any issues, suggestions, or feedback:
+
+[https://t.me/+DLsyG6ol3SFjM2Vk](https://t.me/+DLsyG6ol3SFjM2Vk)
+
+## 🔗 Useful Links
+
+[One-click RPC setup script](https://github.com/pittpv/sepolia-auto-install "Quickly set up a Sepolia node for RPC")
