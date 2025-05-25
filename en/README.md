@@ -66,7 +66,7 @@ Main menu:
 6. 🏛️ Find governanceProposerPayload
 7. 🔗 Check Proven L2 Block *(data for getting Apprentice role in Discord)*
 8. 🔌 Change RPC URL
-9. 🚪 Exit
+0. 🚪 Exit
 
 ## 🚀 Using the Cron Agent
 
