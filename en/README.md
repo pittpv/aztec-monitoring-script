@@ -8,7 +8,7 @@
 
 ![First Screen](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-ru-2025-05-25-05-45-23.png)
 
-### 📌 Overview
+## 📌 Overview
 
 This script provides Aztec node monitoring with the following features:
 
@@ -19,7 +19,7 @@ This script provides Aztec node monitoring with the following features:
 * Simple cron job setup
 * Getting proof for discord role
 
-### 🛠 Features
+## 🛠 Features
 
 1. **Monitoring**:
 
@@ -45,7 +45,7 @@ This script provides Aztec node monitoring with the following features:
    * Runs a check every minute
    * Log rotation support
 
-### ⚙️ Installation
+## ⚙️ Installation & Run
 
 1. **Requirements**:
    The script checks for necessary components and offers to install missing ones.
@@ -65,7 +65,7 @@ This script provides Aztec node monitoring with the following features:
    * Configure Telegram bot
    * Activate monitoring
 
-### 🚀 Using the Cron Agent
+## 🚀 Using the Cron Agent
 
 After installation, the script will:
 
@@ -75,7 +75,7 @@ After installation, the script will:
 * Continuously monitor the node and log output to `agent.log`
 * Send Telegram alerts if the node fails to process the current block
 
-### 📝 Telegram Messages
+## 📝 Telegram Messages
 
 * **First run**:
 
