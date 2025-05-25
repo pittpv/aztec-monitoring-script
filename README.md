@@ -60,7 +60,7 @@
 4. 🏷️ Найти rollupAddress
 5. 👥 Найти PeerID
 6. 🏛️ Найти governanceProposerPayload
-7. 🔗 Проверить Proven L2 Block
+7. 🔗 Проверить Proven L2 Block *(данные для получения Apprentice роли в Discord)*
 8. 🔌 Изменить RPC URL
 0. 🚪 Выход
 

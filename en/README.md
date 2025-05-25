@@ -64,7 +64,7 @@ Main menu:
 4. 🏷️ Find rollupAddress
 5. 👥 Find PeerID
 6. 🏛️ Find governanceProposerPayload
-7. 🔗 Check Proven L2 Block
+7. 🔗 Check Proven L2 Block *(data for getting Apprentice role in Discord)*
 8. 🔌 Change RPC URL
 9. 🚪 Exit
 
