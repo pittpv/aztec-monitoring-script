@@ -6,12 +6,13 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
+VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
 function show_logo() {
     echo -e " "
     echo -e " "
-    echo -e "${BLUE}$(t "welcome")${RESET}"
+    echo -e "${VIOLET}$(t "welcome")${NC}"
     curl -s https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/logo.sh | bash
 }
 
@@ -39,7 +40,7 @@ init_languages() {
   esac
 
   # English translations
-  TRANSLATIONS["en,welcome"]="     Welcome to the Aztec node monitoring script     "
+  TRANSLATIONS["en,welcome"]="Welcome to the Aztec node monitoring script"
   TRANSLATIONS["en,title"]="========= Main Menu ========="
   TRANSLATIONS["en,option1"]="1. Check container and current block"
   TRANSLATIONS["en,option2"]="2. Install cron monitoring agent"
@@ -88,7 +89,7 @@ init_languages() {
   TRANSLATIONS["en,searching"]="Searching..."
 
   # Russian translations
-  TRANSLATIONS["ru,welcome"]="   Добро пожаловать в скрипт мониторинга ноды Aztec   "
+  TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
   TRANSLATIONS["ru,title"]="========= Главное меню ========="
   TRANSLATIONS["ru,option1"]="1. Проверить контейнер и актуальный блок"
   TRANSLATIONS["ru,option2"]="2. Установить cron-агент для мониторинга"
