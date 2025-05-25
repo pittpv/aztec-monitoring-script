@@ -48,6 +48,7 @@ init_languages() {
   TRANSLATIONS["en,option4"]="4. Find rollupAddress in logs"
   TRANSLATIONS["en,option5"]="5. Find PeerID in logs"
   TRANSLATIONS["en,option6"]="6. Find governanceProposerPayload in logs"
+  TRANSLATIONS["en,option7"]="7. Check Proven L2 Block and Sync Proof"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,choose_option"]="Select option:"
   TRANSLATIONS["en,checking_deps"]="🔍 Checking required components:"
@@ -87,6 +88,12 @@ init_languages() {
   TRANSLATIONS["en,goodbye"]="👋 Goodbye."
   TRANSLATIONS["en,invalid_choice"]="❌ Invalid choice. Try again."
   TRANSLATIONS["en,searching"]="Searching..."
+  TRANSLATIONS["en,get_proven_block"]="🔍 Getting proven L2 block number..."
+  TRANSLATIONS["en,proven_block_found"]="✅ Proven L2 Block Number:"
+  TRANSLATIONS["en,proven_block_error"]="❌ Failed to retrieve the proven L2 block number."
+  TRANSLATIONS["en,get_sync_proof"]="🔍 Fetching Sync Proof..."
+  TRANSLATIONS["en,sync_proof_found"]="✅ Sync Proof:"
+  TRANSLATIONS["en,sync_proof_error"]="❌ Failed to retrieve sync proof."
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -97,6 +104,7 @@ init_languages() {
   TRANSLATIONS["ru,option4"]="4. Найти адрес rollupAddress в логах"
   TRANSLATIONS["ru,option5"]="5. Найти PeerID в логах"
   TRANSLATIONS["ru,option6"]="6. Найти governanceProposerPayload в логах"
+  TRANSLATIONS["ru,option7"]="7. Проверить Proven L2 блок и Sync Proof"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,choose_option"]="Выберите опцию:"
   TRANSLATIONS["ru,checking_deps"]="🔍 Проверка необходимых компонентов:"
@@ -136,13 +144,19 @@ init_languages() {
   TRANSLATIONS["ru,goodbye"]="👋 Выход."
   TRANSLATIONS["ru,invalid_choice"]="❌ Неверный выбор. Попробуйте снова."
   TRANSLATIONS["ru,searching"]="Поиск..."
+  TRANSLATIONS["ru,get_proven_block"]="🔍 Получение номера proven L2 блока..."
+  TRANSLATIONS["ru,proven_block_found"]="✅ Номер Proven L2 блока:"
+  TRANSLATIONS["ru,proven_block_error"]="❌ Не удалось получить номер proven L2 блока."
+  TRANSLATIONS["ru,get_sync_proof"]="🔍 Получение Sync Proof..."
+  TRANSLATIONS["ru,sync_proof_found"]="✅ Sync Proof:"
+  TRANSLATIONS["ru,sync_proof_error"]="❌ Не удалось получить sync proof."
 }
 
 # === Configuration ===
 CONTRACT_ADDRESS="0xee6d4e937f0493fb461f28a75cf591f1dba8704e"
 FUNCTION_SIG="getPendingBlockNumber()"
 
-REQUIRED_TOOLS=("cast" "curl" "crontab" "grep" "sed")
+REQUIRED_TOOLS=("cast" "curl" "crontab" "grep" "sed" "jq")
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 
@@ -150,7 +164,7 @@ LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 check_dependencies() {
   missing=()
   echo -e "\n${BLUE}$(t "checking_deps")${NC}\n"
-  
+
   for tool in "${REQUIRED_TOOLS[@]}"; do
     if ! command -v "$tool" &>/dev/null; then
       echo -e "${RED}❌ $tool $(t "not_installed")${NC}"
@@ -189,6 +203,11 @@ check_dependencies() {
             echo -e "\n${CYAN}$(t "installing_utils")${NC}"
             sudo apt-get install -y grep sed || brew install grep gnu-sed
             ;;
+
+          jq)
+            echo -e "\n${CYAN}$(t "installing_jq")${NC}"
+            sudo apt-get install -y jq || brew install jq
+            ;;
         esac
       done
     else
@@ -214,21 +233,21 @@ spinner() {
   local pid=$1
   local delay=0.1
   local spinstr='|/-\'
-  
+
   while kill -0 "$pid" 2>/dev/null; do
     for i in $(seq 0 3); do
       printf "\r${CYAN}$(t "searching") %c${NC}" "${spinstr:i:1}"
       sleep $delay
     done
   done
-  
+
   printf "\r                 \r"
 }
 
 # === Check container logs ===
 check_aztec_container_logs() {
   source .env-aztec-agent
-  
+
   echo -e "\n${BLUE}$(t "search_container")${NC}"
   container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
 
@@ -354,13 +373,42 @@ find_governance_proposer_payload() {
   rm "$tmp_log"
 }
 
+# === Check Proven L2 Block and Sync Proof ===
+check_proven_block() {
+  echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
+
+  PROVEN_BLOCK=$(curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
+    http://localhost:8080 | jq -r ".result.proven.number")
+
+  if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
+    echo -e "\n${RED}$(t "proven_block_error")${NC}"
+    return
+  fi
+
+  echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
+
+  echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
+  SYNC_PROOF=$(curl -s -X POST -H 'Content-Type: application/json' \
+    -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
+    http://localhost:8080 | jq -r ".result")
+
+  if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
+    echo -e "\n${RED}$(t "sync_proof_error")${NC}"
+    return
+  fi
+
+  echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
+  echo "$SYNC_PROOF"
+}
+
 # === Create agent and cron task ===
 create_cron_agent() {
   source .env-aztec-agent
-  
+
   echo -e "\n${BLUE}$(t "token_prompt")${NC}"
   read -p "> " TELEGRAM_BOT_TOKEN
-  
+
   echo -e "\n${BLUE}$(t "chatid_prompt")${NC}"
   read -p "> " TELEGRAM_CHAT_ID
 
@@ -461,9 +509,10 @@ main_menu() {
     echo -e "${CYAN}$(t "option4")${NC}"
     echo -e "${CYAN}$(t "option5")${NC}"
     echo -e "${CYAN}$(t "option6")${NC}"
+    echo -e "${CYAN}$(t "option7")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
-    
+
     read -p "$(t "choose_option") " choice
 
     case "$choice" in
@@ -473,6 +522,7 @@ main_menu() {
       4) find_rollup_address ;;
       5) find_peer_id ;;
       6) find_governance_proposer_payload ;;
+      7) check_proven_block ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
