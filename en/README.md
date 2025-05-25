@@ -42,45 +42,31 @@ This script provides comprehensive monitoring for Aztec node containers with the
 ### ⚙️ Installation
 
 1. **Prerequisites**:
+   The script will check for the required components and offer to install any missing ones.
+
+2. **Run setup**:
    ```bash
-   sudo apt-get install curl git docker.io
+   curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/aztec-logs.sh  
+   chmod +x aztec-logs.sh 
+   ./aztec-logs.sh 
    ```
 
-2. **Clone repository**:
-   ```bash
-   git clone https://github.com/yourrepo/aztec-monitor.git
-   cd aztec-monitor
-   ```
-
-3. **Run setup**:
-   ```bash
-   chmod +x aztec-monitor.sh
-   ./aztec-monitor.sh
-   ```
-
-4. **Follow prompts** to:
+3. **Follow prompts** to:
    - Select language
    - Enter RPC URL
    - Configure Telegram bot
    - Set up monitoring
 
-### 🚀 Usage
+### 🚀 Using the cron agent
 
 After installation, the script will:
 
-- Create agent in `~/aztec-monitor-agent`
-- Add cron job running every minute
-- Send initial status to Telegram
-- Monitor node continuously
+* Create the agent in `~/aztec-monitor-agent`
+* Configure a cron job
+* Send the initial status to Telegram
+* Continuously monitor the node and log activity to `agent.log`
+* Send a notification to Telegram if it fails to find the latest block
 
-Manual commands:
-```bash
-# Check container status
-./aztec-monitor.sh
-
-# Remove agent
-./aztec-monitor.sh (select option 3)
-```
 
 ### 📝 Telegram Messages
 
