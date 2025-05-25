@@ -14,8 +14,9 @@ function print_colored() {
   local r=$'\033[0m'  # Reset
   echo "$1" | sed -E "s/(█+)/${b}\1${y}/g"
 }
-
- echo
+  echo -e " "
+  echo -e " "
+  echo
   print_colored " █████╗ ███████╗████████╗███████╗ ██████╗"
   print_colored "██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝"
   print_colored "███████║  ███╔╝    ██║   █████╗  ██║"
