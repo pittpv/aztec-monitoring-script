@@ -1,10 +1,12 @@
 # Aztec Node Monitoring Agent
 
+[🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "English version of description")
+
 ![Bash](https://img.shields.io/badge/Bash-5.2-blue)
 ![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
 ![Telegram](https://img.shields.io/badge/Telegram-API-blue)
 
-[🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "English version of description")
+![Первый экран](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-ru-2025-05-25-05-45-23.png)
 
 ### 📌 Обзор
 
