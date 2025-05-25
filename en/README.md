@@ -67,7 +67,7 @@ This script provides Aztec node monitoring with the following features:
 
 ## 🚀 Using the Cron Agent
 
-After installation, the script will:
+After installing the script, select option Install cron agent for monitoring:
 
 * Create an agent in `~/aztec-monitor-agent`
 * Configure a cron job
