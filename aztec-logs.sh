@@ -449,6 +449,7 @@ remove_cron_agent() {
 
 # === Main menu ===
 main_menu() {
+  show_logo
   while true; do
     echo -e "\n${BLUE}$(t "title")${NC}"
     echo -e "${CYAN}$(t "option1")${NC}"
