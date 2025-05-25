@@ -12,7 +12,7 @@ NC='\033[0m' # No Color
 function show_logo() {
     echo -e " "
     echo -e " "
-    echo -e "${VIOLET}$(t "welcome")${NC}"
+    echo -e "${NC}$(t "welcome")${NC}"
     curl -s https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/logo.sh | bash
 }
 
