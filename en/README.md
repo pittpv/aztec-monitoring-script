@@ -75,6 +75,12 @@ After installing the script, select option Install cron agent for monitoring:
 * Continuously monitor the node and log output to `agent.log`
 * Send Telegram alerts if the node fails to process the current block
 
+### For cron agent you will need:
+
+1. Get a Telegram bot token from [BotFather](https://t.me/BotFather)
+2. Find your `chat_id` using [IDBot](https://t.me/myidbot) or similar
+3. Enter the token and chat\_id during cron-agent setup
+
 ## 📝 Telegram Messages
 
 * **First run**:
