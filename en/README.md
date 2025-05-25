@@ -101,3 +101,7 @@ After installing the script, select option Install cron agent for monitoring:
 ## 📜 License
 
 MIT License © 2023 Aztec Monitor Project
+
+## 🔗 Useful Links 
+
+[RPC Launch Script](https://github.com/pittpv/sepolia-auto-install "Run a Sepolia node for RPC access")

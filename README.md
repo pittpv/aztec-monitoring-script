@@ -93,3 +93,7 @@
 ## 📜 License
 
 MIT License © 2023 Aztec Monitor Project
+
+## 🔗 Полезные ссылки
+
+[Скрипт для запуска RPC](https://github.com/pittpv/sepolia-auto-install "Запуск Sepolia узла для RPC")
