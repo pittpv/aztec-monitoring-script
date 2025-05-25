@@ -9,6 +9,8 @@ CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 function show_logo() {
+    echo -e " "
+    echo -e " "
     echo -e "${BLUE}$(t "welcome")${RESET}"
     curl -s https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/logo.sh | bash
 }
