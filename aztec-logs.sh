@@ -610,6 +610,35 @@ remove_cron_agent() {
   echo -e "\n${GREEN}$(t "agent_removed")${NC}"
 }
 
+# === Check Proven L2 Block and Sync Proof ===
+check_proven_block() {
+  echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
+
+  PROVEN_BLOCK=$(curl -s -X POST -H 'Content-Type: application/json' \
+    -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
+    http://localhost:8080 | jq -r ".result.proven.number")
+
+  if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
+    echo -e "\n${RED}$(t "proven_block_error")${NC}"
+    return
+  fi
+
+  echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
+
+  echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
+  SYNC_PROOF=$(curl -s -X POST -H 'Content-Type: application/json' \
+    -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
+    http://localhost:8080 | jq -r ".result")
+
+  if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
+    echo -e "\n${RED}$(t "sync_proof_error")${NC}"
+    return
+  fi
+
+  echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
+  echo "$SYNC_PROOF"
+}
+
 # === Change RPC URL ===
 change_rpc_url() {
   echo -e "\n${BLUE}$(t "rpc_change_prompt")${NC}"
