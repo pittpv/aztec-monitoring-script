@@ -579,8 +579,13 @@ if [ "\$log_block" == "none found" ]; then
   send_telegram_message "\$message"
 elif [ "\$log_block" -ne "\$block_number" ]; then
   blocks_diff=\$((block_number - log_block))
-  message="⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-  send_telegram_message "\$message"
+  # Send notification only if difference is more than 3 blocks
+  if [ \$blocks_diff -gt 3 ]; then
+    message="⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    send_telegram_message "\$message"
+  else
+    log "Block difference (\$blocks_diff) is within acceptable range, no notification sent"
+  fi
 fi
 
 # Send welcome message on first run
