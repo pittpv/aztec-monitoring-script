@@ -79,7 +79,7 @@ After running the script, select the option to **Install the cron monitoring age
 * Sends Telegram alerts if:
 
   * The Aztec container is not found
-  * There is a mismatch between the latest block in the logs and in the smart contract (minor differences are acceptable)
+  * There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
   * There is an RPC server issue
 
 ### Requirements for Cron Agent:
