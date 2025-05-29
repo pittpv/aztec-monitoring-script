@@ -93,7 +93,7 @@ After running the script, select the option to **Install the cron monitoring age
 
 ### Updating the cron agent
 
-If there is an update for the cron agent, first update the entire script. Then delete the old agent and create a new one.
+If there is an update for the cron-agent, first update the entire script. Then delete the old agent and create a new one.
 
 ## ⚠️ Important
 
