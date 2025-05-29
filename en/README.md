@@ -67,7 +67,7 @@ Main menu:
 7. 🔗 Check Proven L2 Block *(data for getting Apprentice role in Discord)*
    - Now you can set your own port (default port 8080). The new port number will be saved in the environment file .env-aztec-agent *(update from 05/30/2025)*
 8. 🔌 Change RPC URL
-9. 🔍 Search for validator and check status  *(update from 30.05.2025)*
+9. 🔍 Search for validator and check status  *(update from 05/30/2025)*
 0. 🚪 Exit
 
 ## 🚀 Using the Cron Agent
@@ -82,7 +82,7 @@ After running the script, select the option to **Install the cron monitoring age
    - The Aztec container is not found
    - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
    - There is an RPC server issue
-- Clears the log file when it reaches 1 MB in size, saving the very first report. *(agent update from 29.05.2025)*  
+- Clears the log file when it reaches 1 MB in size, saving the very first report. *(agent update from 05/29/2025)*  
 
 ### Requirements for Cron Agent:
 
