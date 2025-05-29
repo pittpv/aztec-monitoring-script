@@ -72,15 +72,15 @@ Main menu:
 
 After running the script, select the option to **Install the cron monitoring agent**:
 
-* Creates an agent at `~/aztec-monitor-agent`
-* Sets up a cron job
-* Sends an initial status update to Telegram
-* Continuously monitors the node and logs to `~/aztec-monitor-agent/agent.log`
-* Sends Telegram alerts if:
-
-  * The Aztec container is not found
-  * There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
-  * There is an RPC server issue
+- Creates an agent at `~/aztec-monitor-agent`
+- Sets up a cron job
+- Sends an initial status update to Telegram
+- Continuously monitors the node and logs to `~/aztec-monitor-agent/agent.log`
+- Sends Telegram alerts if:
+   - The Aztec container is not found
+   - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
+   - There is an RPC server issue
+- Clears the log file when it reaches 1 MB in size, saving the very first report. *(update from 29.05.2025)*  
 
 ### Requirements for Cron Agent:
 

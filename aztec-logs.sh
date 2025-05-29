@@ -487,6 +487,39 @@ if [ ! -w "\$LOG_FILE" ]; then
   exit 1
 fi
 
+# Check log file size and clean if exceeds 1MB
+MAX_SIZE=1048576
+current_size=\$(stat -c%s "\$LOG_FILE")
+
+if [ "\$current_size" -gt "\$MAX_SIZE" ]; then
+
+  temp_file=\$(mktemp)
+  awk '/INITIALIZED/ {print; exit} {print}' "\$LOG_FILE" > "\$temp_file"
+  mv "\$temp_file" "\$LOG_FILE"
+  chmod 644 "\$LOG_FILE"
+
+  {
+    echo ""
+    echo "✅ Log file cleaned."
+    echo "Cleanup completed: \$(date '+%Y-%m-%d %H:%M:%S')"
+    echo ""
+  } >> "\$LOG_FILE"
+
+  ip=\$(curl -s https://api.ipify.org || echo "unknown-ip")
+  curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
+    -d chat_id="\$TELEGRAM_CHAT_ID" \\
+    -d text="⚠️ *Log file cleaned due to size limit*%0A🌐 Server: \$ip%0A🗃 File: \$LOG_FILE%0A📏 Previous size: \$current_size bytes." \\
+    -d parse_mode="Markdown" >/dev/null
+else
+  {
+    echo "="
+    echo "Log size check"
+    echo "Current size: \$current_size bytes (within limit)."
+    echo "Check timestamp: \$(date '+%Y-%m-%d %H:%M:%S')"
+    echo "="
+  } >> "\$LOG_FILE"
+fi
+
 log() {
   echo "[\$(date '+%Y-%m-%d %H:%M:%S')] \$1" >> "\$LOG_FILE"
 }
@@ -605,7 +638,6 @@ EOF
     echo -e "\n${YELLOW}$(t "agent_exists")${NC}"
   fi
 }
-
 
 # === Remove cron task and agent ===
 remove_cron_agent() {
