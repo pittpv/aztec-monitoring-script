@@ -73,9 +73,9 @@ init_languages() {
   TRANSLATIONS["ru,checking_validators"]="Проверка валидаторов..."
   TRANSLATIONS["ru,check_completed"]="Проверка завершена."
   TRANSLATIONS["ru,select_action"]="Выберите действие:"
-  TRANSLATIONS["ru,option1"]="Поиск и отображение данных конкретного валидатора"
-  TRANSLATIONS["ru,option2"]="Отобразить полный список валидаторов"
-  TRANSLATIONS["ru,option0"]="Выход"
+  TRANSLATIONS["ru,option1"]="1. Поиск и отображение данных конкретного валидатора"
+  TRANSLATIONS["ru,option2"]="2. Отобразить полный список валидаторов"
+  TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,enter_option"]="Выберите опцию:"
   TRANSLATIONS["ru,enter_address"]="Введите адрес валидатора:"
   TRANSLATIONS["ru,validator_info"]="Информация о валидаторе:"
@@ -259,10 +259,14 @@ while true; do
     echo -e "${BOLD}$(t "select_action")${RESET}"
     echo -e "${CYAN}$(t "option1")${RESET}"
     echo -e "${CYAN}$(t "option2")${RESET}"
-    echo -e "${CYAN}$(t "option0")${RESET}"
+    echo -e "${RED}$(t "option0")${RESET}"
     read -p "$(t "enter_option") " choice
 
     case $choice in
+        0)
+                    echo -e "\n${CYAN}$(t "exiting")${RESET}"
+                    break
+                    ;;
         1)
             read -p "$(t "enter_address") " search_address
             found=false
@@ -295,10 +299,6 @@ while true; do
                 echo -e ""
                 echo "----------------------------------------"
             done
-            ;;
-        3)
-            echo -e "\n${CYAN}$(t "exiting")${RESET}"
-            break
             ;;
         *)
             echo -e "\n${RED}$(t "invalid_input")${RESET}"
