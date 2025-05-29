@@ -74,6 +74,7 @@ progress_bar() {
 }
 
 echo -e "${BOLD}Fetching validator list from contract ${CYAN}$ROLLUP_ADDRESS${RESET}..."
+echo -e ""
 VALIDATORS_RESPONSE=$(cast call $ROLLUP_ADDRESS "getAttesters()" --rpc-url $RPC_URL)
 VALIDATORS_HEX=${VALIDATORS_RESPONSE:130}
 VALIDATOR_COUNT=$(( ${#VALIDATORS_HEX} / 64 ))
