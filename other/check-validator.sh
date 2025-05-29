@@ -45,7 +45,7 @@ init_languages() {
   TRANSLATIONS["en,select_action"]="Select an action:"
   TRANSLATIONS["en,option1"]="1. Search and display data for a specific validator"
   TRANSLATIONS["en,option2"]="2. Display the full validator list"
-  TRANSLATIONS["en,option0"]="0. Exit"
+  TRANSLATIONS["en,option3"]="3. Back"
   TRANSLATIONS["en,enter_option"]="Select option:"
   TRANSLATIONS["en,enter_address"]="Enter the validator address:"
   TRANSLATIONS["en,validator_info"]="Validator information:"
@@ -75,7 +75,7 @@ init_languages() {
   TRANSLATIONS["ru,select_action"]="Выберите действие:"
   TRANSLATIONS["ru,option1"]="1. Поиск и отображение данных конкретного валидатора"
   TRANSLATIONS["ru,option2"]="2. Отобразить полный список валидаторов"
-  TRANSLATIONS["ru,option0"]="0. Выход"
+  TRANSLATIONS["ru,option3"]="3. Назад"
   TRANSLATIONS["ru,enter_option"]="Выберите опцию:"
   TRANSLATIONS["ru,enter_address"]="Введите адрес валидатора:"
   TRANSLATIONS["ru,validator_info"]="Информация о валидаторе:"
@@ -259,14 +259,10 @@ while true; do
     echo -e "${BOLD}$(t "select_action")${RESET}"
     echo -e "${CYAN}$(t "option1")${RESET}"
     echo -e "${CYAN}$(t "option2")${RESET}"
-    echo -e "${RED}$(t "option0")${RESET}"
+    echo -e "${RED}$(t "option3")${RESET}"
     read -p "$(t "enter_option") " choice
 
     case $choice in
-        0)
-                    echo -e "\n${CYAN}$(t "exiting")${RESET}"
-                    break
-                    ;;
         1)
             read -p "$(t "enter_address") " search_address
             found=false
@@ -299,6 +295,10 @@ while true; do
                 echo -e ""
                 echo "----------------------------------------"
             done
+            ;;
+        3)
+            echo -e "\n${CYAN}$(t "exiting")${RESET}"
+            break
             ;;
         *)
             echo -e "\n${RED}$(t "invalid_input")${RESET}"
