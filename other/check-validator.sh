@@ -1,5 +1,24 @@
 #!/bin/bash
 
+# Функция загрузки RPC URL с обработкой ошибок
+load_rpc_config() {
+    # Проверяем существование файла конфигурации
+    if [ -f "/root/.env-aztec-agent" ]; then
+        # Загружаем конфиг
+        source "/root/.env-aztec-agent"
+
+        # Проверяем наличие RPC_URL
+        if [ -z "$RPC_URL" ]; then
+            echo -e "${RED}$(t "error_rpc_missing")${RESET}"
+            exit 1
+        fi
+    else
+        # Файл не найден
+        echo -e "${RED}$(t "error_file_missing")${RESET}"
+        exit 1
+    fi
+}
+
 # === Language settings ===
 LANG="en"
 declare -A TRANSLATIONS
@@ -44,6 +63,8 @@ init_languages() {
   TRANSLATIONS["en,status_1"]="ACTIVE - The validator is currently in the validator set"
   TRANSLATIONS["en,status_2"]="INACTIVE - The validator is not active; possibly in withdrawal delay"
   TRANSLATIONS["en,status_3"]="READY_TO_EXIT - The validator has completed exit delay and can be exited"
+  TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in /root/.env-aztec-agent"
+  TRANSLATIONS["en,error_file_missing"]="Error: /root/.env-aztec-agent file not found"
 
   # Russian translations
   TRANSLATIONS["ru,rollup_address"]="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
@@ -72,6 +93,8 @@ init_languages() {
   TRANSLATIONS["ru,status_1"]="ACTIVE - Валидатор в настоящее время в наборе валидаторов"
   TRANSLATIONS["ru,status_2"]="INACTIVE - Валидатор не активен; возможно, в задержке вывода"
   TRANSLATIONS["ru,status_3"]="READY_TO_EXIT - Валидатор завершил задержку выхода и может быть выведен"
+  TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
+  TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл /root/.env-aztec-agent не найден"
 }
 
 # Translation function
@@ -91,6 +114,8 @@ t() {
 init_languages "$1"
 
 ROLLUP_ADDRESS=$(t "rollup_address")
+
+load_rpc_config
 
 # Цвета
 RED="\e[31m"
