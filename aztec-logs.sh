@@ -50,6 +50,7 @@ init_languages() {
   TRANSLATIONS["en,option6"]="6. Find governanceProposerPayload in logs"
   TRANSLATIONS["en,option7"]="7. Check Proven L2 Block and Sync Proof"
   TRANSLATIONS["en,option8"]="8. Change RPC URL"
+  TRANSLATIONS["en,option9"]="9. Search for validator and check status."
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,rpc_change_prompt"]="Enter new RPC URL:"
   TRANSLATIONS["en,rpc_change_success"]="✅ RPC URL successfully updated"
@@ -103,6 +104,13 @@ init_languages() {
   TRANSLATIONS["en,chatid_valid"]="✅ ChatID is valid and bot has access"
   TRANSLATIONS["en,chatid_invalid"]="❌ Invalid ChatID or bot has no access"
   TRANSLATIONS["en,agent_created"]="✅ Agent successfully created and configured!"
+  TRANSLATIONS["en,running_validator_script"]="Running Check Validator script from GitHub..."
+  TRANSLATIONS["en,failed_run_validator"]="Failed to run Check Validator script."
+  TRANSLATIONS["en,enter_rpc_port_prompt"]="Enter RPC port number"
+  TRANSLATIONS["en,port_saved_successfully"]="✅ Port saved successfully"
+  TRANSLATIONS["en,checking_port"]="Checking port"
+  TRANSLATIONS["en,port_not_available"]="RPC port not available on"
+  TRANSLATIONS["en,current_rpc_port"]="Current RPC port:"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -115,6 +123,7 @@ init_languages() {
   TRANSLATIONS["ru,option6"]="6. Найти governanceProposerPayload в логах"
   TRANSLATIONS["ru,option7"]="7. Проверить Proven L2 блок и Sync Proof"
   TRANSLATIONS["ru,option8"]="8. Изменить RPC URL"
+  TRANSLATIONS["ru,option9"]="9. Поиск валидатора и проверка статуса."
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,rpc_change_prompt"]="Введите новый RPC URL:"
   TRANSLATIONS["ru,rpc_change_success"]="✅ RPC URL успешно обновлен"
@@ -168,6 +177,13 @@ init_languages() {
   TRANSLATIONS["ru,chatid_valid"]="✅ ChatID действителен и бот имеет доступ"
   TRANSLATIONS["ru,chatid_invalid"]="❌ Неверный ChatID или бот не имеет доступа"
   TRANSLATIONS["ru,agent_created"]="✅ Агент успешно создан и настроен!"
+  TRANSLATIONS["ru,running_validator_script"]="Запуск скрипта проверки валидатора из GitHub..."
+  TRANSLATIONS["ru,failed_run_validator"]="Не удалось запустить скрипт проверки валидатора."
+  TRANSLATIONS["ru,enter_rpc_port_prompt"]="Введите номер RPC порта"
+  TRANSLATIONS["ru,port_saved_successfully"]="✅ Порт успешно сохранен"
+  TRANSLATIONS["ru,checking_port"]="Проверка порта"
+  TRANSLATIONS["ru,port_not_available"]="RPC порт недоступен на"
+  TRANSLATIONS["ru,current_rpc_port"]="Текущий RPC порт:"
 }
 
 # === Configuration ===
@@ -649,15 +665,49 @@ remove_cron_agent() {
 
 # === Check Proven L2 Block and Sync Proof ===
 check_proven_block() {
+  # Проверяем наличие сохраненного порта
+  if [ -f "/root/.env-aztec-agent" ]; then
+    source "/root/.env-aztec-agent"
+    if [ -z "$RPC_PORT" ]; then
+      RPC_PORT=8080  # Значение по умолчанию
+    fi
+  else
+    RPC_PORT=8080  # Значение по умолчанию
+  fi
+
+  # Запрашиваем порт у пользователя
+  echo -e "\n${CYAN}$(t "current_rpc_port") $RPC_PORT${NC}"
+  read -p "$(t "enter_rpc_port_prompt") [${RPC_PORT}]: " user_port
+
+  # Если пользователь ввел порт, обновляем значение
+  if [ -n "$user_port" ]; then
+    RPC_PORT=$user_port
+    # Сохраняем в конфиг
+    echo "RPC_PORT=$RPC_PORT" > /root/.env-aztec-agent
+    if [ -n "$RPC_URL" ]; then
+      echo "RPC_URL=$RPC_URL" >> /root/.env-aztec-agent
+    fi
+    echo -e "${GREEN}$(t "port_saved_successfully")${NC}"
+  fi
+
+  # Проверяем доступность порта
+  echo -e "\n${BLUE}$(t "checking_port") $RPC_PORT...${NC}"
+  if ! nc -z -w 2 localhost $RPC_PORT; then
+    echo -e "\n${RED}$(t "port_not_available") $RPC_PORT${NC}"
+    echo -e "${YELLOW}$(t "check_node_running")${NC}"
+    return 1
+  fi
+
+  # Основная логика функции
   echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
 
   PROVEN_BLOCK=$(curl -s -X POST -H 'Content-Type: application/json' \
     -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
-    http://localhost:8080 | jq -r ".result.proven.number")
+    http://localhost:$RPC_PORT | jq -r ".result.proven.number")
 
   if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
     echo -e "\n${RED}$(t "proven_block_error")${NC}"
-    return
+    return 1
   fi
 
   echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
@@ -665,15 +715,16 @@ check_proven_block() {
   echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
   SYNC_PROOF=$(curl -s -X POST -H 'Content-Type: application/json' \
     -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
-    http://localhost:8080 | jq -r ".result")
+    http://localhost:$RPC_PORT | jq -r ".result")
 
   if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
     echo -e "\n${RED}$(t "sync_proof_error")${NC}"
-    return
+    return 1
   fi
 
   echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
   echo "$SYNC_PROOF"
+  return 0
 }
 
 # === Change RPC URL ===
@@ -706,6 +757,17 @@ change_rpc_url() {
   source .env-aztec-agent
 }
 
+# === Check validator ===
+function check_validator {
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator.sh"
+  echo -e ""
+  echo -e "${CYAN}$(t "running_validator_script")${RESET}"
+  echo -e ""
+
+  # Передаем текущий язык как аргумент
+  bash <(curl -s "$URL") "$LANG" || print_error "$(t "failed_run_validator")"
+}
+
 # === Main menu ===
 main_menu() {
   show_logo
@@ -719,6 +781,7 @@ main_menu() {
     echo -e "${CYAN}$(t "option6")${NC}"
     echo -e "${CYAN}$(t "option7")${NC}"
     echo -e "${CYAN}$(t "option8")${NC}"
+	echo -e "${CYAN}$(t "option9")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -733,6 +796,7 @@ main_menu() {
       6) find_governance_proposer_payload ;;
       7) check_proven_block ;;
       8) change_rpc_url ;;
+	  9) check_validator ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
