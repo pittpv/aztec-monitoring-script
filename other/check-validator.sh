@@ -1,6 +1,96 @@
 #!/bin/bash
 
-ROLLUP_ADDRESS="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
+# === Language settings ===
+LANG="en"
+declare -A TRANSLATIONS
+
+# Initialize languages
+init_languages() {
+  # Check if language is passed as argument
+  if [ -n "$1" ]; then
+    case $1 in
+      "en") LANG="en" ;;
+      "ru") LANG="ru" ;;
+    esac
+  else
+    # Default to English if no language specified
+    LANG="en"
+  fi
+
+  # English translations
+  TRANSLATIONS["en,rollup_address"]="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
+  TRANSLATIONS["en,fetching_validators"]="Fetching validator list from contract"
+  TRANSLATIONS["en,found_validators"]="Found validators:"
+  TRANSLATIONS["en,checking_validators"]="Checking validators..."
+  TRANSLATIONS["en,check_completed"]="Check completed."
+  TRANSLATIONS["en,select_action"]="Select an action:"
+  TRANSLATIONS["en,option1"]="1. Search and display data for a specific validator"
+  TRANSLATIONS["en,option2"]="2. Display the full validator list"
+  TRANSLATIONS["en,option3"]="3. Exit"
+  TRANSLATIONS["en,enter_option"]="Enter option number:"
+  TRANSLATIONS["en,enter_address"]="Enter the validator address:"
+  TRANSLATIONS["en,validator_info"]="Validator information:"
+  TRANSLATIONS["en,address"]="Address"
+  TRANSLATIONS["en,stake"]="Stake"
+  TRANSLATIONS["en,withdrawer"]="Withdrawer"
+  TRANSLATIONS["en,proposer"]="Proposer"
+  TRANSLATIONS["en,status"]="Status"
+  TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
+  TRANSLATIONS["en,exiting"]="Exiting."
+  TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2 or 3."
+  TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in /root/.env-aztec-agent"
+  TRANSLATIONS["en,error_file_missing"]="Error: /root/.env-aztec-agent file not found"
+  TRANSLATIONS["en,status_0"]="NOT_IN_SET - The validator is not in the validator set"
+  TRANSLATIONS["en,status_1"]="ACTIVE - The validator is currently in the validator set"
+  TRANSLATIONS["en,status_2"]="INACTIVE - The validator is not active; possibly in withdrawal delay"
+  TRANSLATIONS["en,status_3"]="READY_TO_EXIT - The validator has completed exit delay and can be exited"
+
+  # Russian translations
+  TRANSLATIONS["ru,rollup_address"]="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
+  TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
+  TRANSLATIONS["ru,found_validators"]="Найдено валидаторов:"
+  TRANSLATIONS["ru,checking_validators"]="Проверка валидаторов..."
+  TRANSLATIONS["ru,check_completed"]="Проверка завершена."
+  TRANSLATIONS["ru,select_action"]="Выберите действие:"
+  TRANSLATIONS["ru,option1"]="1. Поиск и отображение данных конкретного валидатора"
+  TRANSLATIONS["ru,option2"]="2. Отобразить полный список валидаторов"
+  TRANSLATIONS["ru,option3"]="3. Выход"
+  TRANSLATIONS["ru,enter_option"]="Введите номер опции:"
+  TRANSLATIONS["ru,enter_address"]="Введите адрес валидатора:"
+  TRANSLATIONS["ru,validator_info"]="Информация о валидаторе:"
+  TRANSLATIONS["ru,address"]="Адрес"
+  TRANSLATIONS["ru,stake"]="Стейк"
+  TRANSLATIONS["ru,withdrawer"]="Withdrawer адрес"
+  TRANSLATIONS["ru,proposer"]="Proposer адрес"
+  TRANSLATIONS["ru,status"]="Статус"
+  TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
+  TRANSLATIONS["ru,exiting"]="Выход."
+  TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2 или 3."
+  TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
+  TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл /root/.env-aztec-agent не найден"
+  TRANSLATIONS["ru,status_0"]="NOT_IN_SET - Валидатор не в наборе валидаторов"
+  TRANSLATIONS["ru,status_1"]="ACTIVE - Валидатор в настоящее время в наборе валидаторов"
+  TRANSLATIONS["ru,status_2"]="INACTIVE - Валидатор не активен; возможно, в задержке вывода"
+  TRANSLATIONS["ru,status_3"]="READY_TO_EXIT - Валидатор завершил задержку выхода и может быть выведен"
+}
+
+# Translation function
+t() {
+  local key=$1
+  local value="${TRANSLATIONS[$LANG,$key]}"
+
+  # Handle printf-style formatting
+  if [[ $# -gt 1 ]]; then
+    printf -v value "${value}" "${@:2}"
+  fi
+
+  echo "${value}"
+}
+
+# Initialize language system with first argument
+init_languages "$1"
+
+ROLLUP_ADDRESS=$(t "rollup_address")
 
 # Цвета
 RED="\e[31m"
@@ -11,23 +101,11 @@ CYAN="\e[36m"
 BOLD="\e[1m"
 RESET="\e[0m"
 
-# Загрузка RPC_URL из файла .env-aztec-agent
-if [ -f "/root/.env-aztec-agent" ]; then
-    source /root/.env-aztec-agent
-    if [ -z "$RPC_URL" ]; then
-        echo -e "${RED}Error: RPC_URL not found in /root/.env-aztec-agent${RESET}"
-        exit 1
-    fi
-else
-    echo -e "${RED}Error: /root/.env-aztec-agent file not found${RESET}"
-    exit 1
-fi
-
 declare -A STATUS_MAP=(
-    [0]="NOT_IN_SET - The validator is not in the validator set"
-    [1]="ACTIVE - The validator is currently in the validator set"
-    [2]="INACTIVE - The validator is not active; possibly in withdrawal delay"
-    [3]="READY_TO_EXIT - The validator has completed exit delay and can be exited"
+    [0]=$(t "status_0")
+    [1]=$(t "status_1")
+    [2]=$(t "status_2")
+    [3]=$(t "status_3")
 )
 
 declare -A STATUS_COLOR=(
@@ -73,7 +151,7 @@ progress_bar() {
     printf "] %d/%d" "$current" "$total"
 }
 
-echo -e "${BOLD}Fetching validator list from contract ${CYAN}$ROLLUP_ADDRESS${RESET}..."
+echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
 echo -e ""
 VALIDATORS_RESPONSE=$(cast call $ROLLUP_ADDRESS "getAttesters()" --rpc-url $RPC_URL)
 VALIDATORS_HEX=${VALIDATORS_RESPONSE:130}
@@ -86,14 +164,14 @@ for (( i=0; i<$VALIDATOR_COUNT; i++ )); do
     VALIDATOR_ADDRESSES+=("0x$ADDRESS_HEX")
 done
 
-echo -e "${GREEN}Found validators:${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
+echo -e "${GREEN}$(t "found_validators")${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
 echo "----------------------------------------"
 
 # Временный файл для результатов
 TMP_RESULTS=$(mktemp)
 trap 'rm -f "$TMP_RESULTS"' EXIT
 
-echo -e "${BOLD}Checking validators...${RESET}"
+echo -e "${BOLD}$(t "checking_validators")${RESET}"
 
 CURRENT=0
 
@@ -132,7 +210,7 @@ while true; do
     sleep 0.1
 done
 
-echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
+echo -e "\n${GREEN}${BOLD}$(t "check_completed")${RESET}"
 echo "----------------------------------------"
 
 declare -a RESULTS
@@ -140,7 +218,7 @@ declare -a RESULTS
 # Обработка результатов
 while IFS='|' read -r validator stake withdrawer proposer status; do
     if [[ "$stake" == "ERROR" ]]; then
-        echo -e "${RED}Error fetching info for validator $validator${RESET}"
+        echo -e "${RED}$(t "error_fetching_info") $validator${RESET}"
         continue
     fi
 
@@ -153,52 +231,52 @@ done < "$TMP_RESULTS"
 # Меню
 while true; do
     echo ""
-    echo -e "${BOLD}Select an action:${RESET}"
-    echo -e "  ${CYAN}1.${RESET} Search and display data for a specific validator"
-    echo -e "  ${CYAN}2.${RESET} Display the full validator list"
-    echo -e "  ${CYAN}3.${RESET} Exit"
-    read -p "Enter option number: " choice
+    echo -e "${BOLD}$(t "select_action")${RESET}"
+    echo -e "  ${CYAN}1.${RESET} $(t "option1")"
+    echo -e "  ${CYAN}2.${RESET} $(t "option2")"
+    echo -e "  ${CYAN}3.${RESET} $(t "option3")"
+    read -p "$(t "enter_option") " choice
 
     case $choice in
         1)
-            read -p "Enter the validator address: " search_address
+            read -p "$(t "enter_address") " search_address
             found=false
             for line in "${RESULTS[@]}"; do
                 IFS='|' read -r validator stake withdrawer proposer status status_text status_color <<< "$line"
                 if [[ "${validator,,}" == "${search_address,,}" ]]; then
-                    echo -e "\n${BOLD}Validator information:${RESET}\n"
-                    echo -e "  ${BOLD}Address    :${RESET} $validator"
-                    echo -e "  ${BOLD}Stake      :${RESET} $stake STK"
-                    echo -e "  ${BOLD}Withdrawer :${RESET} $withdrawer"
-                    echo -e "  ${BOLD}Proposer   :${RESET} $proposer"
-                    echo -e "  ${BOLD}Status     :${RESET} ${status_color}$status ($status_text)${RESET}\n"
+                    echo -e "\n${BOLD}$(t "validator_info")${RESET}\n"
+                    echo -e "  ${BOLD}$(t "address")    :${RESET} $validator"
+                    echo -e "  ${BOLD}$(t "stake")      :${RESET} $stake STK"
+                    echo -e "  ${BOLD}$(t "withdrawer") :${RESET} $withdrawer"
+                    echo -e "  ${BOLD}$(t "proposer")   :${RESET} $proposer"
+                    echo -e "  ${BOLD}$(t "status")     :${RESET} ${status_color}$status ($status_text)${RESET}\n"
                     found=true
                     break
                 fi
             done
             if ! $found; then
-                echo -e "\n${RED}Validator with address $search_address not found.${RESET}"
+                echo -e "\n${RED}$(t "validator_not_found" "$search_address")${RESET}"
             fi
             ;;
         2)
             echo ""
             for line in "${RESULTS[@]}"; do
                 IFS='|' read -r validator stake withdrawer proposer status status_text status_color <<< "$line"
-                echo -e "${BOLD}Validator:${RESET} $validator"
-                echo -e "  ${BOLD}Stake      :${RESET} $stake STK"
-                echo -e "  ${BOLD}Withdrawer :${RESET} $withdrawer"
-                echo -e "  ${BOLD}Proposer   :${RESET} $proposer"
-                echo -e "  ${BOLD}Status     :${RESET} ${status_color}$status ($status_text)${RESET}"
+                echo -e "${BOLD}$(t "address"):${RESET} $validator"
+                echo -e "  ${BOLD}$(t "stake")      :${RESET} $stake STK"
+                echo -e "  ${BOLD}$(t "withdrawer") :${RESET} $withdrawer"
+                echo -e "  ${BOLD}$(t "proposer")   :${RESET} $proposer"
+                echo -e "  ${BOLD}$(t "status")     :${RESET} ${status_color}$status ($status_text)${RESET}"
                 echo -e ""
                 echo "----------------------------------------"
             done
             ;;
         3)
-            echo -e "\n${CYAN}Exiting.${RESET}"
+            echo -e "\n${CYAN}$(t "exiting")${RESET}"
             break
             ;;
         *)
-            echo -e "\n${RED}Invalid input. Please choose 1, 2 or 3.${RESET}"
+            echo -e "\n${RED}$(t "invalid_input")${RESET}"
             ;;
     esac
 done
