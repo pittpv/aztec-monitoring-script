@@ -35,7 +35,7 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 1. **Requirements**:
    The script will check for required components and offer to install any that are missing.
 
-2. **Launch**:
+2. **Launch or Update**:
 
    ```bash
    curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/aztec-logs.sh && chmod +x aztec-logs.sh && ./aztec-logs.sh
@@ -82,7 +82,7 @@ After running the script, select the option to **Install the cron monitoring age
    - The Aztec container is not found
    - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
    - There is an RPC server issue
-- Clears the log file when it reaches 1 MB in size, saving the very first report. *(update from 29.05.2025)*  
+- Clears the log file when it reaches 1 MB in size, saving the very first report. *(agent update from 29.05.2025)*  
 
 ### Requirements for Cron Agent:
 
@@ -90,6 +90,10 @@ After running the script, select the option to **Install the cron monitoring age
 2. Find your `chat_id` using [IDBot](https://t.me/myidbot)
 3. Enter these in the script during cron-agent setup.
    The script validates both token and chat ID — if entered incorrectly, you will see a warning.
+
+### Updating the cron agent
+
+If there is an update for the cron agent, first update the entire script. Then delete the old agent and create a new one.
 
 ## ⚠️ Important
 
