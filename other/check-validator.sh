@@ -270,11 +270,11 @@ while true; do
                 IFS='|' read -r validator stake withdrawer proposer status status_text status_color <<< "$line"
                 if [[ "${validator,,}" == "${search_address,,}" ]]; then
                     echo -e "\n${BOLD}$(t "validator_info")${RESET}\n"
-                    echo -e "  ${BOLD}$(t "address")    :${RESET} $validator"
-                    echo -e "  ${BOLD}$(t "stake")      :${RESET} $stake STK"
-                    echo -e "  ${BOLD}$(t "withdrawer") :${RESET} $withdrawer"
-                    echo -e "  ${BOLD}$(t "proposer")   :${RESET} $proposer"
-                    echo -e "  ${BOLD}$(t "status")     :${RESET} ${status_color}$status ($status_text)${RESET}\n"
+                    echo -e "  ${BOLD}$(t "address"):${RESET} $validator"
+                    echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
+                    echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+                    echo -e "  ${BOLD}$(t "proposer"):${RESET} $proposer"
+                    echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}\n"
                     found=true
                     break
                 fi
@@ -288,10 +288,10 @@ while true; do
             for line in "${RESULTS[@]}"; do
                 IFS='|' read -r validator stake withdrawer proposer status status_text status_color <<< "$line"
                 echo -e "${BOLD}$(t "address"):${RESET} $validator"
-                echo -e "  ${BOLD}$(t "stake")      :${RESET} $stake STK"
-                echo -e "  ${BOLD}$(t "withdrawer") :${RESET} $withdrawer"
-                echo -e "  ${BOLD}$(t "proposer")   :${RESET} $proposer"
-                echo -e "  ${BOLD}$(t "status")     :${RESET} ${status_color}$status ($status_text)${RESET}"
+                echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
+                echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+                echo -e "  ${BOLD}$(t "proposer"):${RESET} $proposer"
+                echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
                 echo -e ""
                 echo "----------------------------------------"
             done
