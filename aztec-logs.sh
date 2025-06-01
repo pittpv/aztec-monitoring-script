@@ -818,7 +818,7 @@ main_menu() {
     echo -e "${CYAN}$(t "option6")${NC}"
     echo -e "${CYAN}$(t "option7")${NC}"
     echo -e "${CYAN}$(t "option8")${NC}"
-	  echo -e "${CYAN}$(t "option9")${NC}"
+    echo -e "${CYAN}$(t "option9")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -833,7 +833,7 @@ main_menu() {
       6) find_governance_proposer_payload ;;
       7) check_proven_block ;;
       8) change_rpc_url ;;
-	    9) check_validator ;;
+      9) check_validator ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
