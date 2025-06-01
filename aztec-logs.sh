@@ -106,11 +106,11 @@ init_languages() {
   TRANSLATIONS["en,agent_created"]="✅ Agent successfully created and configured!"
   TRANSLATIONS["en,running_validator_script"]="Running Check Validator script from GitHub..."
   TRANSLATIONS["en,failed_run_validator"]="Failed to run Check Validator script."
-  TRANSLATIONS["en,enter_rpc_port_prompt"]="Enter RPC port number"
+  TRANSLATIONS["en,enter_aztec_port_prompt"]="Enter Aztec node port number"
   TRANSLATIONS["en,port_saved_successfully"]="✅ Port saved successfully"
   TRANSLATIONS["en,checking_port"]="Checking port"
-  TRANSLATIONS["en,port_not_available"]="RPC port not available on"
-  TRANSLATIONS["en,current_rpc_port"]="Current RPC port:"
+  TRANSLATIONS["en,port_not_available"]="Aztec port not available on"
+  TRANSLATIONS["en,current_aztec_port"]="Current Aztec node port:"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -179,22 +179,23 @@ init_languages() {
   TRANSLATIONS["ru,agent_created"]="✅ Агент успешно создан и настроен!"
   TRANSLATIONS["ru,running_validator_script"]="Запуск скрипта проверки валидатора из GitHub..."
   TRANSLATIONS["ru,failed_run_validator"]="Не удалось запустить скрипт проверки валидатора."
-  TRANSLATIONS["ru,enter_rpc_port_prompt"]="Введите номер RPC порта"
+  TRANSLATIONS["ru,enter_aztec_port_prompt"]="Введите номер порта Aztec"
   TRANSLATIONS["ru,port_saved_successfully"]="✅ Порт успешно сохранен"
   TRANSLATIONS["ru,checking_port"]="Проверка порта"
-  TRANSLATIONS["ru,port_not_available"]="RPC порт недоступен на"
-  TRANSLATIONS["ru,current_rpc_port"]="Текущий RPC порт:"
+  TRANSLATIONS["ru,port_not_available"]="Aztec порт недоступен на"
+  TRANSLATIONS["ru,current_aztec_port"]="Текущий порт ноды Aztec:"
 }
 
 # === Configuration ===
 CONTRACT_ADDRESS="0xee6d4e937f0493fb461f28a75cf591f1dba8704e"
 FUNCTION_SIG="getPendingBlockNumber()"
 
-REQUIRED_TOOLS=("cast" "curl" "crontab" "grep" "sed" "jq")
+REQUIRED_TOOLS=("cast" "curl" "crontab" "grep" "sed" "jq" "bc")
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 
 # === Dependency check ===
+
 check_dependencies() {
   missing=()
   echo -e "\n${BLUE}$(t "checking_deps")${NC}\n"
@@ -247,6 +248,11 @@ check_dependencies() {
             echo -e "\n${CYAN}$(t "installing_jq")${NC}"
             sudo apt-get install -y jq || brew install jq
             ;;
+
+          bc)
+            echo -e "\n${CYAN}$(t "installing_bc")${NC}"
+            sudo apt-get install -y bc || brew install bc
+            ;;
         esac
       done
     else
@@ -254,6 +260,7 @@ check_dependencies() {
       exit 1
     fi
   fi
+
 
   # Request RPC URL from user and create .env file
   if [ ! -f .env-aztec-agent ]; then
@@ -285,37 +292,41 @@ spinner() {
 
 # === Check container logs ===
 check_aztec_container_logs() {
-  source .env-aztec-agent
+    source .env-aztec-agent
 
-  echo -e "\n${BLUE}$(t "search_container")${NC}"
-  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+    echo -e "\n${BLUE}$(t "search_container")${NC}"
+    container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
 
-  if [ -z "$container_id" ]; then
-    echo -e "\n${RED}$(t "container_not_found")${NC}"
-    return
-  fi
+    if [ -z "$container_id" ]; then
+        echo -e "\n${RED}$(t "container_not_found")${NC}"
+        return
+    fi
 
-  echo -e "\n${GREEN}$(t "container_found") $container_id${NC}"
+    echo -e "\n${GREEN}$(t "container_found") $container_id${NC}"
 
-  echo -e "\n${BLUE}$(t "get_block")${NC}"
-  block_hex=$(cast call "$CONTRACT_ADDRESS" "$FUNCTION_SIG" --rpc-url "$RPC_URL" 2>/dev/null)
+    echo -e "\n${BLUE}$(t "get_block")${NC}"
+    block_hex=$(cast call "$CONTRACT_ADDRESS" "$FUNCTION_SIG" --rpc-url "$RPC_URL" 2>/dev/null)
 
-  if [ -z "$block_hex" ]; then
-    echo -e "\n${RED}$(t "block_error")${NC}"
-    return
-  fi
+    if [ -z "$block_hex" ]; then
+        echo -e "\n${RED}$(t "block_error")${NC}"
+        return
+    fi
 
-  block_number=$((block_hex))
-  echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
+    block_number=$((16#${block_hex#0x}))
+    echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
 
-  logs=$(docker logs --tail 500 "$container_id")
+    logs=$(docker logs --tail 500 "$container_id" 2>&1)
+    clean_logs=$(echo "$logs" | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
-  if echo "$logs" | grep -q "$block_number"; then
-    echo -e "\n${GREEN}$(t "node_ok")${NC}"
-  else
-    echo -e "\n${YELLOW}$(t "node_behind")${NC}"
-  fi
+    if echo "$clean_logs" | grep -E -q "\b$block_number\b"; then
+        echo -e "\n${GREEN}$(t "node_ok")${NC}"
+    else
+        echo -e "\n${YELLOW}$(t "node_behind")${NC}"
+        echo "Пример строки из логов:"
+        echo "$clean_logs" | grep -m1 "$block_number" || echo "Не найдено ни одной строки с номером блока!"
+    fi
 }
+
 
 # === Find rollupAddress in logs ===
 find_rollup_address() {
@@ -325,91 +336,126 @@ find_rollup_address() {
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
-    return
+    return 1
   fi
 
   tmp_log=$(mktemp)
-  docker logs "$container_id" > "$tmp_log" 2>/dev/null &
+  # Получаем логи с очисткой ANSI-кодов
+  docker logs "$container_id" 2>&1 | sed -r "s/\x1B\[[0-9;]*[mK]//g" > "$tmp_log" &
 
   spinner $!
 
-  # Get last occurrence of rollupAddress
-  rollup_address=$(grep -oP '"rollupAddress"\s*:\s*"\K0x[a-fA-F0-9]{40}' "$tmp_log" | tail -n 1)
+  # Более надежный поиск rollupAddress
+  rollup_address=$(grep -oP -m1 '"rollupAddress"\s*:\s*"\K0x[a-fA-F0-9]{40}' "$tmp_log" | tail -n 1)
+
+  # Альтернативный вариант поиска, если стандартный не сработал
+  if [ -z "$rollup_address" ]; then
+    rollup_address=$(grep -oE -m1 'rollupAddress[^0-9a-fA-F]*0x[a-fA-F0-9]{40}' "$tmp_log" | grep -oE '0x[a-fA-F0-9]{40}' | tail -n 1)
+  fi
 
   rm "$tmp_log"
 
   if [ -n "$rollup_address" ]; then
     echo -e "\n${GREEN}$(t "rollup_found") $rollup_address${NC}"
+    return 0
   else
     echo -e "\n${RED}$(t "rollup_not_found")${NC}"
+    return 1
   fi
 }
 
-# === Find PeerID in logs ===
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
-  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+  container_id=$(docker ps -q --filter ancestor=aztecprotocol/aztec:alpha-testnet | head -n 1)
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
-    return
+    return 1
   fi
 
-  tmp_log=$(mktemp)
-  docker logs "$container_id" > "$tmp_log" 2>/dev/null &
-
-  spinner $!
-
   echo -e "\n${CYAN}$(t "peers_found")${NC}"
-  # Show unique PeerIDs matching 16Uiu2... format
-  grep -oP '"peerId"\s*:\s*"\K16U[^\"]+' "$tmp_log" | sort | uniq || echo -e "${RED}$(t "peer_not_found")${NC}"
 
-  rm "$tmp_log"
+  # Фоновый процесс для поиска peerId
+  _find_peer_id_worker() {
+    sudo docker logs "$container_id" 2>&1 | \
+      grep -i "peerId" | \
+      grep -o '"peerId":"[^"]*"' | \
+      cut -d'"' -f4 | \
+      head -n 1 > /tmp/peer_id.tmp
+  }
+
+  _find_peer_id_worker &
+  worker_pid=$!
+  spinner $worker_pid
+  wait $worker_pid
+
+  peer_id=$(< /tmp/peer_id.tmp)
+  rm -f /tmp/peer_id.tmp
+
+  if [ -z "$peer_id" ]; then
+    echo -e "${RED}$(t "peer_not_found")${NC}"
+    return 1
+  else
+    echo "$peer_id"
+    return 0
+  fi
 }
 
 # === Find governanceProposerPayload ===
 find_governance_proposer_payload() {
   echo -e "\n${BLUE}$(t "search_gov")${NC}"
 
-  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | tail -n 1)
+  # Получаем ID контейнера
+  container_id=$(docker ps -q --filter ancestor=aztecprotocol/aztec:alpha-testnet | head -n 1)
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
-    return
+    return 1
   fi
-
-  tmp_log=$(mktemp)
-  docker logs "$container_id" > "$tmp_log" 2>/dev/null &
-
-  spinner $!
 
   echo -e "\n${CYAN}$(t "gov_found")${NC}"
 
-  # Extract all occurrences, remove consecutive duplicates but keep order
-  mapfile -t payloads < <(grep -oE '"governanceProposerPayload":"0x[a-fA-F0-9]{40}"' "$tmp_log" | \
-    sed -E 's/.*"governanceProposerPayload":"(0x[a-fA-F0-9]{40})"/\1/' | awk 'a != $0 {print; a = $0}')
+  # Вспомогательная функция для запуска поиска в фоне
+  _find_payloads_worker() {
+    sudo docker logs "$container_id" 2>&1 | \
+      grep -i '"governanceProposerPayload"' | \
+      grep -o '"governanceProposerPayload":"0x[a-fA-F0-9]\{40\}"' | \
+      cut -d'"' -f4 | \
+      awk '!seen[$0]++ {print}' | \
+      tail -n 10 > /tmp/gov_payloads.tmp
+  }
 
-  if [ "${#payloads[@]}" -eq 0 ]; then
+  # Запускаем поиск в фоне и спиннер
+  _find_payloads_worker &
+  worker_pid=$!
+  spinner $worker_pid
+  wait $worker_pid
+
+  if [ ! -s /tmp/gov_payloads.tmp ]; then
     echo -e "\n${RED}$(t "gov_not_found")${NC}"
-    rm "$tmp_log"
-    return
+    rm -f /tmp/gov_payloads.tmp
+    return 1
   fi
 
-  for p in "${payloads[@]}"; do
+  mapfile -t payloads_array < /tmp/gov_payloads.tmp
+  rm -f /tmp/gov_payloads.tmp
+
+  echo -e "\n${GREEN}$(t "gov_found_results")${NC}"
+  for p in "${payloads_array[@]}"; do
     echo "• $p"
   done
 
-  if [ "${#payloads[@]}" -gt 1 ]; then
+  if [ "${#payloads_array[@]}" -gt 1 ]; then
     echo -e "\n${RED}$(t "gov_changed")${NC}"
-    for ((i = 1; i < ${#payloads[@]}; i++)); do
-      echo -e "${YELLOW}$(t "gov_was") ${payloads[i-1]} → $(t "gov_now") ${payloads[i]}${NC}"
+    for ((i = 1; i < ${#payloads_array[@]}; i++)); do
+      echo -e "${YELLOW}$(t "gov_was") ${payloads_array[i-1]} → $(t "gov_now") ${payloads_array[i]}${NC}"
     done
   else
     echo -e "\n${GREEN}$(t "gov_no_changes")${NC}"
   fi
 
-  rm "$tmp_log"
+  return 0
 }
 
 # === Create agent and cron task ===
@@ -551,6 +597,7 @@ send_telegram_message() {
 get_ip_address() {
   curl -s https://api.ipify.org || echo "unknown-ip"
 }
+ip=\$(get_ip_address)
 
 # New hex to decimal conversion function
 hex_to_dec() {
@@ -565,84 +612,53 @@ hex_to_dec() {
 }
 
 # Check if container exists
-container_id=\$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+check_blocks() {
+  container_id=\$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+  [ -z "\$container_id" ] && {
+    log "Container 'aztec' not found."
+    send_telegram_message "❌ *Aztec Container Not Found*%0A🌐 Server: \$ip%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    return 1
+  }
 
-if [ -z "\$container_id" ]; then
-  log "Container 'aztec' not found."
-  ip=\$(get_ip_address)
-  send_telegram_message "❌ *Aztec Container Not Found*%0A🌐 Server: \$ip%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-  exit 0
-fi
+  # Get current block from contract
+  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
+  [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]] && {
+    send_telegram_message "❌ *Block Fetch Error*%0A🌐 Server: \$ip%0A🔗 RPC: \$RPC_URL%0A💬 Error: \$block_hex%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    return 1
+  }
 
-# Get current block from contract
-block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
-log "Raw cast call output: \$block_hex"
+  # Convert hex to decimal
+  block_number=\$((16#\${block_hex#0x}))
+  log "Contract block: \$block_number"
 
-# Check if call was successful
-if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
-  ip=\$(get_ip_address)
-  error_msg="❌ *Block Fetch Error*%0A🌐 Server: \$ip%0A🔗 RPC: \$RPC_URL%0A💬 Error: \$block_hex%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-  send_telegram_message "\$error_msg"
-  log "\$error_msg"
-  exit 0
-fi
+  # Очистка логов от ANSI-кодов и поиск блока
+  logs=\$(docker logs --tail 1000 "\$container_id" 2>&1 | sed -r "s/\x1B\[[0-9;]*[mK]//g")
 
-# Convert hex to decimal using new function
-block_number=\$(hex_to_dec "\$block_hex")
-log "Converted block number: \$block_number"
+  # Поиск блока в разных форматах
+  log_block=\$(echo "\$logs" | grep -oP '(block |Proven chain is now at block )\K[0-9]+' | tail -n 1)
+  [ -z "\$log_block" ] && log_block="none"
 
-if [ -z "\$block_number" ]; then
-  log "Error: Block number conversion failed"
-  exit 0
-fi
-
-logs=\$(docker logs --tail 1000 "\$container_id" 2>&1)
-ip=\$(get_ip_address)
-
-# Try to find the latest L2 block in logs
-log_block=\$(echo "\$logs" | grep -oP 'Downloaded L2 block \\K[0-9]+' | tail -n 1)
-
-if [ -z "\$log_block" ]; then
-  log_block="none found"
-fi
-
-# Log all information
-log "Contract block: \$block_number"
-log "Logs block: \$log_block"
-
-# Prepare status message
-if [ "\$log_block" == "none found" ]; then
-  status="❌ No blocks found in logs"
-elif [ "\$log_block" -eq "\$block_number" ]; then
-  status="✅ Node is synced (block \$block_number)"
-else
-  blocks_diff=\$((block_number - log_block))
-  status="⚠️ Node is behind by \$blocks_diff blocks (logs: \$log_block, contract: \$block_number)"
-fi
-
-log "Status: \$status"
-
-# Check if we need to send notifications
-if [ "\$log_block" == "none found" ]; then
-  message="❌ *No blocks processed*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-  send_telegram_message "\$message"
-elif [ "\$log_block" -ne "\$block_number" ]; then
-  blocks_diff=\$((block_number - log_block))
-  # Send notification only if difference is more than 3 blocks
-  if [ \$blocks_diff -gt 3 ]; then
-    message="⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-    send_telegram_message "\$message"
+  # Compare blocks
+  if [ "\$log_block" == "none" ]; then
+    status="❌ No blocks found in logs"
+    send_telegram_message "❌ *No blocks processed*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+  elif [ "\$log_block" -eq "\$block_number" ]; then
+    status="✅ Node synced (block \$block_number)"
   else
-    log "Block difference (\$blocks_diff) is within acceptable range, no notification sent"
+    blocks_diff=\$((block_number - log_block))
+    status="⚠️ Node behind by \$blocks_diff blocks"
+    [ \$blocks_diff -gt 3 ] && send_telegram_message "⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
   fi
-fi
 
-# Send welcome message on first run
-if ! grep -q "INITIALIZED" "\$LOG_FILE"; then
-  welcome_msg="🤖 *Aztec Monitoring Agent Started*%0A🌐 Server: \$ip%0A\$status%0Aℹ️ Notifications will be sent for issues%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-  send_telegram_message "\$welcome_msg"
-  echo "INITIALIZED" >> "\$LOG_FILE"
-fi
+  log "Status: \$status (logs: \$log_block, contract: \$block_number)"
+  [ ! -f "\$LOG_FILE.initialized" ] && {
+    send_telegram_message "🤖 *Aztec Monitoring Agent Started*%0A🌐 Server: \$ip%0A\$status%0Aℹ️ Notifications will be sent for issues%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    touch "\$LOG_FILE.initialized"
+	echo "INITIALIZED" >> "\$LOG_FILE"
+  }
+}
+
+check_blocks
 EOF
 
   chmod +x "$AGENT_SCRIPT_PATH/agent.sh"
@@ -663,47 +679,51 @@ remove_cron_agent() {
   echo -e "\n${GREEN}$(t "agent_removed")${NC}"
 }
 
-# === Check Proven L2 Block and Sync Proof ===
 check_proven_block() {
-  # Проверяем наличие сохраненного порта
-  if [ -f "/root/.env-aztec-agent" ]; then
-    source "/root/.env-aztec-agent"
-    if [ -z "$RPC_PORT" ]; then
-      RPC_PORT=8080  # Значение по умолчанию
-    fi
-  else
-    RPC_PORT=8080  # Значение по умолчанию
+  ENV_FILE="/root/.env-aztec-agent"
+
+  if [ -f "$ENV_FILE" ]; then
+    source "$ENV_FILE"
   fi
 
-  # Запрашиваем порт у пользователя
-  echo -e "\n${CYAN}$(t "current_rpc_port") $RPC_PORT${NC}"
-  read -p "$(t "enter_rpc_port_prompt") [${RPC_PORT}]: " user_port
+  AZTEC_PORT=${AZTEC_PORT:-8080}
 
-  # Если пользователь ввел порт, обновляем значение
+  echo -e "\n${CYAN}$(t "current_aztec_port") $AZTEC_PORT${NC}"
+  read -p "$(t "enter_aztec_port_prompt") [${AZTEC_PORT}]: " user_port
+
   if [ -n "$user_port" ]; then
-    RPC_PORT=$user_port
-    # Сохраняем в конфиг
-    echo "RPC_PORT=$RPC_PORT" > /root/.env-aztec-agent
-    if [ -n "$RPC_URL" ]; then
-      echo "RPC_URL=$RPC_URL" >> /root/.env-aztec-agent
+    AZTEC_PORT=$user_port
+
+    if grep -q "^AZTEC_PORT=" "$ENV_FILE" 2>/dev/null; then
+      sed -i "s/^AZTEC_PORT=.*/AZTEC_PORT=$AZTEC_PORT/" "$ENV_FILE"
+    else
+      echo "AZTEC_PORT=$AZTEC_PORT" >> "$ENV_FILE"
     fi
+
     echo -e "${GREEN}$(t "port_saved_successfully")${NC}"
   fi
 
-  # Проверяем доступность порта
-  echo -e "\n${BLUE}$(t "checking_port") $RPC_PORT...${NC}"
-  if ! nc -z -w 2 localhost $RPC_PORT; then
-    echo -e "\n${RED}$(t "port_not_available") $RPC_PORT${NC}"
+  echo -e "\n${BLUE}$(t "checking_port") $AZTEC_PORT...${NC}"
+  if ! nc -z -w 2 localhost $AZTEC_PORT; then
+    echo -e "\n${RED}$(t "port_not_available") $AZTEC_PORT${NC}"
     echo -e "${YELLOW}$(t "check_node_running")${NC}"
     return 1
   fi
 
-  # Основная логика функции
   echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
 
-  PROVEN_BLOCK=$(curl -s -X POST -H 'Content-Type: application/json' \
-    -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
-    http://localhost:$RPC_PORT | jq -r ".result.proven.number")
+  # Фоновый процесс получения блока
+  (
+    curl -s -X POST -H 'Content-Type: application/json' \
+      -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
+      http://localhost:$AZTEC_PORT | jq -r ".result.proven.number"
+  ) > /tmp/proven_block.tmp &
+  pid1=$!
+  spinner $pid1
+  wait $pid1
+
+  PROVEN_BLOCK=$(< /tmp/proven_block.tmp)
+  rm -f /tmp/proven_block.tmp
 
   if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
     echo -e "\n${RED}$(t "proven_block_error")${NC}"
@@ -713,9 +733,19 @@ check_proven_block() {
   echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
 
   echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
-  SYNC_PROOF=$(curl -s -X POST -H 'Content-Type: application/json' \
-    -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
-    http://localhost:$RPC_PORT | jq -r ".result")
+
+  # Фоновый процесс получения proof
+  (
+    curl -s -X POST -H 'Content-Type: application/json' \
+      -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
+      http://localhost:$AZTEC_PORT | jq -r ".result"
+  ) > /tmp/sync_proof.tmp &
+  pid2=$!
+  spinner $pid2
+  wait $pid2
+
+  SYNC_PROOF=$(< /tmp/sync_proof.tmp)
+  rm -f /tmp/sync_proof.tmp
 
   if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
     echo -e "\n${RED}$(t "sync_proof_error")${NC}"
@@ -729,6 +759,8 @@ check_proven_block() {
 
 # === Change RPC URL ===
 change_rpc_url() {
+  ENV_FILE=".env-aztec-agent"
+
   echo -e "\n${BLUE}$(t "rpc_change_prompt")${NC}"
   read -p "> " NEW_RPC_URL
 
@@ -737,7 +769,7 @@ change_rpc_url() {
     return 1
   fi
 
-  # Test the new RPC URL
+  # Тестируем RPC URL
   echo -e "\n${BLUE}Testing new RPC URL...${NC}"
   response=$(curl -s -X POST -H "Content-Type: application/json" \
     --data '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}' \
@@ -748,13 +780,18 @@ change_rpc_url() {
     return 1
   fi
 
-  # Update the .env file
-  echo "RPC_URL=$NEW_RPC_URL" > .env-aztec-agent
+  # Обновляем или добавляем RPC_URL в файл
+  if grep -q "^RPC_URL=" "$ENV_FILE" 2>/dev/null; then
+    sed -i "s|^RPC_URL=.*|RPC_URL=$NEW_RPC_URL|" "$ENV_FILE"
+  else
+    echo "RPC_URL=$NEW_RPC_URL" >> "$ENV_FILE"
+  fi
+
   echo -e "\n${GREEN}$(t "rpc_change_success")${NC}"
   echo -e "${YELLOW}New RPC URL: $NEW_RPC_URL${NC}"
 
-  # Reload the environment
-  source .env-aztec-agent
+  # Подгружаем обновления
+  source "$ENV_FILE"
 }
 
 # === Check validator ===
@@ -781,7 +818,7 @@ main_menu() {
     echo -e "${CYAN}$(t "option6")${NC}"
     echo -e "${CYAN}$(t "option7")${NC}"
     echo -e "${CYAN}$(t "option8")${NC}"
-	echo -e "${CYAN}$(t "option9")${NC}"
+	  echo -e "${CYAN}$(t "option9")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -796,7 +833,7 @@ main_menu() {
       6) find_governance_proposer_payload ;;
       7) check_proven_block ;;
       8) change_rpc_url ;;
-	  9) check_validator ;;
+	    9) check_validator ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
