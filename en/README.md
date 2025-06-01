@@ -57,6 +57,7 @@ Here's the English translation of your update log:
 
 ### 30-05-2025
 - Added validator check function. Analyzes all validators, shows information for specific ones, displays full list.
+- Aztec node custom port setup for proof generation option. This is necessary if you changed the node port during installation.
 
 ### 29-05-2025
 - Log file cleanup when reaching 1 MB, initial report is preserved.
@@ -97,7 +98,7 @@ Main menu:
 5. 👥 Find PeerID
 6. 🏛️ Find governanceProposerPayload
 7. 🔗 Check Proven L2 Block *(data for getting Apprentice role in Discord)*
-   - Now you can set your own port (default port 8080). The new port number will be saved in the environment file .env-aztec-agent *(update from 05/30/2025)*
+   - Now you can set your own port (default port 8080). The new port number will be saved in the environment file .env-aztec-agent
 8. 🔌 Change RPC URL
 9. 🔍 Search for validator and check status  *(update from 05/30/2025)*
 0. 🚪 Exit
@@ -114,7 +115,7 @@ After running the script, select the option to **Install the cron monitoring age
    - The Aztec container is not found
    - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
    - There is an RPC server issue
-- Clears the log file when it reaches 1 MB in size, saving the very first report. *(agent update from 05/29/2025)*  
+- Clears the log file when it reaches 1 MB in size, saving the very first report.
 
 ### Requirements for Cron Agent:
 
