@@ -314,7 +314,7 @@ check_aztec_container_logs() {
 
     if [ "$block_hex" == "0x" ]; then
         echo -e "\n${RED}$(t "block_error")${NC} (received 0x)"
-        echo "$(date '+%F %T') [ERROR] Received invalid block_hex (0x) from contract" >> aztec-agent.log
+        echo "$(date '+%F %T') [ERROR] Received invalid block_hex (0x) from contract" >> aztec-logs.log
         return
     fi
 
