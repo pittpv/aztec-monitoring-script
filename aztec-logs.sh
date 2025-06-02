@@ -312,7 +312,14 @@ check_aztec_container_logs() {
         return
     fi
 
+    if [ "$block_hex" == "0x" ]; then
+        echo -e "\n${RED}$(t "block_error")${NC} (received 0x)"
+        echo "$(date '+%F %T') [ERROR] Received invalid block_hex (0x) from contract" >> aztec-agent.log
+        return
+    fi
+
     block_number=$((16#${block_hex#0x}))
+
     echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
 
     logs=$(docker logs --tail 500 "$container_id" 2>&1)
@@ -326,6 +333,7 @@ check_aztec_container_logs() {
         echo "$clean_logs" | grep -m1 "$block_number" || echo "Не найдено ни одной строки с номером блока!"
     fi
 }
+
 
 
 # === Find rollupAddress in logs ===
