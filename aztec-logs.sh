@@ -367,7 +367,7 @@ find_rollup_address() {
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
-  container_id=$(docker ps -q --filter ancestor=aztecprotocol/aztec:alpha-testnet | head -n 1)
+  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}"  | head -n 1)
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -407,7 +407,7 @@ find_governance_proposer_payload() {
   echo -e "\n${BLUE}$(t "search_gov")${NC}"
 
   # Получаем ID контейнера
-  container_id=$(docker ps -q --filter ancestor=aztecprotocol/aztec:alpha-testnet | head -n 1)
+  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}"  | head -n 1)
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -623,6 +623,7 @@ check_blocks() {
   # Get current block from contract
   block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
   [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]] && {
+	log "Block Fetch Error. Check RPC or cast"
     send_telegram_message "❌ *Block Fetch Error*%0A🌐 Server: \$ip%0A🔗 RPC: \$RPC_URL%0A💬 Error: \$block_hex%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
     return 1
   }
@@ -654,6 +655,7 @@ check_blocks() {
   [ ! -f "\$LOG_FILE.initialized" ] && {
     send_telegram_message "🤖 *Aztec Monitoring Agent Started*%0A🌐 Server: \$ip%0A\$status%0Aℹ️ Notifications will be sent for issues%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
     touch "\$LOG_FILE.initialized"
+	echo "v020625-last" >> "\$LOG_FILE"
 	echo "INITIALIZED" >> "\$LOG_FILE"
   }
 }
