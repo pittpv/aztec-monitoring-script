@@ -30,30 +30,29 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 | 🌐 **Languages** | English/Russian language support                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-Here's the English translation of your update log:
-
-## 📌 Latest Updates 01-06-2025
-
-### New Features:
-- **Docker and CLI Compatibility**: Full script compatibility with Docker and command-line interfaces
-- **Enhanced Block Monitoring**: Added support for new log format "block NNNN"
-- **Extended Dependency Check**: Automatic installation of `bc` utility for precise calculations
-- **Log Cleaning**: ANSI codes removal before analysis for reliable data search
-
-### Fixes:
-- 🐛 Fixed PeerID search error in logs
-- 🛠 Optimized hex value processing for blocks
-- 📊 Improved Telegram notification system
+## 📌 Latest Updates 02-06-2025
 
 ### Technical Changes:
-- Added `bc` dependency check
-- Updated block number search mechanism in logs
-- Enhanced RPC request error handling
+
+- Updated log reading filter values for better compatibility with different versions of the Aztec node
+- Added logging for RPC/cast errors
+- Added script version logging
 
 ---
 
 <details>
 <summary>📅 Version History</summary>
+
+### 01-06-2025
+
+- Improved compatibility. The script now works with both Docker-based and CLI Aztec nodes
+- Added support for the new log format "block NNNN"
+- Automatic check and installation of the `bc` utility for calculations in option 9
+- Removal of ANSI codes before analysis for more reliable data parsing
+- Fixed issue with PeerID detection in logs
+- Optimized handling of block hex values
+- Improved Telegram notification system
+
 
 ### 30-05-2025
 - Added validator check function. Analyzes all validators, shows information for specific ones, displays full list.
