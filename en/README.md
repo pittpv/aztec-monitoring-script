@@ -99,7 +99,7 @@ Main menu:
 7. 🔗 Check Proven L2 Block *(data for getting Apprentice role in Discord)*
    - Now you can set your own port (default port 8080). The new port number will be saved in the environment file .env-aztec-agent
 8. 🔌 Change RPC URL
-9. 🔍 Search for validator and check status  *(update from 05/30/2025)*
+9. 🔍 Search for validator and check status
 0. 🚪 Exit
 
 ## 🚀 Using the Cron Agent
