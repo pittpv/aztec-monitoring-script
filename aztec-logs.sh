@@ -9,6 +9,8 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
+SCRIPT_VERSION="1.6.0"
+
 function show_logo() {
     echo -e " "
     echo -e " "
@@ -51,6 +53,7 @@ init_languages() {
   TRANSLATIONS["en,option7"]="7. Check Proven L2 Block and Sync Proof"
   TRANSLATIONS["en,option8"]="8. Change RPC URL"
   TRANSLATIONS["en,option9"]="9. Search for validator and check status"
+  TRANSLATIONS["en,option10"]="10. View Aztec logs"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,rpc_change_prompt"]="Enter new RPC URL:"
   TRANSLATIONS["en,rpc_change_success"]="✅ RPC URL successfully updated"
@@ -111,6 +114,19 @@ init_languages() {
   TRANSLATIONS["en,checking_port"]="Checking port"
   TRANSLATIONS["en,port_not_available"]="Aztec port not available on"
   TRANSLATIONS["en,current_aztec_port"]="Current Aztec node port:"
+  TRANSLATIONS["en,log_block_not_found"]="❌ No line with 'Downloaded L2 block' found in logs."
+  TRANSLATIONS["en,log_block_extract_failed"]="❌ Failed to extract block number from the line:"
+  TRANSLATIONS["en,log_block_number"]="📄 Latest block from logs:"
+  TRANSLATIONS["en,log_behind_details"]="⚠️ Logs are behind. Latest block in logs: %s, from contract: %s"
+  TRANSLATIONS["en,log_line_example"]="🔎 Example log line:"
+  TRANSLATIONS["en,press_ctrlc"]="Press Ctrl+C to exit and return to the menu"
+  TRANSLATIONS["en,logs_starting"]="Logs will start in 5 seconds..."
+  TRANSLATIONS["en,return_main_menu"]="Returning to the main menu..."
+  TRANSLATIONS["en,current_script_version"]="📌 Current script version:"
+  TRANSLATIONS["en,new_version_avialable"]="🚀 New version available:"
+  TRANSLATIONS["en,new_version_update"]="Please update your script"
+  TRANSLATIONS["en,version_up_to_date"]="✅ You are using the latest version"
+
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -124,6 +140,7 @@ init_languages() {
   TRANSLATIONS["ru,option7"]="7. Проверить Proven L2 блок и Sync Proof"
   TRANSLATIONS["ru,option8"]="8. Изменить RPC URL"
   TRANSLATIONS["ru,option9"]="9. Поиск валидатора и проверка статуса"
+  TRANSLATIONS["ru,option10"]="10. Просмотреть логи Aztec"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,rpc_change_prompt"]="Введите новый RPC URL:"
   TRANSLATIONS["ru,rpc_change_success"]="✅ RPC URL успешно обновлен"
@@ -184,6 +201,18 @@ init_languages() {
   TRANSLATIONS["ru,checking_port"]="Проверка порта"
   TRANSLATIONS["ru,port_not_available"]="Aztec порт недоступен на"
   TRANSLATIONS["ru,current_aztec_port"]="Текущий порт ноды Aztec:"
+  TRANSLATIONS["ru,log_block_not_found"]="❌ Не найдена строка с 'Downloaded L2 block' в логах."
+  TRANSLATIONS["ru,log_block_extract_failed"]="❌ Не удалось извлечь номер блока из строки:"
+  TRANSLATIONS["ru,log_block_number"]="📄 Последний блок из логов:"
+  TRANSLATIONS["ru,log_behind_details"]="⚠️ Логи отстают. Последний блок из логов: %s, из контракта: %s"
+  TRANSLATIONS["ru,log_line_example"]="🔎 Пример строки из логов:"
+  TRANSLATIONS["ru,press_ctrlc"]="Нажмите Ctrl+C, чтобы выйти и вернуться в меню"
+  TRANSLATIONS["ru,logs_starting"]="Логи запустятся через 5 секунд..."
+  TRANSLATIONS["ru,return_main_menu"]="Возврат в главное меню..."
+  TRANSLATIONS["ru,current_script_version"]="📌 Текущая версия скрипта:"
+  TRANSLATIONS["ru,new_version_avialable"]="🚀 Доступна новая версия:"
+  TRANSLATIONS["ru,new_version_update"]="Пожалуйста, обновите скрипт"
+  TRANSLATIONS["ru,version_up_to_date"]="✅ Установлена актуальная версия"
 }
 
 # === Configuration ===
@@ -272,6 +301,38 @@ check_dependencies() {
     source .env-aztec-agent
     echo -e "\n${GREEN}$(t "env_exists") $RPC_URL${NC}"
   fi
+
+
+  # === Проверяем и добавляем ключ VERSION в ~/.env-aztec-agent ===
+  # Если ключа VERSION в .env-aztec-agent нет – дописать его, не затронув остальные переменные
+  INSTALLED_VERSION=$(grep '^VERSION=' ~/.env-aztec-agent | cut -d'=' -f2)
+
+  if [ -z "$INSTALLED_VERSION" ]; then
+    echo "VERSION=$SCRIPT_VERSION" >> ~/.env-aztec-agent
+    INSTALLED_VERSION="$SCRIPT_VERSION"
+  elif [ "$INSTALLED_VERSION" != "$SCRIPT_VERSION" ]; then
+  # Обновляем строку VERSION в .env-aztec-agent
+    sed -i "s/^VERSION=.*/VERSION=$SCRIPT_VERSION/" ~/.env-aztec-agent
+    INSTALLED_VERSION="$SCRIPT_VERSION"
+  fi
+
+  # === Скачиваем remote version_control.json и определяем последнюю версию ===
+  REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/version_control.json"
+  # Скачиваем весь JSON, отбираем массив .[].VERSION, сортируем, берём последний
+  if remote_data=$(curl -fsSL "$REMOTE_VC_URL"); then
+    REMOTE_LATEST_VERSION=$(echo "$remote_data" | jq -r '.[].VERSION' | sort -V | tail -n1)
+  else
+    REMOTE_LATEST_VERSION=""
+  fi
+
+  # === Выводим текущую версию и, если надо, предупреждение об обновлении ===
+  echo -e "\n${CYAN}$(t "current_script_version") ${INSTALLED_VERSION}${NC}"
+  if [ -n "$REMOTE_LATEST_VERSION" ] && [ "$REMOTE_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
+    echo -e "${YELLOW}$(t "new_version_avialable") ${REMOTE_LATEST_VERSION}. $(t "new_version_update").${NC}"
+  elif [ -n "$REMOTE_LATEST_VERSION" ]; then
+    echo -e "${GREEN}$(t "version_up_to_date")${NC}"
+  fi
+
 }
 
 # === Spinner function ===
@@ -290,7 +351,8 @@ spinner() {
   printf "\r                 \r"
 }
 
-# === Check container logs ===
+
+# === Check container logs for block ===
 check_aztec_container_logs() {
     source .env-aztec-agent
 
@@ -312,28 +374,76 @@ check_aztec_container_logs() {
         return
     fi
 
-    if [ "$block_hex" == "0x" ]; then
-        echo -e "\n${RED}$(t "block_error")${NC} (received 0x)"
-        echo "$(date '+%F %T') [ERROR] Received invalid block_hex (0x) from contract" >> aztec-logs.log
+    block_number=$((16#${block_hex#0x}))
+    echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
+
+    # Получаем весь лог контейнера и очищаем от ANSI-кодов
+    clean_logs=$(docker logs "$container_id" 2>&1 | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
+
+    # === Запускаем поиск последней строки с 'Downloaded L2 block' в фоне и показываем спинер ===
+    temp_file=$(mktemp)
+    {
+      echo "$clean_logs" | tac | grep -m1 'Downloaded L2 block' > "$temp_file"
+    } &
+    search_pid=$!
+    spinner $search_pid
+    wait $search_pid
+
+    latest_log_line=$(<"$temp_file")
+    rm -f "$temp_file"
+
+    if [ -z "$latest_log_line" ]; then
+        echo -e "\n${RED}$(t "log_block_not_found")${NC}"
         return
     fi
 
-    block_number=$((16#${block_hex#0x}))
+    # Извлекаем blockNumber из найденной строки
+    log_block_number=$(echo "$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
 
-    echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
+    if [ -z "$log_block_number" ]; then
+        echo -e "\n${RED}$(t "log_block_extract_failed")${NC}"
+        echo "$latest_log_line"
+        return
+    fi
 
-    logs=$(docker logs --tail 500 "$container_id" 2>&1)
-    clean_logs=$(echo "$logs" | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
+    echo -e "\n${BLUE}$(t "log_block_number") $log_block_number${NC}"
 
-    if echo "$clean_logs" | grep -E -q "\b$block_number\b"; then
+    if [ "$log_block_number" -eq "$block_number" ]; then
         echo -e "\n${GREEN}$(t "node_ok")${NC}"
     else
-        echo -e "\n${YELLOW}$(t "node_behind")${NC}"
-        echo "Пример строки из логов:"
-        echo "$clean_logs" | grep -m1 "$block_number" || echo "Не найдено ни одной строки с номером блока!"
+        printf "\n${YELLOW}$(t "log_behind_details")${NC}\n" "$log_block_number" "$block_number"
+        echo -e "\n${BLUE}$(t "log_line_example")${NC}"
+        echo "$latest_log_line"
     fi
 }
 
+
+# === View Aztec container logs ===
+view_container_logs() {
+
+  echo -e "\n${BLUE}$(t "search_container")${NC}"
+  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+
+  if [ -z "$container_id" ]; then
+    echo -e "\n${RED}$(t "container_not_found")${NC}"
+    return
+  fi
+
+  echo -e "\n${GREEN}$(t "container_found") $container_id${NC}"
+  echo -e "\n${BLUE}$(t "press_ctrlc")${NC}"
+  echo -e "\n${BLUE}$(t "logs_starting")${NC}"
+
+  sleep 5
+
+  # При получении SIGINT (Ctrl+C) выходим из функции и возвращаемся в меню
+  trap "echo -e '\n${YELLOW}$(t "return_main_menu")${NC}'; trap - SIGINT; return" SIGINT
+
+  # Показываем логи в режиме "follow"
+  docker logs -f "$container_id"
+
+  # Убираем ранее установленный trap, если пользователь вышел нормально
+  trap - SIGINT
+}
 
 
 # === Find rollupAddress in logs ===
@@ -535,7 +645,7 @@ create_cron_agent() {
 
 cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
-export PATH="$PATH:/root/.foundry/bin"
+export PATH="\$PATH:/root/.foundry/bin"
 
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
@@ -544,7 +654,7 @@ TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
 
-# Create log file if it doesn't exist
+# === Создание файла лога, если его нет ===
 if [ ! -f "\$LOG_FILE" ]; then
   touch "\$LOG_FILE" 2>/dev/null || {
     echo "Error: Could not create log file \$LOG_FILE"
@@ -557,12 +667,11 @@ if [ ! -w "\$LOG_FILE" ]; then
   exit 1
 fi
 
-# Check log file size and clean if exceeds 1MB
+# === Проверка размера файла и очистка, если больше 1 МБ ===
 MAX_SIZE=1048576
 current_size=\$(stat -c%s "\$LOG_FILE")
 
 if [ "\$current_size" -gt "\$MAX_SIZE" ]; then
-
   temp_file=\$(mktemp)
   awk '/INITIALIZED/ {print; exit} {print}' "\$LOG_FILE" > "\$temp_file"
   mv "\$temp_file" "\$LOG_FILE"
@@ -590,10 +699,12 @@ else
   } >> "\$LOG_FILE"
 fi
 
+# === Функция для записи в лог-файл ===
 log() {
   echo "[\$(date '+%Y-%m-%d %H:%M:%S')] \$1" >> "\$LOG_FILE"
 }
 
+# === Функция для отправки уведомлений в Telegram ===
 send_telegram_message() {
   local message="\$1"
   curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
@@ -602,70 +713,85 @@ send_telegram_message() {
     -d parse_mode="Markdown" >/dev/null
 }
 
+# === Получаем свой публичный IP для включения в уведомления ===
 get_ip_address() {
   curl -s https://api.ipify.org || echo "unknown-ip"
 }
 ip=\$(get_ip_address)
 
-# New hex to decimal conversion function
+# === Переводим hex -> decimal ===
 hex_to_dec() {
   local hex=\$1
-  # Remove 0x prefix if present
+  # Убираем префикс 0x, если он есть
   hex=\${hex#0x}
-  # Remove leading zeros
+  # Убираем ведущие нули
   hex=\$(echo \$hex | sed 's/^0*//')
-  # If empty after removing zeros, return 0
+  # Если ничего не осталось после очистки — возвращаем 0
   [ -z "\$hex" ] && echo 0 && return
   echo \$((16#\$hex))
 }
 
-# Check if container exists
+# === Основная функция: проверка контейнера и сравнение блоков ===
 check_blocks() {
-  container_id=\$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
-  [ -z "\$container_id" ] && {
+  container_id=\$(docker ps --filter "name=aztec" --format '{{.ID}}' | head -n 1)
+  if [ -z "\$container_id" ]; then
     log "Container 'aztec' not found."
     send_telegram_message "❌ *Aztec Container Not Found*%0A🌐 Server: \$ip%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-    return 1
-  }
-
-  # Get current block from contract
-  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
-  [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]] && {
-	log "Block Fetch Error. Check RPC or cast"
-    send_telegram_message "❌ *Block Fetch Error*%0A🌐 Server: \$ip%0A🔗 RPC: \$RPC_URL%0A💬 Error: \$block_hex%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-    return 1
-  }
-
-  # Convert hex to decimal
-  block_number=\$((16#\${block_hex#0x}))
-  log "Contract block: \$block_number"
-
-  # Очистка логов от ANSI-кодов и поиск блока
-  logs=\$(docker logs --tail 1000 "\$container_id" 2>&1 | sed -r "s/\x1B\[[0-9;]*[mK]//g")
-
-  # Поиск блока в разных форматах
-  log_block=\$(echo "\$logs" | grep -oP '(block |Proven chain is now at block )\K[0-9]+' | tail -n 1)
-  [ -z "\$log_block" ] && log_block="none"
-
-  # Compare blocks
-  if [ "\$log_block" == "none" ]; then
-    status="❌ No blocks found in logs"
-    send_telegram_message "❌ *No blocks processed*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
-  elif [ "\$log_block" -eq "\$block_number" ]; then
-    status="✅ Node synced (block \$block_number)"
-  else
-    blocks_diff=\$((block_number - log_block))
-    status="⚠️ Node behind by \$blocks_diff blocks"
-    [ \$blocks_diff -gt 3 ] && send_telegram_message "⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    exit 1
   fi
 
-  log "Status: \$status (logs: \$log_block, contract: \$block_number)"
-  [ ! -f "\$LOG_FILE.initialized" ] && {
+  # Получаем текущий блок из контракта
+  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
+  if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
+    log "Block Fetch Error. Check RPC or cast"
+    send_telegram_message "❌ *Block Fetch Error*%0A🌐 Server: \$ip%0A🔗 RPC: \$RPC_URL%0A💬 Error: \$block_hex%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    exit 1
+  fi
+
+  # Конвертируем hex-значение в десятичный
+  block_number=\$(hex_to_dec "\$block_hex")
+  log "Contract block: \$block_number"
+
+  logs=\$(docker logs "\$container_id" 2>&1 | sed -r "s/\\x1B\\[[0-9;]*[mK]//g")
+
+  # Ищем последнюю строку, содержащую 'Downloaded L2 block', с конца (tac + grep -m1)
+  latest_log_line=\$(echo "\$logs" | tac | grep -m1 'Downloaded L2 block')
+  if [ -z "\$latest_log_line" ]; then
+    log "No 'Downloaded L2 block' line found in logs"
+    send_telegram_message "❌ *No 'Downloaded L2 block' found*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    exit 1
+  fi
+
+  # Извлекаем blockNumber из этой строки
+  log_block_number=\$(echo "\$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
+  if [ -z "\$log_block_number" ]; then
+    log "Failed to extract blockNumber from line: \$latest_log_line"
+    send_telegram_message "❌ *Failed to extract blockNumber*%0A🌐 Server: \$ip%0A📋 Line: \$latest_log_line%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    exit 1
+  fi
+
+  log "Latest log block: \$log_block_number"
+
+  # Сравниваем блоки
+  if [ "\$log_block_number" -eq "\$block_number" ]; then
+    status="✅ Node synced (block \$block_number)"
+  else
+    blocks_diff=\$((block_number - log_block_number))
+    status="⚠️ Node behind by \$blocks_diff blocks"
+    # Если отставание > 3 блоков — шлём отдельное уведомление
+    if [ "\$blocks_diff" -gt 3 ]; then
+      send_telegram_message "⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    fi
+  fi
+
+  log "Status: \$status (logs: \$log_block_number, contract: \$block_number)"
+
+  if [ ! -f "\$LOG_FILE.initialized" ]; then
     send_telegram_message "🤖 *Aztec Monitoring Agent Started*%0A🌐 Server: \$ip%0A\$status%0Aℹ️ Notifications will be sent for issues%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
     touch "\$LOG_FILE.initialized"
-	echo "v020625-last" >> "\$LOG_FILE"
-	echo "INITIALIZED" >> "\$LOG_FILE"
-  }
+    echo "v.\$VERSION" >> "\$LOG_FILE"
+    echo "INITIALIZED" >> "\$LOG_FILE"
+  fi
 }
 
 check_blocks
@@ -829,6 +955,7 @@ main_menu() {
     echo -e "${CYAN}$(t "option7")${NC}"
     echo -e "${CYAN}$(t "option8")${NC}"
     echo -e "${CYAN}$(t "option9")${NC}"
+	echo -e "${CYAN}$(t "option10")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -844,6 +971,7 @@ main_menu() {
       7) check_proven_block ;;
       8) change_rpc_url ;;
       9) check_validator ;;
+	  10) view_container_logs ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

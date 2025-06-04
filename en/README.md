@@ -30,21 +30,27 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 | 🌐 **Languages** | English/Russian language support                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 02-06-2025
+## 📌 Latest Updates 04-06-2025
 
 ### Technical Changes:
-
-- Updated log reading filter values for better compatibility with different versions of the Aztec node
-- Added logging for RPC/cast errors
-- Added script version logging
+- Improved block number search mechanism (Option 1 and cron agent) in debug-level logs. Supports debug, info (and likely all other) log levels. Maximally accurate search results.
+- Enhanced block validation error handling
+- Added a new option – View node logs directly from the script (Ctrl+C to exit logs)
+- Added block number output from logs when executing Option 1.
+- Added script version control. If there are updates, the script will notify you about it.
+- Minor improvements
 
 ---
 
 <details>
 <summary>📅 Version History</summary>
 
-### 01-06-2025
+### 02-06-2025
+- Updated log reading filter values for better compatibility with different versions of the Aztec node
+- Added logging for RPC/cast errors
+- Added script version logging
 
+### 01-06-2025
 - Improved compatibility. The script now works with both Docker-based and CLI Aztec nodes
 - Added support for the new log format "block NNNN"
 - Automatic check and installation of the `bc` utility for calculations in option 9
