@@ -31,8 +31,6 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
 ## 📌 Latest Updates 04-06-2025
-
-### Technical Changes:
 - Improved block number search mechanism (Option 1 and cron agent) in debug-level logs. Supports debug, info (and likely all other) log levels. Maximally accurate search results.
 - Enhanced block validation error handling
 - Added a new option – View node logs directly from the script (Ctrl+C to exit logs)
