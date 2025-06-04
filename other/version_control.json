@@ -18,23 +18,23 @@
         "VERSION": "1.3.0",
         "UPDATE_DATE": "29.05.2025",
         "CHANGES": ["Clear log file function"]
-    }
-	{
+    },
+    {
         "VERSION": "1.4.0",
         "UPDATE_DATE": "30.05.2025",
         "CHANGES": ["Change Aztec port", "Check validators"]
-    }
-	{
+    },
+    {
         "VERSION": "1.5.0",
         "UPDATE_DATE": "01.06.2025",
         "CHANGES": ["Full Docker & CLI compatibility"]
-    }
-	{
+    },
+    {
         "VERSION": "1.5.1",
         "UPDATE_DATE": "01.06.2025",
         "CHANGES": ["Compatibility fix"]
-    }
-		{
+    },
+    {
         "VERSION": "1.6.0",
         "UPDATE_DATE": "04.06.2025",
         "CHANGES": ["Improved block number search mechanism", "Enhanced block validation error handling", "View Aztec node logs", "Block number output from logs", "Minor improvements"]
