@@ -37,6 +37,6 @@
     {
         "VERSION": "1.6.0",
         "UPDATE_DATE": "04.06.2025",
-        "CHANGES": ["Improved block number search mechanism", "Enhanced block validation error handling", "View Aztec node logs", "Block number output from logs", "Minor improvements"]
+        "CHANGES": ["Improved block number search mechanism", "Enhanced block validation error handling", "View Aztec node logs", "Block number output from logs", "Version control", "Minor improvements"]
     }
 ]
