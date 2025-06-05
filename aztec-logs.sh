@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.6.0"
+SCRIPT_VERSION="1.6.1"
 
 function show_logo() {
     echo -e " "
@@ -357,7 +357,7 @@ check_aztec_container_logs() {
     source .env-aztec-agent
 
     echo -e "\n${BLUE}$(t "search_container")${NC}"
-    container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+    container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
 
     if [ -z "$container_id" ]; then
         echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -422,7 +422,7 @@ check_aztec_container_logs() {
 view_container_logs() {
 
   echo -e "\n${BLUE}$(t "search_container")${NC}"
-  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -450,7 +450,7 @@ view_container_logs() {
 find_rollup_address() {
   echo -e "\n${BLUE}$(t "search_rollup")${NC}"
 
-  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}" | head -n 1)
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -485,7 +485,7 @@ find_rollup_address() {
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
-  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}"  | head -n 1)
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -525,7 +525,7 @@ find_governance_proposer_payload() {
   echo -e "\n${BLUE}$(t "search_gov")${NC}"
 
   # Получаем ID контейнера
-  container_id=$(docker ps --filter "name=aztec" --format "{{.ID}}"  | head -n 1)
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -733,7 +733,7 @@ hex_to_dec() {
 
 # === Основная функция: проверка контейнера и сравнение блоков ===
 check_blocks() {
-  container_id=\$(docker ps --filter "name=aztec" --format '{{.ID}}' | head -n 1)
+  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then
     log "Container 'aztec' not found."
     send_telegram_message "❌ *Aztec Container Not Found*%0A🌐 Server: \$ip%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
