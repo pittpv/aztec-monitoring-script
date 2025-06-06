@@ -1,6 +1,6 @@
 # Aztec Node İzleme Aracı
 
-[🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Açıklamanın Rusça versiyonu") | [🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "Açıklamanın İngilizce versiyonu")
+[ [🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Açıklamanın Rusça versiyonu") ] [ [🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "Açıklamanın İngilizce versiyonu") ]
 
 ![Bash](https://img.shields.io/badge/Bash-5.2-blue)
 ![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
