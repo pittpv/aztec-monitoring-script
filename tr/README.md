@@ -41,7 +41,7 @@ Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyn
   - Varsayılan portların kullanılabilirliğinin kontrolü, portları değiştirme seçeneği ile
   - Node’un en son binary dosyasının kurulumu
   - `.env` ve `docker-compose` dosyalarının otomatik oluşturulması
-  - ufw üzerinden 8080 ve 40400 portlarının açılması
+  - ufw üzerinden portlarının açılması
   - Node’un başlatılması ve ilk logların gösterimi 
 - Aztec düğümünü silme işlevi eklendi  
 
