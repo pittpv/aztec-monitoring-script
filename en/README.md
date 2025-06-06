@@ -41,7 +41,7 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
   - Checking default port availability with the option to change ports if needed.
   - Installation of the latest node binary
   - Automatic creation of `.env` and `docker-compose` files
-  - Opening ports 8080 and 40400 in UFW
+  - Opening ports in UFW
   - Starting the node and displaying the initial logs
 - Added function to delete Aztec node  
 
