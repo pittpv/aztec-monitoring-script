@@ -34,8 +34,6 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 
 ## 📌 Latest Updates 06-06-2025
 
-Translate into Turkish:
-
 - Full localization, including the script and Telegram notifications, into three languages. Turkish language has been added.
 - Added a function for installing the Aztec node with Docker and **Watchtower**. Watchtower is configured to automatically update the node container while preserving the configuration.
   - Installation of dependencies
