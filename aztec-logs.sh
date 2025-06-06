@@ -163,6 +163,8 @@ init_languages() {
   TRANSLATIONS["en,failed_downloading_script"]="❌ Failed to download installation script"
   TRANSLATIONS["en,install_completed_successfully"]="✅ Installation completed successfully"
   TRANSLATIONS["en,logs_stopped_by_user"]="⚠ Log viewing stopped by user"
+  TRANSLATIONS["en,installation_cancelled_by_user"]="✖ Installation cancelled by user"
+  TRANSLATIONS["en,unknown_error_occurred"]="⚠ An unknown error occurred during installation"
 
 
   # Russian translations
@@ -285,6 +287,8 @@ init_languages() {
   TRANSLATIONS["ru,failed_downloading_script"]="❌ Не удалось загрузить скрипт установки"
   TRANSLATIONS["ru,install_completed_successfully"]="✅ Установка успешно завершена"
   TRANSLATIONS["ru,logs_stopped_by_user"]="⚠ Просмотр логов остановлен пользователем"
+  TRANSLATIONS["ru,installation_cancelled_by_user"]="✖ Установка отменена пользователем"
+  TRANSLATIONS["ru,unknown_error_occurred"]="⚠ Произошла неизвестная ошибка при установке"
 
 
   # Turkish translations
@@ -399,7 +403,7 @@ init_languages() {
   TRANSLATIONS["tr,invalid_chatid"]="Geçersiz Telegram chat ID veya botun bu sohbete erişimi yok. Lütfen tekrar deneyin."
   TRANSLATIONS["tr,chatid_number"]="Chat ID bir sayı olmalıdır (grup sohbetleri için - ile başlayabilir). Lütfen tekrar deneyin."
   TRANSLATIONS["tr,running_install_node"]="GitHub'dan Aztec node kurulum betiği çalıştırılıyor..."
-  TRANSLATIONS["ru,failed_running_install_node"]="GitHub'dan Aztec düğüm yükleme betiği çalıştırılamadı..."
+  TRANSLATIONS["tr,failed_running_install_node"]="GitHub'dan Aztec düğüm yükleme betiği çalıştırılamadı..."
   TRANSLATIONS["tr,delete_node"]="🗑️ Aztec Node siliniyor..."
   TRANSLATIONS["tr,delete_confirm"]="Aztec node'u silmek istediğinize emin misiniz? Bu işlem konteynerleri durduracak ve tüm verileri silecektir. (y/n) "
   TRANSLATIONS["tr,node_deleted"]="✅ Aztec node başarıyla silindi"
@@ -407,6 +411,8 @@ init_languages() {
   TRANSLATIONS["tr,failed_downloading_script"]="❌ Kurulum betiği indirilemedi"
   TRANSLATIONS["tr,install_completed_successfully"]="✅ Kurulum başarıyla tamamlandı"
   TRANSLATIONS["tr,logs_stopped_by_user"]="⚠ Log görüntüleme kullanıcı tarafından durduruldu"
+  TRANSLATIONS["tr,installation_cancelled_by_user"]="✖ Kurulum kullanıcı tarafından iptal edildi"
+  TRANSLATIONS["tr,unknown_error_occurred"]="⚠ Kurulum sırasında bilinmeyen bir hata oluştu"
 }
 
 # === Configuration ===
@@ -1194,20 +1200,37 @@ function install_aztec {
     return 1
   }
 
-  # Запускаем с обработкой Ctrl+C
-  if bash "$TEMP_SCRIPT" "$LANG"; then
-    # Успешное выполнение
-    echo -e "${GREEN}$(t "install_completed_successfully")${NC}"
-  elif [[ $? -eq 130 ]]; then
-    # Ctrl+C - не считаем ошибкой
-    echo -e "${YELLOW}$(t "logs_stopped_by_user")${NC}"
-  else
-    # Реальная ошибка
-    echo -e "${RED}$(t "failed_running_install_node")${NC}"
-  fi
+  # Запускаем с обработкой Ctrl+C и других кодов возврата
+  bash "$TEMP_SCRIPT" "$LANG"
+  EXIT_CODE=$?
+
+  case $EXIT_CODE in
+    0)
+      # Успешное выполнение
+      echo -e "${GREEN}$(t "install_completed_successfully")${NC}"
+      ;;
+    1)
+      # Ошибка установки
+      echo -e "${RED}$(t "failed_running_install_node")${NC}"
+      ;;
+    130)
+      # Ctrl+C - не считаем ошибкой
+      echo -e "${YELLOW}$(t "logs_stopped_by_user")${NC}"
+      ;;
+    2)
+      # Пользователь отменил установку из-за занятых портов
+      echo -e "${YELLOW}$(t "installation_cancelled_by_user")${NC}"
+      ;;
+    *)
+      # Неизвестная ошибка
+      echo -e "${RED}$(t "unknown_error_occurred")${NC}"
+      ;;
+  esac
 
   # Удаляем временный файл
   rm -f "$TEMP_SCRIPT"
+
+  return $EXIT_CODE
 }
 
 # === Delete Aztec node ===

@@ -278,19 +278,19 @@ check_and_set_ports() {
                 echo -e "\n${YELLOW}$(t "enter_new_ports_prompt")${NC}"
 
                 # Запрос нового HTTP-порта
-                read -p "  $(t "enter_http_port") [${GRAY}по умолчанию: $http_port${NC}]: " new_http_port
+                read -p "  $(t "enter_http_port") [${GRAY}by default: $http_port${NC}]: " new_http_port
                 http_port=${new_http_port:-$http_port}
 
                 # Запрос нового P2P-порта
-                read -p "  $(t "enter_p2p_port") [${GRAY}по умолчанию: $p2p_port${NC}]: " new_p2p_port
+                read -p "  $(t "enter_p2p_port") [${GRAY}by default: $p2p_port${NC}]: " new_p2p_port
                 p2p_port=${new_p2p_port:-$p2p_port}
 
                 echo -e "\n${CYAN}$(t "ports_updated")${NC}"
                 echo -e "  HTTP: ${YELLOW}$http_port${NC}, P2P: ${YELLOW}$p2p_port${NC}\n"
             else
                 # Отмена установки
-                echo -e "\n${RED}✖ $(t "installation_aborted")${NC}\n"
-                exit 1
+                #echo -e "\n${RED}✖ $(t "installation_aborted")${NC}\n"
+                exit 2
             fi
         fi
     done

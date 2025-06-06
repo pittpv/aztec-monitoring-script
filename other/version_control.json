@@ -48,5 +48,10 @@
         "VERSION": "1.7.0",
         "UPDATE_DATE": "06.06.2025",
         "CHANGES": ["Full localization. Turkish language has been added", "Install & delete Aztec node functions"]
+    },
+    {
+        "VERSION": "1.7.1",
+        "UPDATE_DATE": "06.06.2025",
+        "CHANGES": ["Fixed error handling when installing a node."]
     }
 ]
