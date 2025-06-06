@@ -6,7 +6,7 @@
 ![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
 ![Telegram](https://img.shields.io/badge/Telegram-API-blue)
 
-![Ana Ekran](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-tr-2025-06-06-13-19-12.png
+![Ana Ekran](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-tr-2025-06-06-13-19-12.png)
 
 ## 📝 Açıklama
 
