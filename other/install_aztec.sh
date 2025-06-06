@@ -290,7 +290,7 @@ check_and_set_ports() {
             else
                 # Отмена установки
                 #echo -e "\n${RED}✖ $(t "installation_aborted")${NC}\n"
-                exit 1
+                exit 2
             fi
         fi
     done
