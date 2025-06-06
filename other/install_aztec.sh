@@ -197,6 +197,12 @@ delete_aztec_node() {
     read -p "$(t "delete_confirm")" -n 1 -r
     echo
 
+    # Очистка ввода перед выходом
+    while [[ -n $REPLY && ! $REPLY =~ ^[YyNn]$ ]]; do
+        read -p "Please enter Y or N: " -n 1 -r
+        echo
+    done
+
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo -e "${YELLOW}Stopping containers...${NC}"
         docker compose -f "$HOME/aztec/docker-compose.yml" down || true
