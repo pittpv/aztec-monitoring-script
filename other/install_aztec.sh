@@ -71,6 +71,10 @@ init_languages() {
   TRANSLATIONS["en,ports_updated"]="Port numbers have been updated"
   TRANSLATIONS["en,installing_ss"]="Installing iproute2 (contains ss utility)..."
   TRANSLATIONS["en,ss_installed"]="iproute2 installed successfully"
+  TRANSLATIONS["en,delete_node"]="🗑️ Deleting Aztec Node..."
+  TRANSLATIONS["en,delete_confirm"]="Are you sure you want to delete the Aztec node? This will stop containers and remove all data. (y/n) "
+  TRANSLATIONS["en,node_deleted"]="✅ Aztec node successfully deleted"
+  TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -120,6 +124,10 @@ init_languages() {
   TRANSLATIONS["ru,ports_updated"]="Номера портов обновлены"
   TRANSLATIONS["ru,installing_ss"]="Установка iproute2 (содержит утилиту ss)..."
   TRANSLATIONS["ru,ss_installed"]="iproute2 успешно установлен"
+  TRANSLATIONS["ru,delete_node"]="🗑️ Удаление ноды Aztec..."
+  TRANSLATIONS["ru,delete_confirm"]="Вы уверены, что хотите удалить ноду Aztec? Это остановит контейнеры и удалит все данные. (y/n) "
+  TRANSLATIONS["ru,node_deleted"]="✅ Нода Aztec успешно удалена"
+  TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -169,6 +177,10 @@ init_languages() {
   TRANSLATIONS["tr,ports_updated"]="Port numaraları güncellendi"
   TRANSLATIONS["tr,installing_ss"]="iproute2 yükleniyor (ss aracı içerir)..."
   TRANSLATIONS["tr,ss_installed"]="iproute2 başarıyla yüklendi"
+  TRANSLATIONS["tr,delete_node"]="🗑️ Aztec Node siliniyor..."
+  TRANSLATIONS["tr,delete_confirm"]="Aztec node'u silmek istediğinize emin misiniz? Bu işlem konteynerleri durduracak ve tüm verileri silecektir. (y/n) "
+  TRANSLATIONS["tr,node_deleted"]="✅ Aztec node başarıyla silindi"
+  TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
 }
 
 # Initialize language (default to en if no argument)
@@ -180,6 +192,24 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+delete_aztec_node() {
+    echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
+    read -p "$(t "delete_confirm")" -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}Stopping containers...${NC}"
+        docker compose -f "$HOME/aztec/docker-compose.yml" down || true
+
+        echo -e "${YELLOW}Removing data...${NC}"
+        sudo rm -rf "$HOME/.aztec" "$HOME/aztec"
+
+        echo -e "${GREEN}$(t "node_deleted")${NC}"
+    else
+        echo -e "${YELLOW}$(t "delete_canceled")${NC}"
+    fi
+}
+
 # Инициализация портов по умолчанию
 http_port=8080
 p2p_port=40400
@@ -187,10 +217,10 @@ p2p_port=40400
 check_and_set_ports() {
     local new_http_port
     local new_p2p_port
-    
+
     echo -e "\n${CYAN}=== $(t "checking_ports") ===${NC}"
     echo -e "${GRAY}$(t "checking_ports_desc")${NC}\n"
-    
+
     # Установка iproute2 (если не установлен) - содержит утилиту ss
     if ! command -v ss &> /dev/null; then
         echo -e "${YELLOW}$(t "installing_ss")...${NC}"
@@ -198,16 +228,16 @@ check_and_set_ports() {
         sudo apt install -y iproute2 > /dev/null 2>&1
         echo -e "${GREEN}$(t "ss_installed") ✔${NC}\n"
     fi
-    
+
     while true; do
         ports=("$http_port" "$p2p_port")
         ports_busy=()
-        
+
         echo -e "${CYAN}$(t "scanning_ports")...${NC}"
-        
+
         # Проверка каждого порта с визуализацией (используем ss вместо lsof)
         for port in "${ports[@]}"; do
-            echo -n -e "  ${YELLOW}Порт $port:${NC} "
+            echo -n -e "  ${YELLOW}Port $port:${NC} "
             if sudo ss -tuln | grep -q ":${port}\b"; then
                 echo -e "${RED}$(t "busy") ✖${NC}"
                 ports_busy+=("$port")
@@ -216,7 +246,7 @@ check_and_set_ports() {
             fi
             sleep 0.1  # Уменьшенная задержка, так как ss работает быстрее
         done
-        
+
         # Все порты свободны → выход из цикла
         if [ ${#ports_busy[@]} -eq 0 ]; then
             echo -e "\n${GREEN}✓ $(t "ports_free_success")${NC}"
@@ -226,22 +256,22 @@ check_and_set_ports() {
             # Показать занятые порты
             echo -e "\n${RED}⚠ $(t "ports_busy_error")${NC}"
             echo -e "  ${RED}${ports_busy[*]}${NC}\n"
-            
+
             # Предложить изменить порты
             read -p "$(t "change_ports_prompt") " -n 1 -r
             echo
-            
+
             if [[ $REPLY =~ ^[Yy]$ || -z "$REPLY" ]]; then
                 echo -e "\n${YELLOW}$(t "enter_new_ports_prompt")${NC}"
-                
+
                 # Запрос нового HTTP-порта
                 read -p "  $(t "enter_http_port") [${GRAY}по умолчанию: $http_port${NC}]: " new_http_port
                 http_port=${new_http_port:-$http_port}
-                
+
                 # Запрос нового P2P-порта
                 read -p "  $(t "enter_p2p_port") [${GRAY}по умолчанию: $p2p_port${NC}]: " new_p2p_port
                 p2p_port=${new_p2p_port:-$p2p_port}
-                
+
                 echo -e "\n${CYAN}$(t "ports_updated")${NC}"
                 echo -e "  HTTP: ${YELLOW}$http_port${NC}, P2P: ${YELLOW}$p2p_port${NC}\n"
             else
@@ -355,7 +385,7 @@ cat > docker-compose.yml <<EOF
 services:
   aztec-node:
     container_name: aztec-sequencer
-    network_mode: host 
+    network_mode: host
     image: aztecprotocol/aztec:latest
     restart: unless-stopped
     labels:
