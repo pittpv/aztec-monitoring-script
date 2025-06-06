@@ -38,6 +38,7 @@ Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyn
 - Docker ile **Watchtower** kullanarak Aztec node kurulum özelliği eklendi. Watchtower, yapılandırmaları koruyarak node konteynerini otomatik olarak güncellemeye ayarlanmıştır.
   - Bağımlılıkların kurulumu
   - Docker ve Docker Compose'un varlığının kontrolü ve gerekirse kurulumu
+  - Varsayılan portların kullanılabilirliğinin kontrolü, portları değiştirme seçeneği ile
   - Node’un en son binary dosyasının kurulumu
   - `.env` ve `docker-compose` dosyalarının otomatik oluşturulması
   - ufw üzerinden 8080 ve 40400 portlarının açılması

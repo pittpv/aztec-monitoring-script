@@ -40,6 +40,7 @@ Translate into Turkish:
 - Added a function for installing the Aztec node with Docker and **Watchtower**. Watchtower is configured to automatically update the node container while preserving the configuration.
   - Installation of dependencies
   - Check for Docker and Docker Compose, and install them if necessary
+  - Checking default port availability with the option to change ports if needed.
   - Installation of the latest node binary
   - Automatic creation of `.env` and `docker-compose` files
   - Opening ports 8080 and 40400 in UFW
