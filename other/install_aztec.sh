@@ -205,8 +205,10 @@ delete_aztec_node() {
         sudo rm -rf "$HOME/.aztec" "$HOME/aztec"
 
         echo -e "${GREEN}$(t "node_deleted")${NC}"
+        return 0
     else
         echo -e "${YELLOW}$(t "delete_canceled")${NC}"
+        return 1
     fi
 }
 
