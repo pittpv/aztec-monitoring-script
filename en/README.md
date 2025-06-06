@@ -1,6 +1,6 @@
 # Aztec Node Monitoring Agent
 
-[🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Русская версия описания")
+[🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Русская версия описания") | [🇹🇷 Turkish Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/tr/ "Turkish version of description")
 
 ![Bash](https://img.shields.io/badge/Bash-5.2-blue)
 ![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
@@ -27,16 +27,30 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 | ✅ **Container**  | Monitors the status of the Aztec Docker container |
 | 🔄 **Blocks**    | Compares local block height with on-chain height  |
 | 🤖 **Telegram**  | Instant issue alerts via Telegram                 |
-| 🌐 **Languages** | English/Russian language support                  |
+| 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 05-06-2025
-- Update for Watchtower compatibility
+## 📌 Latest Updates 06-06-2025
+
+Translate into Turkish:
+
+- Full localization, including the script and Telegram notifications, into three languages. Turkish language has been added.
+- Added a function for installing the Aztec node with Docker and **Watchtower**. Watchtower is configured to automatically update the node container while preserving the configuration.
+  - Installation of dependencies
+  - Check for Docker and Docker Compose, and install them if necessary
+  - Installation of the latest node binary
+  - Automatic creation of `.env` and `docker-compose` files
+  - Opening ports 8080 and 40400 in UFW
+  - Starting the node and displaying the initial logs
+- Added function to delete Aztec node  
 
 ---
 
 <details>
 <summary>📅 Version History</summary>
+
+### 05-06-2025
+- Update for Watchtower compatibility
 
 ### 04-06-2025
 - Improved block number search mechanism (Option 1 and cron agent) in debug-level logs. Supports debug, info (and likely all other) log levels. Maximally accurate search results.
@@ -107,6 +121,9 @@ Main menu:
    - Now you can set your own port (default port 8080). The new port number will be saved in the environment file .env-aztec-agent
 8. 🔌 Change RPC URL
 9. 🔍 Search for validator and check status
+10. View Aztec logs
+11. Install Aztec Node with Watchtower
+12. Delete Aztec node
 0. 🚪 Exit
 
 ## 🚀 Using the Cron Agent

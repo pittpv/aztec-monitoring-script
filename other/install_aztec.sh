@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# for Aztec Node Monitoring Agent by Pittpv
+# https://github.com/pittpv/aztec-monitoring-script
+#
+
 set -e
 
 # === Language settings ===
@@ -432,4 +437,5 @@ docker compose up -d
 echo -e "\n${YELLOW}$(t "showing_logs")${NC}"
 echo -e "${YELLOW}$(t "logs_starting")${NC}"
 sleep 5
+echo -e ""
 docker compose logs -fn 200

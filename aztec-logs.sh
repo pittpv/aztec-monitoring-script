@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.6.1"
+SCRIPT_VERSION="1.7.0"
 
 function show_logo() {
     echo -e " "
@@ -33,11 +33,13 @@ init_languages() {
   echo -e "\n${BLUE}Select language / Выберите язык:${NC}"
   echo -e "1. English"
   echo -e "2. Русский"
+  echo -e "3. Türkçe"
   read -p "> " lang_choice
 
   case $lang_choice in
     1) LANG="en" ;;
     2) LANG="ru" ;;
+    3) LANG="tr" ;;
     *) LANG="en" ;;
   esac
 
@@ -54,6 +56,8 @@ init_languages() {
   TRANSLATIONS["en,option8"]="8. Change RPC URL"
   TRANSLATIONS["en,option9"]="9. Search for validator and check status"
   TRANSLATIONS["en,option10"]="10. View Aztec logs"
+  TRANSLATIONS["en,option11"]="11. Install Aztec Node with Watchtower"
+  TRANSLATIONS["en,option12"]="12. Delete Aztec node"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,rpc_change_prompt"]="Enter new RPC URL:"
   TRANSLATIONS["en,rpc_change_success"]="✅ RPC URL successfully updated"
@@ -126,6 +130,39 @@ init_languages() {
   TRANSLATIONS["en,new_version_avialable"]="🚀 New version available:"
   TRANSLATIONS["en,new_version_update"]="Please update your script"
   TRANSLATIONS["en,version_up_to_date"]="✅ You are using the latest version"
+  TRANSLATIONS["en,agent_log_cleaned"]="✅ Log file cleaned."
+  TRANSLATIONS["en,agent_container_not_found"]="❌ Aztec Container Not Found"
+  TRANSLATIONS["en,agent_block_fetch_error"]="❌ Block Fetch Error"
+  TRANSLATIONS["en,agent_no_block_in_logs"]="❌ No 'Downloaded L2 block' found"
+  TRANSLATIONS["en,agent_failed_extract_block"]="❌ Failed to extract blockNumber"
+  TRANSLATIONS["en,agent_node_behind"]="⚠️ Node is behind by %d blocks"
+  TRANSLATIONS["en,agent_started"]="🤖 Aztec Monitoring Agent Started"
+  TRANSLATIONS["en,agent_log_size_warning"]="⚠️ Log file cleaned due to size limit"
+  TRANSLATIONS["en,agent_server_info"]="🌐 Server: %s"
+  TRANSLATIONS["en,agent_file_info"]="🗃 File: %s"
+  TRANSLATIONS["en,agent_size_info"]="📏 Previous size: %s bytes"
+  TRANSLATIONS["en,agent_rpc_info"]="🔗 RPC: %s"
+  TRANSLATIONS["en,agent_error_info"]="💬 Error: %s"
+  TRANSLATIONS["en,agent_block_info"]="📦 Contract block: %s"
+  TRANSLATIONS["en,agent_log_block_info"]="📝 Logs block: %s"
+  TRANSLATIONS["en,agent_time_info"]="🕒 %s"
+  TRANSLATIONS["en,agent_line_info"]="📋 Line: %s"
+  TRANSLATIONS["en,agent_notifications_info"]="ℹ️ Notifications will be sent for issues"
+  TRANSLATIONS["en,agent_node_synced"]="✅ Node synced (block %s)"
+  TRANSLATIONS["en,chatid_linked"]="✅ ChatID successfully linked to Aztec Agent"
+  TRANSLATIONS["en,invalid_token"]="Invalid Telegram bot token. Please try again."
+  TRANSLATIONS["en,token_format"]="Token should be in format: 1234567890:ABCdefGHIJKlmNoPQRsTUVwxyZ"
+  TRANSLATIONS["en,invalid_chatid"]="Invalid Telegram chat ID or the bot doesn't have access to this chat. Please try again."
+  TRANSLATIONS["en,chatid_number"]="Chat ID must be a number (can start with - for group chats). Please try again."
+  TRANSLATIONS["en,running_install_node"]="Running Install Aztec node script from GitHub..."
+  TRANSLATIONS["en,failed_running_install_node"]="Failed to run Aztec node install script from GitHub..."
+  TRANSLATIONS["en,delete_node"]="🗑️ Deleting Aztec Node..."
+  TRANSLATIONS["en,delete_confirm"]="Are you sure you want to delete the Aztec node? This will stop containers and remove all data. (y/n) "
+  TRANSLATIONS["en,node_deleted"]="✅ Aztec node successfully deleted"
+  TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
+  TRANSLATIONS["en,failed_downloading_script"]="❌ Failed to download installation script"
+  TRANSLATIONS["en,install_completed_successfully"]="✅ Installation completed successfully"
+  TRANSLATIONS["en,logs_stopped_by_user"]="⚠ Log viewing stopped by user"
 
 
   # Russian translations
@@ -141,6 +178,8 @@ init_languages() {
   TRANSLATIONS["ru,option8"]="8. Изменить RPC URL"
   TRANSLATIONS["ru,option9"]="9. Поиск валидатора и проверка статуса"
   TRANSLATIONS["ru,option10"]="10. Просмотреть логи Aztec"
+  TRANSLATIONS["ru,option11"]="11. Установить Aztec ноду с Watchtower"
+  TRANSLATIONS["ru,option12"]="12. Удалить ноду Aztec"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,rpc_change_prompt"]="Введите новый RPC URL:"
   TRANSLATIONS["ru,rpc_change_success"]="✅ RPC URL успешно обновлен"
@@ -213,6 +252,161 @@ init_languages() {
   TRANSLATIONS["ru,new_version_avialable"]="🚀 Доступна новая версия:"
   TRANSLATIONS["ru,new_version_update"]="Пожалуйста, обновите скрипт"
   TRANSLATIONS["ru,version_up_to_date"]="✅ Установлена актуальная версия"
+  TRANSLATIONS["ru,agent_log_cleaned"]="✅ Лог-файл очищен."
+  TRANSLATIONS["ru,agent_container_not_found"]="❌ Контейнер Aztec не найден"
+  TRANSLATIONS["ru,agent_block_fetch_error"]="❌ Ошибка получения блока"
+  TRANSLATIONS["ru,agent_no_block_in_logs"]="❌ Блок 'Downloaded L2 block' не найден"
+  TRANSLATIONS["ru,agent_failed_extract_block"]="❌ Не удалось извлечь номер блока"
+  TRANSLATIONS["ru,agent_node_behind"]="⚠️ Узел отстает на %d блоков"
+  TRANSLATIONS["ru,agent_started"]="🤖 Агент мониторинга Aztec запущен"
+  TRANSLATIONS["ru,agent_log_size_warning"]="⚠️ Лог-файл очищен из-за превышения размера"
+  TRANSLATIONS["ru,agent_server_info"]="🌐 Сервер: %s"
+  TRANSLATIONS["ru,agent_file_info"]="🗃 Файл: %s"
+  TRANSLATIONS["ru,agent_size_info"]="📏 Предыдущий размер: %s байт"
+  TRANSLATIONS["ru,agent_rpc_info"]="🔗 RPC: %s"
+  TRANSLATIONS["ru,agent_error_info"]="💬 Ошибка: %s"
+  TRANSLATIONS["ru,agent_block_info"]="📦 Блок в контракте: %s"
+  TRANSLATIONS["ru,agent_log_block_info"]="📝 Блок в логах: %s"
+  TRANSLATIONS["ru,agent_time_info"]="🕒 %s"
+  TRANSLATIONS["ru,agent_line_info"]="📋 Строка: %s"
+  TRANSLATIONS["ru,agent_notifications_info"]="ℹ️ Уведомления будут отправляться при проблемах"
+  TRANSLATIONS["ru,agent_node_synced"]="✅ Узел синхронизирован (блок %s)"
+  TRANSLATIONS["ru,chatid_linked"]="✅ ChatID успешно связан с Aztec Agent"
+  TRANSLATIONS["ru,invalid_token"]="Неверный токен Telegram бота. Пожалуйста, попробуйте снова."
+  TRANSLATIONS["ru,token_format"]="Токен должен быть в формате: 1234567890:ABCdefGHIJKlmNoPQRsTUVwxyZ"
+  TRANSLATIONS["ru,invalid_chatid"]="Неверный Chat ID или бот не имеет доступа к этому чату. Пожалуйста, попробуйте снова."
+  TRANSLATIONS["ru,chatid_number"]="Chat ID должен быть числом (может начинаться с - для групповых чатов). Пожалуйста, попробуйте снова."
+  TRANSLATIONS["ru,running_install_node"]="Запуск скрипта установки Aztec node из GitHub..."
+  TRANSLATIONS["ru,failed_running_install_node"]="Не удалось запустить скрипт установки узла Aztec из GitHub..."
+  TRANSLATIONS["ru,delete_node"]="🗑️ Удаление ноды Aztec..."
+  TRANSLATIONS["ru,delete_confirm"]="Вы уверены, что хотите удалить ноду Aztec? Это остановит контейнеры и удалит все данные. (y/n) "
+  TRANSLATIONS["ru,node_deleted"]="✅ Нода Aztec успешно удалена"
+  TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
+  TRANSLATIONS["ru,failed_downloading_script"]="❌ Не удалось загрузить скрипт установки"
+  TRANSLATIONS["ru,install_completed_successfully"]="✅ Установка успешно завершена"
+  TRANSLATIONS["ru,logs_stopped_by_user"]="⚠ Просмотр логов остановлен пользователем"
+
+
+  # Turkish translations
+  TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
+  TRANSLATIONS["tr,title"]="========= Ana Menü ========="
+  TRANSLATIONS["tr,option1"]="1. Konteyner ve mevcut bloğu kontrol et"
+  TRANSLATIONS["tr,option2"]="2. Cron izleme aracısını yükle"
+  TRANSLATIONS["tr,option3"]="3. Cron aracısını ve dosyaları kaldır"
+  TRANSLATIONS["tr,option4"]="4. Loglarda rollupAddress bul"
+  TRANSLATIONS["tr,option5"]="5. Loglarda PeerID bul"
+  TRANSLATIONS["tr,option6"]="6. Loglarda governanceProposerPayload bul"
+  TRANSLATIONS["tr,option7"]="7. Kanıtlanmış L2 Bloğunu ve Sync Proof'u Kontrol Et"
+  TRANSLATIONS["tr,option8"]="8. RPC URL'sini değiştir"
+  TRANSLATIONS["tr,option9"]="9. Validator ara ve durumunu kontrol et"
+  TRANSLATIONS["tr,option10"]="10. Aztec loglarını görüntüle"
+  TRANSLATIONS["tr,option11"]="11. Watchtower ile birlikte Aztec Node Kurulumu"
+  TRANSLATIONS["tr,option12"]="12. Aztec düğümünü sil"
+  TRANSLATIONS["tr,option0"]="0. Çıkış"
+  TRANSLATIONS["tr,rpc_change_prompt"]="Yeni RPC URL'sini girin:"
+  TRANSLATIONS["tr,rpc_change_success"]="✅ RPC URL başarıyla güncellendi"
+  TRANSLATIONS["tr,choose_option"]="Seçenek seçin:"
+  TRANSLATIONS["tr,checking_deps"]="🔍 Gerekli bileşenler kontrol ediliyor:"
+  TRANSLATIONS["tr,missing_tools"]="Gerekli bileşenler eksik:"
+  TRANSLATIONS["tr,install_prompt"]="Şimdi yüklemek istiyor musunuz? (Y/n):"
+  TRANSLATIONS["tr,missing_required"]="⚠️ Betik, gerekli bileşenler olmadan çalışamaz. Çıkılıyor."
+  TRANSLATIONS["tr,rpc_prompt"]="RPC URL'sini girin:"
+  TRANSLATIONS["tr,env_created"]="✅ RPC URL'si ile .env dosyası oluşturuldu"
+  TRANSLATIONS["tr,env_exists"]="✅ Mevcut .env dosyası kullanılıyor, RPC URL:"
+  TRANSLATIONS["tr,search_container"]="🔍 'aztec' konteyneri aranıyor..."
+  TRANSLATIONS["tr,container_not_found"]="❌ 'aztec' konteyneri bulunamadı."
+  TRANSLATIONS["tr,container_found"]="✅ Konteyner bulundu:"
+  TRANSLATIONS["tr,get_block"]="🔗 Kontraktan mevcut blok alınıyor..."
+  TRANSLATIONS["tr,block_error"]="❌ Hata: Blok numarası alınamadı. RPC veya kontratı kontrol edin."
+  TRANSLATIONS["tr,current_block"]="📦 Mevcut blok numarası:"
+  TRANSLATIONS["tr,node_ok"]="✅ Düğüm çalışıyor ve mevcut bloğu işliyor"
+  TRANSLATIONS["tr,node_behind"]="⚠️ Mevcut blok loglarda bulunamadı. Düğüm geride olabilir."
+  TRANSLATIONS["tr,search_rollup"]="🔍 'aztec' konteyner loglarında rollupAddress aranıyor..."
+  TRANSLATIONS["tr,rollup_found"]="✅ Mevcut rollupAddress:"
+  TRANSLATIONS["tr,rollup_not_found"]="❌ Loglarda rollupAddress bulunamadı."
+  TRANSLATIONS["tr,search_peer"]="🔍 'aztec' konteyner loglarında PeerID aranıyor..."
+  TRANSLATIONS["tr,peers_found"]="Bulunan PeerID'ler:"
+  TRANSLATIONS["tr,peer_not_found"]="❌ Loglarda PeerID bulunamadı."
+  TRANSLATIONS["tr,search_gov"]="🔍 'aztec' konteyner loglarında governanceProposerPayload aranıyor..."
+  TRANSLATIONS["tr,gov_found"]="Bulunan governanceProposerPayload değerleri:"
+  TRANSLATIONS["tr,gov_not_found"]="❌ governanceProposerPayload bulunamadı."
+  TRANSLATIONS["tr,gov_changed"]="🛑 GovernanceProposerPayload değişikliği tespit edildi!"
+  TRANSLATIONS["tr,gov_was"]="⚠️ Önceki:"
+  TRANSLATIONS["tr,gov_now"]="Şimdi:"
+  TRANSLATIONS["tr,gov_no_changes"]="✅ Değişiklik tespit edilmedi."
+  TRANSLATIONS["tr,token_prompt"]="Telegram Bot Token'ını girin:"
+  TRANSLATIONS["tr,chatid_prompt"]="Telegram Chat ID'yi girin:"
+  TRANSLATIONS["tr,agent_added"]="✅ Aracı cron'a eklendi ve her dakika çalışacak."
+  TRANSLATIONS["tr,agent_exists"]="ℹ️ Aracı zaten cron'da mevcut."
+  TRANSLATIONS["tr,removing_agent"]="🗑 Aracı ve cron görevi kaldırılıyor..."
+  TRANSLATIONS["tr,agent_removed"]="✅ Aracı ve cron görevi kaldırıldı."
+  TRANSLATIONS["tr,goodbye"]="👋 Güle güle."
+  TRANSLATIONS["tr,invalid_choice"]="❌ Geçersiz seçim. Tekrar deneyin."
+  TRANSLATIONS["tr,searching"]="Aranıyor..."
+  TRANSLATIONS["tr,get_proven_block"]="🔍 Kanıtlanmış L2 blok numarası alınıyor..."
+  TRANSLATIONS["tr,proven_block_found"]="✅ Kanıtlanmış L2 Blok Numarası:"
+  TRANSLATIONS["tr,proven_block_error"]="❌ Kanıtlanmış L2 blok numarası alınamadı."
+  TRANSLATIONS["tr,get_sync_proof"]="🔍 Sync Proof alınıyor..."
+  TRANSLATIONS["tr,sync_proof_found"]="✅ Sync Proof:"
+  TRANSLATIONS["tr,sync_proof_error"]="❌ Sync Proof alınamadı."
+  TRANSLATIONS["tr,token_check"]="🔍 Telegram token ve ChatID kontrol ediliyor..."
+  TRANSLATIONS["tr,token_valid"]="✅ Telegram token geçerli"
+  TRANSLATIONS["tr,token_invalid"]="❌ Geçersiz Telegram token"
+  TRANSLATIONS["tr,chatid_valid"]="✅ ChatID geçerli ve bota erişim var"
+  TRANSLATIONS["tr,chatid_invalid"]="❌ Geçersiz ChatID veya bota erişim yok"
+  TRANSLATIONS["tr,agent_created"]="✅ Aracı başarıyla oluşturuldu ve yapılandırıldı!"
+  TRANSLATIONS["tr,running_validator_script"]="GitHub'dan Check Validator betiği çalıştırılıyor..."
+  TRANSLATIONS["tr,failed_run_validator"]="Check Validator betiği çalıştırılamadı."
+  TRANSLATIONS["tr,enter_aztec_port_prompt"]="Aztec düğüm port numarasını girin"
+  TRANSLATIONS["tr,port_saved_successfully"]="✅ Port başarıyla kaydedildi"
+  TRANSLATIONS["tr,checking_port"]="Port kontrol ediliyor"
+  TRANSLATIONS["tr,port_not_available"]="Aztec portu şurada mevcut değil:"
+  TRANSLATIONS["tr,current_aztec_port"]="Mevcut Aztec düğüm portu:"
+  TRANSLATIONS["tr,log_block_not_found"]="❌ Loglarda 'Downloaded L2 block' içeren satır bulunamadı."
+  TRANSLATIONS["tr,log_block_extract_failed"]="❌ Blok numarası satırdan çıkarılamadı:"
+  TRANSLATIONS["tr,log_block_number"]="📄 Loglardaki son blok:"
+  TRANSLATIONS["tr,log_behind_details"]="⚠️ Loglar geride. Loglardaki son blok: %s, kontraktaki: %s"
+  TRANSLATIONS["tr,log_line_example"]="🔎 Örnek log satırı:"
+  TRANSLATIONS["tr,press_ctrlc"]="Menüye dönmek için Ctrl+C'ye basın"
+  TRANSLATIONS["tr,logs_starting"]="Loglar 5 saniye içinde başlayacak..."
+  TRANSLATIONS["tr,return_main_menu"]="Ana menüye dönülüyor..."
+  TRANSLATIONS["tr,current_script_version"]="📌 Mevcut betik versiyonu:"
+  TRANSLATIONS["tr,new_version_avialable"]="🚀 Yeni versiyon mevcut:"
+  TRANSLATIONS["tr,new_version_update"]="Lütfen betiğinizi güncelleyin"
+  TRANSLATIONS["tr,version_up_to_date"]="✅ En son versiyonu kullanıyorsunuz"
+  TRANSLATIONS["tr,agent_log_cleaned"]="✅ Log dosyası temizlendi."
+  TRANSLATIONS["tr,agent_container_not_found"]="❌ Aztec Konteyneri Bulunamadı"
+  TRANSLATIONS["tr,agent_block_fetch_error"]="❌ Blok Alma Hatası"
+  TRANSLATIONS["tr,agent_no_block_in_logs"]="❌ 'Downloaded L2 block' bulunamadı"
+  TRANSLATIONS["tr,agent_failed_extract_block"]="❌ Blok numarası çıkarılamadı"
+  TRANSLATIONS["tr,agent_node_behind"]="⚠️ Düğüm %d blok geride"
+  TRANSLATIONS["tr,agent_started"]="🤖 Aztec İzleme Aracı Başlatıldı"
+  TRANSLATIONS["tr,agent_log_size_warning"]="⚠️ Boyut sınırı nedeniyle log dosyası temizlendi"
+  TRANSLATIONS["tr,agent_server_info"]="🌐 Sunucu: %s"
+  TRANSLATIONS["tr,agent_file_info"]="🗃 Dosya: %s"
+  TRANSLATIONS["tr,agent_size_info"]="📏 Önceki boyut: %s bayt"
+  TRANSLATIONS["tr,agent_rpc_info"]="🔗 RPC: %s"
+  TRANSLATIONS["tr,agent_error_info"]="💬 Hata: %s"
+  TRANSLATIONS["tr,agent_block_info"]="📦 Kontrakt blok: %s"
+  TRANSLATIONS["tr,agent_log_block_info"]="📝 Log blok: %s"
+  TRANSLATIONS["tr,agent_time_info"]="🕒 %s"
+  TRANSLATIONS["tr,agent_line_info"]="📋 Satır: %s"
+  TRANSLATIONS["tr,agent_notifications_info"]="ℹ️ Sorunlar için bildirimler gönderilecek"
+  TRANSLATIONS["tr,agent_node_synced"]="✅ Düğüm senkronize (blok %s)"
+  TRANSLATIONS["tr,chatid_linked"]="✅ ChatID başarıyla Aztec Aracı'na bağlandı"
+  TRANSLATIONS["tr,invalid_token"]="Geçersiz Telegram bot tokenı. Lütfen tekrar deneyin."
+  TRANSLATIONS["tr,token_format"]="Token formatı: 1234567890:ABCdefGHIJKlmNoPQRsTUVwxyZ"
+  TRANSLATIONS["tr,invalid_chatid"]="Geçersiz Telegram chat ID veya botun bu sohbete erişimi yok. Lütfen tekrar deneyin."
+  TRANSLATIONS["tr,chatid_number"]="Chat ID bir sayı olmalıdır (grup sohbetleri için - ile başlayabilir). Lütfen tekrar deneyin."
+  TRANSLATIONS["tr,running_install_node"]="GitHub'dan Aztec node kurulum betiği çalıştırılıyor..."
+  TRANSLATIONS["ru,failed_running_install_node"]="GitHub'dan Aztec düğüm yükleme betiği çalıştırılamadı..."
+  TRANSLATIONS["tr,delete_node"]="🗑️ Aztec Node siliniyor..."
+  TRANSLATIONS["tr,delete_confirm"]="Aztec node'u silmek istediğinize emin misiniz? Bu işlem konteynerleri durduracak ve tüm verileri silecektir. (y/n) "
+  TRANSLATIONS["tr,node_deleted"]="✅ Aztec node başarıyla silindi"
+  TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
+  TRANSLATIONS["tr,failed_downloading_script"]="❌ Kurulum betiği indirilemedi"
+  TRANSLATIONS["tr,install_completed_successfully"]="✅ Kurulum başarıyla tamamlandı"
+  TRANSLATIONS["tr,logs_stopped_by_user"]="⚠ Log görüntüleme kullanıcı tarafından durduruldu"
 }
 
 # === Configuration ===
@@ -602,7 +796,7 @@ create_cron_agent() {
     # Test chat ID by trying to send a test message
     local response=$(curl -s -X POST "https://api.telegram.org/bot${token}/sendMessage" \
       -d chat_id="${chat_id}" \
-      -d text="✅ ChatID successfully linked to Aztec Agent" \
+      -d text="$(t "chatid_linked")" \
       -d parse_mode="Markdown")
 
     if [[ "$response" == *"ok\":true"* ]]; then
@@ -620,8 +814,8 @@ create_cron_agent() {
     if validate_telegram_token "$TELEGRAM_BOT_TOKEN"; then
       break
     else
-      echo -e "${RED}Invalid Telegram bot token. Please try again.${NC}"
-      echo -e "${YELLOW}Token should be in format: 1234567890:ABCdefGHIJKlmNoPQRsTUVwxyZ${NC}"
+      echo -e "${RED}$(t "invalid_token")${NC}"
+      echo -e "${YELLOW}$(t "token_format")${NC}"
     fi
   done
 
@@ -634,10 +828,10 @@ create_cron_agent() {
       if validate_telegram_chat "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHAT_ID"; then
         break
       else
-        echo -e "${RED}Invalid Telegram chat ID or the bot doesn't have access to this chat. Please try again.${NC}"
+        echo -e "${RED}$(t "invalid_chatid")${NC}"
       fi
     else
-      echo -e "${RED}Chat ID must be a number (can start with - for group chats). Please try again.${NC}"
+      echo -e "${RED}$(t "chatid_number")${NC}"
     fi
   done
 
@@ -653,6 +847,37 @@ FUNCTION_SIG="$FUNCTION_SIG"
 TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
+LANG="$LANG"  # Передаем язык из основного скрипта
+
+# Функция перевода
+t() {
+  local key=\$1
+  local value1=\$2
+  local value2=\$3
+
+  case \$key in
+    "log_cleaned") echo "$(t "agent_log_cleaned")" ;;
+    "container_not_found") echo "$(t "agent_container_not_found")" ;;
+    "block_fetch_error") echo "$(t "agent_block_fetch_error")" ;;
+    "no_block_in_logs") echo "$(t "agent_no_block_in_logs")" ;;
+    "failed_extract_block") echo "$(t "agent_failed_extract_block")" ;;
+    "node_behind") printf "$(t "agent_node_behind")" "\$value1" ;;
+    "agent_started") echo "$(t "agent_started")" ;;
+    "log_size_warning") echo "$(t "agent_log_size_warning")" ;;
+    "server_info") printf "$(t "agent_server_info")" "\$value1" ;;
+    "file_info") printf "$(t "agent_file_info")" "\$value1" ;;
+    "size_info") printf "$(t "agent_size_info")" "\$value1" ;;
+    "rpc_info") printf "$(t "agent_rpc_info")" "\$value1" ;;
+    "error_info") printf "$(t "agent_error_info")" "\$value1" ;;
+    "block_info") printf "$(t "agent_block_info")" "\$value1" ;;
+    "log_block_info") printf "$(t "agent_log_block_info")" "\$value1" ;;
+    "time_info") printf "$(t "agent_time_info")" "\$value1" ;;
+    "line_info") printf "$(t "agent_line_info")" "\$value1" ;;
+    "notifications_info") echo "$(t "agent_notifications_info")" ;;
+    "node_synced") printf "$(t "agent_node_synced")" "\$value1" ;;
+    *) echo "\$key" ;;
+  esac
+}
 
 # === Создание файла лога, если его нет ===
 if [ ! -f "\$LOG_FILE" ]; then
@@ -679,15 +904,18 @@ if [ "\$current_size" -gt "\$MAX_SIZE" ]; then
 
   {
     echo ""
-    echo "✅ Log file cleaned."
+    echo "\$(t "log_cleaned")"
     echo "Cleanup completed: \$(date '+%Y-%m-%d %H:%M:%S')"
     echo ""
   } >> "\$LOG_FILE"
 
   ip=\$(curl -s https://api.ipify.org || echo "unknown-ip")
+  current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+  message="\$(t "log_size_warning")%0A\$(t "server_info" "\$ip")%0A\$(t "file_info" "\$LOG_FILE")%0A\$(t "size_info" "\$current_size")%0A\$(t "time_info" "\$current_time")"
+
   curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
     -d chat_id="\$TELEGRAM_CHAT_ID" \\
-    -d text="⚠️ *Log file cleaned due to size limit*%0A🌐 Server: \$ip%0A🗃 File: \$LOG_FILE%0A📏 Previous size: \$current_size bytes." \\
+    -d text="\$message" \\
     -d parse_mode="Markdown" >/dev/null
 else
   {
@@ -722,11 +950,8 @@ ip=\$(get_ip_address)
 # === Переводим hex -> decimal ===
 hex_to_dec() {
   local hex=\$1
-  # Убираем префикс 0x, если он есть
   hex=\${hex#0x}
-  # Убираем ведущие нули
   hex=\$(echo \$hex | sed 's/^0*//')
-  # Если ничего не осталось после очистки — возвращаем 0
   [ -z "\$hex" ] && echo 0 && return
   echo \$((16#\$hex))
 }
@@ -736,7 +961,9 @@ check_blocks() {
   container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then
     log "Container 'aztec' not found."
-    send_telegram_message "❌ *Aztec Container Not Found*%0A🌐 Server: \$ip%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    message="\$(t "container_not_found")%0A\$(t "server_info" "\$ip")%0A\$(t "time_info" "\$current_time")"
+    send_telegram_message "\$message"
     exit 1
   fi
 
@@ -744,7 +971,9 @@ check_blocks() {
   block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
   if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
     log "Block Fetch Error. Check RPC or cast"
-    send_telegram_message "❌ *Block Fetch Error*%0A🌐 Server: \$ip%0A🔗 RPC: \$RPC_URL%0A💬 Error: \$block_hex%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    message="\$(t "block_fetch_error")%0A\$(t "server_info" "\$ip")%0A\$(t "rpc_info" "\$RPC_URL")%0A\$(t "error_info" "\$block_hex")%0A\$(t "time_info" "\$current_time")"
+    send_telegram_message "\$message"
     exit 1
   fi
 
@@ -758,7 +987,9 @@ check_blocks() {
   latest_log_line=\$(echo "\$logs" | tac | grep -m1 'Downloaded L2 block')
   if [ -z "\$latest_log_line" ]; then
     log "No 'Downloaded L2 block' line found in logs"
-    send_telegram_message "❌ *No 'Downloaded L2 block' found*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    message="\$(t "no_block_in_logs")%0A\$(t "server_info" "\$ip")%0A\$(t "block_info" "\$block_number")%0A\$(t "time_info" "\$current_time")"
+    send_telegram_message "\$message"
     exit 1
   fi
 
@@ -766,7 +997,9 @@ check_blocks() {
   log_block_number=\$(echo "\$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
   if [ -z "\$log_block_number" ]; then
     log "Failed to extract blockNumber from line: \$latest_log_line"
-    send_telegram_message "❌ *Failed to extract blockNumber*%0A🌐 Server: \$ip%0A📋 Line: \$latest_log_line%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    message="\$(t "failed_extract_block")%0A\$(t "server_info" "\$ip")%0A\$(t "line_info" "\$latest_log_line")%0A\$(t "time_info" "\$current_time")"
+    send_telegram_message "\$message"
     exit 1
   fi
 
@@ -774,20 +1007,23 @@ check_blocks() {
 
   # Сравниваем блоки
   if [ "\$log_block_number" -eq "\$block_number" ]; then
-    status="✅ Node synced (block \$block_number)"
+    status="\$(t "node_synced" "\$block_number")"
   else
     blocks_diff=\$((block_number - log_block_number))
-    status="⚠️ Node behind by \$blocks_diff blocks"
-    # Если отставание > 3 блоков — шлём отдельное уведомление
+    status="\$(t "node_behind" "\$blocks_diff")"
     if [ "\$blocks_diff" -gt 3 ]; then
-      send_telegram_message "⚠️ *Node is behind by \$blocks_diff blocks*%0A🌐 Server: \$ip%0A📦 Contract block: \$block_number%0A📝 Logs block: \$log_block_number%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+      current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+      message="\$(t "node_behind" "\$blocks_diff")%0A\$(t "server_info" "\$ip")%0A\$(t "block_info" "\$block_number")%0A\$(t "log_block_info" "\$log_block_number")%0A\$(t "time_info" "\$current_time")"
+      send_telegram_message "\$message"
     fi
   fi
 
   log "Status: \$status (logs: \$log_block_number, contract: \$block_number)"
 
   if [ ! -f "\$LOG_FILE.initialized" ]; then
-    send_telegram_message "🤖 *Aztec Monitoring Agent Started*%0A🌐 Server: \$ip%0A\$status%0Aℹ️ Notifications will be sent for issues%0A🕒 \$(date '+%Y-%m-%d %H:%M:%S')"
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    message="\$(t "agent_started")%0A\$(t "server_info" "\$ip")%0A\$status%0A\$(t "notifications_info")%0A\$(t "time_info" "\$current_time")"
+    send_telegram_message "\$message"
     touch "\$LOG_FILE.initialized"
     echo "v.\$VERSION" >> "\$LOG_FILE"
     echo "INITIALIZED" >> "\$LOG_FILE"
@@ -934,12 +1170,55 @@ change_rpc_url() {
 function check_validator {
   URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator.sh"
   echo -e ""
-  echo -e "${CYAN}$(t "running_validator_script")${RESET}"
+  echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
 
   # Передаем текущий язык как аргумент
-  bash <(curl -s "$URL") "$LANG" || print_error "$(t "failed_run_validator")"
+  bash <(curl -s "$URL") "$LANG" || echo -e "${RED}$(t "failed_run_validator")${NC}"
 }
+
+# === Install Aztec node ===
+function install_aztec {
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+  echo -e ""
+  echo -e "${CYAN}$(t "running_install_node")${NC}"
+  echo -e ""
+
+  # Временный файл для скрипта
+  TEMP_SCRIPT=$(mktemp)
+
+  # Загружаем скрипт
+  curl -s "$URL" > "$TEMP_SCRIPT" || {
+    echo -e "${RED}$(t "failed_downloading_script")${NC}"
+    rm -f "$TEMP_SCRIPT"
+    return 1
+  }
+
+  # Запускаем с обработкой Ctrl+C
+  if bash "$TEMP_SCRIPT" "$LANG"; then
+    # Успешное выполнение
+    echo -e "${GREEN}$(t "install_completed_successfully")${NC}"
+  elif [[ $? -eq 130 ]]; then
+    # Ctrl+C - не считаем ошибкой
+    echo -e "${YELLOW}$(t "logs_stopped_by_user")${NC}"
+  else
+    # Реальная ошибка
+    echo -e "${RED}$(t "failed_running_install_node")${NC}"
+  fi
+
+  # Удаляем временный файл
+  rm -f "$TEMP_SCRIPT"
+}
+
+# === Delete Aztec node ===
+function delete_aztec() {
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    local FUNCTION_NAME="delete_aztec_node"
+
+    # Загружаем скрипт во временную переменную и выполняем функцию
+    source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
+}
+
 
 # === Main menu ===
 main_menu() {
@@ -956,6 +1235,8 @@ main_menu() {
     echo -e "${CYAN}$(t "option8")${NC}"
     echo -e "${CYAN}$(t "option9")${NC}"
 	echo -e "${CYAN}$(t "option10")${NC}"
+	echo -e "${CYAN}$(t "option11")${NC}"
+	echo -e "${CYAN}$(t "option12")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -972,6 +1253,8 @@ main_menu() {
       8) change_rpc_url ;;
       9) check_validator ;;
 	  10) view_container_logs ;;
+	  11) install_aztec ;;
+	  12) delete_aztec ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

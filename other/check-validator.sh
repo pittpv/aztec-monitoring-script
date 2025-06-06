@@ -30,6 +30,8 @@ init_languages() {
     case $1 in
       "en") LANG="en" ;;
       "ru") LANG="ru" ;;
+      "tr") LANG="tr" ;;
+
     esac
   else
     # Default to English if no language specified
@@ -37,7 +39,6 @@ init_languages() {
   fi
 
   # English translations
-  TRANSLATIONS["en,rollup_address"]="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
   TRANSLATIONS["en,fetching_validators"]="Fetching validator list from contract"
   TRANSLATIONS["en,found_validators"]="Found validators:"
   TRANSLATIONS["en,checking_validators"]="Checking validators..."
@@ -57,8 +58,6 @@ init_languages() {
   TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
   TRANSLATIONS["en,exiting"]="Exiting."
   TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2 or 3."
-  TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in /root/.env-aztec-agent"
-  TRANSLATIONS["en,error_file_missing"]="Error: /root/.env-aztec-agent file not found"
   TRANSLATIONS["en,status_0"]="NOT_IN_SET - The validator is not in the validator set"
   TRANSLATIONS["en,status_1"]="ACTIVE - The validator is currently in the validator set"
   TRANSLATIONS["en,status_2"]="INACTIVE - The validator is not active; possibly in withdrawal delay"
@@ -67,7 +66,6 @@ init_languages() {
   TRANSLATIONS["en,error_file_missing"]="Error: /root/.env-aztec-agent file not found"
 
   # Russian translations
-  TRANSLATIONS["ru,rollup_address"]="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
   TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
   TRANSLATIONS["ru,found_validators"]="Найдено валидаторов:"
   TRANSLATIONS["ru,checking_validators"]="Проверка валидаторов..."
@@ -87,14 +85,39 @@ init_languages() {
   TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
   TRANSLATIONS["ru,exiting"]="Выход."
   TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2 или 3."
-  TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
-  TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл /root/.env-aztec-agent не найден"
   TRANSLATIONS["ru,status_0"]="NOT_IN_SET - Валидатор не в наборе валидаторов"
   TRANSLATIONS["ru,status_1"]="ACTIVE - Валидатор в настоящее время в наборе валидаторов"
   TRANSLATIONS["ru,status_2"]="INACTIVE - Валидатор не активен; возможно, в задержке вывода"
   TRANSLATIONS["ru,status_3"]="READY_TO_EXIT - Валидатор завершил задержку выхода и может быть выведен"
   TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
   TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл /root/.env-aztec-agent не найден"
+
+  #Turkish translations
+  TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
+  TRANSLATIONS["tr,found_validators"]="Bulunan doğrulayıcılar:"
+  TRANSLATIONS["tr,checking_validators"]="Doğrulayıcılar kontrol ediliyor..."
+  TRANSLATIONS["tr,check_completed"]="Kontrol tamamlandı."
+  TRANSLATIONS["tr,select_action"]="Bir işlem seçin:"
+  TRANSLATIONS["tr,option1"]="1. Belirli bir doğrulayıcı için arama yap ve verileri göster"
+  TRANSLATIONS["tr,option2"]="2. Tam doğrulayıcı listesini göster"
+  TRANSLATIONS["tr,option3"]="3. Geri"
+  TRANSLATIONS["tr,enter_option"]="Seçenek seçin:"
+  TRANSLATIONS["tr,enter_address"]="Doğrulayıcı adresini girin:"
+  TRANSLATIONS["tr,validator_info"]="Doğrulayıcı bilgisi:"
+  TRANSLATIONS["tr,address"]="Adres"
+  TRANSLATIONS["tr,stake"]="Stake"
+  TRANSLATIONS["tr,withdrawer"]="Çekici"
+  TRANSLATIONS["tr,proposer"]="Öneren"
+  TRANSLATIONS["tr,status"]="Durum"
+  TRANSLATIONS["tr,validator_not_found"]="%s adresli doğrulayıcı bulunamadı."
+  TRANSLATIONS["tr,exiting"]="Çıkılıyor."
+  TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2 veya 3 seçin."
+  TRANSLATIONS["tr,status_0"]="NOT_IN_SET - Doğrulayıcı, doğrulayıcı setinde değil"
+  TRANSLATIONS["tr,status_1"]="AKTİF - Doğrulayıcı şu anda doğrulayıcı setinde"
+  TRANSLATIONS["tr,status_2"]="PASİF - Doğrulayıcı aktif değil; muhtemelen çekme gecikmesinde"
+  TRANSLATIONS["tr,status_3"]="ÇIKIŞA_HAZIR - Doğrulayıcı çıkış gecikmesini tamamladı ve çıkış yapılabilir"
+  TRANSLATIONS["tr,error_rpc_missing"]="Hata: /root/.env-aztec-agent dosyasında RPC_URL bulunamadı"
+  TRANSLATIONS["tr,error_file_missing"]="Hata: /root/.env-aztec-agent dosyası bulunamadı"
 }
 
 # Translation function
@@ -113,7 +136,7 @@ t() {
 # Initialize language system with first argument
 init_languages "$1"
 
-ROLLUP_ADDRESS=$(t "rollup_address")
+ROLLUP_ADDRESS="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
 
 load_rpc_config
 

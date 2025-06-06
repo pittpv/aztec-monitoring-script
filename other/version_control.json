@@ -43,5 +43,10 @@
         "VERSION": "1.6.1",
         "UPDATE_DATE": "05.06.2025",
         "CHANGES": ["Update for Watchtower compatibility"]
+    },
+    {
+        "VERSION": "1.7.0",
+        "UPDATE_DATE": "06.06.2025",
+        "CHANGES": ["Full localization. Turkish language has been added", "Install & delete Aztec node functions"]
     }
 ]
