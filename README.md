@@ -1,6 +1,6 @@
 # Aztec Node Monitoring Agent
 
-[🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "English version of description") | [🇹🇷 Turkish Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/tr/ "Turkish version of description")
+[ [🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "English version of description") ] [ [🇹🇷 Turkish Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/tr/ "Turkish version of description") ]
 
 ![Bash](https://img.shields.io/badge/Bash-5.2-blue)
 ![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
