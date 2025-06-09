@@ -411,7 +411,7 @@ services:
       VALIDATOR_PRIVATE_KEY: \${VALIDATOR_PRIVATE_KEY}
       COINBASE: \${COINBASE}
       P2P_IP: \${P2P_IP}
-      LOG_LEVEL: info
+      LOG_LEVEL: debug
     entrypoint: >
       sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network alpha-testnet --node --archiver --sequencer'
     ports:

@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.7.1"
+SCRIPT_VERSION="1.7.2"
 
 function show_logo() {
     echo -e " "
@@ -557,33 +557,37 @@ check_aztec_container_logs() {
     source .env-aztec-agent
 
     echo -e "\n${BLUE}$(t "search_container")${NC}"
-    container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+    container_id=$(docker ps --format "{{.ID}} {{.Names}}" \
+                   | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
 
     if [ -z "$container_id" ]; then
         echo -e "\n${RED}$(t "container_not_found")${NC}"
         return
     fi
-
     echo -e "\n${GREEN}$(t "container_found") $container_id${NC}"
 
     echo -e "\n${BLUE}$(t "get_block")${NC}"
     block_hex=$(cast call "$CONTRACT_ADDRESS" "$FUNCTION_SIG" --rpc-url "$RPC_URL" 2>/dev/null)
-
     if [ -z "$block_hex" ]; then
         echo -e "\n${RED}$(t "block_error")${NC}"
         return
     fi
-
     block_number=$((16#${block_hex#0x}))
     echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
 
-    # Получаем весь лог контейнера и очищаем от ANSI-кодов
+    # ---------- получаем логи контейнера без ANSI ----------
     clean_logs=$(docker logs "$container_id" 2>&1 | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
-    # === Запускаем поиск последней строки с 'Downloaded L2 block' в фоне и показываем спинер ===
+    # ---------- ищем последнюю подходящую строку ------------
     temp_file=$(mktemp)
     {
-      echo "$clean_logs" | tac | grep -m1 'Downloaded L2 block' > "$temp_file"
+        # 1. пытаемся найти Sequencer sync check succeeded
+        echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file"
+
+        # 2. если ничего не нашли — падаем к старому «Downloaded L2 block»
+        if [ ! -s "$temp_file" ]; then
+            echo "$clean_logs" | tac | grep -m1 'Downloaded L2 block' >"$temp_file"
+        fi
     } &
     search_pid=$!
     spinner $search_pid
@@ -592,30 +596,46 @@ check_aztec_container_logs() {
     latest_log_line=$(<"$temp_file")
     rm -f "$temp_file"
 
+	#echo "DEBUG: $latest_log_line"
+
     if [ -z "$latest_log_line" ]; then
         echo -e "\n${RED}$(t "log_block_not_found")${NC}"
         return
     fi
 
-    # Извлекаем blockNumber из найденной строки
-    log_block_number=$(echo "$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
+    # ---------- извлекаем номер блока -----------------------
+    if grep -q 'Sequencer sync check succeeded' <<<"$latest_log_line"; then
+        # формат: ..."worldState":{"number":18254,"hash":...
+        log_block_number=$(echo "$latest_log_line" \
+            | grep -o '"worldState":{"number":[0-9]\+' \
+            | grep -o '[0-9]\+$')
+    else
+        # старый формат: ..."blockNumber":18254,...
+        log_block_number=$(echo "$latest_log_line" \
+            | grep -o '"blockNumber":[0-9]\+' \
+            | head -n1 | cut -d':' -f2)
+    fi
+
+	#echo "DEBUG: $log_block_number"
 
     if [ -z "$log_block_number" ]; then
         echo -e "\n${RED}$(t "log_block_extract_failed")${NC}"
         echo "$latest_log_line"
         return
     fi
-
     echo -e "\n${BLUE}$(t "log_block_number") $log_block_number${NC}"
 
+    # ---------- сравнение с текущим блоком -----------------
     if [ "$log_block_number" -eq "$block_number" ]; then
         echo -e "\n${GREEN}$(t "node_ok")${NC}"
     else
-        printf "\n${YELLOW}$(t "log_behind_details")${NC}\n" "$log_block_number" "$block_number"
+        printf "\n${YELLOW}$(t "log_behind_details")${NC}\n" \
+               "$log_block_number" "$block_number"
         echo -e "\n${BLUE}$(t "log_line_example")${NC}"
         echo "$latest_log_line"
     fi
 }
+
 
 
 # === View Aztec container logs ===
@@ -989,18 +1009,28 @@ check_blocks() {
 
   logs=\$(docker logs "\$container_id" 2>&1 | sed -r "s/\\x1B\\[[0-9;]*[mK]//g")
 
-  # Ищем последнюю строку, содержащую 'Downloaded L2 block', с конца (tac + grep -m1)
-  latest_log_line=\$(echo "\$logs" | tac | grep -m1 'Downloaded L2 block')
+  # === Обновлённый поиск последней строки с номером блокa ===
+  latest_log_line=\$(echo "\$logs" | tac | grep -m1 'Sequencer sync check succeeded')
   if [ -z "\$latest_log_line" ]; then
-    log "No 'Downloaded L2 block' line found in logs"
+    latest_log_line=\$(echo "\$logs" | tac | grep -m1 'Downloaded L2 block')
+  fi
+  if [ -z "\$latest_log_line" ]; then
+    log "No suitable block line found in logs"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     message="\$(t "no_block_in_logs")%0A\$(t "server_info" "\$ip")%0A\$(t "block_info" "\$block_number")%0A\$(t "time_info" "\$current_time")"
     send_telegram_message "\$message"
     exit 1
   fi
 
-  # Извлекаем blockNumber из этой строки
-  log_block_number=\$(echo "\$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
+  # Извлекаем номер блока из найденной строки
+  if grep -q 'Sequencer sync check succeeded' <<<"\$latest_log_line"; then
+    # формат: ..."worldState":{"number":18254,...
+    log_block_number=\$(echo "\$latest_log_line" | grep -o '"worldState":{"number":[0-9]\+' | grep -o '[0-9]\+$')
+  else
+    # формат: ..."blockNumber":18254,...
+    log_block_number=\$(echo "\$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
+  fi
+
   if [ -z "\$log_block_number" ]; then
     log "Failed to extract blockNumber from line: \$latest_log_line"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')

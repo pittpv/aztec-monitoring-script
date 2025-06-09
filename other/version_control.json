@@ -54,4 +54,10 @@
         "UPDATE_DATE": "06.06.2025",
         "CHANGES": ["Fixed error handling when installing a node."]
     }
+,
+    {
+        "VERSION": "1.7.2",
+        "UPDATE_DATE": "09.06.2025",
+        "CHANGES": ["Hot fix for Aztec Update ver.0.87.8."]
+    }
 ]
