@@ -154,7 +154,7 @@ If there is an update for the cron-agent, first update the entire script. Then d
 
 ## ⚠️ Important
 
-This script is not an official product of Aztec Protocol and is provided "as is".
+This script is not an official product of Aztec Network and is provided "as is".
 
 ## 📜 License
 

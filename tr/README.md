@@ -161,7 +161,7 @@ Ajan güncellemesi varsa, önce betiğin tamamını güncelleyin. Sonra eski aja
 
 ## ⚠️ Önemli
 
-Bu betik Aztec Protocol’ün resmi ürünü değildir ve “olduğu gibi” sunulmaktadır.
+Bu betik Aztec Network’ün resmi ürünü değildir ve “olduğu gibi” sunulmaktadır.
 
 ## 📜 Lisans
 
