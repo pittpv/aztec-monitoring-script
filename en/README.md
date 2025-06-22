@@ -34,7 +34,7 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 
 ## 📌 Latest Updates 22-06-2025  
 - View Aztec logs function – updated to show the last 500 lines with auto-refresh.  
-- Check container and latest block function – improved log parsing and memory optimization.  
+- Check container and current block function - improved log reading and memory issue prevention
 - Enhanced dependency check & installation for required script tools.  
 
 ---

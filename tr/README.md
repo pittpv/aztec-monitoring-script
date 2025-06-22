@@ -33,8 +33,8 @@ Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyn
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
 ## 📌 Son Güncellemeler (22-06-2025)  
-- Aztec log görüntüleme fonksiyonu - son 500 satırı otomatik yenileme ile gösterecek şekilde güncellendi  
-- Konteyner ve son blok kontrol fonksiyonu - log analizi iyileştirildi ve bellek optimizasyonu yapıldı  
+- Aztec loglarını görüntüle fonksiyonu - son 500 satırı otomatik yenileme ile gösterecek şekilde güncellendi  
+- Konteyner ve mevcut bloğu kontrol et fonksiyonu - iyileştirilmiş günlük okuma ve bellek sorunu önleme 
 - Gerekli araçların kontrolü ve kurulumu - geliştirilmiş bağımlılık yönetimi   
 
 ---
