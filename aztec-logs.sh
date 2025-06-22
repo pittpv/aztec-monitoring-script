@@ -429,17 +429,37 @@ check_dependencies() {
   missing=()
   echo -e "\n${BLUE}$(t "checking_deps")${NC}\n"
 
+  # Создаем ассоциативный массив для отображения имен
+  declare -A tool_names=(
+    ["cast"]="foundry"
+    ["curl"]="curl"
+    ["crontab"]="cron"
+    ["grep"]="grep"
+    ["sed"]="sed"
+    ["jq"]="jq"
+    ["bc"]="bc"
+  )
+
   for tool in "${REQUIRED_TOOLS[@]}"; do
     if ! command -v "$tool" &>/dev/null; then
-      echo -e "${RED}❌ $tool $(t "not_installed")${NC}"
+      # Используем отображаемое имя из массива или оригинальное имя, если нет соответствия
+      display_name=${tool_names[$tool]:-$tool}
+      echo -e "${RED}❌ $display_name $(t "not_installed")${NC}"
       missing+=("$tool")
     else
-      echo -e "${GREEN}✅ $tool $(t "installed")${NC}"
+      display_name=${tool_names[$tool]:-$tool}
+      echo -e "${GREEN}✅ $display_name $(t "installed")${NC}"
     fi
   done
 
   if [ ${#missing[@]} -gt 0 ]; then
-    echo -e "\n${YELLOW}$(t "missing_tools") ${missing[*]}${NC}"
+    # Преобразуем имена для отображения в списке отсутствующих инструментов
+    missing_display=()
+    for tool in "${missing[@]}"; do
+      missing_display+=("${tool_names[$tool]:-$tool}")
+    done
+
+    echo -e "\n${YELLOW}$(t "missing_tools") ${missing_display[*]}${NC}"
     read -p "$(t "install_prompt") " confirm
     confirm=${confirm:-Y}
 
@@ -575,18 +595,18 @@ check_aztec_container_logs() {
     block_number=$((16#${block_hex#0x}))
     echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
 
-    # ---------- получаем логи контейнера без ANSI ----------
-    clean_logs=$(docker logs "$container_id" 2>&1 | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
+    # ---------- получаем логи контейнера без ANSI и ограничиваем объем ----------
+    clean_logs=$(docker logs "$container_id" --tail 20000 2>&1 | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
     # ---------- ищем последнюю подходящую строку ------------
     temp_file=$(mktemp)
     {
         # 1. пытаемся найти Sequencer sync check succeeded
-        echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file"
+        echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file" 2>/dev/null
 
         # 2. если ничего не нашли — падаем к старому «Downloaded L2 block»
         if [ ! -s "$temp_file" ]; then
-            echo "$clean_logs" | tac | grep -m1 'Downloaded L2 block' >"$temp_file"
+            echo "$clean_logs" | tac | grep -m1 'Downloaded L2 block' >"$temp_file" 2>/dev/null
         fi
     } &
     search_pid=$!
@@ -595,8 +615,6 @@ check_aztec_container_logs() {
 
     latest_log_line=$(<"$temp_file")
     rm -f "$temp_file"
-
-	#echo "DEBUG: $latest_log_line"
 
     if [ -z "$latest_log_line" ]; then
         echo -e "\n${RED}$(t "log_block_not_found")${NC}"
@@ -615,8 +633,6 @@ check_aztec_container_logs() {
             | grep -o '"blockNumber":[0-9]\+' \
             | head -n1 | cut -d':' -f2)
     fi
-
-	#echo "DEBUG: $log_block_number"
 
     if [ -z "$log_block_number" ]; then
         echo -e "\n${RED}$(t "log_block_extract_failed")${NC}"
@@ -659,7 +675,7 @@ view_container_logs() {
   trap "echo -e '\n${YELLOW}$(t "return_main_menu")${NC}'; trap - SIGINT; return" SIGINT
 
   # Показываем логи в режиме "follow"
-  docker logs -f "$container_id"
+  docker logs --tail 500 -f "$container_id"
 
   # Убираем ранее установленный trap, если пользователь вышел нормально
   trap - SIGINT
@@ -982,6 +998,29 @@ hex_to_dec() {
   echo \$((16#\$hex))
 }
 
+# === Оптимизированная функция для поиска строк в логах ===
+find_last_log_line() {
+  local container_id=\$1
+  local temp_file=\$(mktemp)
+
+  # Получаем логи с ограничением по объему и сразу фильтруем нужные строки
+  docker logs "\$container_id" --tail 10000 2>&1 | \
+    sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g' | \
+    grep -E 'Sequencer sync check succeeded|Downloaded L2 block' | \
+    tail -100 > "\$temp_file"
+
+  # Сначала ищем Sequencer sync check succeeded
+  local line=\$(tac "\$temp_file" | grep -m1 'Sequencer sync check succeeded')
+
+  # Если не нашли, ищем Downloaded L2 block
+  if [ -z "\$line" ]; then
+    line=\$(tac "\$temp_file" | grep -m1 'Downloaded L2 block')
+  fi
+
+  rm -f "\$temp_file"
+  echo "\$line"
+}
+
 # === Основная функция: проверка контейнера и сравнение блоков ===
 check_blocks() {
   container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
@@ -1007,13 +1046,9 @@ check_blocks() {
   block_number=\$(hex_to_dec "\$block_hex")
   log "Contract block: \$block_number"
 
-  logs=\$(docker logs "\$container_id" 2>&1 | sed -r "s/\\x1B\\[[0-9;]*[mK]//g")
+  # Получаем последнюю релевантную строку из логов
+  latest_log_line=\$(find_last_log_line "\$container_id")
 
-  # === Обновлённый поиск последней строки с номером блокa ===
-  latest_log_line=\$(echo "\$logs" | tac | grep -m1 'Sequencer sync check succeeded')
-  if [ -z "\$latest_log_line" ]; then
-    latest_log_line=\$(echo "\$logs" | tac | grep -m1 'Downloaded L2 block')
-  fi
   if [ -z "\$latest_log_line" ]; then
     log "No suitable block line found in logs"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
@@ -1287,9 +1322,9 @@ main_menu() {
     echo -e "${CYAN}$(t "option7")${NC}"
     echo -e "${CYAN}$(t "option8")${NC}"
     echo -e "${CYAN}$(t "option9")${NC}"
-	echo -e "${CYAN}$(t "option10")${NC}"
-	echo -e "${CYAN}$(t "option11")${NC}"
-	echo -e "${CYAN}$(t "option12")${NC}"
+    echo -e "${CYAN}$(t "option10")${NC}"
+    echo -e "${CYAN}$(t "option11")${NC}"
+    echo -e "${CYAN}$(t "option12")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -1305,9 +1340,9 @@ main_menu() {
       7) check_proven_block ;;
       8) change_rpc_url ;;
       9) check_validator ;;
-	  10) view_container_logs ;;
-	  11) install_aztec ;;
-	  12) delete_aztec ;;
+      10) view_container_logs ;;
+      11) install_aztec ;;
+      12) delete_aztec ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
