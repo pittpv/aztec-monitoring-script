@@ -32,7 +32,17 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 06-06-2025
+## 📌 Latest Updates 22-06-2025  
+- View Aztec logs function – updated to show the last 500 lines with auto-refresh.  
+- Check container and latest block function – improved log parsing and memory optimization.  
+- Enhanced dependency check & installation for required script tools.  
+
+---
+
+<details>
+<summary>📅 Version History</summary>
+
+### 06-06-2025
 
 - Full localization, including the script and Telegram notifications, into three languages. Turkish language has been added.
 - Added a function for installing the Aztec node with Docker and **Watchtower**. Watchtower is configured to automatically update the node container while preserving the configuration.
@@ -43,12 +53,7 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
   - Automatic creation of `.env` and `docker-compose` files
   - Opening ports in UFW
   - Starting the node and displaying the initial logs
-- Added function to delete Aztec node  
-
----
-
-<details>
-<summary>📅 Version History</summary>
+- Added function to delete Aztec node 
 
 ### 05-06-2025
 - Update for Watchtower compatibility

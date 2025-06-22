@@ -32,10 +32,10 @@ Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyn
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler 22-06-2025  
-- Aztec logları artık son 500 satırı gösteriyor (otomatik yenileme özelliği ile).  
-- Konteyner/blok kontrolü artık logları daha verimli işliyor.  
-- Bağımlılık kontrolü ve otomatik kurulum iyileştirildi.   
+## 📌 Son Güncellemeler (22-06-2025)  
+- Aztec log görüntüleme fonksiyonu - son 500 satırı otomatik yenileme ile gösterecek şekilde güncellendi  
+- Konteyner ve son blok kontrol fonksiyonu - log analizi iyileştirildi ve bellek optimizasyonu yapıldı  
+- Gerekli araçların kontrolü ve kurulumu - geliştirilmiş bağımlılık yönetimi   
 
 ---
 
