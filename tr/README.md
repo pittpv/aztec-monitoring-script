@@ -32,7 +32,17 @@ Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyn
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler – 06-06-2025
+## 📌 Son Güncellemeler 22-06-2025  
+- Aztec logları artık son 500 satırı gösteriyor (otomatik yenileme özelliği ile).  
+- Konteyner/blok kontrolü artık logları daha verimli işliyor.  
+- Bağımlılık kontrolü ve otomatik kurulum iyileştirildi.   
+
+---
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 06-06-2025
 
 - Telegram bildirimleri de dahil olmak üzere betik tamamen üç dile yerelleştirildi. Türkçe dili eklendi.
 - Docker ile **Watchtower** kullanarak Aztec node kurulum özelliği eklendi. Watchtower, yapılandırmaları koruyarak node konteynerini otomatik olarak güncellemeye ayarlanmıştır.
@@ -43,12 +53,7 @@ Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyn
   - `.env` ve `docker-compose` dosyalarının otomatik oluşturulması
   - ufw üzerinden portlarının açılması
   - Node’un başlatılması ve ilk logların gösterimi 
-- Aztec düğümünü silme işlevi eklendi  
-
----
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
+- Aztec düğümünü silme işlevi eklendi 
 
 ### 05-06-2025
 
