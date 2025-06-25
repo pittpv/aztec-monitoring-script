@@ -1,4 +1,4 @@
-# Aztec Node İzleme Aracı
+# Aztec Düğüm Kurulum ve İzleme Betiği
 
 **Açıklama:**
 - [🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "Açıklamanın İngilizce versiyonu")

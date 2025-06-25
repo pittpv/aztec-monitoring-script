@@ -1,4 +1,4 @@
-# Aztec Node Monitoring Agent
+# Aztec - cкрипт установки и мониторинга ноды
 
 **Описание на:**
 - [🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "English version of description")
