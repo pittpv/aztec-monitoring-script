@@ -44,8 +44,6 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 - Telegram bildirimleriyle cron-agent oluşturma işlevi güncellendi – artık ChatID ve Telegram token bilgileri `.env-aztec-agent` dosyasına kaydediliyor ve cron-agent silinirken/oluşturulurken tekrar girilmesi gerekmiyor.
 - Betik yüklendiğinde Aztec Node sürüm kontrolü eklendi.
 
----
-
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
 
@@ -106,6 +104,8 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 * Log dosyası 1 MB’a ulaştığında temizlenir, ilk rapor saklanır.
 
 </details>
+
+---
 
 ## ⚙️ Kurulum ve Başlatma
 

@@ -44,8 +44,6 @@ This script provides a comprehensive solution for launching (via docker-compose 
 - Updated the cron-agent creation function with Telegram notifications – now ChatID and Telegram token are saved in the `.env-aztec-agent` file and don’t need to be re-entered when removing/creating the cron-agent.
 - Added Aztec Node version check when the script loads.
 
----
-
 <details>
 <summary>📅 Version History</summary>
 
@@ -100,6 +98,8 @@ This script provides a comprehensive solution for launching (via docker-compose 
 ### 29-05-2025
 - Log file cleanup when reaching 1 MB, initial report is preserved.
 </details>
+
+---
 
 ## ⚙️ Installation and Launch
 
