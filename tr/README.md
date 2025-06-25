@@ -141,7 +141,7 @@ Ana menü:
 4. 🏷️ rollupAddress bul
 5. 👥 PeerID bul
 6. 🏛️ governanceProposerPayload bul
-7. 🔗 Proven L2 Block kontrol et *(Discord'da Apprentice rolü almak için veri)*
+7. 🔗 Proven L2 Block kontrol et *(Discord'da Apprentice rolünü almak için önceden gereken veriler)*
    - Artık kendi portunuzu ayarlayabilirsiniz (varsayılan 8080). Yeni port .env-aztec-agent dosyasına kaydedilir.
 8. 🔌 RPC URL’sini değiştir
 9. 🔍 Doğrulayıcı ara ve durumunu kontrol et
