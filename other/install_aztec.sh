@@ -43,7 +43,7 @@ init_languages() {
   TRANSLATIONS["en,docker_installed"]="✅ Docker successfully installed"
   TRANSLATIONS["en,compose_installed"]="✅ Docker Compose successfully installed"
   TRANSLATIONS["en,docker_found"]="✅ Docker and docker compose found"
-  TRANSLATIONS["en,installing_aztec"]="⬇️ Installing Aztec CLI..."
+  TRANSLATIONS["en,installing_aztec"]="⬇️ Installing Aztec node..."
   TRANSLATIONS["en,aztec_not_installed"]="❌ Aztec CLI not installed. Check installation."
   TRANSLATIONS["en,aztec_installed"]="✅ Aztec CLI installed"
   TRANSLATIONS["en,running_aztec_up"]="🚀 Running aztec-up latest..."
@@ -80,6 +80,8 @@ init_languages() {
   TRANSLATIONS["en,delete_confirm"]="Are you sure you want to delete the Aztec node? This will stop containers and remove all data. (y/n) "
   TRANSLATIONS["en,node_deleted"]="✅ Aztec node successfully deleted"
   TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
+  TRANSLATIONS["en,warn_orig_install"]="⚠️ Type 'n' when prompted with the question:"
+  TRANSLATIONS["en,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -96,7 +98,7 @@ init_languages() {
   TRANSLATIONS["ru,docker_installed"]="✅ Docker успешно установлен"
   TRANSLATIONS["ru,compose_installed"]="✅ Docker Compose успешно установлен"
   TRANSLATIONS["ru,docker_found"]="✅ Docker и docker compose найдены"
-  TRANSLATIONS["ru,installing_aztec"]="⬇️ Установка Aztec CLI..."
+  TRANSLATIONS["ru,installing_aztec"]="⬇️ Установка ноды Aztec..."
   TRANSLATIONS["ru,aztec_not_installed"]="❌ Aztec CLI не установлен. Проверьте установку."
   TRANSLATIONS["ru,aztec_installed"]="✅ Aztec CLI установлен"
   TRANSLATIONS["ru,running_aztec_up"]="🚀 Запуск aztec-up latest..."
@@ -133,6 +135,8 @@ init_languages() {
   TRANSLATIONS["ru,delete_confirm"]="Вы уверены, что хотите удалить ноду Aztec? Это остановит контейнеры и удалит все данные. (y/n) "
   TRANSLATIONS["ru,node_deleted"]="✅ Нода Aztec успешно удалена"
   TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
+  TRANSLATIONS["ru,warn_orig_install"]="⚠️ Введите 'n' когда появится вопрос:"
+  TRANSLATIONS["ru,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -149,7 +153,7 @@ init_languages() {
   TRANSLATIONS["tr,docker_installed"]="✅ Docker başarıyla yüklendi"
   TRANSLATIONS["tr,compose_installed"]="✅ Docker Compose başarıyla yüklendi"
   TRANSLATIONS["tr,docker_found"]="✅ Docker ve docker compose bulundu"
-  TRANSLATIONS["tr,installing_aztec"]="⬇️ Aztec CLI yükleniyor..."
+  TRANSLATIONS["tr,installing_aztec"]="⬇️ Aztec yükleniyor..."
   TRANSLATIONS["tr,aztec_not_installed"]="❌ Aztec CLI yüklü değil. Kurulumu kontrol edin."
   TRANSLATIONS["tr,aztec_installed"]="✅ Aztec CLI yüklendi"
   TRANSLATIONS["tr,running_aztec_up"]="🚀 aztec-up latest çalıştırılıyor..."
@@ -186,6 +190,8 @@ init_languages() {
   TRANSLATIONS["tr,delete_confirm"]="Aztec node'u silmek istediğinize emin misiniz? Bu işlem konteynerleri durduracak ve tüm verileri silecektir. (y/n) "
   TRANSLATIONS["tr,node_deleted"]="✅ Aztec node başarıyla silindi"
   TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
+  TRANSLATIONS["tr,warn_orig_install"]="⚠️ Şu soru çıktığında 'n' yazın:"
+  TRANSLATIONS["tr,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
 }
 
 # Initialize language (default to en if no argument)
@@ -349,6 +355,8 @@ fi
 echo -e "\n${GREEN}$(t "docker_found")${NC}"
 
 echo -e "\n${GREEN}$(t "installing_aztec")${NC}"
+echo -e "${YELLOW}$(t "warn_orig_install") ${NC}$(t "warn_orig_install_2")${NC}"
+sleep 5
 curl -s https://install.aztec.network -o install-aztec.sh
 chmod +x install-aztec.sh
 bash install-aztec.sh
