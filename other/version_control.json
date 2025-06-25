@@ -63,5 +63,11 @@
         "VERSION": "1.7.3",
         "UPDATE_DATE": "22.06.2025",
         "CHANGES": ["View Aztec Logs - enhanced to display the last 500 lines with subsequent updates", "Check Container and Latest Block - improved with better log reading and memory issue prevention", "Improved dependency check and installation function for required software for the script"]
+    },
+    {
+        "VERSION": "1.8.0",
+        "UPDATE_DATE": "25.06.2025",
+        "CHANGES": ["Added function Stop Aztec Node Containers", "Added function Start Aztec Node Containers", "Updated the cron-agent creation function", "Added Aztec Node version check"]
     }
+
 ]

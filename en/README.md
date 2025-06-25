@@ -12,10 +12,11 @@
 
 ## 📝 Description
 
-This script provides a comprehensive solution for monitoring the Aztec node, including container status checks, block synchronization verification, and Telegram notifications.
+This script provides a comprehensive solution for launching (via docker-compose or CLI) and monitoring an Aztec node, including container status checks, block synchronization verification, retrieval of important node information, and sending notifications via Telegram.
 
 ## 🌟 Key Features
 
+* 🏃🏻‍ Node launch (docker-compose or CLI)
 * 🐳 Aztec container monitoring
 * 🔗 Block freshness checks (compared to the smart contract)
 * 🔍 Log parsing for critical parameters
@@ -32,15 +33,26 @@ This script provides a comprehensive solution for monitoring the Aztec node, inc
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 22-06-2025  
-- View Aztec logs function – updated to show the last 500 lines with auto-refresh.  
-- Check container and current block function - improved log reading and memory issue prevention
-- Enhanced dependency check & installation for required script tools.  
+## 📌 Latest Updates 25-06-2025  
+- Added function "Stop Aztec Node Containers" – a smart function that remembers your method of running the node container (docker-compose or CLI) and continues to operate in the selected mode.
+  - When prompted for the working method, specify how your node is running: `docker-compose` or `CLI`
+  - When prompted for the path to the docker-compose file, provide the path from the root directory in the format: `/root/aztec` or `./aztec`
+  - All settings are saved in the `.env-aztec-agent` file. You can change them if desired.
+- Added function "Start Aztec Node Containers" – a smart function that uses the container running method assigned in the "Stop Aztec Node Containers" function (option 13).
+  - If you **haven’t set** the container management method (option 13) and use the "Start Aztec Node Containers" function, it will work as a **wizard for starting a CLI node**. In this case, the script will prompt for the necessary CLI launch parameters, generate the command, and start the CLI node in a screen session.
+  - All settings are saved in the `.env-aztec-agent` file. You can change them if desired.
+- Updated the cron-agent creation function with Telegram notifications – now ChatID and Telegram token are saved in the `.env-aztec-agent` file and don’t need to be re-entered when removing/creating the cron-agent.
+- Added Aztec Node version check when the script loads.
 
 ---
 
 <details>
 <summary>📅 Version History</summary>
+
+### 22-06-2025  
+- View Aztec logs function – updated to show the last 500 lines with auto-refresh.  
+- Check container and current block function - improved log reading and memory issue prevention
+- Enhanced dependency check & installation for required script tools. 
 
 ### 06-06-2025
 
@@ -130,6 +142,9 @@ Main menu:
 10. View Aztec logs
 11. Install Aztec Node with Watchtower
 12. Delete Aztec node
+13. Stop Aztec node containers
+14. Start Aztec node containers
+
 0. 🚪 Exit
 
 ## 🚀 Using the Cron Agent
@@ -155,7 +170,7 @@ After running the script, select the option to **Install the cron monitoring age
 
 ### Updating the cron agent
 
-If there is an update for the cron-agent, first update the entire script. Then delete the old agent and create a new one.
+If there is an update for the cron-agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
 
 ## ⚠️ Important
 

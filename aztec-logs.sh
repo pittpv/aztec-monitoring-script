@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.7.3"
+SCRIPT_VERSION="1.8.0"
 
 function show_logo() {
     echo -e " "
@@ -58,6 +58,8 @@ init_languages() {
   TRANSLATIONS["en,option10"]="10. View Aztec logs"
   TRANSLATIONS["en,option11"]="11. Install Aztec Node with Watchtower"
   TRANSLATIONS["en,option12"]="12. Delete Aztec node"
+  TRANSLATIONS["en,option13"]="13. Stop Aztec node containers"
+  TRANSLATIONS["en,option14"]="14. Start Aztec node containers"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,rpc_change_prompt"]="Enter new RPC URL:"
   TRANSLATIONS["en,rpc_change_success"]="✅ RPC URL successfully updated"
@@ -165,6 +167,23 @@ init_languages() {
   TRANSLATIONS["en,logs_stopped_by_user"]="⚠ Log viewing stopped by user"
   TRANSLATIONS["en,installation_cancelled_by_user"]="✖ Installation cancelled by user"
   TRANSLATIONS["en,unknown_error_occurred"]="⚠ An unknown error occurred during installation"
+  TRANSLATIONS["en,stop_method_prompt"]="Choose method to stop Aztec node (docker-compose / cli): "
+  TRANSLATIONS["en,enter_compose_path"]="Enter full path to folder with docker-compose.yml: "
+  TRANSLATIONS["en,docker_stop_success"]="Containers stopped and docker path saved to .env-aztec-agent"
+  TRANSLATIONS["en,no_aztec_screen"]="No active Aztec screen sessions found."
+  TRANSLATIONS["en,cli_stop_success"]="Aztec CLI node stopped and session saved to .env-aztec-agent"
+  TRANSLATIONS["en,invalid_path"]="Invalid path or docker-compose.yml not found."
+  TRANSLATIONS["en,starting_node"]="Starting Aztec node..."
+  TRANSLATIONS["en,node_started"]="Aztec node started."
+  TRANSLATIONS["en,missing_compose"]="Path to docker-compose.yml not found in .env-aztec-agent."
+  TRANSLATIONS["en,run_type_not_set"]="RUN_TYPE not set in configuration."
+  TRANSLATIONS["en,confirm_cli_run"]="Do you want to run the container in CLI mode?"
+  TRANSLATIONS["en,run_type_set_to_cli"]="RUN_TYPE set to CLI."
+  TRANSLATIONS["en,run_aborted"]="Run aborted by user."
+  TRANSLATIONS["en,checking_aztec_version"]="Checking Aztec version..."
+  TRANSLATIONS["en,aztec_version_failed"]="Failed to retrieve aztec version."
+  TRANSLATIONS["en,aztec_node_version"]="Aztec Node version:"
+
 
 
   # Russian translations
@@ -182,6 +201,8 @@ init_languages() {
   TRANSLATIONS["ru,option10"]="10. Просмотреть логи Aztec"
   TRANSLATIONS["ru,option11"]="11. Установить Aztec ноду с Watchtower"
   TRANSLATIONS["ru,option12"]="12. Удалить ноду Aztec"
+  TRANSLATIONS["ru,option13"]="13. Остановить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option14"]="14. Запустить контейнеры ноды Aztec"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,rpc_change_prompt"]="Введите новый RPC URL:"
   TRANSLATIONS["ru,rpc_change_success"]="✅ RPC URL успешно обновлен"
@@ -289,6 +310,22 @@ init_languages() {
   TRANSLATIONS["ru,logs_stopped_by_user"]="⚠ Просмотр логов остановлен пользователем"
   TRANSLATIONS["ru,installation_cancelled_by_user"]="✖ Установка отменена пользователем"
   TRANSLATIONS["ru,unknown_error_occurred"]="⚠ Произошла неизвестная ошибка при установке"
+  TRANSLATIONS["ru,stop_method_prompt"]="Выберите способ остановки ноды Aztec (docker-compose / cli): "
+  TRANSLATIONS["ru,enter_compose_path"]="Введите полный путь к папке с docker-compose.yml: "
+  TRANSLATIONS["ru,docker_stop_success"]="Контейнеры остановлены, путь сохранён в .env-aztec-agent"
+  TRANSLATIONS["ru,no_aztec_screen"]="Активных screen-сессий с Aztec не найдено."
+  TRANSLATIONS["ru,cli_stop_success"]="Нода Aztec CLI остановлена, сессия сохранена в .env-aztec-agent"
+  TRANSLATIONS["ru,invalid_path"]="Неверный путь или файл docker-compose.yml не найден."
+  TRANSLATIONS["ru,starting_node"]="Запуск ноды Aztec..."
+  TRANSLATIONS["ru,node_started"]="Нода Aztec запущена."
+  TRANSLATIONS["ru,missing_compose"]="Путь к docker-compose.yml не найден в .env-aztec-agent."
+  TRANSLATIONS["ru,run_type_not_set"]="RUN_TYPE не задан в конфигурации."
+  TRANSLATIONS["ru,confirm_cli_run"]="Вы хотите запустить контейнер в CLI режиме?"
+  TRANSLATIONS["ru,run_type_set_to_cli"]="RUN_TYPE установлен в CLI."
+  TRANSLATIONS["ru,run_aborted"]="Запуск отменен пользователем."
+  TRANSLATIONS["ru,checking_aztec_version"]="Проверка версии Aztec..."
+  TRANSLATIONS["ru,aztec_version_failed"]="Не удалось получить версию aztec."
+  TRANSLATIONS["ru,aztec_node_version"]="Версия ноды Aztec:"
 
 
   # Turkish translations
@@ -306,6 +343,8 @@ init_languages() {
   TRANSLATIONS["tr,option10"]="10. Aztec loglarını görüntüle"
   TRANSLATIONS["tr,option11"]="11. Watchtower ile birlikte Aztec Node Kurulumu"
   TRANSLATIONS["tr,option12"]="12. Aztec düğümünü sil"
+  TRANSLATIONS["tr,option13"]="13. Aztec düğüm konteynerlerini durdur"
+  TRANSLATIONS["tr,option14"]="14. Aztec düğüm konteynerlerini başlat"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
   TRANSLATIONS["tr,rpc_change_prompt"]="Yeni RPC URL'sini girin:"
   TRANSLATIONS["tr,rpc_change_success"]="✅ RPC URL başarıyla güncellendi"
@@ -413,6 +452,23 @@ init_languages() {
   TRANSLATIONS["tr,logs_stopped_by_user"]="⚠ Log görüntüleme kullanıcı tarafından durduruldu"
   TRANSLATIONS["tr,installation_cancelled_by_user"]="✖ Kurulum kullanıcı tarafından iptal edildi"
   TRANSLATIONS["tr,unknown_error_occurred"]="⚠ Kurulum sırasında bilinmeyen bir hata oluştu"
+  TRANSLATIONS["tr,stop_method_prompt"]="Aztec düğümünü durdurma yöntemi seçin (docker-compose / cli): "
+  TRANSLATIONS["tr,enter_compose_path"]="docker-compose.yml dosyasının bulunduğu klasörün tam yolunu girin: "
+  TRANSLATIONS["tr,docker_stop_success"]="Konteynerler durduruldu ve yol .env-aztec-agent dosyasına kaydedildi"
+  TRANSLATIONS["tr,no_aztec_screen"]="Aktif Aztec screen oturumu bulunamadı."
+  TRANSLATIONS["tr,cli_stop_success"]="Aztec CLI düğümü durduruldu ve oturum .env-aztec-agent dosyasına kaydedildi"
+  TRANSLATIONS["tr,invalid_path"]="Geçersiz yol veya docker-compose.yml dosyası bulunamadı."
+  TRANSLATIONS["tr,starting_node"]="Aztec düğümü başlatılıyor..."
+  TRANSLATIONS["tr,node_started"]="Aztec düğümü başlatıldı."
+  TRANSLATIONS["tr,missing_compose"]="docker-compose.yml yolu .env-aztec-agent dosyasında bulunamadı."
+  TRANSLATIONS["tr,run_type_not_set"]="Yapılandırmada RUN_TYPE ayarlanmamış."
+  TRANSLATIONS["tr,confirm_cli_run"]="Kapsayıcıyı CLI modunda çalıştırmak istiyor musunuz?"
+  TRANSLATIONS["tr,run_type_set_to_cli"]="RUN_TYPE CLI olarak ayarlandı."
+  TRANSLATIONS["tr,run_aborted"]="Çalıştırma kullanıcı tarafından iptal edildi."
+  TRANSLATIONS["tr,checking_aztec_version"]="Aztec sürümü kontrol ediliyor..."
+  TRANSLATIONS["tr,aztec_version_failed"]="Aztec sürümü alınamadı."
+  TRANSLATIONS["tr,aztec_node_version"]="Aztec Node sürümü:"
+
 }
 
 # === Configuration ===
@@ -574,6 +630,7 @@ spinner() {
 
 # === Check container logs for block ===
 check_aztec_container_logs() {
+    cd $HOME
     source .env-aztec-agent
 
     echo -e "\n${BLUE}$(t "search_container")${NC}"
@@ -814,7 +871,9 @@ find_governance_proposer_payload() {
 
 # === Create agent and cron task ===
 create_cron_agent() {
-  source .env-aztec-agent
+  local env_file
+  env_file=$(_ensure_env_file)
+  source "$env_file"
 
   # Function to validate Telegram bot token
   validate_telegram_token() {
@@ -848,34 +907,40 @@ create_cron_agent() {
     fi
   }
 
-  # Get and validate Telegram bot token
-  while true; do
-    echo -e "\n${BLUE}$(t "token_prompt")${NC}"
-    read -p "> " TELEGRAM_BOT_TOKEN
+  # === Проверка и получение TELEGRAM_BOT_TOKEN ===
+  if [ -z "$TELEGRAM_BOT_TOKEN" ]; then
+    while true; do
+      echo -e "\n${BLUE}$(t "token_prompt")${NC}"
+      read -p "> " TELEGRAM_BOT_TOKEN
 
-    if validate_telegram_token "$TELEGRAM_BOT_TOKEN"; then
-      break
-    else
-      echo -e "${RED}$(t "invalid_token")${NC}"
-      echo -e "${YELLOW}$(t "token_format")${NC}"
-    fi
-  done
-
-  # Get and validate Telegram chat ID
-  while true; do
-    echo -e "\n${BLUE}$(t "chatid_prompt")${NC}"
-    read -p "> " TELEGRAM_CHAT_ID
-
-    if [[ "$TELEGRAM_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
-      if validate_telegram_chat "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHAT_ID"; then
+      if validate_telegram_token "$TELEGRAM_BOT_TOKEN"; then
+        echo "TELEGRAM_BOT_TOKEN=\"$TELEGRAM_BOT_TOKEN\"" >> "$env_file"
         break
       else
-        echo -e "${RED}$(t "invalid_chatid")${NC}"
+        echo -e "${RED}$(t "invalid_token")${NC}"
+        echo -e "${YELLOW}$(t "token_format")${NC}"
       fi
-    else
-      echo -e "${RED}$(t "chatid_number")${NC}"
-    fi
-  done
+    done
+  fi
+
+  # === Проверка и получение TELEGRAM_CHAT_ID ===
+  if [ -z "$TELEGRAM_CHAT_ID" ]; then
+    while true; do
+      echo -e "\n${BLUE}$(t "chatid_prompt")${NC}"
+      read -p "> " TELEGRAM_CHAT_ID
+
+      if [[ "$TELEGRAM_CHAT_ID" =~ ^-?[0-9]+$ ]]; then
+        if validate_telegram_chat "$TELEGRAM_BOT_TOKEN" "$TELEGRAM_CHAT_ID"; then
+          echo "TELEGRAM_CHAT_ID=\"$TELEGRAM_CHAT_ID\"" >> "$env_file"
+          break
+        else
+          echo -e "${RED}$(t "invalid_chatid")${NC}"
+        fi
+      else
+        echo -e "${RED}$(t "chatid_number")${NC}"
+      fi
+    done
+  fi
 
   mkdir -p "$AGENT_SCRIPT_PATH"
 
@@ -1307,6 +1372,264 @@ function delete_aztec() {
     source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
 }
 
+# === Common helper functions ===
+function _ensure_env_file() {
+  local env_file="$HOME/.env-aztec-agent"
+  [[ ! -f "$env_file" ]] && touch "$env_file"
+  echo "$env_file"
+}
+
+function _update_env_var() {
+  local env_file="$1" key="$2" value="$3"
+  if grep -q "^$key=" "$env_file"; then
+    sed -i "s|^$key=.*|$key=$value|" "$env_file"
+  else
+    echo "$key=$value" >> "$env_file"
+  fi
+}
+
+function _read_env_var() {
+  local env_file="$1" key="$2"
+  grep "^$key=" "$env_file" | cut -d '=' -f2-
+}
+
+function _validate_compose_path() {
+  local path="$1"
+  [[ -d "$path" && -f "$path/docker-compose.yml" ]]
+}
+
+# === Stop Aztec containers ===
+function stop_aztec_containers() {
+  local env_file
+  env_file=$(_ensure_env_file)
+
+  local run_type
+  run_type=$(_read_env_var "$env_file" "RUN_TYPE")
+
+  case "$run_type" in
+    "DOCKER")
+      local compose_path
+      compose_path=$(_read_env_var "$env_file" "COMPOSE_PATH")
+
+      if ! _validate_compose_path "$compose_path"; then
+        read -p "$(t "enter_compose_path")" compose_path
+        if _validate_compose_path "$compose_path"; then
+          _update_env_var "$env_file" "COMPOSE_PATH" "$compose_path"
+        else
+          echo -e "${RED}$(t "invalid_path")${NC}"
+          return 1
+        fi
+      fi
+
+      _update_env_var "$env_file" "RUN_TYPE" "DOCKER"
+
+      if cd "$compose_path" && docker-compose down; then
+        echo -e "${GREEN}$(t "docker_stop_success")${NC}"
+      else
+        echo -e "${RED}Failed to stop Docker containers${NC}"
+        return 1
+      fi
+      ;;
+
+    "CLI")
+      local session_name
+      session_name=$(_read_env_var "$env_file" "SCREEN_SESSION")
+
+      if [[ -z "$session_name" ]]; then
+        session_name=$(screen -ls | grep aztec | awk '{print $1}')
+        # Extract only the alphabetical part (remove numbers and .aztec)
+        session_name=$(echo "$session_name" | sed 's/^[0-9]*\.//;s/\.aztec$//')
+        if [[ -z "$session_name" ]]; then
+          echo -e "${RED}$(t "no_aztec_screen")${NC}"
+          return 1
+        fi
+        _update_env_var "$env_file" "SCREEN_SESSION" "$session_name"
+      fi
+
+      _update_env_var "$env_file" "RUN_TYPE" "CLI"
+
+      screen -S "$session_name" -p 0 -X stuff $'\003'
+      sleep 2
+      screen -S "$session_name" -X quit
+      echo -e "${GREEN}$(t "cli_stop_success")${NC}"
+      ;;
+
+    *)
+      echo -e "\n${YELLOW}$(t "stop_method_prompt")${NC}"
+      read -r method
+
+      case "$method" in
+        "docker-compose")
+          read -p "$(t "enter_compose_path")" compose_path
+          if _validate_compose_path "$compose_path"; then
+            _update_env_var "$env_file" "COMPOSE_PATH" "$compose_path"
+            _update_env_var "$env_file" "RUN_TYPE" "DOCKER"
+
+            cd "$compose_path" || return 1
+            docker-compose down
+            echo -e "${GREEN}$(t "docker_stop_success")${NC}"
+          else
+            echo -e "${RED}$(t "invalid_path")${NC}"
+            return 1
+          fi
+          ;;
+
+        "cli")
+          local session_name
+          session_name=$(screen -ls | grep aztec | awk '{print $1}')
+          if [[ -n "$session_name" ]]; then
+            # Extract only the alphabetical part (remove numbers and .aztec)
+            session_name=$(echo "$session_name" | sed 's/^[0-9]*\.//;s/\.aztec$//')
+            _update_env_var "$env_file" "SCREEN_SESSION" "$session_name"
+            _update_env_var "$env_file" "RUN_TYPE" "CLI"
+
+            screen -S "$session_name" -p 0 -X stuff $'\003'
+            sleep 2
+            screen -S "$session_name" -X quit
+            echo -e "${GREEN}$(t "cli_stop_success")${NC}"
+          else
+            echo -e "${RED}$(t "no_aztec_screen")${NC}"
+            return 1
+          fi
+          ;;
+
+        *)
+          echo -e "${RED}Invalid method. Choose 'docker-compose' or 'cli'.${NC}"
+          return 1
+          ;;
+      esac
+      ;;
+  esac
+}
+
+# === Start Aztec containers ===
+function start_aztec_containers() {
+  local env_file
+  env_file=$(_ensure_env_file)
+
+  echo -e "\n${YELLOW}$(t "starting_node")${NC}"
+
+  local run_type
+  run_type=$(_read_env_var "$env_file" "RUN_TYPE")
+
+  if [[ -z "$run_type" ]]; then
+    echo -e "${YELLOW}$(t "run_type_not_set")${NC}"
+    read -p "$(t "confirm_cli_run") [y/N] " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+      run_type="CLI"
+      _update_env_var "$env_file" "RUN_TYPE" "$run_type"
+      echo -e "${GREEN}$(t "run_type_set_to_cli")${NC}"
+    else
+      echo -e "${RED}$(t "run_aborted")${NC}"
+      return 1
+    fi
+  fi
+
+  case "$run_type" in
+    "DOCKER")
+      local compose_path
+      compose_path=$(_read_env_var "$env_file" "COMPOSE_PATH")
+
+      if ! _validate_compose_path "$compose_path"; then
+        echo -e "${RED}$(t "missing_compose")${NC}"
+        read -p "$(t "enter_compose_path")" compose_path
+        if ! _validate_compose_path "$compose_path"; then
+          echo -e "${RED}$(t "invalid_path")${NC}"
+          return 1
+        fi
+        _update_env_var "$env_file" "COMPOSE_PATH" "$compose_path"
+      fi
+
+      if cd "$compose_path" && docker-compose up -d; then
+        echo -e "${GREEN}$(t "node_started")${NC}"
+      else
+        echo -e "${RED}Failed to start Docker containers${NC}"
+        return 1
+      fi
+      ;;
+
+    "CLI")
+      local p2p_ip
+      p2p_ip=$(curl -s https://api.ipify.org || echo "127.0.0.1")
+
+      declare -A vars=(
+        ["RPC_URL"]="Ethereum Execution RPC URL"
+        ["CONSENSUS_BEACON_URL"]="Consensus Beacon URL"
+        ["VALIDATOR_PRIVATE_KEY"]="Validator Private Key (without 0x)"
+        ["COINBASE"]="Coinbase (your EVM wallet address)"
+        ["P2P_IP"]="$p2p_ip"
+      )
+
+      for key in "${!vars[@]}"; do
+        if ! grep -q "^$key=" "$env_file"; then
+          local prompt="${vars[$key]}"
+          local val
+          if [[ "$key" == "P2P_IP" ]]; then
+            val="$p2p_ip"
+          else
+            read -p "$prompt: " val
+          fi
+          _update_env_var "$env_file" "$key" "$val"
+        fi
+      done
+
+      local ethereum_rpc_url consensus_beacon_url validator_private_key coinbase
+      ethereum_rpc_url=$(_read_env_var "$env_file" "RPC_URL")
+      consensus_beacon_url=$(_read_env_var "$env_file" "CONSENSUS_BEACON_URL")
+      validator_private_key=$(_read_env_var "$env_file" "VALIDATOR_PRIVATE_KEY")
+      coinbase=$(_read_env_var "$env_file" "COINBASE")
+      p2p_ip=$(_read_env_var "$env_file" "P2P_IP")
+
+      local session_name
+      session_name=$(_read_env_var "$env_file" "SCREEN_SESSION")
+      [[ -z "$session_name" ]] && session_name="aztec"
+      _update_env_var "$env_file" "SCREEN_SESSION" "$session_name"
+
+      if screen -dmS "$session_name" && \
+         screen -S "$session_name" -p 0 -X stuff "aztec start --node --archiver --sequencer \
+--network alpha-testnet \
+--l1-rpc-urls $ethereum_rpc_url \
+--l1-consensus-host-urls $consensus_beacon_url \
+--sequencer.validatorPrivateKey 0x$validator_private_key \
+--sequencer.coinbase $coinbase \
+--p2p.p2pIp $p2p_ip"$'\n'; then
+        echo -e "${GREEN}$(t "node_started")${NC}"
+      else
+        echo -e "${RED}Failed to start Aztec in screen session${NC}"
+        return 1
+      fi
+      ;;
+
+    *)
+      echo -e "${RED}Unknown RUN_TYPE: $run_type${NC}"
+      return 1
+      ;;
+  esac
+}
+
+# === Aztec node version check (via direct JS entrypoint) ===
+function check_aztec_version() {
+
+    echo -e "\n${CYAN}$(t "checking_aztec_version")${NC}"
+    container_id=$(docker ps --format "{{.ID}} {{.Names}}" \
+                   | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+
+    if [ -z "$container_id" ]; then
+        echo -e "${RED}$(t "container_not_found")${NC}"
+        return
+    fi
+
+    echo -e "${GREEN}$(t "container_found") ${BLUE}$container_id${NC}"
+
+    version=$(docker exec "$container_id" node /usr/src/yarn-project/aztec/dest/bin/index.js --version 2>/dev/null)
+
+    if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        echo -e "${GREEN}$(t "aztec_node_version") ${BLUE}$version${NC}"
+    else
+        echo -e "\n${RED}$(t "aztec_version_failed")${NC}"
+    fi
+}
+
 
 # === Main menu ===
 main_menu() {
@@ -1325,6 +1648,8 @@ main_menu() {
     echo -e "${CYAN}$(t "option10")${NC}"
     echo -e "${CYAN}$(t "option11")${NC}"
     echo -e "${CYAN}$(t "option12")${NC}"
+    echo -e "${CYAN}$(t "option13")${NC}"
+    echo -e "${CYAN}$(t "option14")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -1343,6 +1668,8 @@ main_menu() {
       10) view_container_logs ;;
       11) install_aztec ;;
       12) delete_aztec ;;
+      13) stop_aztec_containers ;;
+      14) start_aztec_containers ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
@@ -1352,4 +1679,5 @@ main_menu() {
 # === Script launch ===
 init_languages
 check_dependencies
+check_aztec_version
 main_menu

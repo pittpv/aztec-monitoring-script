@@ -12,10 +12,11 @@
 
 ## 📝 Açıklama
 
-Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyner durumu kontrolü, blok senkronizasyon doğrulaması ve Telegram bildirimleri dahil.
+Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılığıyla) ve izlemek için kapsamlı bir çözüm sunar. İçerdiği özellikler arasında konteyner durumu kontrolü, blok senkronizasyon doğrulaması, düğüme ait önemli bilgilerin alınması ve Telegram üzerinden bildirim gönderme bulunmaktadır.
 
 ## 🌟 Temel Özellikler
 
+* 🏃🏻‍ Node başlatma (docker-compose veya CLI ile)
 * 🐳 Aztec konteyner izleme
 * 🔗 Blok güncelliği kontrolü (akıllı kontratla karşılaştırma)
 * 🔍 Log analizi ile kritik parametre kontrolü
@@ -32,15 +33,26 @@ Bu betik, Aztec node’unuzu izlemek için kapsamlı bir çözüm sunar: konteyn
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler (22-06-2025)  
-- Aztec loglarını görüntüle fonksiyonu - son 500 satırı otomatik yenileme ile gösterecek şekilde güncellendi  
-- Konteyner ve mevcut bloğu kontrol et fonksiyonu - iyileştirilmiş günlük okuma ve bellek sorunu önleme 
-- Gerekli araçların kontrolü ve kurulumu - geliştirilmiş bağımlılık yönetimi   
+## 📌 Son Güncellemeler 25-06-2025  
+- "Aztec Node Containers'ı Durdur" işlevi eklendi – node konteynerini yönetme yönteminizi (docker-compose veya CLI) hatırlayan ve seçilen modda çalışmaya devam eden akıllı bir işlev.
+  - Çalışma yöntemi sorulduğunda, node’unuzun nasıl çalıştığını belirtin: `docker-compose` veya `CLI`
+  - docker-compose dosyasının yolu sorulduğunda, kök dizinden itibaren `/root/aztec` veya `./aztec` formatında yolu girin
+  - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
+- "Aztec Node Containers'ı Başlat" işlevi eklendi – bu işlev, "Aztec Node Containers'ı Durdur" işlevinde (seçenek 13) belirlenen konteyner yönetim yöntemini kullanır.
+  - Eğer konteyner yönetim yöntemini **belirlemediyseniz** (seçenek 13) ve "Aztec Node Containers'ı Başlat" işlevini kullanırsanız, bu işlev **CLI node başlatma sihirbazı** olarak çalışır. Bu durumda betik, gerekli CLI başlatma parametrelerini sorar, komutu oluşturur ve CLI node'u bir screen oturumunda başlatır.
+  - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
+- Telegram bildirimleriyle cron-agent oluşturma işlevi güncellendi – artık ChatID ve Telegram token bilgileri `.env-aztec-agent` dosyasına kaydediliyor ve cron-agent silinirken/oluşturulurken tekrar girilmesi gerekmiyor.
+- Betik yüklendiğinde Aztec Node sürüm kontrolü eklendi.
 
 ---
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 22-06-2025  
+- Aztec loglarını görüntüle fonksiyonu - son 500 satırı otomatik yenileme ile gösterecek şekilde güncellendi  
+- Konteyner ve mevcut bloğu kontrol et fonksiyonu - iyileştirilmiş günlük okuma ve bellek sorunu önleme 
+- Gerekli araçların kontrolü ve kurulumu - geliştirilmiş bağımlılık yönetimi 
 
 ### 06-06-2025
 
@@ -136,6 +148,9 @@ Ana menü:
 10. Aztec loglarını görüntüle
 11. Watchtower ile birlikte Aztec Node Kurulumu
 12. Aztec düğümünü sil
+13. Aztec düğüm konteynerlerini durdur
+14. Aztec düğüm konteynerlerini başlat
+
 0. 🚪 Çıkış
 
 ## 🚀 Cron Ajanı Kullanımı
@@ -162,7 +177,7 @@ Betik çalıştırıldıktan sonra, **Cron izleme ajanını kur** seçeneğini s
 
 ### Cron ajanını güncelleme
 
-Ajan güncellemesi varsa, önce betiğin tamamını güncelleyin. Sonra eski ajanı silin ve yenisini oluşturun.
+Ajan güncellemesi varsa, önce betiğin tamamını güncelleyin. Sonra eski ajanı silin ve yenisini oluşturun. Daha önce girdiğiniz ChatID ve Telegram token, yeni ajan için otomatik olarak atanır.
 
 ## ⚠️ Önemli
 
