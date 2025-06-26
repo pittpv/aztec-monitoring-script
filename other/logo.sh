@@ -1,10 +1,16 @@
+#!/bin/bash
+
+# Цвета
+b=$'\033[34m' # Blue
+y=$'\033[33m' # Yellow
+r=$'\033[0m'  # Reset
+
+# Функция подсветки "█" блоков
 function print_colored() {
-  local b=$'\033[34m' # Blue
-  local y=$'\033[33m' # Yellow
-  local r=$'\033[0m'  # Reset
-  echo -e "${b}$(echo "$1" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+  echo "${b}$(echo "$1" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
 }
 
+# Логотип
 echo
 print_colored " █████╗ ███████╗████████╗███████╗ ██████╗"
 print_colored "██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝"
@@ -13,11 +19,6 @@ print_colored "██╔══██║ ███╔╝     ██║   ██�
 print_colored "██║  ██║███████╗   ██║   ███████╗╚██████╗"
 print_colored "╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝"
 echo
-
-# Цвета
-b=$'\033[34m' # Blue
-y=$'\033[33m' # Yellow
-r=$'\033[0m'  # Reset
 
 # Информация в рамке
 info_lines=(
@@ -31,19 +32,19 @@ info_lines=(
 # Вычисляем максимальную длину строки (учёт Unicode, без цветов)
 max_len=0
 for line in "${info_lines[@]}"; do
-  clean_line=$(echo -e "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
+  clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
   line_length=$(echo -n "$clean_line" | wc -m)
-  [ "$line_length" -gt "$max_len" ] && max_len=$line_length
+  (( line_length > max_len )) && max_len=$line_length
 done
 
-# Рамка
+# Рамки
 top_border="╔$(printf '═%.0s' $(seq 1 $((max_len + 2))))╗"
 bottom_border="╚$(printf '═%.0s' $(seq 1 $((max_len + 2))))╝"
 
 # Печать рамки
 echo -e "${b}${top_border}${r}"
 for line in "${info_lines[@]}"; do
-  clean_line=$(echo -e "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
+  clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
   line_length=$(echo -n "$clean_line" | wc -m)
   padding=$((max_len - line_length))
   printf "${b}║ ${y}%s%*s ${b}║\n" "$line" "$padding" ""
