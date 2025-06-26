@@ -43,10 +43,16 @@ bottom_border="╚$(printf '═%.0s' $(seq 1 $((max_len + 2))))╝"
 # Печать рамки
 echo -e "${b}${top_border}${r}"
 for line in "${info_lines[@]}"; do
+  # Очищаем от цветов для подсчёта видимой длины
   clean_line=$(echo -e "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
   line_length=$(echo -n "$clean_line" | wc -m)
   padding=$((max_len - line_length))
-  printf "${b}║ ${y}%s%*s ${b}║\n" "$line" "$padding" ""
+
+  # Добавляем padding к строке до применения цвета
+  formatted_line="${line}$(printf '%*s' "$padding" "")"
+
+  # Выводим с цветом уже после выравнивания
+  echo -e "${b}║ ${y}${formatted_line} ${b}║${r}"
 done
 echo -e "${b}${bottom_border}${r}"
 echo
