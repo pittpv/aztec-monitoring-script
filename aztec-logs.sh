@@ -890,44 +890,6 @@ find_rollup_address() {
   fi
 }
 
-# find_peer_id() {
-  # echo -e "\n${BLUE}$(t "search_peer")${NC}"
-
-  # container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
-
-  # if [ -z "$container_id" ]; then
-    # echo -e "\n${RED}$(t "container_not_found")${NC}"
-    # return 1
-  # fi
-
-  # echo -e "\n${CYAN}$(t "peers_found")${NC}"
-
-  # # Фоновый процесс для поиска peerId
-  # _find_peer_id_worker() {
-    # sudo docker logs "$container_id" 2>&1 | \
-      # grep -i "peerId" | \
-      # grep -o '"peerId":"[^"]*"' | \
-      # cut -d'"' -f4 | \
-      # head -n 1 > /tmp/peer_id.tmp
-  # }
-
-  # _find_peer_id_worker &
-  # worker_pid=$!
-  # spinner $worker_pid
-  # wait $worker_pid
-
-  # peer_id=$(< /tmp/peer_id.tmp)
-  # rm -f /tmp/peer_id.tmp
-
-  # if [ -z "$peer_id" ]; then
-    # echo -e "${RED}$(t "peer_not_found")${NC}"
-    # return 1
-  # else
-    # echo "$peer_id"
-    # return 0
-  # fi
-# }
-
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
