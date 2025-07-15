@@ -34,7 +34,7 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
 ## 📌 Son Güncellemeler 15-07-2025  
-- Telegram bildirim sistemi geliştirildi. Fikir için teşekkürler @malbur187 (Discord)
+- **Validatörler** için Telegram bildirim sistemi **geliştirildi**. Fikir için teşekkürler @malbur187 (Discord)
     - Düğüm izleme cron ajanı kurulurken hangi bildirimlerin alınacağı seçilebilir: sadece hatalar veya komite seçimi ve blok oluşturma bildirimleri de dahil.
     - Seçim `.env-aztec-agent` dosyasına kaydedilir ve sonraki ajan oluşturmalarında uygulanır. Değiştirmek isterseniz `.env-aztec-agent` dosyasını düzenleyin.
 - Kritik hata tespit özelliği eklendi. Düğüm loglarında kritik bir hata tespit edilirse, Telegram'a bildirim gönderilir.

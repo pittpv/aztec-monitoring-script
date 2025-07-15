@@ -34,7 +34,7 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
 ## 📌 Latest Updates 15-07-2025
-- Improved the Telegram notification system. Thanks for the idea @malbur187 (Discord)
+- Improved the Telegram notification system **for validators**. Thanks for the idea @malbur187 (Discord)
     - When setting up the node monitoring cron agent, you can now choose which notifications to receive: only errors or also committee selection and block creation alerts.
     - The selection is saved in `.env-aztec-agent` and applied during subsequent agent recreations. To modify it, edit the `.env-aztec-agent` file.
 - Added critical error detection. If a critical error is found in the node logs, a Telegram notification will be sent.
