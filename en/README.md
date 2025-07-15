@@ -33,19 +33,29 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 25-06-2025  
-- Added function "Stop Aztec Node Containers" – a smart function that remembers your method of running the node container (docker-compose or CLI) and continues to operate in the selected mode.
-  - When prompted for the working method, specify how your node is running: `docker-compose` or `CLI`
-  - When prompted for the path to the docker-compose file, provide the path from the root directory in the format: `/root/aztec` or `./aztec`
-  - All settings are saved in the `.env-aztec-agent` file. You can change them if desired.
-- Added function "Start Aztec Node Containers" – a smart function that uses the container running method assigned in the "Stop Aztec Node Containers" function (option 13).
-  - If you **haven’t set** the container management method (option 13) and use the "Start Aztec Node Containers" function, it will work as a **wizard for starting a CLI node**. In this case, the script will prompt for the necessary CLI launch parameters, generate the command, and start the CLI node in a screen session.
-  - All settings are saved in the `.env-aztec-agent` file. You can change them if desired.
-- Updated the cron-agent creation function with Telegram notifications – now ChatID and Telegram token are saved in the `.env-aztec-agent` file and don’t need to be re-entered when removing/creating the cron-agent.
-- Added Aztec Node version check when the script loads.
+## 📌 Latest Updates 15-07-2025
+- Improved the Telegram notification system. Thanks for the idea @malbur187 (Discord)
+    - When setting up the node monitoring cron agent, you can now choose which notifications to receive: only errors or also committee selection and block creation alerts.
+    - The selection is saved in `.env-aztec-agent` and applied during subsequent agent recreations. To modify it, edit the `.env-aztec-agent` file.
+- Added critical error detection. If a critical error is found in the node logs, a Telegram notification will be sent.
+    - The error array is updated via a unified JSON file, allowing quick addition of new errors and their solutions.
+- Updated the PeerID search function. Thanks for the idea @web3.creed (Discord)
+    - After successful log detection, the PeerID is checked in the public database `aztec.nethermind.io`, and the result is displayed.
+- Minor improvements
 
 <details>
 <summary>📅 Version History</summary>
+
+### 25-06-2025
+- Added function "Stop Aztec Node Containers" – a smart function that remembers your method of running the node container (docker-compose or CLI) and continues to operate in the selected mode.
+    - When prompted for the working method, specify how your node is running: `docker-compose` or `CLI`
+    - When prompted for the path to the docker-compose file, provide the path from the root directory in the format: `/root/aztec` or `./aztec`
+    - All settings are saved in the `.env-aztec-agent` file. You can change them if desired.
+- Added function "Start Aztec Node Containers" – a smart function that uses the container running method assigned in the "Stop Aztec Node Containers" function (option 13).
+    - If you **haven’t set** the container management method (option 13) and use the "Start Aztec Node Containers" function, it will work as a **wizard for starting a CLI node**. In this case, the script will prompt for the necessary CLI launch parameters, generate the command, and start the CLI node in a screen session.
+    - All settings are saved in the `.env-aztec-agent` file. You can change them if desired.
+- Updated the cron-agent creation function with Telegram notifications – now ChatID and Telegram token are saved in the `.env-aztec-agent` file and don’t need to be re-entered when removing/creating the cron-agent.
+- Added Aztec Node version check when the script loads.
 
 ### 22-06-2025  
 - View Aztec logs function – updated to show the last 500 lines with auto-refresh.  
@@ -159,6 +169,9 @@ After running the script, select the option to **Install the cron monitoring age
    - The Aztec container is not found
    - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
    - There is an RPC server issue
+   - Critical errors found
+   - Selected for committee
+   - Created a block
 - Clears the log file when it reaches 1 MB in size, saving the very first report.
 
 ### Requirements for Cron Agent:

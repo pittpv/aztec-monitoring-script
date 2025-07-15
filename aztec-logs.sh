@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.8.0"
+SCRIPT_VERSION="1.9.0"
 
 function show_logo() {
     echo -e " "
@@ -50,7 +50,7 @@ init_languages() {
   TRANSLATIONS["en,option2"]="2. Install cron monitoring agent"
   TRANSLATIONS["en,option3"]="3. Remove cron agent and files"
   TRANSLATIONS["en,option4"]="4. Find rollupAddress in logs"
-  TRANSLATIONS["en,option5"]="5. Find PeerID in logs"
+  TRANSLATIONS["en,option5"]="5. Find PeerID in logs and Nethermind.io"
   TRANSLATIONS["en,option6"]="6. Find governanceProposerPayload in logs"
   TRANSLATIONS["en,option7"]="7. Check Proven L2 Block and Sync Proof"
   TRANSLATIONS["en,option8"]="8. Change RPC URL"
@@ -83,7 +83,6 @@ init_languages() {
   TRANSLATIONS["en,rollup_found"]="✅ Current rollupAddress:"
   TRANSLATIONS["en,rollup_not_found"]="❌ rollupAddress not found in logs."
   TRANSLATIONS["en,search_peer"]="🔍 Searching for PeerID in 'aztec' container logs..."
-  TRANSLATIONS["en,peers_found"]="Found PeerIDs:"
   TRANSLATIONS["en,peer_not_found"]="❌ No PeerID found in logs."
   TRANSLATIONS["en,search_gov"]="🔍 Searching for governanceProposerPayload in 'aztec' container logs..."
   TRANSLATIONS["en,gov_found"]="Found governanceProposerPayload values:"
@@ -183,7 +182,24 @@ init_languages() {
   TRANSLATIONS["en,checking_aztec_version"]="Checking Aztec version..."
   TRANSLATIONS["en,aztec_version_failed"]="Failed to retrieve aztec version."
   TRANSLATIONS["en,aztec_node_version"]="Aztec Node version:"
-
+  TRANSLATIONS["en,critical_error_found"]="Critical error detected"
+  TRANSLATIONS["en,error_prefix"]="ERROR:"
+  TRANSLATIONS["en,solution_prefix"]="Solution:"
+  TRANSLATIONS["en,notifications_prompt"]="Do you want to receive additional notifications?"
+  TRANSLATIONS["en,notifications_option1"]="1. Critical errors only (recommended)"
+  TRANSLATIONS["en,notifications_option2"]="2. All notifications (including committee participation and block creation)"
+  TRANSLATIONS["en,notifications_debug_warning"]="DEBUG log level is required for committee and block creation notifications"
+  TRANSLATIONS["en,notifications_input_error"]="Error: please enter 1 or 2"
+  TRANSLATIONS["en,choose_option_prompt"]="Choose option"
+  TRANSLATIONS["en,committee_selected"]="🎉 You've been selected for the committee"
+  TRANSLATIONS["en,epoch_info"]="Epoch %s"
+  TRANSLATIONS["en,block_built"]="✅ Block %s successfully built"
+  TRANSLATIONS["en,slot_info"]="🧩 Slot: %s"
+  TRANSLATIONS["en,agent_notifications_full_info"]="ℹ️ Notifications will be sent for issues, committee, blocks"
+  TRANSLATIONS["en,fetching_peer_info"]="Fetching peer information from API..."
+  TRANSLATIONS["en,peer_found"]="Peer ID found in logs"
+  TRANSLATIONS["en,peer_not_in_list"]="Peer not found in the public peers list"
+  TRANSLATIONS["en,peer_id_not_critical"]="The presence or absence of a Peer ID in Nethermind.io is not a critical parameter. The data may be outdated."
 
 
   # Russian translations
@@ -193,7 +209,7 @@ init_languages() {
   TRANSLATIONS["ru,option2"]="2. Установить cron-агент для мониторинга"
   TRANSLATIONS["ru,option3"]="3. Удалить cron-агент и файлы"
   TRANSLATIONS["ru,option4"]="4. Найти адрес rollupAddress в логах"
-  TRANSLATIONS["ru,option5"]="5. Найти PeerID в логах"
+  TRANSLATIONS["ru,option5"]="5. Найти PeerID в логах и Nethermind.io"
   TRANSLATIONS["ru,option6"]="6. Найти governanceProposerPayload в логах"
   TRANSLATIONS["ru,option7"]="7. Проверить Proven L2 блок и Sync Proof"
   TRANSLATIONS["ru,option8"]="8. Изменить RPC URL"
@@ -226,7 +242,6 @@ init_languages() {
   TRANSLATIONS["ru,rollup_found"]="✅ Актуальный rollupAddress:"
   TRANSLATIONS["ru,rollup_not_found"]="❌ Адрес rollupAddress не найден в логе."
   TRANSLATIONS["ru,search_peer"]="🔍 Поиск PeerID в логах контейнера 'aztec'..."
-  TRANSLATIONS["ru,peers_found"]="Найденные PeerID:"
   TRANSLATIONS["ru,peer_not_found"]="❌ В логах PeerID не найден."
   TRANSLATIONS["ru,search_gov"]="🔍 Поиск governanceProposerPayload в логах контейнера 'aztec'..."
   TRANSLATIONS["ru,gov_found"]="Найденные значения governanceProposerPayload:"
@@ -326,6 +341,24 @@ init_languages() {
   TRANSLATIONS["ru,checking_aztec_version"]="Проверка версии Aztec..."
   TRANSLATIONS["ru,aztec_version_failed"]="Не удалось получить версию aztec."
   TRANSLATIONS["ru,aztec_node_version"]="Версия ноды Aztec:"
+  TRANSLATIONS["ru,critical_error_found"]="Найдена критическая ошибка"
+  TRANSLATIONS["ru,error_prefix"]="ОШИБКА:"
+  TRANSLATIONS["ru,solution_prefix"]="Решение:"
+  TRANSLATIONS["ru,notifications_prompt"]="Хотите получать дополнительные уведомления?"
+  TRANSLATIONS["ru,notifications_option1"]="1. Только критические ошибки (рекомендуется)"
+  TRANSLATIONS["ru,notifications_option2"]="2. Все уведомления (включая попадание в комитет и создание блоков)"
+  TRANSLATIONS["ru,notifications_debug_warning"]="Для получения уведомлений о попадании в комитет и создании блоков требуется уровень логов DEBUG"
+  TRANSLATIONS["ru,notifications_input_error"]="Ошибка: введите 1 или 2"
+  TRANSLATIONS["ru,choose_option_prompt"]="Выберите вариант"
+  TRANSLATIONS["ru,committee_selected"]="🎉 Тебя выбрали в комитет"
+  TRANSLATIONS["ru,epoch_info"]="Эпоха %s"
+  TRANSLATIONS["ru,block_built"]="✅ Блок %s успешно построен"
+  TRANSLATIONS["ru,slot_info"]="🧩 Слот: %s"
+  TRANSLATIONS["ru,agent_notifications_full_info"]="ℹ️ Уведомления будут отправляться при проблемах, выборе в комитет, создании блоков"
+  TRANSLATIONS["ru,fetching_peer_info"]="Получение информации о пире из API..."
+  TRANSLATIONS["ru,peer_found"]="Peer ID найден в логах"
+  TRANSLATIONS["ru,peer_not_in_list"]="Пир не найден в публичном списке"
+  TRANSLATIONS["ru,peer_id_not_critical"]="Наличие или отсутствие Peer ID в Nethermind.io не является критично важным параметром. Данные могут быть неактуальными."
 
 
   # Turkish translations
@@ -335,7 +368,7 @@ init_languages() {
   TRANSLATIONS["tr,option2"]="2. Cron izleme aracısını yükle"
   TRANSLATIONS["tr,option3"]="3. Cron aracısını ve dosyaları kaldır"
   TRANSLATIONS["tr,option4"]="4. Loglarda rollupAddress bul"
-  TRANSLATIONS["tr,option5"]="5. Loglarda PeerID bul"
+  TRANSLATIONS["tr,option5"]="5. Loglarda ve Nethermind.io PeerID bul"
   TRANSLATIONS["tr,option6"]="6. Loglarda governanceProposerPayload bul"
   TRANSLATIONS["tr,option7"]="7. Kanıtlanmış L2 Bloğunu ve Sync Proof'u Kontrol Et"
   TRANSLATIONS["tr,option8"]="8. RPC URL'sini değiştir"
@@ -368,7 +401,6 @@ init_languages() {
   TRANSLATIONS["tr,rollup_found"]="✅ Mevcut rollupAddress:"
   TRANSLATIONS["tr,rollup_not_found"]="❌ Loglarda rollupAddress bulunamadı."
   TRANSLATIONS["tr,search_peer"]="🔍 'aztec' konteyner loglarında PeerID aranıyor..."
-  TRANSLATIONS["tr,peers_found"]="Bulunan PeerID'ler:"
   TRANSLATIONS["tr,peer_not_found"]="❌ Loglarda PeerID bulunamadı."
   TRANSLATIONS["tr,search_gov"]="🔍 'aztec' konteyner loglarında governanceProposerPayload aranıyor..."
   TRANSLATIONS["tr,gov_found"]="Bulunan governanceProposerPayload değerleri:"
@@ -468,6 +500,24 @@ init_languages() {
   TRANSLATIONS["tr,checking_aztec_version"]="Aztec sürümü kontrol ediliyor..."
   TRANSLATIONS["tr,aztec_version_failed"]="Aztec sürümü alınamadı."
   TRANSLATIONS["tr,aztec_node_version"]="Aztec Node sürümü:"
+  TRANSLATIONS["tr,critical_error_found"]="Kritik hata tespit edildi"
+  TRANSLATIONS["tr,error_prefix"]="HATA:"
+  TRANSLATIONS["tr,solution_prefix"]="Çözüm:"
+  TRANSLATIONS["tr,notifications_prompt"]="Ek bildirim almak istiyor musunuz?"
+  TRANSLATIONS["tr,notifications_option1"]="1. Sadece kritik hatalar (tavsiye edilen)"
+  TRANSLATIONS["tr,notifications_option2"]="2. Tüm bildirimler (komite katılımı ve blok oluşturma dahil)"
+  TRANSLATIONS["tr,notifications_debug_warning"]="Komite ve blok oluşturma bildirimleri için DEBUG log seviyesi gereklidir"
+  TRANSLATIONS["tr,notifications_input_error"]="Hata: lütfen 1 veya 2 girin"
+  TRANSLATIONS["tr,choose_option_prompt"]="Seçenek belirleyin"
+  TRANSLATIONS["tr,committee_selected"]="🎉 Komiteye seçildiniz"
+  TRANSLATIONS["tr,epoch_info"]="Dönem %s"
+  TRANSLATIONS["tr,block_built"]="✅ %s bloğu başarıyla oluşturuldu"
+  TRANSLATIONS["tr,slot_info"]="🧩 Slot: %s"
+  TRANSLATIONS["tr,agent_notifications_full_info"]="ℹ️ Sorunlar, komite ve bloklar için bildirimler gönderilecek"
+  TRANSLATIONS["tr,fetching_peer_info"]="API'den eş (peer) bilgisi alınıyor..."
+  TRANSLATIONS["tr,peer_found"]="Loglarda Peer ID bulundu"
+  TRANSLATIONS["tr,peer_not_in_list"]="Eş, genel listede bulunamadı"
+  TRANSLATIONS["tr,peer_id_not_critical"]="Nethermind.io'da Peer ID'nin olup olmaması kritik bir parametre değildir. Veriler güncel olmayabilir."
 
 }
 
@@ -633,6 +683,63 @@ check_aztec_container_logs() {
     cd $HOME
     source .env-aztec-agent
 
+    # URL JSON файла с ошибками на GitHub
+    ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
+
+    # Локальный файл для кэширования
+    ERROR_DEFINITIONS_FILE="$HOME/aztec_error_definitions.json"
+
+    # Загружаем JSON с определениями ошибок
+    download_error_definitions() {
+        if ! curl -s --fail "$ERROR_DEFINITIONS_URL" -o "$ERROR_DEFINITIONS_FILE"; then
+            echo -e "${YELLOW}Warning: Failed to download error definitions from GitHub${NC}"
+            return 1
+        fi
+        return 0
+    }
+
+    # Парсим JSON и заполняем массивы
+    parse_error_definitions() {
+        # Используем jq для парсинга JSON, если установлен
+        if command -v jq >/dev/null; then
+            while IFS= read -r line; do
+                pattern=$(jq -r '.pattern' <<< "$line")
+                message=$(jq -r '.message' <<< "$line")
+                solution=$(jq -r '.solution' <<< "$line")
+                critical_errors["$pattern"]="$message"
+                error_solutions["$pattern"]="$solution"
+            done < <(jq -c '.[]' "$ERROR_DEFINITIONS_FILE")
+        else
+            # Простой парсинг без jq (ограниченная функциональность)
+            while IFS= read -r line; do
+                if [[ "$line" =~ \"pattern\":\"([^\"]*)\".*\"message\":\"([^\"]*)\".*\"solution\":\"([^\"]*)\" ]]; then
+                    pattern="${BASH_REMATCH[1]}"
+                    message="${BASH_REMATCH[2]}"
+                    solution="${BASH_REMATCH[3]}"
+                    critical_errors["$pattern"]="$message"
+                    error_solutions["$pattern"]="$solution"
+                fi
+            done < <(grep -Eo '\{[^}]+\}' "$ERROR_DEFINITIONS_FILE")
+        fi
+    }
+
+    # Инициализируем массивы для ошибок и решений
+    declare -A critical_errors
+    declare -A error_solutions
+
+    # Загружаем и парсим определения ошибок
+    if download_error_definitions; then
+        parse_error_definitions
+    else
+        # Используем встроенные ошибки по умолчанию если не удалось загрузить
+        critical_errors=(
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
+        )
+        error_solutions=(
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/alpha-testnet/data/\n3. Run the container. Use option 14"
+        )
+    fi
+
     echo -e "\n${BLUE}$(t "search_container")${NC}"
     container_id=$(docker ps --format "{{.ID}} {{.Names}}" \
                    | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
@@ -652,16 +759,29 @@ check_aztec_container_logs() {
     block_number=$((16#${block_hex#0x}))
     echo -e "\n${GREEN}$(t "current_block") $block_number${NC}"
 
-    # ---------- получаем логи контейнера без ANSI и ограничиваем объем ----------
+    # Получаем логи контейнера
     clean_logs=$(docker logs "$container_id" --tail 20000 2>&1 | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
-    # ---------- ищем последнюю подходящую строку ------------
+    # Проверяем на наличие критических ошибок
+    for error_pattern in "${!critical_errors[@]}"; do
+        if echo "$clean_logs" | grep -q "$error_pattern"; then
+            echo -e "\n${RED}$(t "critical_error_found")${NC}"
+            echo -e "${YELLOW}$(t "error_prefix") ${critical_errors[$error_pattern]}${NC}"
+
+            # Выводим решение для данной ошибки
+            if [ -n "${error_solutions[$error_pattern]}" ]; then
+                echo -e "\n${BLUE}$(t "solution_prefix")${NC}"
+                echo -e "${error_solutions[$error_pattern]}"
+            fi
+
+            return
+        fi
+    done
+
+    # Остальная часть функции остается без изменений
     temp_file=$(mktemp)
     {
-        # 1. пытаемся найти Sequencer sync check succeeded
         echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file" 2>/dev/null
-
-        # 2. если ничего не нашли — падаем к старому «Downloaded L2 block»
         if [ ! -s "$temp_file" ]; then
             echo "$clean_logs" | tac | grep -m1 'Downloaded L2 block' >"$temp_file" 2>/dev/null
         fi
@@ -678,14 +798,11 @@ check_aztec_container_logs() {
         return
     fi
 
-    # ---------- извлекаем номер блока -----------------------
     if grep -q 'Sequencer sync check succeeded' <<<"$latest_log_line"; then
-        # формат: ..."worldState":{"number":18254,"hash":...
         log_block_number=$(echo "$latest_log_line" \
             | grep -o '"worldState":{"number":[0-9]\+' \
             | grep -o '[0-9]\+$')
     else
-        # старый формат: ..."blockNumber":18254,...
         log_block_number=$(echo "$latest_log_line" \
             | grep -o '"blockNumber":[0-9]\+' \
             | head -n1 | cut -d':' -f2)
@@ -698,7 +815,6 @@ check_aztec_container_logs() {
     fi
     echo -e "\n${BLUE}$(t "log_block_number") $log_block_number${NC}"
 
-    # ---------- сравнение с текущим блоком -----------------
     if [ "$log_block_number" -eq "$block_number" ]; then
         echo -e "\n${GREEN}$(t "node_ok")${NC}"
     else
@@ -708,7 +824,6 @@ check_aztec_container_logs() {
         echo "$latest_log_line"
     fi
 }
-
 
 
 # === View Aztec container logs ===
@@ -775,6 +890,44 @@ find_rollup_address() {
   fi
 }
 
+# find_peer_id() {
+  # echo -e "\n${BLUE}$(t "search_peer")${NC}"
+
+  # container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+
+  # if [ -z "$container_id" ]; then
+    # echo -e "\n${RED}$(t "container_not_found")${NC}"
+    # return 1
+  # fi
+
+  # echo -e "\n${CYAN}$(t "peers_found")${NC}"
+
+  # # Фоновый процесс для поиска peerId
+  # _find_peer_id_worker() {
+    # sudo docker logs "$container_id" 2>&1 | \
+      # grep -i "peerId" | \
+      # grep -o '"peerId":"[^"]*"' | \
+      # cut -d'"' -f4 | \
+      # head -n 1 > /tmp/peer_id.tmp
+  # }
+
+  # _find_peer_id_worker &
+  # worker_pid=$!
+  # spinner $worker_pid
+  # wait $worker_pid
+
+  # peer_id=$(< /tmp/peer_id.tmp)
+  # rm -f /tmp/peer_id.tmp
+
+  # if [ -z "$peer_id" ]; then
+    # echo -e "${RED}$(t "peer_not_found")${NC}"
+    # return 1
+  # else
+    # echo "$peer_id"
+    # return 0
+  # fi
+# }
+
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
@@ -784,8 +937,6 @@ find_peer_id() {
     echo -e "\n${RED}$(t "container_not_found")${NC}"
     return 1
   fi
-
-  echo -e "\n${CYAN}$(t "peers_found")${NC}"
 
   # Фоновый процесс для поиска peerId
   _find_peer_id_worker() {
@@ -808,8 +959,42 @@ find_peer_id() {
     echo -e "${RED}$(t "peer_not_found")${NC}"
     return 1
   else
-    echo "$peer_id"
-    return 0
+    echo -e "\n${GREEN}$(t "peer_found")${NC}: $peer_id"
+
+    # Получаем JSON с информацией о пирах
+    echo -e "\n${CYAN}$(t "fetching_peer_info")${NC}"
+    peers_json=$(curl -s "https://aztec.nethermind.io/api/peers?page_size=30000&latest=true")
+
+    # Ищем информацию о нашем пире
+    peer_info=$(echo "$peers_json" | jq -r --arg peer_id "$peer_id" '.peers[] | select(.id == $peer_id)')
+
+    if [ -z "$peer_info" ]; then
+      echo -e "${YELLOW}$(t "peer_not_in_list")${NC}"
+	  echo -e "\n$(t "peer_id_not_critical")"
+      return 1
+    else
+      # Извлекаем данные из JSON
+      created_at=$(echo "$peer_info" | jq -r '.created_at')
+      last_seen=$(echo "$peer_info" | jq -r '.last_seen')
+      client=$(echo "$peer_info" | jq -r '.client')
+      country=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].country_name')
+      city=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].city_name')
+      latitude=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].latitude')
+      longitude=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].longitude')
+
+      # Выводим информацию в красивом виде
+      echo -e "\n${GREEN}=== Peer Information ===${NC}"
+      echo -e "${BLUE}Peer ID:${NC} $peer_id"
+      echo -e "${BLUE}Client Version:${NC} $client"
+      echo -e "${BLUE}Created At:${NC} $created_at"
+      echo -e "${BLUE}Last Seen:${NC} $last_seen"
+      echo -e "${BLUE}Location:${NC} $city, $country"
+      echo -e "${BLUE}Coordinates:${NC} $latitude, $longitude"
+
+	  echo -e "\n$(t "peer_id_not_critical")"
+
+      return 0
+    fi
   fi
 }
 
@@ -942,9 +1127,31 @@ create_cron_agent() {
     done
   fi
 
+  # === Запрос о дополнительных уведомлениях ===
+if [ -z "$NOTIFICATION_TYPE" ]; then
+  echo -e "\n${BLUE}$(t "notifications_prompt")${NC}"
+  echo -e "$(t "notifications_option1")"
+  echo -e "$(t "notifications_option2")"
+  echo -e "\n${YELLOW}$(t "notifications_debug_warning")${NC}"
+  while true; do
+    read -p "$(t "choose_option_prompt") (1/2): " NOTIFICATION_TYPE
+    if [[ "$NOTIFICATION_TYPE" =~ ^[12]$ ]]; then
+      if ! grep -q "NOTIFICATION_TYPE" "$env_file"; then
+        echo "NOTIFICATION_TYPE=\"$NOTIFICATION_TYPE\"" >> "$env_file"
+      else
+        sed -i "s/^NOTIFICATION_TYPE=.*/NOTIFICATION_TYPE=\"$NOTIFICATION_TYPE\"/" "$env_file"
+      fi
+      break
+    else
+      echo -e "${RED}$(t "notifications_input_error")${NC}"
+    fi
+  done
+fi
+
   mkdir -p "$AGENT_SCRIPT_PATH"
 
-cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
+  # Генерация скрипта агента
+  cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
 export PATH="\$PATH:/root/.foundry/bin"
 
@@ -954,7 +1161,11 @@ FUNCTION_SIG="$FUNCTION_SIG"
 TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
-LANG="$LANG"  # Передаем язык из основного скрипта
+LANG="$LANG"
+
+# URL JSON файла с ошибками на GitHub
+ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
+ERROR_DEFINITIONS_FILE="\$HOME/aztec_error_definitions.json"
 
 # Функция перевода
 t() {
@@ -982,6 +1193,14 @@ t() {
     "line_info") printf "$(t "agent_line_info")" "\$value1" ;;
     "notifications_info") echo "$(t "agent_notifications_info")" ;;
     "node_synced") printf "$(t "agent_node_synced")" "\$value1" ;;
+    "critical_error_found") echo "$(t "critical_error_found")" ;;
+    "error_prefix") echo "$(t "error_prefix")" ;;
+    "solution_prefix") echo "$(t "solution_prefix")" ;;
+    "notifications_full_info") echo "$(t "agent_notifications_full_info")" ;;
+    "committee_selected") echo "$(t "committee_selected")" ;;
+    "epoch_info") printf "$(t "epoch_info")" "\$value1" ;;
+    "block_built") printf "$(t "block_built")" "\$value1" ;;
+    "slot_info") printf "$(t "slot_info")" "\$value1" ;;
     *) echo "\$key" ;;
   esac
 }
@@ -1063,6 +1282,34 @@ hex_to_dec() {
   echo \$((16#\$hex))
 }
 
+# === Проверка критических ошибок в логах ===
+check_critical_errors() {
+  local container_id=\$1
+  local clean_logs=\$(docker logs "\$container_id" --tail 10000 2>&1 | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
+
+  # Загружаем JSON с определениями ошибок
+  if ! curl -s --fail "\$ERROR_DEFINITIONS_URL" -o "\$ERROR_DEFINITIONS_FILE"; then
+    log "Failed to download error definitions from GitHub"
+    return
+  fi
+
+  # Парсим JSON с ошибками
+  errors_count=\$(jq '. | length' "\$ERROR_DEFINITIONS_FILE")
+  for ((i=0; i<\$errors_count; i++)); do
+    pattern=\$(jq -r ".[\$i].pattern" "\$ERROR_DEFINITIONS_FILE")
+    message=\$(jq -r ".[\$i].message" "\$ERROR_DEFINITIONS_FILE")
+    solution=\$(jq -r ".[\$i].solution" "\$ERROR_DEFINITIONS_FILE")
+
+    if echo "\$clean_logs" | grep -q "\$pattern"; then
+      log "Critical error detected: \$pattern"
+      current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+      full_message="\$(t "critical_error_found")%0A\$(t "server_info" "\$ip")%0A\$(t "error_prefix") \$message%0A\$(t "solution_prefix")%0A\$solution%0A\$(t "time_info" "\$current_time")"
+      send_telegram_message "\$full_message"
+      exit 1
+    fi
+  done
+}
+
 # === Оптимизированная функция для поиска строк в логах ===
 find_last_log_line() {
   local container_id=\$1
@@ -1086,6 +1333,53 @@ find_last_log_line() {
   echo "\$line"
 }
 
+
+# === Новые функции для проверки комитета и создания блоков ===
+check_committee() {
+  if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then return; fi
+
+  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
+  if [ -z "\$container_id" ]; then return; fi
+
+  committee_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -i "is on the validator committee for epoch" | tail -n 1)
+  if [ -z "\$committee_line" ]; then return; fi
+
+  # извлекаем номер эпохи
+  epoch=\$(echo "\$committee_line" | grep -oE 'epoch [0-9]+' | awk '{print \$2}')
+  if [ -z "\$epoch" ]; then return; fi
+
+  last_epoch_file="$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
+  if [ -f "\$last_epoch_file" ] && grep -q "\$epoch" "\$last_epoch_file"; then return; fi
+  echo "\$epoch" > "\$last_epoch_file"
+
+  current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+  message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A\$(t "server_info" "\$ip")%0A\$(t "time_info" "\$current_time")"
+  send_telegram_message "\$message"
+  log "Committee notification sent: \$committee_line"
+}
+
+check_block_built() {
+  if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then return; fi
+
+  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
+  if [ -z "\$container_id" ]; then return; fi
+
+  log_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep "Built block" | grep "with" | grep "INFO: sequencer" | tail -n 1)
+  if [ -z "\$log_line" ]; then return; fi
+
+  block_number=\$(echo "\$log_line" | grep -oE 'block [0-9]+' | awk '{print \$2}')
+  slot_number=\$(echo "\$log_line" | grep -oE 'slot [0-9]+' | awk '{print \$2}')
+  last_block_file="$AGENT_SCRIPT_PATH/aztec_last_block_built"
+
+  if [ -f "\$last_block_file" ] && grep -q "\$block_number" "\$last_block_file"; then return; fi
+  echo "\$block_number" > "\$last_block_file"
+
+  current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+  message="\$(t "block_built" "\$block_number")!%0A\$(t "slot_info" "\$slot_number")%0A\$(t "server_info" "\$ip")%0A\$(t "time_info" "\$current_time")"
+  send_telegram_message "\$message"
+  log "Block built notification sent: block \$block_number slot \$slot_number"
+}
+
 # === Основная функция: проверка контейнера и сравнение блоков ===
 check_blocks() {
   container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
@@ -1096,6 +1390,9 @@ check_blocks() {
     send_telegram_message "\$message"
     exit 1
   fi
+
+  # Проверка критических ошибок
+  check_critical_errors "\$container_id"
 
   # Получаем текущий блок из контракта
   block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
@@ -1157,13 +1454,25 @@ check_blocks() {
   log "Status: \$status (logs: \$log_block_number, contract: \$block_number)"
 
   if [ ! -f "\$LOG_FILE.initialized" ]; then
-    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+  current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+
+  if [ "\$NOTIFICATION_TYPE" -eq 2 ]; then
+    # Полные уведомления (все включено)
+    message="\$(t "agent_started")%0A\$(t "server_info" "\$ip")%0A\$status%0A\$(t "notifications_full_info")%0A\$(t "time_info" "\$current_time")"
+  else
+    # Только критические уведомления
     message="\$(t "agent_started")%0A\$(t "server_info" "\$ip")%0A\$status%0A\$(t "notifications_info")%0A\$(t "time_info" "\$current_time")"
-    send_telegram_message "\$message"
-    touch "\$LOG_FILE.initialized"
-    echo "v.\$VERSION" >> "\$LOG_FILE"
-    echo "INITIALIZED" >> "\$LOG_FILE"
   fi
+
+  send_telegram_message "\$message"
+  touch "\$LOG_FILE.initialized"
+  echo "v.\$VERSION" >> "\$LOG_FILE"
+  echo "INITIALIZED" >> "\$LOG_FILE"
+fi
+
+   # Дополнительные проверки (только если NOTIFICATION_TYPE == 2)
+  check_committee
+  check_block_built
 }
 
 check_blocks
@@ -1423,7 +1732,7 @@ function stop_aztec_containers() {
 
       _update_env_var "$env_file" "RUN_TYPE" "DOCKER"
 
-      if cd "$compose_path" && docker-compose down; then
+      if cd "$compose_path" && docker compose down; then
         echo -e "${GREEN}$(t "docker_stop_success")${NC}"
       else
         echo -e "${RED}Failed to stop Docker containers${NC}"
@@ -1466,7 +1775,7 @@ function stop_aztec_containers() {
             _update_env_var "$env_file" "RUN_TYPE" "DOCKER"
 
             cd "$compose_path" || return 1
-            docker-compose down
+            docker compose down
             echo -e "${GREEN}$(t "docker_stop_success")${NC}"
           else
             echo -e "${RED}$(t "invalid_path")${NC}"
@@ -1540,7 +1849,7 @@ function start_aztec_containers() {
         _update_env_var "$env_file" "COMPOSE_PATH" "$compose_path"
       fi
 
-      if cd "$compose_path" && docker-compose up -d; then
+      if cd "$compose_path" && docker compose up -d; then
         echo -e "${GREEN}$(t "node_started")${NC}"
       else
         echo -e "${RED}Failed to start Docker containers${NC}"

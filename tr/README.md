@@ -33,19 +33,29 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler 25-06-2025  
-- "Aztec Node Containers'ı Durdur" işlevi eklendi – node konteynerini yönetme yönteminizi (docker-compose veya CLI) hatırlayan ve seçilen modda çalışmaya devam eden akıllı bir işlev.
-  - Çalışma yöntemi sorulduğunda, node’unuzun nasıl çalıştığını belirtin: `docker-compose` veya `CLI`
-  - docker-compose dosyasının yolu sorulduğunda, kök dizinden itibaren `/root/aztec` veya `./aztec` formatında yolu girin
-  - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
-- "Aztec Node Containers'ı Başlat" işlevi eklendi – bu işlev, "Aztec Node Containers'ı Durdur" işlevinde (seçenek 13) belirlenen konteyner yönetim yöntemini kullanır.
-  - Eğer konteyner yönetim yöntemini **belirlemediyseniz** (seçenek 13) ve "Aztec Node Containers'ı Başlat" işlevini kullanırsanız, bu işlev **CLI node başlatma sihirbazı** olarak çalışır. Bu durumda betik, gerekli CLI başlatma parametrelerini sorar, komutu oluşturur ve CLI node'u bir screen oturumunda başlatır.
-  - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
-- Telegram bildirimleriyle cron-agent oluşturma işlevi güncellendi – artık ChatID ve Telegram token bilgileri `.env-aztec-agent` dosyasına kaydediliyor ve cron-agent silinirken/oluşturulurken tekrar girilmesi gerekmiyor.
-- Betik yüklendiğinde Aztec Node sürüm kontrolü eklendi.
+## 📌 Son Güncellemeler 15-07-2025  
+- Telegram bildirim sistemi geliştirildi. Fikir için teşekkürler @malbur187 (Discord)
+    - Düğüm izleme cron ajanı kurulurken hangi bildirimlerin alınacağı seçilebilir: sadece hatalar veya komite seçimi ve blok oluşturma bildirimleri de dahil.
+    - Seçim `.env-aztec-agent` dosyasına kaydedilir ve sonraki ajan oluşturmalarında uygulanır. Değiştirmek isterseniz `.env-aztec-agent` dosyasını düzenleyin.
+- Kritik hata tespit özelliği eklendi. Düğüm loglarında kritik bir hata tespit edilirse, Telegram'a bildirim gönderilir.
+    - Hata listesi, tek bir JSON dosyası üzerinden güncellenerek yeni hataların ve çözüm yollarının hızlıca eklenmesi sağlanmıştır.
+- PeerID arama fonksiyonu güncellendi. Fikir için teşekkürler @web3.creed (Discord)
+    - Loglarda başarılı bir şekilde bulunduktan sonra, PeerID `aztec.nethermind.io` veritabanında kontrol edilir ve sonuç gösterilir.
+- Küçük iyileştirmeler
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 25-06-2025
+- "Aztec Node Containers'ı Durdur" işlevi eklendi – node konteynerini yönetme yönteminizi (docker-compose veya CLI) hatırlayan ve seçilen modda çalışmaya devam eden akıllı bir işlev.
+    - Çalışma yöntemi sorulduğunda, node’unuzun nasıl çalıştığını belirtin: `docker-compose` veya `CLI`
+    - docker-compose dosyasının yolu sorulduğunda, kök dizinden itibaren `/root/aztec` veya `./aztec` formatında yolu girin
+    - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
+- "Aztec Node Containers'ı Başlat" işlevi eklendi – bu işlev, "Aztec Node Containers'ı Durdur" işlevinde (seçenek 13) belirlenen konteyner yönetim yöntemini kullanır.
+    - Eğer konteyner yönetim yöntemini **belirlemediyseniz** (seçenek 13) ve "Aztec Node Containers'ı Başlat" işlevini kullanırsanız, bu işlev **CLI node başlatma sihirbazı** olarak çalışır. Bu durumda betik, gerekli CLI başlatma parametrelerini sorar, komutu oluşturur ve CLI node'u bir screen oturumunda başlatır.
+    - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
+- Telegram bildirimleriyle cron-agent oluşturma işlevi güncellendi – artık ChatID ve Telegram token bilgileri `.env-aztec-agent` dosyasına kaydediliyor ve cron-agent silinirken/oluşturulurken tekrar girilmesi gerekmiyor.
+- Betik yüklendiğinde Aztec Node sürüm kontrolü eklendi.
 
 ### 22-06-2025  
 - Aztec loglarını görüntüle fonksiyonu - son 500 satırı otomatik yenileme ile gösterecek şekilde güncellendi  
@@ -157,16 +167,19 @@ Ana menü:
 
 Betik çalıştırıldıktan sonra, **Cron izleme ajanını kur** seçeneğini seçin:
 
-* \~/aztec-monitor-agent dizininde ajan oluşturur
-* Bir cron görevi kurar
-* Telegram'a ilk durum güncellemesini gönderir
-* Node’u sürekli izler, \~/aztec-monitor-agent/agent.log dosyasına log yazar
-* Aşağıdaki durumlarda Telegram’a uyarı gönderir:
-
-  * Aztec konteyneri bulunamadıysa
-  * Log’lardaki en son blok ile akıllı kontrattaki blok **> 3 blok** fark varsa
-  * RPC sunucusunda sorun varsa
-* Log dosyası 1 MB’a ulaştığında temizlenir, ilk rapor saklanır
+- `~/aztec-monitor-agent` dizininde ajan oluşturur
+- Bir cron görevi kurar
+- Telegram'a ilk durum güncellemesini gönderir
+- Node’u sürekli izler, \~/aztec-monitor-agent/agent.log dosyasına log yazar
+- Aşağıdaki durumlarda Telegram’a uyarı gönderir:
+  - Aztec konteyneri bulunamadıysa
+  - Log’lardaki en son blok ile akıllı kontrattaki blok **> 3 blok** fark varsa
+  - RPC sunucusunda sorun varsa
+  - İşte orijinal formatı koruyarak Türkçe çevirisi:
+  - Kritik hatalar bulundu
+  - Komiteye seçildi
+  - Blok oluşturuldu
+- Log dosyası 1 MB’a ulaştığında temizlenir, ilk rapor saklanır
 
 ### Cron Ajanı Gereksinimleri:
 

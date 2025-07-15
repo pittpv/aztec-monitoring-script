@@ -68,6 +68,11 @@
         "VERSION": "1.8.0",
         "UPDATE_DATE": "25.06.2025",
         "CHANGES": ["Added function Stop Aztec Node Containers", "Added function Start Aztec Node Containers", "Updated the cron-agent creation function", "Added Aztec Node version check"]
+    },
+    {
+        "VERSION": "1.9.0",
+        "UPDATE_DATE": "15.07.2025",
+        "CHANGES": ["Improved the Telegram notification system", "Added critical error detection", "Updated the PeerID search function", "Minor improvements"]
     }
 
 ]
