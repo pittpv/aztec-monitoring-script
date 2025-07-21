@@ -36,6 +36,7 @@ This script provides a comprehensive solution for launching (via docker-compose 
 ## 📌 Latest Updates 21-07-2025
 - Updated node launch command in CLI (validatorPrivateKey**s**) for node version 1.1.0 and above
 - Added function to check for old screen sessions with node in CLI and delete them before creating a new session.
+- Rollup contract address updated.
 
 <details>
 <summary>📅 Version History</summary>

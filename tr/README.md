@@ -36,6 +36,7 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 ## 📌 Son Güncellemeler 21-07-2025  
 - 1.1.0 ve üzeri düğüm sürümleri için CLI'deki düğüm başlatma komutu (validatorPrivateKey**s**) güncellendi
 - CLI'da düğümle ilgili eski ekran oturumlarını kontrol etme ve yeni bir oturum oluşturmadan önce bunları silme işlevi eklendi
+- Rollup adresi güncellendi
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
