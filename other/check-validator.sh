@@ -136,7 +136,7 @@ t() {
 # Initialize language system with first argument
 init_languages "$1"
 
-ROLLUP_ADDRESS="0xeE6d4e937f0493Fb461F28A75Cf591f1dBa8704E"
+ROLLUP_ADDRESS="0x216f071653a82ced3ef9d29f3f0c0ed7829c8f81"
 
 load_rpc_config
 
