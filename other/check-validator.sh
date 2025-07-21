@@ -225,7 +225,7 @@ CURRENT=0
 
 for validator in "${VALIDATOR_ADDRESSES[@]}"; do
     (
-        info=$(cast call $ROLLUP_ADDRESS "getInfo(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
+        info=$(cast call $ROLLUP_ADDRESS "getStatus(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
         # Проверяем успешность вызова
         if [[ $? -ne 0 || -z "$info" ]]; then
             echo "$validator|ERROR" >> "$TMP_RESULTS"
