@@ -73,6 +73,11 @@
         "VERSION": "1.9.0",
         "UPDATE_DATE": "15.07.2025",
         "CHANGES": ["Improved the Telegram notification system", "Added critical error detection", "Updated the PeerID search function", "Minor improvements"]
+    },
+    {
+        "VERSION": "1.9.1",
+        "UPDATE_DATE": "21.07.2025",
+        "CHANGES": ["Updated node launch command in CLI (validatorPrivateKeys)", "Added function to check and delete old screen sessions"]
     }
 
 ]

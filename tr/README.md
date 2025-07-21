@@ -33,7 +33,14 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler 15-07-2025  
+## 📌 Son Güncellemeler 21-07-2025  
+- 1.1.0 ve üzeri düğüm sürümleri için CLI'deki düğüm başlatma komutu (validatorPrivateKey**s**) güncellendi
+- CLI'da düğümle ilgili eski ekran oturumlarını kontrol etme ve yeni bir oturum oluşturmadan önce bunları silme işlevi eklendi
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 15-07-2025
 - **Validatörler** için Telegram bildirim sistemi **geliştirildi**. Fikir için teşekkürler @malbur187 (Discord)
     - Düğüm izleme cron ajanı kurulurken hangi bildirimlerin alınacağı seçilebilir: sadece hatalar veya komite seçimi ve blok oluşturma bildirimleri de dahil.
     - Seçim `.env-aztec-agent` dosyasına kaydedilir ve sonraki ajan oluşturmalarında uygulanır. Değiştirmek isterseniz `.env-aztec-agent` dosyasını düzenleyin.
@@ -42,9 +49,6 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 - PeerID arama fonksiyonu güncellendi. Fikir için teşekkürler @web3.creed (Discord)
     - Loglarda başarılı bir şekilde bulunduktan sonra, PeerID `aztec.nethermind.io` veritabanında kontrol edilir ve sonuç gösterilir.
 - Küçük iyileştirmeler
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 25-06-2025
 - "Aztec Node Containers'ı Durdur" işlevi eklendi – node konteynerini yönetme yönteminizi (docker-compose veya CLI) hatırlayan ve seçilen modda çalışmaya devam eden akıllı bir işlev.

@@ -33,7 +33,14 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 15-07-2025
+## 📌 Latest Updates 21-07-2025
+- Updated node launch command in CLI (validatorPrivateKey**s**) for node version 1.1.0 and above
+- Added function to check for old screen sessions with node in CLI and delete them before creating a new session.
+
+<details>
+<summary>📅 Version History</summary>
+
+### 15-07-2025
 - Improved the Telegram notification system **for validators**. Thanks for the idea @malbur187 (Discord)
     - When setting up the node monitoring cron agent, you can now choose which notifications to receive: only errors or also committee selection and block creation alerts.
     - The selection is saved in `.env-aztec-agent` and applied during subsequent agent recreations. To modify it, edit the `.env-aztec-agent` file.
@@ -42,9 +49,6 @@ This script provides a comprehensive solution for launching (via docker-compose 
 - Updated the PeerID search function. Thanks for the idea @web3.creed (Discord)
     - After successful log detection, the PeerID is checked in the public database `aztec.nethermind.io`, and the result is displayed.
 - Minor improvements
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 25-06-2025
 - Added function "Stop Aztec Node Containers" – a smart function that remembers your method of running the node container (docker-compose or CLI) and continues to operate in the selected mode.

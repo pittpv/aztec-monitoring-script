@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.9.0"
+SCRIPT_VERSION="1.9.1"
 
 function show_logo() {
     echo -e " "
@@ -200,6 +200,7 @@ init_languages() {
   TRANSLATIONS["en,peer_found"]="Peer ID found in logs"
   TRANSLATIONS["en,peer_not_in_list"]="Peer not found in the public peers list"
   TRANSLATIONS["en,peer_id_not_critical"]="The presence or absence of a Peer ID in Nethermind.io is not a critical parameter. The data may be outdated."
+  TRANSLATIONS["en,cli_quit_old_sessions"]="Closed existing session:"
 
 
   # Russian translations
@@ -359,6 +360,7 @@ init_languages() {
   TRANSLATIONS["ru,peer_found"]="Peer ID найден в логах"
   TRANSLATIONS["ru,peer_not_in_list"]="Пир не найден в публичном списке"
   TRANSLATIONS["ru,peer_id_not_critical"]="Наличие или отсутствие Peer ID в Nethermind.io не является критично важным параметром. Данные могут быть неактуальными."
+  TRANSLATIONS["ru,cli_quit_old_sessions"]="Закрыта старая сессия:"
 
 
   # Turkish translations
@@ -518,6 +520,7 @@ init_languages() {
   TRANSLATIONS["tr,peer_found"]="Loglarda Peer ID bulundu"
   TRANSLATIONS["tr,peer_not_in_list"]="Eş, genel listede bulunamadı"
   TRANSLATIONS["tr,peer_id_not_critical"]="Nethermind.io'da Peer ID'nin olup olmaması kritik bir parametre değildir. Veriler güncel olmayabilir."
+  TRANSLATIONS["tr,cli_quit_old_sessions"]="Eski oturum kapatıldı:"
 
 }
 
@@ -889,6 +892,44 @@ find_rollup_address() {
     return 1
   fi
 }
+
+# find_peer_id() {
+  # echo -e "\n${BLUE}$(t "search_peer")${NC}"
+
+  # container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+
+  # if [ -z "$container_id" ]; then
+    # echo -e "\n${RED}$(t "container_not_found")${NC}"
+    # return 1
+  # fi
+
+  # echo -e "\n${CYAN}$(t "peers_found")${NC}"
+
+  # # Фоновый процесс для поиска peerId
+  # _find_peer_id_worker() {
+    # sudo docker logs "$container_id" 2>&1 | \
+      # grep -i "peerId" | \
+      # grep -o '"peerId":"[^"]*"' | \
+      # cut -d'"' -f4 | \
+      # head -n 1 > /tmp/peer_id.tmp
+  # }
+
+  # _find_peer_id_worker &
+  # worker_pid=$!
+  # spinner $worker_pid
+  # wait $worker_pid
+
+  # peer_id=$(< /tmp/peer_id.tmp)
+  # rm -f /tmp/peer_id.tmp
+
+  # if [ -z "$peer_id" ]; then
+    # echo -e "${RED}$(t "peer_not_found")${NC}"
+    # return 1
+  # else
+    # echo "$peer_id"
+    # return 0
+  # fi
+# }
 
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
@@ -1856,12 +1897,21 @@ function start_aztec_containers() {
       [[ -z "$session_name" ]] && session_name="aztec"
       _update_env_var "$env_file" "SCREEN_SESSION" "$session_name"
 
+      # Проверка и удаление существующих сессий с aztec
+      existing_sessions=$(screen -ls | grep -oP '[0-9]+\.aztec[^\s]*')
+      if [[ -n "$existing_sessions" ]]; then
+        while read -r session; do
+          screen -XS "$session" quit
+          echo -e "${YELLOW}$(t "cli_quit_old_sessions") $session${NC}"
+        done <<< "$existing_sessions"
+      fi
+
       if screen -dmS "$session_name" && \
          screen -S "$session_name" -p 0 -X stuff "aztec start --node --archiver --sequencer \
 --network alpha-testnet \
 --l1-rpc-urls $ethereum_rpc_url \
 --l1-consensus-host-urls $consensus_beacon_url \
---sequencer.validatorPrivateKey 0x$validator_private_key \
+--sequencer.validatorPrivateKeys 0x$validator_private_key \
 --sequencer.coinbase $coinbase \
 --p2p.p2pIp $p2p_ip"$'\n'; then
         echo -e "${GREEN}$(t "node_started")${NC}"
