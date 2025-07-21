@@ -78,6 +78,11 @@
         "VERSION": "1.9.1",
         "UPDATE_DATE": "21.07.2025",
         "CHANGES": ["Updated node launch command in CLI (validatorPrivateKeys)", "Added function to check and delete old screen sessions"]
+    },
+    {
+        "VERSION": "1.9.2",
+        "UPDATE_DATE": "21.07.2025",
+        "CHANGES": ["Updated rollup contract address"]
     }
 
 ]
