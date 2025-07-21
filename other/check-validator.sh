@@ -205,20 +205,24 @@ echo -e "${BOLD}$(t "checking_validators")${RESET}"
 CURRENT=0
 for validator in "${VALIDATOR_ADDRESSES[@]}"; do
     (
+        # Получаем данные через getAttesterView()
         response=$(cast call $ROLLUP_ADDRESS "getAttesterView(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
         if [[ $? -ne 0 || -z "$response" ]]; then
             echo "$validator|ERROR" >> "$TMP_RESULTS"
             exit 0
         fi
 
+        # Получаем отдельно withdrawer адрес через getConfig()
+        config_response=$(cast call $ROLLUP_ADDRESS "getConfig(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
+        withdrawer="0x${config_response:26:40}"
+
+        # Парсим данные из getAttesterView()
         data=${response:2}
         status_hex=${data:0:64}
         stake_hex=${data:64:64}
-        withdrawer_hex=${data:640:64}
 
         status=$(hex_to_dec "$status_hex")
         stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
-        withdrawer="0x${withdrawer_hex:24:40}"
 
         echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
     ) &
