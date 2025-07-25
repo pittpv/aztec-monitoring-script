@@ -249,8 +249,8 @@ delete_aztec_node() {
     read -p "$(t "delete_confirm")" -n 1 -r
     echo
 
-    # Очистка ввода перед выходом
-    while [[ -n $REPLY && ! $REPLY =~ ^[YyNn]$ ]]; do
+    # Проверка ввода для основного вопроса
+    while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
         read -p "Please enter Y or N: " -n 1 -r
         echo
     done
@@ -266,12 +266,12 @@ delete_aztec_node() {
 
         # Ask about Watchtower deletion if it exists
         if [ -d "$HOME/watchtower" ]; then
-            REPLY=""  # Сброс переменной перед новым запросом
+            unset REPLY  # Полный сброс переменной
             read -p "$(t "delete_watchtower_confirm")" -n 1 -r
             echo
 
             # Проверка ввода для Watchtower
-            while [[ -n $REPLY && ! $REPLY =~ ^[YyNn]$ ]]; do
+            while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
                 read -p "Please enter Y or N: " -n 1 -r
                 echo
             done
