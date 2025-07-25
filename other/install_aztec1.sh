@@ -517,6 +517,8 @@ services:
       - ${http_port}:${http_port}
     volumes:
       - /root/.aztec/alpha-testnet/data/:/data
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 EOF
 else
     # Режим одного валидатора - не включаем SEQ_PUBLISHER_PRIVATE_KEY
@@ -543,6 +545,8 @@ services:
       - ${http_port}:${http_port}
     volumes:
       - /root/.aztec/alpha-testnet/data/:/data
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 EOF
 fi
 
