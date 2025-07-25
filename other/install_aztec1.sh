@@ -458,8 +458,8 @@ mkdir -p "$HOME/aztec"
 cd "$HOME/aztec"
 
 # Ask if user wants to run single or multiple validators
-echo -e "\n${CYAN}=== Validator Setup ===${NC}"
-read -p "Do you want to run multiple validators? (y/n) " -n 1 -r
+echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
+read -p "$(t "multiple_validators_prompt")" -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
@@ -471,11 +471,13 @@ else
     SEQ_PUBLISHER_PRIVATE_KEY=""
 fi
 
+DEFAULT_IP=$(hostname -I | awk '{print $1}')
+
 echo -e "\n${GREEN}$(t "creating_env")${NC}"
 read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
 read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
 read -p "COINBASE: " COINBASE
-read -p "P2P_IP: " P2P_IP
+#read -p "P2P_IP: " P2P_IP
 
 cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
@@ -483,7 +485,7 @@ CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
 VALIDATOR_PRIVATE_KEYS=${VALIDATOR_PRIVATE_KEYS}
 SEQ_PUBLISHER_PRIVATE_KEY=${SEQ_PUBLISHER_PRIVATE_KEY}
 COINBASE=${COINBASE}
-P2P_IP=${P2P_IP}
+P2P_IP=${DEFAULT_IP}
 EOF
 
 echo -e "\n${GREEN}$(t "creating_compose")${NC}"
