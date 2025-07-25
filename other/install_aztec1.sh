@@ -94,7 +94,7 @@ init_languages() {
   TRANSLATIONS["en,multi_validator_mode"]="🔹 Multiple validators mode selected"
   TRANSLATIONS["en,enter_validator_keys"]="Enter validator private keys (comma-separated with 0x, up to 10): "
   TRANSLATIONS["en,enter_validator_key"]="Enter validator private key (with 0x): "
-  TRANSLATIONS["en,enter_seq_publisher_key"]="Enter sequencer publisher private key: "
+  TRANSLATIONS["en,enter_seq_publisher_key"]="Enter SEQ_PUBLISHER_PRIVATE_KEY (with 0x): "
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -162,7 +162,7 @@ init_languages() {
   TRANSLATIONS["ru,multi_validator_mode"]="🔹 Выбран режим нескольких валидаторов"
   TRANSLATIONS["ru,enter_validator_keys"]="Введите приватные ключи валидаторов (c 0x через запятую, до 10): "
   TRANSLATIONS["ru,enter_validator_key"]="Введите приватный ключ валидатора (с 0x): "
-  TRANSLATIONS["ru,enter_seq_publisher_key"]="Введите приватный ключ издателя секвенсера: "
+  TRANSLATIONS["ru,enter_seq_publisher_key"]="Введите SEQ_PUBLISHER_PRIVATE_KEY (с 0x): "
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -230,7 +230,7 @@ init_languages() {
   TRANSLATIONS["tr,multi_validator_mode"]="🔹 Çoklu validatör modu seçildi"
   TRANSLATIONS["tr,enter_validator_keys"]="Validatör özel anahtarlarını girin (0x ile virgülle ayrılmış, en fazla 10): "
   TRANSLATIONS["tr,enter_validator_key"]="Validatör özel anahtar girin (0x ile): "
-  TRANSLATIONS["tr,enter_seq_publisher_key"]="Sıralayıcı yayıncı özel anahtarını girin: "
+  TRANSLATIONS["tr,enter_seq_publisher_key"]="SEQ_PUBLISHER_PRIVATE_KEY girin (0x ile): "
 }
 
 # Initialize language (default to en if no argument)
@@ -266,8 +266,16 @@ delete_aztec_node() {
 
         # Ask about Watchtower deletion if it exists
         if [ -d "$HOME/watchtower" ]; then
+            REPLY=""  # Сброс переменной перед новым запросом
             read -p "$(t "delete_watchtower_confirm")" -n 1 -r
             echo
+
+            # Проверка ввода для Watchtower
+            while [[ -n $REPLY && ! $REPLY =~ ^[YyNn]$ ]]; do
+                read -p "Please enter Y or N: " -n 1 -r
+                echo
+            done
+
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 echo -e "${YELLOW}Stopping Watchtower...${NC}"
                 docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
