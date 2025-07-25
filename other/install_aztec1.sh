@@ -246,13 +246,19 @@ NC='\033[0m'
 
 delete_aztec_node() {
     echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
-    read -p "$(t "delete_confirm")" -n 1 -r
-    echo
 
-    # Проверка ввода
-    while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
-        read -p "$(t "enter_yn")" -n 1 -r
-        echo
+    # Основной запрос с циклом проверки
+    while true; do
+        read -p "$(t "delete_confirm")" -n 1 -r
+        echo  # Переводим строку после ввода
+
+        # Проверка корректности ввода
+        if [[ $REPLY =~ ^[YyNn]$ ]]; then
+            break
+        fi
+
+        # Сообщение об ошибке (выводится только один раз)
+        echo -e "${YELLOW}$(t "enter_yn")${NC}"
     done
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -266,35 +272,26 @@ delete_aztec_node() {
 
         # Проверяем Watchtower
         local WATCHTOWER_EXISTS=false
-
-        # Проверка директории
-        if [ -d "$HOME/watchtower" ]; then
-            WATCHTOWER_EXISTS=true
-        # Проверка контейнера Docker
-        elif docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
+        if [ -d "$HOME/watchtower" ] || docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
             WATCHTOWER_EXISTS=true
         fi
 
-        # Если Watchtower обнаружен
         if $WATCHTOWER_EXISTS; then
-            unset REPLY
-            read -p "$(t "delete_watchtower_confirm")" -n 1 -r
-            echo
-
-            while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
-                read -p "$(t "enter_yn")" -n 1 -r
+            while true; do
+                read -p "$(t "delete_watchtower_confirm")" -n 1 -r
                 echo
+
+                if [[ $REPLY =~ ^[YyNn]$ ]]; then
+                    break
+                fi
+                echo -e "${YELLOW}$(t "enter_yn")${NC}"
             done
 
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 echo -e "${YELLOW}$(t "stopping_watchtower")${NC}"
-                # Останавливаем и удаляем контейнер Watchtower
                 docker stop watchtower 2>/dev/null || true
                 docker rm watchtower 2>/dev/null || true
-                # Если есть docker-compose файл
-                if [ -f "$HOME/watchtower/docker-compose.yml" ]; then
-                    docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
-                fi
+                [ -f "$HOME/watchtower/docker-compose.yml" ] && docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
 
                 echo -e "${YELLOW}$(t "removing_watchtower_data")${NC}"
                 sudo rm -rf "$HOME/watchtower"
