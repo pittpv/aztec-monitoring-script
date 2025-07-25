@@ -95,6 +95,8 @@ init_languages() {
   TRANSLATIONS["en,enter_validator_keys"]="Enter validator private keys (comma-separated with 0x, up to 10): "
   TRANSLATIONS["en,enter_validator_key"]="Enter validator private key (with 0x): "
   TRANSLATIONS["en,enter_seq_publisher_key"]="Enter SEQ_PUBLISHER_PRIVATE_KEY (with 0x): "
+  TRANSLATIONS["en,validator_setup_header"]="=== Validator Setup ==="
+  TRANSLATIONS["en,multiple_validators_prompt"]="Do you want to run multiple validators? (y/n) "
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -163,6 +165,8 @@ init_languages() {
   TRANSLATIONS["ru,enter_validator_keys"]="Введите приватные ключи валидаторов (c 0x через запятую, до 10): "
   TRANSLATIONS["ru,enter_validator_key"]="Введите приватный ключ валидатора (с 0x): "
   TRANSLATIONS["ru,enter_seq_publisher_key"]="Введите SEQ_PUBLISHER_PRIVATE_KEY (с 0x): "
+  TRANSLATIONS["ru,validator_setup_header"]="=== Настройка валидатора ==="
+  TRANSLATIONS["ru,multiple_validators_prompt"]="Вы хотите запустить несколько валидаторов? (y/n)"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -231,6 +235,8 @@ init_languages() {
   TRANSLATIONS["tr,enter_validator_keys"]="Validatör özel anahtarlarını girin (0x ile virgülle ayrılmış, en fazla 10): "
   TRANSLATIONS["tr,enter_validator_key"]="Validatör özel anahtar girin (0x ile): "
   TRANSLATIONS["tr,enter_seq_publisher_key"]="SEQ_PUBLISHER_PRIVATE_KEY girin (0x ile): "
+  TRANSLATIONS["tr,validator_setup_header"]="=== Validator Kurulumu ==="
+  TRANSLATIONS["tr,multiple_validators_prompt"]="Birden fazla validator çalıştırmak istiyor musunuz? (y/n) "
 }
 
 # Initialize language (default to en if no argument)
