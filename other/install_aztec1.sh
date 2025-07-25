@@ -247,19 +247,14 @@ NC='\033[0m'
 delete_aztec_node() {
     echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
 
-    # Основной запрос с циклом проверки
-    while true; do
-        read -p "$(t "delete_confirm")" -n 1 -r
-        echo  # Переводим строку после ввода
-
-        # Проверка корректности ввода
-        if [[ $REPLY =~ ^[YyNn]$ ]]; then
-            break
-        fi
-
-        # Сообщение об ошибке (выводится только один раз)
-        echo -e "${YELLOW}$(t "enter_yn")${NC}"
+    # Основной запрос
+    while :; do
+        read -p "$(t "delete_confirm") " -n 1 -r
+        [[ $REPLY =~ ^[YyNn]$ ]] && break
+        # Добавляем перевод строки только если ввод был неправильный
+        echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
     done
+    echo  # Фиксируем окончательный перевод строки
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         echo -e "${YELLOW}$(t "stopping_containers")${NC}"
@@ -271,21 +266,13 @@ delete_aztec_node() {
         echo -e "${GREEN}$(t "node_deleted")${NC}"
 
         # Проверяем Watchtower
-        local WATCHTOWER_EXISTS=false
         if [ -d "$HOME/watchtower" ] || docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
-            WATCHTOWER_EXISTS=true
-        fi
-
-        if $WATCHTOWER_EXISTS; then
-            while true; do
-                read -p "$(t "delete_watchtower_confirm")" -n 1 -r
-                echo
-
-                if [[ $REPLY =~ ^[YyNn]$ ]]; then
-                    break
-                fi
-                echo -e "${YELLOW}$(t "enter_yn")${NC}"
+            while :; do
+                read -p "$(t "delete_watchtower_confirm") " -n 1 -r
+                [[ $REPLY =~ ^[YyNn]$ ]] && break
+                echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
             done
+            echo
 
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 echo -e "${YELLOW}$(t "stopping_watchtower")${NC}"
