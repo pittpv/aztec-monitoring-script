@@ -251,15 +251,15 @@ delete_aztec_node() {
 
     # Проверка ввода
     while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
-        read -p "Please enter Y or N: " -n 1 -r
+        read -p "$(t "enter_yn")" -n 1 -r
         echo
     done
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${YELLOW}Stopping containers...${NC}"
+        echo -e "${YELLOW}$(t "stopping_containers")${NC}"
         docker compose -f "$HOME/aztec/docker-compose.yml" down || true
 
-        echo -e "${YELLOW}Removing Aztec node data...${NC}"
+        echo -e "${YELLOW}$(t "removing_node_data")${NC}"
         sudo rm -rf "$HOME/.aztec" "$HOME/aztec"
 
         echo -e "${GREEN}$(t "node_deleted")${NC}"
@@ -282,12 +282,12 @@ delete_aztec_node() {
             echo
 
             while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
-                read -p "Please enter Y or N: " -n 1 -r
+                read -p "$(t "enter_yn")" -n 1 -r
                 echo
             done
 
             if [[ $REPLY =~ ^[Yy]$ ]]; then
-                echo -e "${YELLOW}Stopping Watchtower...${NC}"
+                echo -e "${YELLOW}$(t "stopping_watchtower")${NC}"
                 # Останавливаем и удаляем контейнер Watchtower
                 docker stop watchtower 2>/dev/null || true
                 docker rm watchtower 2>/dev/null || true
@@ -296,7 +296,7 @@ delete_aztec_node() {
                     docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
                 fi
 
-                echo -e "${YELLOW}Removing Watchtower data...${NC}"
+                echo -e "${YELLOW}$(t "removing_watchtower_data")${NC}"
                 sudo rm -rf "$HOME/watchtower"
                 echo -e "${GREEN}$(t "watchtower_deleted")${NC}"
             else
