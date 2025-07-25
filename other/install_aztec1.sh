@@ -249,7 +249,7 @@ delete_aztec_node() {
     read -p "$(t "delete_confirm")" -n 1 -r
     echo
 
-    # Проверка ввода для основного вопроса
+    # Проверка ввода
     while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
         read -p "Please enter Y or N: " -n 1 -r
         echo
@@ -264,13 +264,23 @@ delete_aztec_node() {
 
         echo -e "${GREEN}$(t "node_deleted")${NC}"
 
-        # Ask about Watchtower deletion if it exists
+        # Проверяем Watchtower
+        local WATCHTOWER_EXISTS=false
+
+        # Проверка директории
         if [ -d "$HOME/watchtower" ]; then
-            unset REPLY  # Полный сброс переменной
+            WATCHTOWER_EXISTS=true
+        # Проверка контейнера Docker
+        elif docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
+            WATCHTOWER_EXISTS=true
+        fi
+
+        # Если Watchtower обнаружен
+        if $WATCHTOWER_EXISTS; then
+            unset REPLY
             read -p "$(t "delete_watchtower_confirm")" -n 1 -r
             echo
 
-            # Проверка ввода для Watchtower
             while [[ ! $REPLY =~ ^[YyNn]$ ]]; do
                 read -p "Please enter Y or N: " -n 1 -r
                 echo
@@ -278,7 +288,14 @@ delete_aztec_node() {
 
             if [[ $REPLY =~ ^[Yy]$ ]]; then
                 echo -e "${YELLOW}Stopping Watchtower...${NC}"
-                docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
+                # Останавливаем и удаляем контейнер Watchtower
+                docker stop watchtower 2>/dev/null || true
+                docker rm watchtower 2>/dev/null || true
+                # Если есть docker-compose файл
+                if [ -f "$HOME/watchtower/docker-compose.yml" ]; then
+                    docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
+                fi
+
                 echo -e "${YELLOW}Removing Watchtower data...${NC}"
                 sudo rm -rf "$HOME/watchtower"
                 echo -e "${GREEN}$(t "watchtower_deleted")${NC}"
