@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.9.2"
+SCRIPT_VERSION="1.10.0"
 
 function show_logo() {
     echo -e " "
@@ -157,10 +157,6 @@ init_languages() {
   TRANSLATIONS["en,chatid_number"]="Chat ID must be a number (can start with - for group chats). Please try again."
   TRANSLATIONS["en,running_install_node"]="Running Install Aztec node script from GitHub..."
   TRANSLATIONS["en,failed_running_install_node"]="Failed to run Aztec node install script from GitHub..."
-  TRANSLATIONS["en,delete_node"]="🗑️ Deleting Aztec Node..."
-  TRANSLATIONS["en,delete_confirm"]="Are you sure you want to delete the Aztec node? This will stop containers and remove all data. (y/n) "
-  TRANSLATIONS["en,node_deleted"]="✅ Aztec node successfully deleted"
-  TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
   TRANSLATIONS["en,failed_downloading_script"]="❌ Failed to download installation script"
   TRANSLATIONS["en,install_completed_successfully"]="✅ Installation completed successfully"
   TRANSLATIONS["en,logs_stopped_by_user"]="⚠ Log viewing stopped by user"
@@ -201,7 +197,26 @@ init_languages() {
   TRANSLATIONS["en,peer_not_in_list"]="Peer not found in the public peers list"
   TRANSLATIONS["en,peer_id_not_critical"]="The presence or absence of a Peer ID in Nethermind.io is not a critical parameter. The data may be outdated."
   TRANSLATIONS["en,cli_quit_old_sessions"]="Closed existing session:"
-
+  #install section
+  TRANSLATIONS["en,delete_node"]="🗑️ Deleting Aztec Node..."
+  TRANSLATIONS["en,delete_confirm"]="Are you sure you want to delete the Aztec node? This will stop containers and remove all data. (y/n) "
+  TRANSLATIONS["en,node_deleted"]="✅ Aztec node successfully deleted"
+  TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
+  TRANSLATIONS["en,delete_watchtower_confirm"]="Do you want to also delete Watchtower? (y/n) "
+  TRANSLATIONS["en,watchtower_deleted"]="✅ Watchtower successfully deleted"
+  TRANSLATIONS["en,watchtower_kept"]="✅ Watchtower kept intact"
+  TRANSLATIONS["en,enter_tg_token"]="Enter Telegram bot token: "
+  TRANSLATIONS["en,enter_tg_chat_id"]="Enter Telegram chat ID: "
+  TRANSLATIONS["en,single_validator_mode"]="🔹 Single validator mode selected"
+  TRANSLATIONS["en,multi_validator_mode"]="🔹 Multiple validators mode selected"
+  TRANSLATIONS["en,enter_validator_keys"]="Enter validator private keys (comma-separated with 0x, up to 10): "
+  TRANSLATIONS["en,enter_validator_key"]="Enter validator private key (with 0x): "
+  TRANSLATIONS["en,enter_seq_publisher_key"]="Enter SEQ_PUBLISHER_PRIVATE_KEY (with 0x): "
+  TRANSLATIONS["en,enter_yn"]="Please enter Y or N: "
+  TRANSLATIONS["en,stopping_containers"]="Stopping containers..."
+  TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
+  TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
+  TRANSLATIONS["en,removing_watchtower_data"]="Removing Watchtower data..."
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -317,10 +332,6 @@ init_languages() {
   TRANSLATIONS["ru,chatid_number"]="Chat ID должен быть числом (может начинаться с - для групповых чатов). Пожалуйста, попробуйте снова."
   TRANSLATIONS["ru,running_install_node"]="Запуск скрипта установки Aztec node из GitHub..."
   TRANSLATIONS["ru,failed_running_install_node"]="Не удалось запустить скрипт установки узла Aztec из GitHub..."
-  TRANSLATIONS["ru,delete_node"]="🗑️ Удаление ноды Aztec..."
-  TRANSLATIONS["ru,delete_confirm"]="Вы уверены, что хотите удалить ноду Aztec? Это остановит контейнеры и удалит все данные. (y/n) "
-  TRANSLATIONS["ru,node_deleted"]="✅ Нода Aztec успешно удалена"
-  TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
   TRANSLATIONS["ru,failed_downloading_script"]="❌ Не удалось загрузить скрипт установки"
   TRANSLATIONS["ru,install_completed_successfully"]="✅ Установка успешно завершена"
   TRANSLATIONS["ru,logs_stopped_by_user"]="⚠ Просмотр логов остановлен пользователем"
@@ -361,6 +372,26 @@ init_languages() {
   TRANSLATIONS["ru,peer_not_in_list"]="Пир не найден в публичном списке"
   TRANSLATIONS["ru,peer_id_not_critical"]="Наличие или отсутствие Peer ID в Nethermind.io не является критично важным параметром. Данные могут быть неактуальными."
   TRANSLATIONS["ru,cli_quit_old_sessions"]="Закрыта старая сессия:"
+  #delete section
+  TRANSLATIONS["ru,delete_node"]="🗑️ Удаление ноды Aztec..."
+  TRANSLATIONS["ru,delete_confirm"]="Вы уверены, что хотите удалить ноду Aztec? Это остановит контейнеры и удалит все данные. (y/n) "
+  TRANSLATIONS["ru,node_deleted"]="✅ Нода Aztec успешно удалена"
+  TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
+  TRANSLATIONS["ru,delete_watchtower_confirm"]="Хотите также удалить Watchtower? (y/n) "
+  TRANSLATIONS["ru,watchtower_deleted"]="✅ Watchtower успешно удален"
+  TRANSLATIONS["ru,watchtower_kept"]="✅ Watchtower оставлен без изменений"
+  TRANSLATIONS["ru,enter_tg_token"]="Введите токен Telegram бота: "
+  TRANSLATIONS["ru,enter_tg_chat_id"]="Введите ID Telegram чата: "
+  TRANSLATIONS["ru,single_validator_mode"]="🔹 Выбран режим одного валидатора"
+  TRANSLATIONS["ru,multi_validator_mode"]="🔹 Выбран режим нескольких валидаторов"
+  TRANSLATIONS["ru,enter_validator_keys"]="Введите приватные ключи валидаторов (c 0x через запятую, до 10): "
+  TRANSLATIONS["ru,enter_validator_key"]="Введите приватный ключ валидатора (с 0x): "
+  TRANSLATIONS["ru,enter_seq_publisher_key"]="Введите SEQ_PUBLISHER_PRIVATE_KEY (с 0x): "
+  TRANSLATIONS["ru,enter_yn"]="Пожалуйста, введите Y или N: "
+  TRANSLATIONS["ru,stopping_containers"]="Остановка контейнеров..."
+  TRANSLATIONS["ru,removing_node_data"]="Удаление данных ноды Aztec..."
+  TRANSLATIONS["ru,stopping_watchtower"]="Остановка Watchtower..."
+  TRANSLATIONS["ru,removing_watchtower_data"]="Удаление данных Watchtower..."
 
 
   # Turkish translations
@@ -477,10 +508,6 @@ init_languages() {
   TRANSLATIONS["tr,chatid_number"]="Chat ID bir sayı olmalıdır (grup sohbetleri için - ile başlayabilir). Lütfen tekrar deneyin."
   TRANSLATIONS["tr,running_install_node"]="GitHub'dan Aztec node kurulum betiği çalıştırılıyor..."
   TRANSLATIONS["tr,failed_running_install_node"]="GitHub'dan Aztec düğüm yükleme betiği çalıştırılamadı..."
-  TRANSLATIONS["tr,delete_node"]="🗑️ Aztec Node siliniyor..."
-  TRANSLATIONS["tr,delete_confirm"]="Aztec node'u silmek istediğinize emin misiniz? Bu işlem konteynerleri durduracak ve tüm verileri silecektir. (y/n) "
-  TRANSLATIONS["tr,node_deleted"]="✅ Aztec node başarıyla silindi"
-  TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
   TRANSLATIONS["tr,failed_downloading_script"]="❌ Kurulum betiği indirilemedi"
   TRANSLATIONS["tr,install_completed_successfully"]="✅ Kurulum başarıyla tamamlandı"
   TRANSLATIONS["tr,logs_stopped_by_user"]="⚠ Log görüntüleme kullanıcı tarafından durduruldu"
@@ -521,6 +548,26 @@ init_languages() {
   TRANSLATIONS["tr,peer_not_in_list"]="Eş, genel listede bulunamadı"
   TRANSLATIONS["tr,peer_id_not_critical"]="Nethermind.io'da Peer ID'nin olup olmaması kritik bir parametre değildir. Veriler güncel olmayabilir."
   TRANSLATIONS["tr,cli_quit_old_sessions"]="Eski oturum kapatıldı:"
+  # install section
+  TRANSLATIONS["tr,delete_node"]="🗑️ Aztec Node siliniyor..."
+  TRANSLATIONS["tr,delete_confirm"]="Aztec node'u silmek istediğinize emin misiniz? Bu işlem konteynerleri durduracak ve tüm verileri silecektir. (y/n) "
+  TRANSLATIONS["tr,node_deleted"]="✅ Aztec node başarıyla silindi"
+  TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
+  TRANSLATIONS["tr,delete_watchtower_confirm"]="Watchtower'ı da silmek istiyor musunuz? (y/n) "
+  TRANSLATIONS["tr,watchtower_deleted"]="✅ Watchtower başarıyla silindi"
+  TRANSLATIONS["tr,watchtower_kept"]="✅ Watchtower korundu"
+  TRANSLATIONS["tr,enter_tg_token"]="Telegram bot tokenini girin: "
+  TRANSLATIONS["tr,enter_tg_chat_id"]="Telegram chat ID'sini girin: "
+  TRANSLATIONS["tr,single_validator_mode"]="🔹 Tek validatör modu seçildi"
+  TRANSLATIONS["tr,multi_validator_mode"]="🔹 Çoklu validatör modu seçildi"
+  TRANSLATIONS["tr,enter_validator_keys"]="Validatör özel anahtarlarını girin (0x ile virgülle ayrılmış, en fazla 10): "
+  TRANSLATIONS["tr,enter_validator_key"]="Validatör özel anahtar girin (0x ile): "
+  TRANSLATIONS["tr,enter_seq_publisher_key"]="SEQ_PUBLISHER_PRIVATE_KEY girin (0x ile): "
+  TRANSLATIONS["tr,enter_yn"]="Lütfen Y veya N girin: "
+  TRANSLATIONS["tr,stopping_containers"]="Konteynerler durduruluyor..."
+  TRANSLATIONS["tr,removing_node_data"]="Aztec node verileri kaldırılıyor..."
+  TRANSLATIONS["tr,stopping_watchtower"]="Watchtower durduruluyor..."
+  TRANSLATIONS["tr,removing_watchtower_data"]="Watchtower verileri kaldırılıyor..."
 
 }
 
@@ -892,44 +939,6 @@ find_rollup_address() {
     return 1
   fi
 }
-
-# find_peer_id() {
-  # echo -e "\n${BLUE}$(t "search_peer")${NC}"
-
-  # container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
-
-  # if [ -z "$container_id" ]; then
-    # echo -e "\n${RED}$(t "container_not_found")${NC}"
-    # return 1
-  # fi
-
-  # echo -e "\n${CYAN}$(t "peers_found")${NC}"
-
-  # # Фоновый процесс для поиска peerId
-  # _find_peer_id_worker() {
-    # sudo docker logs "$container_id" 2>&1 | \
-      # grep -i "peerId" | \
-      # grep -o '"peerId":"[^"]*"' | \
-      # cut -d'"' -f4 | \
-      # head -n 1 > /tmp/peer_id.tmp
-  # }
-
-  # _find_peer_id_worker &
-  # worker_pid=$!
-  # spinner $worker_pid
-  # wait $worker_pid
-
-  # peer_id=$(< /tmp/peer_id.tmp)
-  # rm -f /tmp/peer_id.tmp
-
-  # if [ -z "$peer_id" ]; then
-    # echo -e "${RED}$(t "peer_not_found")${NC}"
-    # return 1
-  # else
-    # echo "$peer_id"
-    # return 0
-  # fi
-# }
 
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
@@ -1683,6 +1692,7 @@ function delete_aztec() {
     # Загружаем скрипт во временную переменную и выполняем функцию
     source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
 }
+
 
 # === Common helper functions ===
 function _ensure_env_file() {

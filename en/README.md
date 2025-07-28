@@ -33,13 +33,18 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 21-07-2025
-- Updated node launch command in CLI (validatorPrivateKey**s**) for node version 1.1.0 and above
-- Added function to check for old screen sessions with node in CLI and delete them before creating a new session.
-- Rollup contract address updated.
+## 📌 Latest Updates 28-07-2025
+- Updated the Aztec node installation script with Watchtower. During installation, the script will ask, "Do you want to run multiple validators? (y/n)"
+    - Installation in multivalidator mode (up to 10 validators per node)
+    - Installation in single-validator mode
 
 <details>
 <summary>📅 Version History</summary>
+
+### 21-07-2025
+- Updated node launch command in CLI (validatorPrivateKey**s**) for node version 1.1.0 and above
+- Added function to check for old screen sessions with node in CLI and delete them before creating a new session.
+- Rollup contract address updated.
 
 ### 15-07-2025
 - Improved the Telegram notification system **for validators**. Thanks for the idea @malbur187 (Discord)

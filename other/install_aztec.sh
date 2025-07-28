@@ -82,6 +82,21 @@ init_languages() {
   TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
   TRANSLATIONS["en,warn_orig_install"]="⚠️ Type 'n' when prompted with the question:"
   TRANSLATIONS["en,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["en,watchtower_exists"]="✅ Watchtower is already installed"
+  TRANSLATIONS["en,installing_watchtower"]="⬇️ Installing Watchtower..."
+  TRANSLATIONS["en,creating_watchtower_compose"]="🛠️ Creating Watchtower docker-compose.yml"
+  TRANSLATIONS["en,delete_watchtower_confirm"]="Do you want to also delete Watchtower? (y/n) "
+  TRANSLATIONS["en,watchtower_deleted"]="✅ Watchtower successfully deleted"
+  TRANSLATIONS["en,watchtower_kept"]="✅ Watchtower kept intact"
+  TRANSLATIONS["en,enter_tg_token"]="Enter Telegram bot token: "
+  TRANSLATIONS["en,enter_tg_chat_id"]="Enter Telegram chat ID: "
+  TRANSLATIONS["en,single_validator_mode"]="🔹 Single validator mode selected"
+  TRANSLATIONS["en,multi_validator_mode"]="🔹 Multiple validators mode selected"
+  TRANSLATIONS["en,enter_validator_keys"]="Enter validator private keys (comma-separated with 0x, up to 10): "
+  TRANSLATIONS["en,enter_validator_key"]="Enter validator private key (with 0x): "
+  TRANSLATIONS["en,enter_seq_publisher_key"]="Enter SEQ_PUBLISHER_PRIVATE_KEY (with 0x): "
+  TRANSLATIONS["en,validator_setup_header"]="=== Validator Setup ==="
+  TRANSLATIONS["en,multiple_validators_prompt"]="Do you want to run multiple validators? (y/n) "
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -137,6 +152,21 @@ init_languages() {
   TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
   TRANSLATIONS["ru,warn_orig_install"]="⚠️ Введите 'n' когда появится вопрос:"
   TRANSLATIONS["ru,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["ru,watchtower_exists"]="✅ Watchtower уже установлен"
+  TRANSLATIONS["ru,installing_watchtower"]="⬇️ Установка Watchtower..."
+  TRANSLATIONS["ru,creating_watchtower_compose"]="🛠️ Создание Watchtower docker-compose.yml"
+  TRANSLATIONS["ru,delete_watchtower_confirm"]="Хотите также удалить Watchtower? (y/n) "
+  TRANSLATIONS["ru,watchtower_deleted"]="✅ Watchtower успешно удален"
+  TRANSLATIONS["ru,watchtower_kept"]="✅ Watchtower оставлен без изменений"
+  TRANSLATIONS["ru,enter_tg_token"]="Введите токен Telegram бота: "
+  TRANSLATIONS["ru,enter_tg_chat_id"]="Введите ID Telegram чата: "
+  TRANSLATIONS["ru,single_validator_mode"]="🔹 Выбран режим одного валидатора"
+  TRANSLATIONS["ru,multi_validator_mode"]="🔹 Выбран режим нескольких валидаторов"
+  TRANSLATIONS["ru,enter_validator_keys"]="Введите приватные ключи валидаторов (c 0x через запятую, до 10): "
+  TRANSLATIONS["ru,enter_validator_key"]="Введите приватный ключ валидатора (с 0x): "
+  TRANSLATIONS["ru,enter_seq_publisher_key"]="Введите SEQ_PUBLISHER_PRIVATE_KEY (с 0x): "
+  TRANSLATIONS["ru,validator_setup_header"]="=== Настройка валидатора ==="
+  TRANSLATIONS["ru,multiple_validators_prompt"]="Вы хотите запустить несколько валидаторов? (y/n)"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -192,6 +222,21 @@ init_languages() {
   TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
   TRANSLATIONS["tr,warn_orig_install"]="⚠️ Şu soru çıktığında 'n' yazın:"
   TRANSLATIONS["tr,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["tr,watchtower_exists"]="✅ Watchtower zaten yüklü"
+  TRANSLATIONS["tr,installing_watchtower"]="⬇️ Watchtower yükleniyor..."
+  TRANSLATIONS["tr,creating_watchtower_compose"]="🛠️ Watchtower docker-compose.yml oluşturuluyor"
+  TRANSLATIONS["tr,delete_watchtower_confirm"]="Watchtower'ı da silmek istiyor musunuz? (y/n) "
+  TRANSLATIONS["tr,watchtower_deleted"]="✅ Watchtower başarıyla silindi"
+  TRANSLATIONS["tr,watchtower_kept"]="✅ Watchtower korundu"
+  TRANSLATIONS["tr,enter_tg_token"]="Telegram bot tokenini girin: "
+  TRANSLATIONS["tr,enter_tg_chat_id"]="Telegram chat ID'sini girin: "
+  TRANSLATIONS["tr,single_validator_mode"]="🔹 Tek validatör modu seçildi"
+  TRANSLATIONS["tr,multi_validator_mode"]="🔹 Çoklu validatör modu seçildi"
+  TRANSLATIONS["tr,enter_validator_keys"]="Validatör özel anahtarlarını girin (0x ile virgülle ayrılmış, en fazla 10): "
+  TRANSLATIONS["tr,enter_validator_key"]="Validatör özel anahtar girin (0x ile): "
+  TRANSLATIONS["tr,enter_seq_publisher_key"]="SEQ_PUBLISHER_PRIVATE_KEY girin (0x ile): "
+  TRANSLATIONS["tr,validator_setup_header"]="=== Validator Kurulumu ==="
+  TRANSLATIONS["tr,multiple_validators_prompt"]="Birden fazla validator çalıştırmak istiyor musunuz? (y/n) "
 }
 
 # Initialize language (default to en if no argument)
@@ -201,27 +246,54 @@ init_languages "$1"
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
+CYAN='\033[0;36m'
+GRAY='\033[0;37m'
 NC='\033[0m'
 
 delete_aztec_node() {
     echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
-    read -p "$(t "delete_confirm")" -n 1 -r
-    echo
 
-    # Очистка ввода перед выходом
-    while [[ -n $REPLY && ! $REPLY =~ ^[YyNn]$ ]]; do
-        read -p "Please enter Y or N: " -n 1 -r
-        echo
+    # Основной запрос
+    while :; do
+        read -p "$(t "delete_confirm") " -n 1 -r
+        [[ $REPLY =~ ^[YyNn]$ ]] && break
+        # Добавляем перевод строки только если ввод был неправильный
+        echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
     done
+    echo  # Фиксируем окончательный перевод строки
 
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${YELLOW}Stopping containers...${NC}"
+        echo -e "${YELLOW}$(t "stopping_containers")${NC}"
         docker compose -f "$HOME/aztec/docker-compose.yml" down || true
 
-        echo -e "${YELLOW}Removing data...${NC}"
+        echo -e "${YELLOW}$(t "removing_node_data")${NC}"
         sudo rm -rf "$HOME/.aztec" "$HOME/aztec"
 
         echo -e "${GREEN}$(t "node_deleted")${NC}"
+
+        # Проверяем Watchtower
+        if [ -d "$HOME/watchtower" ] || docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
+            while :; do
+                read -p "$(t "delete_watchtower_confirm") " -n 1 -r
+                [[ $REPLY =~ ^[YyNn]$ ]] && break
+                echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
+            done
+            echo
+
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo -e "${YELLOW}$(t "stopping_watchtower")${NC}"
+                docker stop watchtower 2>/dev/null || true
+                docker rm watchtower 2>/dev/null || true
+                [ -f "$HOME/watchtower/docker-compose.yml" ] && docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
+
+                echo -e "${YELLOW}$(t "removing_watchtower_data")${NC}"
+                sudo rm -rf "$HOME/watchtower"
+                echo -e "${GREEN}$(t "watchtower_deleted")${NC}"
+            else
+                echo -e "${GREEN}$(t "watchtower_kept")${NC}"
+            fi
+        fi
+
         return 0
     else
         echo -e "${YELLOW}$(t "delete_canceled")${NC}"
@@ -380,43 +452,60 @@ sudo ufw allow "$p2p_port"
 sudo ufw allow "$http_port"
 echo -e "\n${GREEN}$(t "ports_opened")${NC}"
 
+# Create Aztec node folder and files
 echo -e "\n${GREEN}$(t "creating_folder")${NC}"
 mkdir -p "$HOME/aztec"
 cd "$HOME/aztec"
 
+# Ask if user wants to run single or multiple validators
+echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
+read -p "$(t "multiple_validators_prompt")" -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
+    read -p "$(t "enter_validator_keys") " VALIDATOR_PRIVATE_KEYS
+    read -p "$(t "enter_seq_publisher_key") " SEQ_PUBLISHER_PRIVATE_KEY
+else
+    echo -e "\n${GREEN}$(t "single_validator_mode")${NC}"
+    read -p "$(t "enter_validator_key") " VALIDATOR_PRIVATE_KEYS
+    SEQ_PUBLISHER_PRIVATE_KEY=""
+fi
+
+DEFAULT_IP=$(hostname -I | awk '{print $1}')
+
 echo -e "\n${GREEN}$(t "creating_env")${NC}"
 read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
 read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
-read -p "VALIDATOR_PRIVATE_KEY: " VALIDATOR_PRIVATE_KEY
 read -p "COINBASE: " COINBASE
-read -p "P2P_IP: " P2P_IP
+#read -p "P2P_IP: " P2P_IP
 
 cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
 CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
-VALIDATOR_PRIVATE_KEY=${VALIDATOR_PRIVATE_KEY}
+VALIDATOR_PRIVATE_KEYS=${VALIDATOR_PRIVATE_KEYS}
+SEQ_PUBLISHER_PRIVATE_KEY=${SEQ_PUBLISHER_PRIVATE_KEY}
 COINBASE=${COINBASE}
-P2P_IP=${P2P_IP}
+P2P_IP=${DEFAULT_IP}
 EOF
 
-echo -e "\n${GREEN}$(t "env_created")${NC}"
-
 echo -e "\n${GREEN}$(t "creating_compose")${NC}"
-cat > docker-compose.yml <<EOF
+
+# Создаем docker-compose.yml с учетом выбранного режима
+if [[ -n "$SEQ_PUBLISHER_PRIVATE_KEY" ]]; then
+    # Режим нескольких валидаторов - включаем SEQ_PUBLISHER_PRIVATE_KEY
+    cat > docker-compose.yml <<EOF
 services:
   aztec-node:
     container_name: aztec-sequencer
     network_mode: host
     image: aztecprotocol/aztec:latest
     restart: unless-stopped
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
-      - "com.centurylinklabs.watchtower.auto-update=config"
     environment:
       ETHEREUM_HOSTS: \${ETHEREUM_RPC_URL}
       L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
       DATA_DIRECTORY: /data
-      VALIDATOR_PRIVATE_KEY: \${VALIDATOR_PRIVATE_KEY}
+      VALIDATOR_PRIVATE_KEYS: \${VALIDATOR_PRIVATE_KEYS}
+      SEQ_PUBLISHER_PRIVATE_KEY: \${SEQ_PUBLISHER_PRIVATE_KEY}
       COINBASE: \${COINBASE}
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: debug
@@ -428,22 +517,100 @@ services:
       - ${http_port}:${http_port}
     volumes:
       - /root/.aztec/alpha-testnet/data/:/data
-
-  watchtower:
-    image: containrrr/watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    command: --interval 3600 --cleanup --label-enable
-    restart: unless-stopped
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
 EOF
+else
+    # Режим одного валидатора - не включаем SEQ_PUBLISHER_PRIVATE_KEY
+    cat > docker-compose.yml <<EOF
+services:
+  aztec-node:
+    container_name: aztec-sequencer
+    network_mode: host
+    image: aztecprotocol/aztec:latest
+    restart: unless-stopped
+    environment:
+      ETHEREUM_HOSTS: \${ETHEREUM_RPC_URL}
+      L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
+      DATA_DIRECTORY: /data
+      VALIDATOR_PRIVATE_KEYS: \${VALIDATOR_PRIVATE_KEYS}
+      COINBASE: \${COINBASE}
+      P2P_IP: \${P2P_IP}
+      LOG_LEVEL: debug
+    entrypoint: >
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network alpha-testnet --node --archiver --sequencer'
+    ports:
+      - ${p2p_port}:${p2p_port}/tcp
+      - ${p2p_port}:${p2p_port}/udp
+      - ${http_port}:${http_port}
+    volumes:
+      - /root/.aztec/alpha-testnet/data/:/data
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+EOF
+fi
 
 echo -e "\n${GREEN}$(t "compose_created")${NC}"
 
+# Check if Watchtower is already installed
+if [ -d "$HOME/watchtower" ]; then
+    echo -e "\n${GREEN}$(t "watchtower_exists")${NC}"
+else
+    # Create Watchtower folder and files
+    echo -e "\n${GREEN}$(t "installing_watchtower")${NC}"
+    mkdir -p "$HOME/watchtower"
+    cd "$HOME/watchtower"
+
+    # Ask for Telegram notification settings
+    echo -e "\n${YELLOW}Telegram notification settings for Watchtower:${NC}"
+    read -p "$(t "enter_tg_token") " TG_TOKEN
+    read -p "$(t "enter_tg_chat_id") " TG_CHAT_ID
+
+    # Create .env file for Watchtower
+    cat > .env <<EOF
+TG_TOKEN=${TG_TOKEN}
+TG_CHAT_ID=${TG_CHAT_ID}
+WATCHTOWER_NOTIFICATION_URL=telegram://${TG_TOKEN}@telegram?channels=${TG_CHAT_ID}&parseMode=html
+EOF
+
+    echo -e "\n${GREEN}$(t "env_created")${NC}"
+
+    echo -e "\n${GREEN}$(t "creating_watchtower_compose")${NC}"
+    cat > docker-compose.yml <<EOF
+services:
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_LABEL_ENABLE=true
+EOF
+
+    echo -e "\n${GREEN}$(t "compose_created")${NC}"
+fi
+
 echo -e "\n${GREEN}$(t "starting_node")${NC}"
+cd "$HOME/aztec"
 docker compose up -d
+
+# Start Watchtower if it exists
+if [ -d "$HOME/watchtower" ]; then
+    cd "$HOME/watchtower"
+    docker compose up -d
+fi
 
 echo -e "\n${YELLOW}$(t "showing_logs")${NC}"
 echo -e "${YELLOW}$(t "logs_starting")${NC}"
 sleep 5
 echo -e ""
+cd "$HOME/aztec"
 docker compose logs -fn 200

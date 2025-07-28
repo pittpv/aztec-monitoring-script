@@ -33,13 +33,18 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler 21-07-2025  
-- 1.1.0 ve üzeri düğüm sürümleri için CLI'deki düğüm başlatma komutu (validatorPrivateKey**s**) güncellendi
-- CLI'da düğümle ilgili eski ekran oturumlarını kontrol etme ve yeni bir oturum oluşturmadan önce bunları silme işlevi eklendi
-- Rollup adresi güncellendi
+## 📌 Son Güncellemeler 28-07-2025  
+- Aztec düğüm kurulum betiği Watchtower ile güncellendi. Kurulum sırasında betik, "Birden fazla validator çalıştırmak istiyor musunuz? (y/n)" sorusunu soracak.
+    - Çoklu doğrulayıcı modunda kurulum (bir düğüm başına en fazla 10 doğrulayıcı)
+    - Tek doğrulayıcı modunda kurulum
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 21-07-2025
+- 1.1.0 ve üzeri düğüm sürümleri için CLI'deki düğüm başlatma komutu (validatorPrivateKey**s**) güncellendi
+- CLI'da düğümle ilgili eski ekran oturumlarını kontrol etme ve yeni bir oturum oluşturmadan önce bunları silme işlevi eklendi
+- Rollup adresi güncellendi
 
 ### 15-07-2025
 - **Validatörler** için Telegram bildirim sistemi **geliştirildi**. Fikir için teşekkürler @malbur187 (Discord)
