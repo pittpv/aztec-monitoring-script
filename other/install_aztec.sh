@@ -250,6 +250,110 @@ CYAN='\033[0;36m'
 GRAY='\033[0;37m'
 NC='\033[0m'
 
+# Функция для обновления ноды Aztec до последней версии
+update_aztec_node() {
+    echo -e "\n${GREEN}=== $(t "update_title") ===${NC}"
+
+    # Переходим в папку с нодой
+    cd "$HOME/aztec" || {
+        echo -e "${RED}$(t "update_folder_error")${NC}"
+        return 1
+    }
+
+    # Проверяем текущий тег в docker-compose.yml
+    CURRENT_TAG=$(grep -oP 'image: aztecprotocol/aztec:\K[^\s]+' docker-compose.yml || echo "")
+
+    if [[ "$CURRENT_TAG" != "latest" ]]; then
+        echo -e "${YELLOW}$(printf "$(t "tag_check")" "$CURRENT_TAG")${NC}"
+        sed -i 's|image: aztecprotocol/aztec:.*|image: aztecprotocol/aztec:latest|' docker-compose.yml
+    fi
+
+    # Останавливаем контейнеры
+    echo -e "${YELLOW}$(t "update_stopping")${NC}"
+    docker compose down || {
+        echo -e "${RED}$(t "update_stop_error")${NC}"
+        return 1
+    }
+
+    # Обновляем образ
+    echo -e "${YELLOW}$(t "update_pulling")${NC}"
+    docker pull aztecprotocol/aztec:latest || {
+        echo -e "${RED}$(t "update_pull_error")${NC}"
+        return 1
+    }
+
+    # Запускаем контейнеры
+    echo -e "${YELLOW}$(t "update_starting")${NC}"
+    docker compose up -d || {
+        echo -e "${RED}$(t "update_start_error")${NC}"
+        return 1
+    }
+
+    echo -e "${GREEN}$(t "update_success")${NC}"
+}
+
+# Функция для даунгрейда ноды Aztec
+downgrade_aztec_node() {
+    echo -e "\n${GREEN}=== $(t "downgrade_title") ===${NC}"
+
+    # Получаем список доступных тегов с Docker Hub
+    echo -e "${YELLOW}$(t "downgrade_fetching")${NC}"
+    TAGS=$(curl -s https://hub.docker.com/v2/repositories/aztecprotocol/aztec/tags/?page_size=100 | jq -r '.results[].name' | sort -Vr)
+
+    if [ -z "$TAGS" ]; then
+        echo -e "${RED}$(t "downgrade_fetch_error")${NC}"
+        return 1
+    fi
+
+    # Выводим список тегов с нумерацией
+    echo -e "\n${CYAN}$(t "downgrade_available")${NC}"
+    select TAG in $TAGS; do
+        if [ -n "$TAG" ]; then
+            break
+        else
+            echo -e "${RED}$(t "downgrade_invalid_choice"){NC}"
+        fi
+    done
+
+    echo -e "\n${YELLOW}$(t "downgrade_selected") $TAG${NC}"
+
+    # Переходим в папку с нодой
+    cd "$HOME/aztec" || {
+        echo -e "${RED}$(t "downgrade_folder_error")${NC}"
+        return 1
+    }
+
+    # Останавливаем контейнеры
+    echo -e "${YELLOW}$(t "downgrade_stopping")${NC}"
+    docker compose down || {
+        echo -e "${RED}$(t "downgrade_stop_error")${NC}"
+        return 1
+    }
+
+    # Обновляем образ до выбранной версии
+    echo -e "${YELLOW}$(t "downgrade_pulling")$TAG...${NC}"
+    docker pull aztecprotocol/aztec:"$TAG" || {
+        echo -e "${RED}$(t "downgrade_pull_error")${NC}"
+        return 1
+    }
+
+    # Изменяем версию в docker-compose.yml
+    echo -e "${YELLOW}$(t "downgrade_updating")${NC}"
+    sed -i "s|image: aztecprotocol/aztec:.*|image: aztecprotocol/aztec:$TAG|" docker-compose.yml || {
+        echo -e "${RED}$(t "downgrade_update_error")${NC}"
+        return 1
+    }
+
+    # Запускаем контейнеры
+    echo -e "${YELLOW}$(t "downgrade_starting") $TAG...${NC}"
+    docker compose up -d || {
+        echo -e "${RED}$(t "downgrade_start_error")${NC}"
+        return 1
+    }
+
+    echo -e "${GREEN}$(t "downgrade_success") $TAG!${NC}"
+}
+
 delete_aztec_node() {
     echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
 
