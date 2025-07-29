@@ -33,13 +33,22 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 28-07-2025
-- Updated the Aztec node installation script with Watchtower. During installation, the script will ask, "Do you want to run multiple validators? (y/n)"
-    - Installation in multivalidator mode (up to 10 validators per node)
-    - Installation in single-validator mode
+## 📌 Latest Updates 29-07-2025
+- Added the Aztec Node Update function. The function updates the node instantly without waiting for automatic updates from Watchtower.
+    - Also use this option if you performed a downgrade and need to revert back.
+    - Checks `docker-compose.yml` and replaces the tag with `latest`
+- Added the Aztec Node Downgrade function. The function shows all node versions from Docker Hub, allowing rollback to any selected version from the list.
+    - Selection of desired version
+    - Updating the `docker-compose.yml` file
+    - Stopping, downloading and launching containers
 
 <details>
 <summary>📅 Version History</summary>
+
+### 28-07-2025
+- Updated the Aztec node installation script with Watchtower. During installation, the script will ask, "Do you want to run multiple validators? (y/n)"
+    - Installation in multivalidator mode (up to 10 validators per node)
+    - Installation in single-validator mode
 
 ### 21-07-2025
 - Updated node launch command in CLI (validatorPrivateKey**s**) for node version 1.1.0 and above

@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.10.0"
+SCRIPT_VERSION="1.11.0"
 
 function show_logo() {
     echo -e " "
@@ -60,6 +60,8 @@ init_languages() {
   TRANSLATIONS["en,option12"]="12. Delete Aztec node"
   TRANSLATIONS["en,option13"]="13. Stop Aztec node containers"
   TRANSLATIONS["en,option14"]="14. Start Aztec node containers"
+  TRANSLATIONS["en,option15"]="15. Update Aztec node"
+  TRANSLATIONS["en,option16"]="16. Downgrade Aztec node"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,rpc_change_prompt"]="Enter new RPC URL:"
   TRANSLATIONS["en,rpc_change_success"]="✅ RPC URL successfully updated"
@@ -217,6 +219,34 @@ init_languages() {
   TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
   TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
   TRANSLATIONS["en,removing_watchtower_data"]="Removing Watchtower data..."
+  #update
+  TRANSLATIONS["en,update_title"]="Updating Aztec node to the latest version"
+  TRANSLATIONS["en,update_folder_error"]="Error: Folder $HOME/aztec does not exist"
+  TRANSLATIONS["en,update_stopping"]="Stopping containers..."
+  TRANSLATIONS["en,update_stop_error"]="Error stopping containers"
+  TRANSLATIONS["en,update_pulling"]="Pulling latest aztecprotocol/aztec image..."
+  TRANSLATIONS["en,update_pull_error"]="Error pulling image"
+  TRANSLATIONS["en,update_starting"]="Starting updated node..."
+  TRANSLATIONS["en,update_start_error"]="Error starting containers"
+  TRANSLATIONS["en,update_success"]="Aztec node successfully updated to the latest version!"
+  TRANSLATIONS["en,tag_check"]="Found tag: %s, replacing with latest"
+  #downgrade
+  TRANSLATIONS["en,downgrade_title"]="Downgrading Aztec node"
+  TRANSLATIONS["en,downgrade_fetching"]="Fetching available versions list..."
+  TRANSLATIONS["en,downgrade_fetch_error"]="Failed to get versions list"
+  TRANSLATIONS["en,downgrade_available"]="Available versions (enter number):"
+  TRANSLATIONS["en,downgrade_invalid_choice"]="Invalid choice, please try again"
+  TRANSLATIONS["en,downgrade_selected"]="Selected version:"
+  TRANSLATIONS["en,downgrade_folder_error"]="Error: Folder $HOME/aztec does not exist"
+  TRANSLATIONS["en,downgrade_stopping"]="Stopping containers..."
+  TRANSLATIONS["en,downgrade_stop_error"]="Error stopping containers"
+  TRANSLATIONS["en,downgrade_pulling"]="Pulling aztecprotocol/aztec image:"
+  TRANSLATIONS["en,downgrade_pull_error"]="Error pulling image"
+  TRANSLATIONS["en,downgrade_updating"]="Updating configuration..."
+  TRANSLATIONS["en,downgrade_update_error"]="Error updating docker-compose.yml"
+  TRANSLATIONS["en,downgrade_starting"]="Starting node with version"
+  TRANSLATIONS["en,downgrade_start_error"]="Error starting containers"
+  TRANSLATIONS["en,downgrade_success"]="Aztec node successfully downgraded to version"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -235,6 +265,8 @@ init_languages() {
   TRANSLATIONS["ru,option12"]="12. Удалить ноду Aztec"
   TRANSLATIONS["ru,option13"]="13. Остановить контейнеры ноды Aztec"
   TRANSLATIONS["ru,option14"]="14. Запустить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option15"]="15. Обновить ноду Aztec"
+  TRANSLATIONS["ru,option16"]="16. Сделать даунгрейд ноды Aztec"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,rpc_change_prompt"]="Введите новый RPC URL:"
   TRANSLATIONS["ru,rpc_change_success"]="✅ RPC URL успешно обновлен"
@@ -392,6 +424,34 @@ init_languages() {
   TRANSLATIONS["ru,removing_node_data"]="Удаление данных ноды Aztec..."
   TRANSLATIONS["ru,stopping_watchtower"]="Остановка Watchtower..."
   TRANSLATIONS["ru,removing_watchtower_data"]="Удаление данных Watchtower..."
+  #update
+  TRANSLATIONS["ru,update_title"]="Обновление ноды Aztec до последней версии"
+  TRANSLATIONS["ru,update_folder_error"]="Ошибка: Папка $HOME/aztec не существует"
+  TRANSLATIONS["ru,update_stopping"]="Остановка контейнеров..."
+  TRANSLATIONS["ru,update_stop_error"]="Ошибка при остановке контейнеров"
+  TRANSLATIONS["ru,update_pulling"]="Загрузка последнего образа aztecprotocol/aztec..."
+  TRANSLATIONS["ru,update_pull_error"]="Ошибка при загрузке образа"
+  TRANSLATIONS["ru,update_starting"]="Запуск обновленной ноды..."
+  TRANSLATIONS["ru,update_start_error"]="Ошибка при запуске контейнеров"
+  TRANSLATIONS["ru,update_success"]="Нода Aztec успешно обновлена до последней версии!"
+  TRANSLATIONS["ru,tag_check"]="Обнаружен тег: %s, заменяем на latest"
+  #downgrade
+  TRANSLATIONS["ru,downgrade_title"]="Даунгрейд ноды Aztec"
+  TRANSLATIONS["ru,downgrade_fetching"]="Получение списка доступных версий..."
+  TRANSLATIONS["ru,downgrade_fetch_error"]="Не удалось получить список версий"
+  TRANSLATIONS["ru,downgrade_available"]="Доступные версии (введите номер):"
+  TRANSLATIONS["ru,downgrade_invalid_choice"]="Неверный выбор, попробуйте еще раз"
+  TRANSLATIONS["ru,downgrade_selected"]="Выбрана версия:"
+  TRANSLATIONS["ru,downgrade_folder_error"]="Ошибка: Папка $HOME/aztec не существует"
+  TRANSLATIONS["ru,downgrade_stopping"]="Остановка контейнеров..."
+  TRANSLATIONS["ru,downgrade_stop_error"]="Ошибка при остановке контейнеров"
+  TRANSLATIONS["ru,downgrade_pulling"]="Загрузка образа aztecprotocol/aztec:"
+  TRANSLATIONS["ru,downgrade_pull_error"]="Ошибка при загрузке образа"
+  TRANSLATIONS["ru,downgrade_updating"]="Обновление конфигурации..."
+  TRANSLATIONS["ru,downgrade_update_error"]="Ошибка при обновлении docker-compose.yml"
+  TRANSLATIONS["ru,downgrade_starting"]="Запуск ноды с версией"
+  TRANSLATIONS["ru,downgrade_start_error"]="Ошибка при запуске контейнеров"
+  TRANSLATIONS["ru,downgrade_success"]="Нода Aztec успешно даунгрейднута до версии"
 
 
   # Turkish translations
@@ -411,6 +471,8 @@ init_languages() {
   TRANSLATIONS["tr,option12"]="12. Aztec düğümünü sil"
   TRANSLATIONS["tr,option13"]="13. Aztec düğüm konteynerlerini durdur"
   TRANSLATIONS["tr,option14"]="14. Aztec düğüm konteynerlerini başlat"
+  TRANSLATIONS["tr,option15"]="15. Aztec düğümünü güncelle"
+  TRANSLATIONS["tr,option16"]="16. Aztec düğümünü eski sürüme düşür"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
   TRANSLATIONS["tr,rpc_change_prompt"]="Yeni RPC URL'sini girin:"
   TRANSLATIONS["tr,rpc_change_success"]="✅ RPC URL başarıyla güncellendi"
@@ -568,6 +630,34 @@ init_languages() {
   TRANSLATIONS["tr,removing_node_data"]="Aztec node verileri kaldırılıyor..."
   TRANSLATIONS["tr,stopping_watchtower"]="Watchtower durduruluyor..."
   TRANSLATIONS["tr,removing_watchtower_data"]="Watchtower verileri kaldırılıyor..."
+  # Güncelleme
+  TRANSLATIONS["tr,update_title"]="Aztec düğümü en son sürüme güncelleniyor"
+  TRANSLATIONS["tr,update_folder_error"]="Hata: $HOME/aztec klasörü mevcut değil"
+  TRANSLATIONS["tr,update_stopping"]="Kapsayıcılar durduruluyor..."
+  TRANSLATIONS["tr,update_stop_error"]="Kapsayıcılar durdurulurken hata oluştu"
+  TRANSLATIONS["tr,update_pulling"]="Son aztecprotocol/aztec imajı çekiliyor..."
+  TRANSLATIONS["tr,update_pull_error"]="İmaj çekilirken hata oluştu"
+  TRANSLATIONS["tr,update_starting"]="Güncellenmiş düğüm başlatılıyor..."
+  TRANSLATIONS["tr,update_start_error"]="Kapsayıcılar başlatılırken hata oluştu"
+  TRANSLATIONS["tr,update_success"]="Aztec düğümü başarıyla en son sürüme güncellendi!"
+  TRANSLATIONS["tr,tag_check"]="Etiket bulundu: %s, en son sürümle değiştiriliyor"
+  # Sürüm düşürme
+  TRANSLATIONS["tr,downgrade_title"]="Aztec düğümü sürüm düşürülüyor"
+  TRANSLATIONS["tr,downgrade_fetching"]="Mevcut sürüm listesi alınıyor..."
+  TRANSLATIONS["tr,downgrade_fetch_error"]="Sürüm listesi alınamadı"
+  TRANSLATIONS["tr,downgrade_available"]="Mevcut sürümler (numarayı girin):"
+  TRANSLATIONS["tr,downgrade_invalid_choice"]="Geçersiz seçim, lütfen tekrar deneyin"
+  TRANSLATIONS["tr,downgrade_selected"]="Seçilen sürüm:"
+  TRANSLATIONS["tr,downgrade_folder_error"]="Hata: $HOME/aztec klasörü mevcut değil"
+  TRANSLATIONS["tr,downgrade_stopping"]="Kapsayıcılar durduruluyor..."
+  TRANSLATIONS["tr,downgrade_stop_error"]="Kapsayıcılar durdurulurken hata oluştu"
+  TRANSLATIONS["tr,downgrade_pulling"]="aztecprotocol/aztec imajı çekiliyor:"
+  TRANSLATIONS["tr,downgrade_pull_error"]="İmaj çekilirken hata oluştu"
+  TRANSLATIONS["tr,downgrade_updating"]="Yapılandırma güncelleniyor..."
+  TRANSLATIONS["tr,downgrade_update_error"]="docker-compose.yml güncellenirken hata oluştu"
+  TRANSLATIONS["tr,downgrade_starting"]="Düğüm şu sürümle başlatılıyor"
+  TRANSLATIONS["tr,downgrade_start_error"]="Kapsayıcılar başlatılırken hata oluştu"
+  TRANSLATIONS["tr,downgrade_success"]="Aztec düğümü başarıyla şu sürüme düşürüldü"
 
 }
 
@@ -1693,6 +1783,24 @@ function delete_aztec() {
     source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
 }
 
+# === Update Aztec node ===
+function update_aztec() {
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    local FUNCTION_NAME="update_aztec_node"
+
+    # Загружаем скрипт во временную переменную и выполняем функцию
+    source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
+}
+
+# === Downgrade Aztec node ===
+function downgrade_aztec() {
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    local FUNCTION_NAME="downgrade_aztec_node"
+
+    # Загружаем скрипт во временную переменную и выполняем функцию
+    source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
+}
+
 
 # === Common helper functions ===
 function _ensure_env_file() {
@@ -1981,6 +2089,8 @@ main_menu() {
     echo -e "${CYAN}$(t "option12")${NC}"
     echo -e "${CYAN}$(t "option13")${NC}"
     echo -e "${CYAN}$(t "option14")${NC}"
+    echo -e "${CYAN}$(t "option15")${NC}"
+    echo -e "${CYAN}$(t "option16")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -2001,6 +2111,8 @@ main_menu() {
       12) delete_aztec ;;
       13) stop_aztec_containers ;;
       14) start_aztec_containers ;;
+      15) update_aztec ;;
+    	16) downgrade_aztec ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

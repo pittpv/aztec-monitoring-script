@@ -33,13 +33,22 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler 28-07-2025  
-- Aztec düğüm kurulum betiği Watchtower ile güncellendi. Kurulum sırasında betik, "Birden fazla validator çalıştırmak istiyor musunuz? (y/n)" sorusunu soracak.
-    - Çoklu doğrulayıcı modunda kurulum (bir düğüm başına en fazla 10 doğrulayıcı)
-    - Tek doğrulayıcı modunda kurulum
+## 📌 Son Güncellemeler 29-07-2025  
+- Aztec Node Güncelleme fonksiyonu eklendi. Bu fonksiyon, Watchtower'ın otomatik güncellemesini beklemeden nodu anında günceller.
+    - Ayrıca, eğer bir düşürme işlemi yaptıysanız ve geri dönmeniz gerekiyorsa bu seçeneği kullanın.
+    - `docker-compose.yml` dosyasını kontrol eder ve etiketi `latest` olarak değiştirir
+- Aztec Node Sürüm Düşürme fonksiyonu eklendi. Bu fonksiyon, Docker Hub'daki tüm node versiyonlarını gösterir ve listeden seçilen herhangi bir versiyona geri dönmeyi sağlar.
+    - İstenilen versiyonun seçimi
+    - `docker-compose.yml` dosyasının güncellenmesi
+    - Konteynerlerin durdurulması, indirilmesi ve başlatılması
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 28-07-2025
+- Aztec düğüm kurulum betiği Watchtower ile güncellendi. Kurulum sırasında betik, "Birden fazla validator çalıştırmak istiyor musunuz? (y/n)" sorusunu soracak.
+    - Çoklu doğrulayıcı modunda kurulum (bir düğüm başına en fazla 10 doğrulayıcı)
+    - Tek doğrulayıcı modunda kurulum
 
 ### 21-07-2025
 - 1.1.0 ve üzeri düğüm sürümleri için CLI'deki düğüm başlatma komutu (validatorPrivateKey**s**) güncellendi

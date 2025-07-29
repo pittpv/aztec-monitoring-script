@@ -88,6 +88,11 @@
         "VERSION": "1.10.0",
         "UPDATE_DATE": "28.07.2025",
         "CHANGES": ["Updated the Aztec node installation script with Watchtower for multiple validators"]
+    },
+    {
+        "VERSION": "1.11.0",
+        "UPDATE_DATE": "29.07.2025",
+        "CHANGES": ["Update and downgrade functions"]
     }
 
 ]
