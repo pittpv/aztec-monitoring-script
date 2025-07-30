@@ -268,17 +268,17 @@ update_aztec_node() {
         sed -i 's|image: aztecprotocol/aztec:.*|image: aztecprotocol/aztec:latest|' docker-compose.yml
     fi
 
-    # Останавливаем контейнеры
-    echo -e "${YELLOW}$(t "update_stopping")${NC}"
-    docker compose down || {
-        echo -e "${RED}$(t "update_stop_error")${NC}"
-        return 1
-    }
-
     # Обновляем образ
     echo -e "${YELLOW}$(t "update_pulling")${NC}"
     docker pull aztecprotocol/aztec:latest || {
         echo -e "${RED}$(t "update_pull_error")${NC}"
+        return 1
+    }
+
+    # Останавливаем контейнеры
+    echo -e "${YELLOW}$(t "update_stopping")${NC}"
+    docker compose down || {
+        echo -e "${RED}$(t "update_stop_error")${NC}"
         return 1
     }
 
@@ -323,17 +323,17 @@ downgrade_aztec_node() {
         return 1
     }
 
-    # Останавливаем контейнеры
-    echo -e "${YELLOW}$(t "downgrade_stopping")${NC}"
-    docker compose down || {
-        echo -e "${RED}$(t "downgrade_stop_error")${NC}"
-        return 1
-    }
-
     # Обновляем образ до выбранной версии
     echo -e "${YELLOW}$(t "downgrade_pulling")$TAG...${NC}"
     docker pull aztecprotocol/aztec:"$TAG" || {
         echo -e "${RED}$(t "downgrade_pull_error")${NC}"
+        return 1
+    }
+
+    # Останавливаем контейнеры
+    echo -e "${YELLOW}$(t "downgrade_stopping")${NC}"
+    docker compose down || {
+        echo -e "${RED}$(t "downgrade_stop_error")${NC}"
         return 1
     }
 
