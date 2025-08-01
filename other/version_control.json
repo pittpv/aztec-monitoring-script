@@ -93,6 +93,11 @@
         "VERSION": "1.11.0",
         "UPDATE_DATE": "29.07.2025",
         "CHANGES": ["Update and downgrade functions"]
+    },
+    {
+        "VERSION": "1.11.1",
+        "UPDATE_DATE": "01.08.2025",
+        "CHANGES": ["Updated the validator check script", "Aztec node version check moved to separate option"]
     }
 
 ]

@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.11.0"
+SCRIPT_VERSION="1.11.1"
 
 function show_logo() {
     echo -e " "
@@ -62,6 +62,7 @@ init_languages() {
   TRANSLATIONS["en,option14"]="14. Start Aztec node containers"
   TRANSLATIONS["en,option15"]="15. Update Aztec node"
   TRANSLATIONS["en,option16"]="16. Downgrade Aztec node"
+  TRANSLATIONS["en,option17"]="17. Check Aztec version"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,rpc_change_prompt"]="Enter new RPC URL:"
   TRANSLATIONS["en,rpc_change_success"]="✅ RPC URL successfully updated"
@@ -267,6 +268,7 @@ init_languages() {
   TRANSLATIONS["ru,option14"]="14. Запустить контейнеры ноды Aztec"
   TRANSLATIONS["ru,option15"]="15. Обновить ноду Aztec"
   TRANSLATIONS["ru,option16"]="16. Сделать даунгрейд ноды Aztec"
+  TRANSLATIONS["ru,option17"]="17. Проверить версию ноды Aztec"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,rpc_change_prompt"]="Введите новый RPC URL:"
   TRANSLATIONS["ru,rpc_change_success"]="✅ RPC URL успешно обновлен"
@@ -473,6 +475,7 @@ init_languages() {
   TRANSLATIONS["tr,option14"]="14. Aztec düğüm konteynerlerini başlat"
   TRANSLATIONS["tr,option15"]="15. Aztec düğümünü güncelle"
   TRANSLATIONS["tr,option16"]="16. Aztec düğümünü eski sürüme düşür"
+  TRANSLATIONS["tr,option17"]="17. Aztek sürümünü kontrol edin"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
   TRANSLATIONS["tr,rpc_change_prompt"]="Yeni RPC URL'sini girin:"
   TRANSLATIONS["tr,rpc_change_success"]="✅ RPC URL başarıyla güncellendi"
@@ -2091,6 +2094,7 @@ main_menu() {
     echo -e "${CYAN}$(t "option14")${NC}"
     echo -e "${CYAN}$(t "option15")${NC}"
     echo -e "${CYAN}$(t "option16")${NC}"
+    echo -e "${CYAN}$(t "option17")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -2112,7 +2116,8 @@ main_menu() {
       13) stop_aztec_containers ;;
       14) start_aztec_containers ;;
       15) update_aztec ;;
-    	16) downgrade_aztec ;;
+      16) downgrade_aztec ;;
+      17) check_aztec_version ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
@@ -2122,5 +2127,4 @@ main_menu() {
 # === Script launch ===
 init_languages
 check_dependencies
-check_aztec_version
 main_menu

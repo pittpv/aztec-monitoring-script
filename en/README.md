@@ -33,7 +33,16 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 29-07-2025
+## 📌 Latest Updates 01-08-2025
+- Updated the validator check script. Added check modes.
+    - Fast processing - high CPU load
+    - Slow processing - no CPU load
+- Aztec node version check moved to a separate menu item to avoid wasting time during script loading.
+
+<details>
+<summary>📅 Version History</summary>
+
+### 29-07-2025
 - Added the Aztec Node Update function. The function updates the node instantly without waiting for automatic updates from Watchtower.
     - Also use this option if you performed a downgrade and need to revert back.
     - Checks `docker-compose.yml` and replaces the tag with `latest`
@@ -41,9 +50,6 @@ This script provides a comprehensive solution for launching (via docker-compose 
     - Selection of desired version
     - Updating the `docker-compose.yml` file
     - Stopping, downloading and launching containers
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 28-07-2025
 - Updated the Aztec node installation script with Watchtower. During installation, the script will ask, "Do you want to run multiple validators? (y/n)"
