@@ -33,14 +33,18 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 01-08-2025
+## 📌 Latest Updates 02-08-2025
+- Updated the validator committee inclusion check function (restored function operation)
+    - Multiple validator addresses can be specified
+
+<details>
+<summary>📅 Version History</summary>
+
+### 01-08-2025
 - Updated the validator check script. Added check modes.
     - Fast processing - high CPU load
     - Slow processing - no CPU load
 - Aztec node version check moved to a separate menu item to avoid wasting time during script loading.
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 29-07-2025
 - Added the Aztec Node Update function. The function updates the node instantly without waiting for automatic updates from Watchtower.

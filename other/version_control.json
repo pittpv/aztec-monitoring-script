@@ -98,6 +98,11 @@
         "VERSION": "1.11.1",
         "UPDATE_DATE": "01.08.2025",
         "CHANGES": ["Updated the validator check script", "Aztec node version check moved to separate option"]
+    },
+    {
+        "VERSION": "1.11.2",
+        "UPDATE_DATE": "02.08.2025",
+        "CHANGES": ["Updated the validator committee inclusion check function (restored function operation)"]
     }
 
 ]

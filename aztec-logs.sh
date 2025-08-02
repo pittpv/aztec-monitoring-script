@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.11.1"
+SCRIPT_VERSION="1.11.2"
 
 function show_logo() {
     echo -e " "
@@ -191,9 +191,13 @@ init_languages() {
   TRANSLATIONS["en,notifications_input_error"]="Error: please enter 1 or 2"
   TRANSLATIONS["en,choose_option_prompt"]="Choose option"
   TRANSLATIONS["en,committee_selected"]="🎉 You've been selected for the committee"
+  TRANSLATIONS["en,found_validators"]="Found validators in committee: %s"
   TRANSLATIONS["en,epoch_info"]="Epoch %s"
   TRANSLATIONS["en,block_built"]="✅ Block %s successfully built"
   TRANSLATIONS["en,slot_info"]="🧩 Slot: %s"
+  TRANSLATIONS["en,validators_prompt"]="Enter your validator addresses (comma separated, without spaces):"
+  TRANSLATIONS["en,validators_format"]="Example: 0x123...,0x456...,0x789..."
+  TRANSLATIONS["en,validators_empty"]="Error: Validators list cannot be empty"
   TRANSLATIONS["en,agent_notifications_full_info"]="ℹ️ Notifications will be sent for issues, committee, blocks"
   TRANSLATIONS["en,fetching_peer_info"]="Fetching peer information from API..."
   TRANSLATIONS["en,peer_found"]="Peer ID found in logs"
@@ -397,9 +401,13 @@ init_languages() {
   TRANSLATIONS["ru,notifications_input_error"]="Ошибка: введите 1 или 2"
   TRANSLATIONS["ru,choose_option_prompt"]="Выберите вариант"
   TRANSLATIONS["ru,committee_selected"]="🎉 Тебя выбрали в комитет"
+  TRANSLATIONS["ru,found_validators"]="Найдены валидаторы в комитете: %s"
   TRANSLATIONS["ru,epoch_info"]="Эпоха %s"
   TRANSLATIONS["ru,block_built"]="✅ Блок %s успешно построен"
   TRANSLATIONS["ru,slot_info"]="🧩 Слот: %s"
+  TRANSLATIONS["ru,validators_prompt"]="Введите адреса валидаторов (через запятую, без пробелов):"
+  TRANSLATIONS["ru,validators_format"]="Пример: 0x123...,0x456...,0x789..."
+  TRANSLATIONS["ru,validators_empty"]="Ошибка: Список валидаторов не может быть пустым"
   TRANSLATIONS["ru,agent_notifications_full_info"]="ℹ️ Уведомления будут отправляться при проблемах, выборе в комитет, создании блоков"
   TRANSLATIONS["ru,fetching_peer_info"]="Получение информации о пире из API..."
   TRANSLATIONS["ru,peer_found"]="Peer ID найден в логах"
@@ -604,9 +612,13 @@ init_languages() {
   TRANSLATIONS["tr,notifications_input_error"]="Hata: lütfen 1 veya 2 girin"
   TRANSLATIONS["tr,choose_option_prompt"]="Seçenek belirleyin"
   TRANSLATIONS["tr,committee_selected"]="🎉 Komiteye seçildiniz"
+  TRANSLATIONS["tr,found_validators"]="Komitede bulunan doğrulayıcılar: %s"
   TRANSLATIONS["tr,epoch_info"]="Dönem %s"
   TRANSLATIONS["tr,block_built"]="✅ %s bloğu başarıyla oluşturuldu"
   TRANSLATIONS["tr,slot_info"]="🧩 Slot: %s"
+  TRANSLATIONS["tr,validators_prompt"]="Validator adreslerinizi girin (virgülle ayırarak, boşluk olmadan):"
+  TRANSLATIONS["tr,validators_format"]="Örnek: 0x123...,0x456...,0x789..."
+  TRANSLATIONS["tr,validators_empty"]="Hata: Validator listesi boş olamaz"
   TRANSLATIONS["tr,agent_notifications_full_info"]="ℹ️ Sorunlar, komite ve bloklar için bildirimler gönderilecek"
   TRANSLATIONS["tr,fetching_peer_info"]="API'den eş (peer) bilgisi alınıyor..."
   TRANSLATIONS["tr,peer_found"]="Loglarda Peer ID bulundu"
@@ -1233,25 +1245,48 @@ create_cron_agent() {
   fi
 
   # === Запрос о дополнительных уведомлениях ===
-if [ -z "$NOTIFICATION_TYPE" ]; then
-  echo -e "\n${BLUE}$(t "notifications_prompt")${NC}"
-  echo -e "$(t "notifications_option1")"
-  echo -e "$(t "notifications_option2")"
-  echo -e "\n${YELLOW}$(t "notifications_debug_warning")${NC}"
-  while true; do
-    read -p "$(t "choose_option_prompt") (1/2): " NOTIFICATION_TYPE
-    if [[ "$NOTIFICATION_TYPE" =~ ^[12]$ ]]; then
-      if ! grep -q "NOTIFICATION_TYPE" "$env_file"; then
-        echo "NOTIFICATION_TYPE=\"$NOTIFICATION_TYPE\"" >> "$env_file"
+  if [ -z "$NOTIFICATION_TYPE" ]; then
+    echo -e "\n${BLUE}$(t "notifications_prompt")${NC}"
+    echo -e "$(t "notifications_option1")"
+    echo -e "$(t "notifications_option2")"
+    echo -e "\n${YELLOW}$(t "notifications_debug_warning")${NC}"
+    while true; do
+      read -p "$(t "choose_option_prompt") (1/2): " NOTIFICATION_TYPE
+      if [[ "$NOTIFICATION_TYPE" =~ ^[12]$ ]]; then
+        if ! grep -q "NOTIFICATION_TYPE" "$env_file"; then
+          echo "NOTIFICATION_TYPE=\"$NOTIFICATION_TYPE\"" >> "$env_file"
+        else
+          sed -i "s/^NOTIFICATION_TYPE=.*/NOTIFICATION_TYPE=\"$NOTIFICATION_TYPE\"/" "$env_file"
+        fi
+        break
       else
-        sed -i "s/^NOTIFICATION_TYPE=.*/NOTIFICATION_TYPE=\"$NOTIFICATION_TYPE\"/" "$env_file"
+        echo -e "${RED}$(t "notifications_input_error")${NC}"
       fi
-      break
-    else
-      echo -e "${RED}$(t "notifications_input_error")${NC}"
-    fi
-  done
-fi
+    done
+  fi
+
+  # === Проверка и получение VALIDATORS (если NOTIFICATION_TYPE == 2) ===
+  if [ "$NOTIFICATION_TYPE" -eq 2 ] && [ ! -f "/root/.env-aztec-agent" ] || ! grep -q "^VALIDATORS=" "/root/.env-aztec-agent"; then
+    echo -e "\n${BLUE}$(t "validators_prompt")${NC}"
+    echo -e "${YELLOW}$(t "validators_format")${NC}"
+    while true; do
+      read -p "> " VALIDATORS
+      if [[ -n "$VALIDATORS" ]]; then
+        if [ -f "/root/.env-aztec-agent" ]; then
+          if grep -q "^VALIDATORS=" "/root/.env-aztec-agent"; then
+            sed -i "s/^VALIDATORS=.*/VALIDATORS=\"$VALIDATORS\"/" "/root/.env-aztec-agent"
+          else
+            echo "VALIDATORS=\"$VALIDATORS\"" >> "/root/.env-aztec-agent"
+          fi
+        else
+          echo "VALIDATORS=\"$VALIDATORS\"" > "/root/.env-aztec-agent"
+        fi
+        break
+      else
+        echo -e "${RED}$(t "validators_empty")${NC}"
+      fi
+    done
+  fi
 
   mkdir -p "$AGENT_SCRIPT_PATH"
 
@@ -1306,6 +1341,10 @@ t() {
     "epoch_info") printf "$(t "epoch_info")" "\$value1" ;;
     "block_built") printf "$(t "block_built")" "\$value1" ;;
     "slot_info") printf "$(t "slot_info")" "\$value1" ;;
+	"found_validators") printf "$(t "found_validators")" "\$value1" ;;
+	"validators_prompt") echo "$(t "validators_prompt")" ;;
+	"validators_format") echo "$(t "validators_format")" ;;
+	"validators_empty") echo "$(t "validators_empty")" ;;
     *) echo "\$key" ;;
   esac
 }
@@ -1443,24 +1482,63 @@ find_last_log_line() {
 check_committee() {
   if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then return; fi
 
+  # Получаем список валидаторов из файла .env-aztec-agent
+  if [ ! -f "/root/.env-aztec-agent" ]; then
+    log "Validator file /root/.env-aztec-agent not found"
+    return
+  fi
+
+  source /root/.env-aztec-agent
+  if [ -z "\$VALIDATORS" ]; then
+    log "No validators defined in VALIDATORS variable"
+    return
+  fi
+
+  # Преобразуем список валидаторов в массив
+  IFS=',' read -ra VALIDATOR_ARRAY <<< "\$VALIDATORS"
+
   container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then return; fi
 
-  committee_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -i "is on the validator committee for epoch" | tail -n 1)
+  # Ищем последнее упоминание Computing stats for slot
+  committee_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -a "Computing stats for slot" | tail -n 1)
   if [ -z "\$committee_line" ]; then return; fi
 
-  # извлекаем номер эпохи
-  epoch=\$(echo "\$committee_line" | grep -oE 'epoch [0-9]+' | awk '{print \$2}')
-  if [ -z "\$epoch" ]; then return; fi
+  # Извлекаем JSON-часть строки
+  json_part=\$(echo "\$committee_line" | sed -n 's/.*\({.*}\).*/\1/p')
+  if [ -z "\$json_part" ]; then return; fi
 
-  last_epoch_file="$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
+  # Извлекаем номер эпохи и список комитета
+  epoch=\$(echo "\$json_part" | jq -r '.epoch')
+  committee=\$(echo "\$json_part" | jq -r '.committee[]')
+
+  if [ -z "\$epoch" ] || [ -z "\$committee" ]; then return; fi
+
+  # Проверяем каждый валидатор на наличие в комитете
+  found_validators=()
+  for validator in "\${VALIDATOR_ARRAY[@]}"; do
+    if echo "\$committee" | grep -qi "\$validator"; then
+      found_validators+=("\$validator")
+    fi
+  done
+
+  # Если не нашли ни одного валидатора - выходим
+  if [ \${#found_validators[@]} -eq 0 ]; then return; fi
+
+  last_epoch_file="\$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
   if [ -f "\$last_epoch_file" ] && grep -q "\$epoch" "\$last_epoch_file"; then return; fi
   echo "\$epoch" > "\$last_epoch_file"
 
+  # Формируем сообщение
   current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-  message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A\$(t "server_info" "\$ip")%0A\$(t "time_info" "\$current_time")"
+  validator_list=\$(IFS=, ; echo "\${found_validators[*]}")
+  message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
+  message+="\$(t "found_validators" "\$validator_list")%0A"
+  message+="\$(t "server_info" "\$ip")%0A"
+  message+="\$(t "time_info" "\$current_time")"
+
   send_telegram_message "\$message"
-  log "Committee notification sent: \$committee_line"
+  log "Committee notification sent for epoch \$epoch: found validators \${found_validators[*]}"
 }
 
 check_block_built() {
