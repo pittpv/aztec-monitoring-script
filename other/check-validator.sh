@@ -449,7 +449,17 @@ monitor_position() {
                 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removal notification sent" >> "$LOG_FILE"
             fi
 
+            # Удаляем файл последней позиции
             rm -f "$LAST_POSITION_FILE"
+
+            # Удаляем сам скрипт мониторинга
+            rm -f "$0"
+
+            # Удаляем задание из cron
+            crontab -l | grep -v "$0" | crontab -
+
+            # Удаляем лог-файл
+            rm -f "$LOG_FILE"
         fi
     fi
 }
@@ -476,23 +486,6 @@ EOF
 
         echo -e "${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
     done
-}
-
-# Функция для удаления скрипта мониторинга
-remove_monitor_script() {
-    local validator_address=$1
-    local normalized_address=${validator_address,,}
-    local script_name="monitor_${normalized_address:2}.sh"
-    local position_file="last_position_${normalized_address:2}.txt"
-    local log_file="monitor_${normalized_address:2}.log"
-
-    # Удаляем скрипт и связанные файлы
-    rm -f "$MONITOR_DIR/$script_name" "$MONITOR_DIR/$position_file" "$MONITOR_DIR/$log_file"
-
-    # Удаляем задание из cron
-    crontab -l | grep -v "$MONITOR_DIR/$script_name" | crontab -
-
-    echo -e "${GREEN}$(t "notification_removed" "$validator_address")${RESET}"
 }
 
 # Функция для отображения списка активных мониторингов
