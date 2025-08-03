@@ -40,8 +40,8 @@ init_languages() {
     TRANSLATIONS["en,select_action"]="Select an action:"
     TRANSLATIONS["en,option1"]="1. Search and display data for a specific validator"
     TRANSLATIONS["en,option2"]="2. Display the full validator list"
-    TRANSLATIONS["en,option3"]="3. Back"
-    TRANSLATIONS["en,option4"]="4. Set up queue position notification for validator"
+    TRANSLATIONS["en,option3"]="3. Set up queue position notification for validator"
+    TRANSLATIONS["en,option0"]="0. Exit"
     TRANSLATIONS["en,enter_option"]="Select option:"
     TRANSLATIONS["en,enter_address"]="Enter the validator address:"
     TRANSLATIONS["en,validator_info"]="Validator information:"
@@ -51,7 +51,7 @@ init_languages() {
     TRANSLATIONS["en,status"]="Status"
     TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
     TRANSLATIONS["en,exiting"]="Exiting."
-    TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 4."
+    TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 0."
     TRANSLATIONS["en,status_0"]="NOT_IN_SET - The validator is not in the validator set"
     TRANSLATIONS["en,status_1"]="ACTIVE - The validator is currently in the validator set"
     TRANSLATIONS["en,status_2"]="INACTIVE - The validator is not active; possibly in withdrawal delay"
@@ -82,8 +82,8 @@ init_languages() {
     TRANSLATIONS["ru,select_action"]="Выберите действие:"
     TRANSLATIONS["ru,option1"]="1. Поиск и отображение данных конкретного валидатора"
     TRANSLATIONS["ru,option2"]="2. Отобразить полный список валидаторов"
-    TRANSLATIONS["ru,option3"]="3. Назад"
-    TRANSLATIONS["ru,option4"]="4. Настроить уведомление об изменении позиции в очереди"
+    TRANSLATIONS["ru,option3"]="3. Настроить уведомление об изменении позиции в очереди"
+    TRANSLATIONS["ru,option0"]="0. Выход"
     TRANSLATIONS["ru,enter_option"]="Выберите опцию:"
     TRANSLATIONS["ru,enter_address"]="Введите адрес валидатора:"
     TRANSLATIONS["ru,validator_info"]="Информация о валидаторе:"
@@ -93,7 +93,7 @@ init_languages() {
     TRANSLATIONS["ru,status"]="Статус"
     TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
     TRANSLATIONS["ru,exiting"]="Выход."
-    TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 4."
+    TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 0."
     TRANSLATIONS["ru,status_0"]="NOT_IN_SET - Валидатор не в наборе валидаторов"
     TRANSLATIONS["ru,status_1"]="ACTIVE - Валидатор в настоящее время в наборе валидаторов"
     TRANSLATIONS["ru,status_2"]="INACTIVE - Валидатор не активен; возможно, в задержке вывода"
@@ -124,8 +124,8 @@ init_languages() {
     TRANSLATIONS["tr,select_action"]="Bir işlem seçin:"
     TRANSLATIONS["tr,option1"]="1. Belirli bir doğrulayıcı için arama yap ve verileri göster"
     TRANSLATIONS["tr,option2"]="2. Tam doğrulayıcı listesini göster"
-    TRANSLATIONS["tr,option3"]="3. Geri"
-    TRANSLATIONS["tr,option4"]="4. Doğrulayıcı sıra pozisyonu bildirimi ayarla"
+    TRANSLATIONS["tr,option3"]="3. Doğrulayıcı sıra pozisyonu bildirimi ayarla"
+    TRANSLATIONS["tr,option0"]="0. Çıkış"
     TRANSLATIONS["tr,enter_option"]="Seçenek seçin:"
     TRANSLATIONS["tr,enter_address"]="Doğrulayıcı adresini girin:"
     TRANSLATIONS["tr,validator_info"]="Doğrulayıcı bilgisi:"
@@ -135,7 +135,7 @@ init_languages() {
     TRANSLATIONS["tr,status"]="Durum"
     TRANSLATIONS["tr,validator_not_found"]="%s adresli doğrulayıcı bulunamadı."
     TRANSLATIONS["tr,exiting"]="Çıkılıyor."
-    TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2, 3 veya 4 seçin."
+    TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2, 3 veya 0 seçin."
     TRANSLATIONS["tr,status_0"]="NOT_IN_SET - Doğrulayıcı, doğrulayıcı setinde değil"
     TRANSLATIONS["tr,status_1"]="AKTİF - Doğrulayıcı şu anda doğrulayıcı setinde"
     TRANSLATIONS["tr,status_2"]="PASİF - Doğrulayıcı aktif değil; muhtemelen çekme gecikmesinde"
@@ -556,8 +556,8 @@ while true; do
     echo -e "${BOLD}$(t "select_action")${RESET}"
     echo -e "${CYAN}$(t "option1")${RESET}"
     echo -e "${CYAN}$(t "option2")${RESET}"
-    echo -e "${BLUE}$(t "option4")${RESET}"
-    echo -e "${RED}$(t "option3")${RESET}"
+    echo -e "${BLUE}$(t "option3")${RESET}"
+    echo -e "${RED}$(t "option0")${RESET}"
     read -p "$(t "enter_option") " choice
 
     case $choice in
@@ -594,7 +594,7 @@ while true; do
                 echo "----------------------------------------"
             done
             ;;
-        4)
+        3)
             echo -e "\n${BOLD}Validator queue position notification${RESET}"
             list_monitor_scripts
             echo ""
@@ -620,7 +620,7 @@ while true; do
 
             create_monitor_script "$validator_address"
             ;;
-        3)
+        0)
             echo -e "\n${CYAN}$(t "exiting")${RESET}"
             break
             ;;
