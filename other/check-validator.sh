@@ -73,6 +73,10 @@ init_languages() {
     TRANSLATIONS["en,enter_validator_address"]="Enter validator address to monitor:"
     TRANSLATIONS["en,notification_removed"]="Notification for validator %s has been removed."
     TRANSLATIONS["en,no_notifications"]="No active notifications found."
+    TRANSLATIONS["en,validator_not_in_queue"]="Validator not found in queue either. Please check the address."
+    TRANSLATIONS["en,validator_not_in_set"]="Validator not found in current validator set. Checking queue..."
+    TRANSLATIONS["en,queue_notification_title"]="Validator queue position notification"
+    TRANSLATIONS["en,active_monitors"]="Active validator monitors:"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -115,6 +119,10 @@ init_languages() {
     TRANSLATIONS["ru,enter_validator_address"]="Введите адрес валидатора для мониторинга:"
     TRANSLATIONS["ru,notification_removed"]="Уведомление для валидатора %s удалено."
     TRANSLATIONS["ru,no_notifications"]="Активных уведомлений не найдено."
+    TRANSLATIONS["ru,validator_not_in_queue"]="Валидатор не найден и в очереди. Пожалуйста, проверьте адрес."
+    TRANSLATIONS["ru,validator_not_in_set"]="Валидатор не найден в текущем наборе. Проверяем очередь..."
+    TRANSLATIONS["ru,queue_notification_title"]="Уведомление о позиции в очереди валидаторов"
+    TRANSLATIONS["ru,active_monitors"]="Активные мониторы валидаторов:"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -157,6 +165,10 @@ init_languages() {
     TRANSLATIONS["tr,enter_validator_address"]="İzlemek için doğrulayıcı adresini girin:"
     TRANSLATIONS["tr,notification_removed"]="%s doğrulayıcısı için bildirim kaldırıldı."
     TRANSLATIONS["tr,no_notifications"]="Aktif bildirim bulunamadı."
+    TRANSLATIONS["tr,validator_not_in_queue"]="Doğrulayıcı kuyrukta da bulunamadı. Lütfen adresi kontrol edin."
+    TRANSLATIONS["tr,validator_not_in_set"]="Doğrulayıcı mevcut doğrulayıcı setinde bulunamadı. Kuyruk kontrol ediliyor..."
+    TRANSLATIONS["tr,queue_notification_title"]="Doğrulayıcı sıra pozisyon bildirimi"
+    TRANSLATIONS["tr,active_monitors"]="Aktif doğrulayıcı izleyicileri:"
 }
 
 t() {
@@ -416,7 +428,7 @@ list_monitor_scripts() {
         return
     fi
 
-    echo -e "${BOLD}Active validator monitors:${RESET}"
+    echo -e "${BOLD}$(t "active_monitors")${RESET}"
     for script in "${scripts[@]}"; do
         local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
         echo -e "  ${CYAN}$address${RESET}"
@@ -556,7 +568,7 @@ while true; do
     echo -e "${BOLD}$(t "select_action")${RESET}"
     echo -e "${CYAN}$(t "option1")${RESET}"
     echo -e "${CYAN}$(t "option2")${RESET}"
-    echo -e "${BLUE}$(t "option3")${RESET}"
+    echo -e "${CYAN}$(t "option3")${RESET}"
     echo -e "${RED}$(t "option0")${RESET}"
     read -p "$(t "enter_option") " choice
 
@@ -595,7 +607,7 @@ while true; do
             done
             ;;
         3)
-            echo -e "\n${BOLD}Validator queue position notification${RESET}"
+            echo -e "\n${BOLD}$(t "queue_notification_title")${RESET}"
             list_monitor_scripts
             echo ""
             read -p "$(t "enter_validator_address") " validator_address
@@ -611,9 +623,9 @@ while true; do
             done
 
             if ! $found; then
-                echo -e "${YELLOW}Validator not found in current validator set. Checking queue...${RESET}"
+                echo -e "${YELLOW}$(t "validator_not_in_set")${RESET}"
                 if ! check_validator_queue "$validator_address"; then
-                    echo -e "${RED}Validator not found in queue either. Please check the address.${RESET}"
+                    echo -e "${RED}$(t "validator_not_in_queue")${RESET}"
                     continue
                 fi
             fi
