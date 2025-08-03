@@ -237,80 +237,23 @@ progress_bar() {
     printf "] %d/%d" "$current" "$total"
 }
 
-# Функция для проверки очереди валидаторов
-check_validator_queue() {
-    local validator_address=$1
-    echo -e "${YELLOW}$(t "fetching_queue")${RESET}"
-
-    # Загружаем данные очереди
-    queue_data=$(curl -s "$QUEUE_URL")
-    if [ $? -ne 0 ] || [ -z "$queue_data" ]; then
-        echo -e "${RED}Error fetching validator queue data${RESET}"
+# Функция для отправки сообщения в Telegram
+send_telegram_message() {
+    local message="$1"
+    if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+        echo -e "${RED}$(t "telegram_creds_missing")${RESET}"
         return 1
     fi
 
-    # Проверяем валидность JSON
-    if ! jq -e . >/dev/null 2>&1 <<<"$queue_data"; then
-        echo -e "${RED}Invalid JSON data received from queue API${RESET}"
+    local response=$(curl -s -X POST \
+        -H 'Content-Type: application/json' \
+        -d "{\"chat_id\":\"$TELEGRAM_CHAT_ID\",\"text\":\"$message\"}" \
+        "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage")
+
+    if ! echo "$response" | jq -e '.ok' >/dev/null; then
+        echo -e "${RED}Failed to send Telegram notification${RESET}"
         return 1
     fi
-
-    # Извлекаем список валидаторов в очереди
-    validators_in_queue=$(echo "$queue_data" | jq -r '.validatorsInQueue[]?.address // empty')
-    if [ -z "$validators_in_queue" ]; then
-        echo -e "${YELLOW}No validators found in queue${RESET}"
-        return 1
-    fi
-
-    # Нормализуем адрес для поиска (нижний регистр)
-    search_address_lower=${validator_address,,}
-
-    # Проверяем наличие валидатора в очереди
-    while IFS= read -r queue_address; do
-        if [ "${queue_address,,}" == "$search_address_lower" ]; then
-            # Получаем полную информацию о валидаторе из очереди
-            validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
-
-            if [ -n "$validator_info" ]; then
-                local position=$(echo "$validator_info" | jq -r '.position')
-                echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
-                echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
-                echo -e "  ${BOLD}$(t "position"):${RESET} $position"
-                echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
-                echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
-
-                # Очищаем буфер ввода перед запросом подтверждения
-                while read -r -t 0; do read -r; done
-
-                # Предлагаем настроить мониторинг
-                echo -e "\n${CYAN}$(t "setup_notifications")${RESET}"
-                read -p "$(t "enter_option") " setup_monitoring
-
-                if [[ "$setup_monitoring" =~ ^[Yy]$ ]]; then
-                    # Проверяем наличие Telegram credentials
-                    if [ -f "/root/.env-aztec-agent" ]; then
-                        source "/root/.env-aztec-agent"
-                        if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-                            echo -e "${RED}$(t "telegram_creds_missing")${RESET}"
-                            echo -e "Please add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to /root/.env-aztec-agent"
-                            return 1
-                        fi
-
-                        create_monitor_script "$validator_address" "$position"
-                        echo -e "${GREEN}$(t "notifications_setup")${RESET}"
-                    else
-                        echo -e "${RED}$(t "telegram_file_missing")${RESET}"
-                        echo -e "Please create the file with TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID variables"
-                    fi
-                fi
-
-                return 0
-            fi
-        fi
-    done <<< "$validators_in_queue"
-
-    echo -e "\n${RED}$(t "not_in_queue")${RESET}"
-    return 1
 }
 
 # Функция для создания скрипта мониторинга
@@ -433,24 +376,27 @@ check_validator_queue() {
                 echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
                 echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
 
+                # Очищаем буфер ввода перед запросом подтверждения
+                while read -t 0 -n 10000 discard; do : ; done
+
                 # Предлагаем настроить мониторинг
-                echo -e "\n${CYAN}Do you want to setup Telegram notifications for position changes? [y/N]${RESET}"
-                read -p "Your choice: " setup_monitoring
+                echo -e "\n${CYAN}$(t "setup_notifications")${RESET}"
+                read -p "$(t "enter_option") " setup_monitoring </dev/tty
 
                 if [[ "$setup_monitoring" =~ ^[Yy]$ ]]; then
                     # Проверяем наличие Telegram credentials
                     if [ -f "/root/.env-aztec-agent" ]; then
                         source "/root/.env-aztec-agent"
                         if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-                            echo -e "${RED}Telegram credentials not found in /root/.env-aztec-agent${RESET}"
+                            echo -e "${RED}$(t "telegram_creds_missing")${RESET}"
                             echo -e "Please add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to /root/.env-aztec-agent"
                             return 1
                         fi
 
                         create_monitor_script "$validator_address" "$position"
-                        echo -e "${GREEN}Telegram notifications will be sent for position changes${RESET}"
+                        echo -e "${GREEN}$(t "notifications_setup")${RESET}"
                     else
-                        echo -e "${RED}/root/.env-aztec-agent file not found${RESET}"
+                        echo -e "${RED}$(t "telegram_file_missing")${RESET}"
                         echo -e "Please create the file with TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID variables"
                     fi
                 fi
