@@ -77,6 +77,9 @@ init_languages() {
     TRANSLATIONS["en,validator_not_in_set"]="Validator not found in current validator set. Checking queue..."
     TRANSLATIONS["en,queue_notification_title"]="Validator queue position notification"
     TRANSLATIONS["en,active_monitors"]="Active validator monitors:"
+    TRANSLATIONS["en,enter_multiple_addresses"]="Enter validator addresses to monitor (comma separated):"
+    TRANSLATIONS["en,invalid_address_format"]="Invalid address format: %s"
+    TRANSLATIONS["en,processing_address"]="Processing address: %s"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -123,6 +126,9 @@ init_languages() {
     TRANSLATIONS["ru,validator_not_in_set"]="Валидатор не найден в текущем наборе. Проверяем очередь..."
     TRANSLATIONS["ru,queue_notification_title"]="Уведомление о позиции в очереди валидаторов"
     TRANSLATIONS["ru,active_monitors"]="Активные мониторы валидаторов:"
+    TRANSLATIONS["ru,enter_multiple_addresses"]="Введите адреса валидаторов для мониторинга (через запятую):"
+    TRANSLATIONS["ru,invalid_address_format"]="Неверный формат адреса: %s"
+    TRANSLATIONS["ru,processing_address"]="Обработка адреса: %s"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -169,6 +175,9 @@ init_languages() {
     TRANSLATIONS["tr,validator_not_in_set"]="Doğrulayıcı mevcut doğrulayıcı setinde bulunamadı. Kuyruk kontrol ediliyor..."
     TRANSLATIONS["tr,queue_notification_title"]="Doğrulayıcı sıra pozisyon bildirimi"
     TRANSLATIONS["tr,active_monitors"]="Aktif doğrulayıcı izleyicileri:"
+    TRANSLATIONS["tr,enter_multiple_addresses"]="İzlemek için doğrulayıcı adreslerini girin (virgülle ayrılmış):"
+    TRANSLATIONS["tr,invalid_address_format"]="Geçersiz adres formatı: %s"
+    TRANSLATIONS["tr,processing_address"]="Adres işleniyor: %s"
 }
 
 t() {
@@ -312,20 +321,32 @@ check_validator_queue() {
 }
 
 create_monitor_script() {
-    local validator_address=$1
-    local normalized_address=${validator_address,,}
-    local script_name="monitor_${normalized_address:2}.sh"
-    local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
-    local position_file="$MONITOR_DIR/last_position_${normalized_address:2}.txt"
+    local validator_addresses=$1
+    local addresses=()
 
-    if [ -f "$MONITOR_DIR/$script_name" ]; then
-        echo -e "${YELLOW}$(t "notification_exists")${RESET}"
-        return 1
-    fi
+    # Разделяем адреса по запятой
+    IFS=',' read -ra addresses <<< "$validator_addresses"
 
-    mkdir -p "$MONITOR_DIR"
+    for validator_address in "${addresses[@]}"; do
+        validator_address=$(echo "$validator_address" | xargs) # Удаляем лишние пробелы
+        if [[ ! "$validator_address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo -e "${RED}Invalid address format: $validator_address${RESET}"
+            continue
+        fi
 
-    cat > "$MONITOR_DIR/$script_name" <<'EOF'
+        local normalized_address=${validator_address,,}
+        local script_name="monitor_${normalized_address:2}.sh"
+        local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
+        local position_file="$MONITOR_DIR/last_position_${normalized_address:2}.txt"
+
+        if [ -f "$MONITOR_DIR/$script_name" ]; then
+            echo -e "${YELLOW}$(t "notification_exists")${RESET}"
+            continue
+        fi
+
+        mkdir -p "$MONITOR_DIR"
+
+        cat > "$MONITOR_DIR/$script_name" <<'EOF'
 #!/bin/bash
 
 # Set safe environment
@@ -438,22 +459,23 @@ monitor_position() {
 } >> "$LOG_FILE" 2>&1
 EOF
 
-    # Заменяем плейсхолдеры
-    sed -i "s|VALIDATOR_ADDRESS_PLACEHOLDER|$validator_address|g" "$MONITOR_DIR/$script_name"
-    sed -i "s|QUEUE_URL_PLACEHOLDER|$QUEUE_URL|g" "$MONITOR_DIR/$script_name"
-    sed -i "s|MONITOR_DIR_PLACEHOLDER|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
-    sed -i "s|LAST_POSITION_FILE_PLACEHOLDER|$position_file|g" "$MONITOR_DIR/$script_name"
-    sed -i "s|LOG_FILE_PLACEHOLDER|$log_file|g" "$MONITOR_DIR/$script_name"
-    sed -i "s|TELEGRAM_BOT_TOKEN_PLACEHOLDER|$TELEGRAM_BOT_TOKEN|g" "$MONITOR_DIR/$script_name"
-    sed -i "s|TELEGRAM_CHAT_ID_PLACEHOLDER|$TELEGRAM_CHAT_ID|g" "$MONITOR_DIR/$script_name"
+        # Заменяем плейсхолдеры
+        sed -i "s|VALIDATOR_ADDRESS_PLACEHOLDER|$validator_address|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|QUEUE_URL_PLACEHOLDER|$QUEUE_URL|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|MONITOR_DIR_PLACEHOLDER|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|LAST_POSITION_FILE_PLACEHOLDER|$position_file|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|LOG_FILE_PLACEHOLDER|$log_file|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|TELEGRAM_BOT_TOKEN_PLACEHOLDER|$TELEGRAM_BOT_TOKEN|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|TELEGRAM_CHAT_ID_PLACEHOLDER|$TELEGRAM_CHAT_ID|g" "$MONITOR_DIR/$script_name"
 
-    chmod +x "$MONITOR_DIR/$script_name"
+        chmod +x "$MONITOR_DIR/$script_name"
 
-    if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
-        (crontab -l 2>/dev/null; echo "0 * * * * $MONITOR_DIR/$script_name") | crontab -
-    fi
+        if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
+            (crontab -l 2>/dev/null; echo "0 * * * * $MONITOR_DIR/$script_name") | crontab -
+        fi
 
-    echo -e "${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
+        echo -e "${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
+    done
 }
 
 # Функция для удаления скрипта мониторинга
@@ -664,27 +686,10 @@ while true; do
             echo -e "\n${BOLD}$(t "queue_notification_title")${RESET}"
             list_monitor_scripts
             echo ""
-            read -p "$(t "enter_validator_address") " validator_address
+            read -p "$(t "enter_multiple_addresses") " validator_addresses
 
-            # Проверяем, есть ли такой валидатор
-            found=false
-            for line in "${RESULTS[@]}"; do
-                IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
-                if [[ "${validator,,}" == "${validator_address,,}" ]]; then
-                    found=true
-                    break
-                fi
-            done
-
-            if ! $found; then
-                echo -e "${YELLOW}$(t "validator_not_in_set")${RESET}"
-                if ! check_validator_queue "$validator_address"; then
-                    echo -e "${RED}$(t "validator_not_in_queue")${RESET}"
-                    continue
-                fi
-            fi
-
-            create_monitor_script "$validator_address"
+            # Создаем скрипты для всех указанных адресов
+            create_monitor_script "$validator_addresses"
             ;;
         0)
             echo -e "\n${CYAN}$(t "exiting")${RESET}"
