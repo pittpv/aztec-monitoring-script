@@ -311,24 +311,20 @@ check_validator_queue() {
     return 1
 }
 
-# Функция для создания скрипта мониторинга
 create_monitor_script() {
     local validator_address=$1
     local normalized_address=${validator_address,,}
-    local script_name="monitor_${normalized_address:2}.sh"  # Удаляем 0x из адреса для имени файла
+    local script_name="monitor_${normalized_address:2}.sh"
     local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
     local position_file="$MONITOR_DIR/last_position_${normalized_address:2}.txt"
 
-    # Проверяем, существует ли уже скрипт для этого валидатора
     if [ -f "$MONITOR_DIR/$script_name" ]; then
         echo -e "${YELLOW}$(t "notification_exists")${RESET}"
         return 1
     fi
 
-    # Создаем директорию, если ее нет
     mkdir -p "$MONITOR_DIR"
 
-    # Создаем скрипт мониторинга с исправленной версией
     cat > "$MONITOR_DIR/$script_name" <<'EOF'
 #!/bin/bash
 
@@ -345,53 +341,27 @@ LOG_FILE="LOG_FILE_PLACEHOLDER"
 TELEGRAM_BOT_TOKEN="TELEGRAM_BOT_TOKEN_PLACEHOLDER"
 TELEGRAM_CHAT_ID="TELEGRAM_CHAT_ID_PLACEHOLDER"
 
-# Ensure directory exists
 mkdir -p "$MONITOR_DIR"
 
-# Function to URL encode strings
-urlencode() {
-    local string="$1"
-    local encoded=""
-    local length=${#string}
-    local pos char
-
-    for ((pos = 0; pos < length; pos++)); do
-        char=${string:$pos:1}
-        case "$char" in
-            [a-zA-Z0-9.~_-]) encoded+="$char" ;;
-            *) encoded+=$(printf '%%%02X' "'$char") ;;
-        esac
-    done
-    echo "$encoded"
-}
-
-# Function to send Telegram messages
 send_telegram() {
     local message="$1"
-    local encoded_message
-    encoded_message=$(urlencode "$message")
 
-    local response
-    response=$(curl -s -X POST \
-        "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
-        -d "chat_id=$TELEGRAM_CHAT_ID" \
-        -d "text=$encoded_message" \
-        -d "parse_mode=Markdown" \
-        -w "\n%{http_code}" 2>&1)
-
-    local http_code
-    http_code=$(echo "$response" | tail -n1)
-    local result
-    result=$(echo "$response" | head -n-1)
-
-    if [[ "$http_code" != "200" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Telegram API Error: $http_code - $result" >> "$LOG_FILE"
-        return 1
-    fi
-    return 0
+    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+        -d chat_id="$TELEGRAM_CHAT_ID" \
+        -d text="$message" \
+        -d parse_mode="Markdown" \
+        -w "\n%{http_code}" > /dev/null 2>&1
 }
 
-# Main monitoring function
+format_date() {
+    local iso_date="$1"
+    if [[ "$iso_date" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}) ]]; then
+        echo "${BASH_REMATCH[3]}.${BASH_REMATCH[2]}.${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]} UTC"
+    else
+        echo "$iso_date"
+    fi
+}
+
 monitor_position() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting monitor_position" >> "$LOG_FILE"
 
@@ -401,67 +371,61 @@ monitor_position() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Last known position: $last_position" >> "$LOG_FILE"
     fi
 
-    local queue_data
-    queue_data=$(curl -s "$QUEUE_URL")
-
+    local queue_data=$(curl -s "$QUEUE_URL")
     if [[ $? -ne 0 || -z "$queue_data" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error: Failed to fetch queue data or empty response" >> "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching queue data" >> "$LOG_FILE"
         return 1
     fi
 
     if ! jq -e . >/dev/null 2>&1 <<<"$queue_data"; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error: Invalid JSON received" >> "$LOG_FILE"
-        echo "Response: $queue_data" >> "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Invalid queue data received" >> "$LOG_FILE"
         return 1
     fi
 
-    # Convert VALIDATOR_ADDRESS to lowercase for comparison
-    ADDRESS_LOWER=$(echo "$VALIDATOR_ADDRESS" | tr '[:upper:]' '[:lower:]')
-
-    # Search for validator
-    validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[]? | select(.address? | ascii_downcase == \"$ADDRESS_LOWER\")")
+    local validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[]? | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
 
     if [[ -n "$validator_info" ]]; then
-        local current_position
-        current_position=$(echo "$validator_info" | jq -r '.position')
-        local queued_at
-        queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
+        local current_position=$(echo "$validator_info" | jq -r '.position')
+        local queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
 
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator found at position $current_position" >> "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator at position $current_position" >> "$LOG_FILE"
 
         if [[ "$last_position" != "$current_position" ]]; then
             local message
             if [[ -n "$last_position" ]]; then
-                message="*Validator position changed*
-\`$VALIDATOR_ADDRESS\`
-▶ Previous: $last_position
-▶ Current: $current_position
-🕒 Queued: $queued_at"
+                message="📊 *Validator Position Update* 📊
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+🔄 *Change:* $last_position → $current_position
+📅 *Queued since:* $queued_at
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
-                message="*New validator in queue*
-\`$VALIDATOR_ADDRESS\`
-▶ Position: $current_position
-🕒 Queued: $queued_at"
+                message="🎉 *New Validator in Queue* 🎉
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+📌 *Initial Position:* $current_position
+📅 *Queued since:* $queued_at
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
 
             if send_telegram "$message"; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Sent notification: position $current_position" >> "$LOG_FILE"
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Notification sent" >> "$LOG_FILE"
             fi
 
             echo "$current_position" > "$LAST_POSITION_FILE"
-        else
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Position unchanged: $current_position" >> "$LOG_FILE"
         fi
     else
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator not found in queue" >> "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator not in queue" >> "$LOG_FILE"
 
         if [[ -n "$last_position" ]]; then
-            local message="*Validator removed from queue*
-\`$VALIDATOR_ADDRESS\`
-❌ Was in position: $last_position"
+            local message="❌ *Validator Removed from Queue* ❌
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
 
             if send_telegram "$message"; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Sent removal notification" >> "$LOG_FILE"
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removal notification sent" >> "$LOG_FILE"
             fi
 
             rm -f "$LAST_POSITION_FILE"
@@ -469,13 +433,12 @@ monitor_position() {
     fi
 }
 
-# Run monitoring with logging
 {
     monitor_position
 } >> "$LOG_FILE" 2>&1
 EOF
 
-    # Заменяем плейсхолдеры на реальные значения
+    # Заменяем плейсхолдеры
     sed -i "s|VALIDATOR_ADDRESS_PLACEHOLDER|$validator_address|g" "$MONITOR_DIR/$script_name"
     sed -i "s|QUEUE_URL_PLACEHOLDER|$QUEUE_URL|g" "$MONITOR_DIR/$script_name"
     sed -i "s|MONITOR_DIR_PLACEHOLDER|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
@@ -484,10 +447,8 @@ EOF
     sed -i "s|TELEGRAM_BOT_TOKEN_PLACEHOLDER|$TELEGRAM_BOT_TOKEN|g" "$MONITOR_DIR/$script_name"
     sed -i "s|TELEGRAM_CHAT_ID_PLACEHOLDER|$TELEGRAM_CHAT_ID|g" "$MONITOR_DIR/$script_name"
 
-    # Делаем скрипт исполняемым
     chmod +x "$MONITOR_DIR/$script_name"
 
-    # Добавляем задание в cron (если его там еще нет)
     if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
         (crontab -l 2>/dev/null; echo "0 * * * * $MONITOR_DIR/$script_name") | crontab -
     fi
