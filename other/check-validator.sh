@@ -64,14 +64,6 @@ init_languages() {
     TRANSLATIONS["en,queued_at"]="Queued at"
     TRANSLATIONS["en,not_in_queue"]="Validator is not in the queue either."
     TRANSLATIONS["en,fetching_queue"]="Fetching validator queue data..."
-    TRANSLATIONS["en,setup_notifications"]="Do you want to setup Telegram notifications for position changes? [y/N]"
-    TRANSLATIONS["en,notifications_setup"]="Telegram notifications will be sent for position changes"
-    TRANSLATIONS["en,telegram_creds_missing"]="Telegram credentials not found in /root/.env-aztec-agent"
-    TRANSLATIONS["en,telegram_file_missing"]="/root/.env-aztec-agent file not found"
-    TRANSLATIONS["en,monitor_script_created"]="Monitoring script created: %s"
-    TRANSLATIONS["en,cron_job_added"]="Cron job added to check every hour"
-    TRANSLATIONS["en,notification_exit"]="Validator %s has exited the queue!"
-    TRANSLATIONS["en,notification_change"]="Validator %s queue position changed: %s → %s"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -108,14 +100,6 @@ init_languages() {
     TRANSLATIONS["ru,queued_at"]="Добавлен в очередь"
     TRANSLATIONS["ru,not_in_queue"]="Валидатора нет и в очереди."
     TRANSLATIONS["ru,fetching_queue"]="Получение данных очереди валидаторов..."
-    TRANSLATIONS["ru,setup_notifications"]="Хотите настроить уведомления в Telegram об изменении позиции? [y/N]"
-    TRANSLATIONS["ru,notifications_setup"]="Уведомления в Telegram будут отправляться при изменении позиции"
-    TRANSLATIONS["ru,telegram_creds_missing"]="Данные для Telegram не найдены в /root/.env-aztec-agent"
-    TRANSLATIONS["ru,telegram_file_missing"]="Файл /root/.env-aztec-agent не найден"
-    TRANSLATIONS["ru,monitor_script_created"]="Скрипт мониторинга создан: %s"
-    TRANSLATIONS["ru,cron_job_added"]="Добавлено задание cron для проверки каждый час"
-    TRANSLATIONS["ru,notification_exit"]="Валидатор %s вышел из очереди!"
-    TRANSLATIONS["ru,notification_change"]="Позиция валидатора %s изменилась: %s → %s"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -152,14 +136,6 @@ init_languages() {
     TRANSLATIONS["tr,queued_at"]="Kuyruğa eklendi"
     TRANSLATIONS["tr,not_in_queue"]="Doğrulayıcı kuyrukta da yok."
     TRANSLATIONS["tr,fetching_queue"]="Doğrulayıcı kuyruk verileri alınıyor..."
-    TRANSLATIONS["tr,setup_notifications"]="Pozisyon değişiklikleri için Telegram bildirimleri ayarlamak ister misiniz? [y/N]"
-    TRANSLATIONS["tr,notifications_setup"]="Pozisyon değişiklikleri için Telegram bildirimleri gönderilecek"
-    TRANSLATIONS["tr,telegram_creds_missing"]="/root/.env-aztec-agent dosyasında Telegram bilgileri bulunamadı"
-    TRANSLATIONS["tr,telegram_file_missing"]="/root/.env-aztec-agent dosyası bulunamadı"
-    TRANSLATIONS["tr,monitor_script_created"]="İzleme betiği oluşturuldu: %s"
-    TRANSLATIONS["tr,cron_job_added"]="Saatlik kontrol için cron görevi eklendi"
-    TRANSLATIONS["tr,notification_exit"]="Doğrulayıcı %s kuyruktan çıktı!"
-    TRANSLATIONS["tr,notification_change"]="Doğrulayıcı %s pozisyonu değişti: %s → %s"
 }
 
 t() {
@@ -237,103 +213,6 @@ progress_bar() {
     printf "] %d/%d" "$current" "$total"
 }
 
-# Функция для отправки сообщения в Telegram
-send_telegram_message() {
-    local message="$1"
-    if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-        echo -e "${RED}$(t "telegram_creds_missing")${RESET}"
-        return 1
-    fi
-
-    local response=$(curl -s -X POST \
-        -H 'Content-Type: application/json' \
-        -d "{\"chat_id\":\"$TELEGRAM_CHAT_ID\",\"text\":\"$message\"}" \
-        "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage")
-
-    if ! echo "$response" | jq -e '.ok' >/dev/null; then
-        echo -e "${RED}Failed to send Telegram notification${RESET}"
-        return 1
-    fi
-}
-
-# Функция для создания скрипта мониторинга
-create_monitor_script() {
-    local validator_address="$1"
-    local current_position="$2"
-    local monitor_dir="/root/aztec-monitor-agent"
-    local script_path="$monitor_dir/monitor_${validator_address}.sh"
-
-    # Создаем директорию если не существует
-    mkdir -p "$monitor_dir"
-
-    # Создаем скрипт
-    cat > "$script_path" <<EOF
-#!/bin/bash
-
-# Configuration
-VALIDATOR_ADDRESS="$validator_address"
-LAST_POSITION="$current_position"
-QUEUE_URL="https://dashtec.xyz/api/validators/queue"
-
-# Load environment variables if exists
-if [ -f "/root/.env-aztec-agent" ]; then
-    source "/root/.env-aztec-agent"
-fi
-
-# Function to send Telegram message
-send_telegram_message() {
-    local message="\$1"
-    curl -s -X POST \
-        -H 'Content-Type: application/json' \
-        -d "{\"chat_id\":\"\$TELEGRAM_CHAT_ID\",\"text\":\"\$message\"}" \
-        "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" >/dev/null
-}
-
-# Main check function
-check_validator_position() {
-    local queue_data=\$(curl -s "\$QUEUE_URL")
-    if [ \$? -ne 0 ] || [ -z "\$queue_data" ]; then
-        echo "Error fetching queue data"
-        return 1
-    fi
-
-    local validator_info=\$(echo "\$queue_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"\${VALIDATOR_ADDRESS,,}\")")
-    if [ -z "\$validator_info" ]; then
-        # Validator no longer in queue
-        if [ "\$LAST_POSITION" != "EXITED" ]; then
-            send_telegram_message "$(t "notification_exit" "\$VALIDATOR_ADDRESS")"
-            LAST_POSITION="EXITED"
-        fi
-        return 0
-    fi
-
-    local new_position=\$(echo "\$validator_info" | jq -r '.position')
-    if [ "\$new_position" != "\$LAST_POSITION" ]; then
-        local message="$(t "notification_change" "\$VALIDATOR_ADDRESS" "\$LAST_POSITION" "\$new_position")"
-        send_telegram_message "\$message"
-        LAST_POSITION="\$new_position"
-    fi
-}
-
-# Run the check
-check_validator_position
-
-# Update last position in script if changed
-if grep -q "LAST_POSITION=\"\$LAST_POSITION\"" "\$0"; then
-    sed -i "s/LAST_POSITION=\"\\\$LAST_POSITION\"/LAST_POSITION=\"\$LAST_POSITION\"/" "\$0"
-fi
-EOF
-
-    # Делаем скрипт исполняемым
-    chmod +x "$script_path"
-
-    # Добавляем задание в cron
-    (crontab -l 2>/dev/null; echo "0 * * * * $script_path") | crontab -
-
-    echo -e "${GREEN}$(t "monitor_script_created" "$script_path")${RESET}"
-    echo -e "${GREEN}$(t "cron_job_added")${RESET}"
-}
-
 # Функция для проверки очереди валидаторов
 check_validator_queue() {
     local validator_address=$1
@@ -369,38 +248,11 @@ check_validator_queue() {
             validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
 
             if [ -n "$validator_info" ]; then
-                local position=$(echo "$validator_info" | jq -r '.position')
                 echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
                 echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
-                echo -e "  ${BOLD}$(t "position"):${RESET} $position"
+                echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
                 echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
                 echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
-
-                # Очищаем буфер ввода
-                while read -t 0 -n 1000 discard; do : ; done
-
-                # Предлагаем настроить мониторинг (используем /dev/tty для гарантированного чтения с терминала)
-                echo -e "\n${CYAN}$(t "setup_notifications")${RESET}"
-                read -p "$(t "enter_option") " setup_monitoring </dev/tty
-
-                if [[ "$setup_monitoring" =~ ^[Yy]$ ]]; then
-                    # Проверяем наличие Telegram credentials
-                    if [ -f "/root/.env-aztec-agent" ]; then
-                        source "/root/.env-aztec-agent"
-                        if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-                            echo -e "${RED}$(t "telegram_creds_missing")${RESET}"
-                            echo -e "Please add TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID to /root/.env-aztec-agent"
-                            return 1
-                        fi
-
-                        create_monitor_script "$validator_address" "$position"
-                        echo -e "${GREEN}$(t "notifications_setup")${RESET}"
-                    else
-                        echo -e "${RED}$(t "telegram_file_missing")${RESET}"
-                        echo -e "Please create the file with TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID variables"
-                    fi
-                fi
-
                 return 0
             fi
         fi
