@@ -376,8 +376,14 @@ check_validator_queue() {
                 echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
                 echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
 
-                # Очищаем буфер ввода перед запросом подтверждения
-                while read -t 0 -n 10000 discard; do : ; done
+                # Если скрипт запущен не интерактивно, пропускаем запрос
+                if [ ! -t 0 ]; then
+                    echo -e "${YELLOW}Running non-interactively, skipping notification setup${RESET}"
+                    return 0
+                fi
+
+                # Очищаем буфер ввода
+                while read -t 0 -n 1000 discard; do : ; done
 
                 # Предлагаем настроить мониторинг
                 echo -e "\n${CYAN}$(t "setup_notifications")${RESET}"
