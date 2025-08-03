@@ -220,46 +220,29 @@ check_validator_queue() {
 
     # Загружаем данные очереди
     queue_data=$(curl -s "$QUEUE_URL")
-    if [ $? -ne 0 ] || [ -z "$queue_data" ]; then
+    if [ $? -ne 0 ]; then
         echo -e "${RED}Error fetching validator queue data${RESET}"
         return 1
     fi
 
-    # Проверяем валидность JSON
-    if ! jq -e . >/dev/null 2>&1 <<<"$queue_data"; then
-        echo -e "${RED}Invalid JSON data received from queue API${RESET}"
-        return 1
-    fi
-
     # Извлекаем список валидаторов в очереди
-    validators_in_queue=$(echo "$queue_data" | jq -r '.validatorsInQueue[]?.address // empty')
-    if [ -z "$validators_in_queue" ]; then
-        echo -e "${YELLOW}No validators found in queue${RESET}"
-        return 1
-    fi
-
-    # Нормализуем адрес для поиска (нижний регистр)
-    search_address_lower=${validator_address,,}
+    validators_in_queue=$(echo "$queue_data" | jq -r '.validatorsInQueue[] | .address')
 
     # Проверяем наличие валидатора в очереди
-    while IFS= read -r queue_address; do
-        if [ "${queue_address,,}" == "$search_address_lower" ]; then
-            # Получаем полную информацию о валидаторе из очереди
-            validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+    if echo "$validators_in_queue" | grep -qi "$validator_address"; then
+        # Получаем полную информацию о валидаторе из очереди
+        validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[] | select(.address | ascii_downcase == \"$validator_address\" | ascii_downcase)")
 
-            if [ -n "$validator_info" ]; then
-                echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
-                echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
-                echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
-                echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
-                echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
-                return 0
-            fi
-        fi
-    done <<< "$validators_in_queue"
-
-    echo -e "\n${RED}$(t "not_in_queue")${RESET}"
-    return 1
+        echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
+        echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
+        echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
+        echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
+        echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
+        return 0
+    else
+        echo -e "\n${RED}$(t "not_in_queue")${RESET}"
+        return 1
+    fi
 }
 
 # Функция для быстрой загрузки (асинхронной)
@@ -441,7 +424,6 @@ while true; do
             ;;
     esac
 done
-
 ##!/bin/bash
 #
 ## Функция загрузки RPC URL с обработкой ошибок
