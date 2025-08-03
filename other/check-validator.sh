@@ -376,16 +376,10 @@ check_validator_queue() {
                 echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
                 echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
 
-                # Если скрипт запущен не интерактивно, пропускаем запрос
-                if [ ! -t 0 ]; then
-                    echo -e "${YELLOW}Running non-interactively, skipping notification setup${RESET}"
-                    return 0
-                fi
-
                 # Очищаем буфер ввода
                 while read -t 0 -n 1000 discard; do : ; done
 
-                # Предлагаем настроить мониторинг
+                # Предлагаем настроить мониторинг (используем /dev/tty для гарантированного чтения с терминала)
                 echo -e "\n${CYAN}$(t "setup_notifications")${RESET}"
                 read -p "$(t "enter_option") " setup_monitoring </dev/tty
 
