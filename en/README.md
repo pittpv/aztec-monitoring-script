@@ -33,12 +33,17 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 02-08-2025
-- Updated the validator committee inclusion check function (restored function operation)
-    - Multiple validator addresses can be specified
+## 📌 Latest Updates 06-08-2025
+- The validator queue check function has been restored.
+
+Please, update script, perform search and validator check by option 9. Add validator position tracking again.
 
 <details>
 <summary>📅 Version History</summary>
+
+### 02-08-2025
+- Updated the validator committee inclusion check function (restored function operation)
+    - Multiple validator addresses can be specified
 
 ### 01-08-2025
 - Updated the validator check script. Added check modes.

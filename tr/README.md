@@ -33,12 +33,17 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler 02-08-2025  
-- Validatör komite dahiliyet kontrol fonksiyonu güncellendi (fonksiyon çalışması yeniden sağlandı)
-  - Birden fazla validatör adresi belirtilebilir
+## 📌 Son Güncellemeler 06-08-2025  
+- Validatör kuyruğu kontrol fonksiyonu yeniden etkinleştirildi.
+
+Lütfen betiği güncelleyin, 9. seçeneği ile arama yapıp validatör kontrolü gerçekleştirin. Validatör pozisyon takibini tekrar ekleyin.
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 02-08-2025
+- Validatör komite dahiliyet kontrol fonksiyonu güncellendi (fonksiyon çalışması yeniden sağlandı)
+  - Birden fazla validatör adresi belirtilebilir
 
 ### 01-08-2025
 - Aztec Node Güncelleme fonksiyonu eklendi. Bu fonksiyon, Watchtower'ın otomatik güncellemesini beklemeden nodu anında günceller.
