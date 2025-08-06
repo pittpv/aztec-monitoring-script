@@ -80,6 +80,7 @@ init_languages() {
     TRANSLATIONS["en,enter_multiple_addresses"]="Enter validator addresses to monitor (comma separated):"
     TRANSLATIONS["en,invalid_address_format"]="Invalid address format: %s"
     TRANSLATIONS["en,processing_address"]="Processing address: %s"
+    TRANSLATIONS["en,fetching_page"]="Fetching page %d of %d..."
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -129,6 +130,7 @@ init_languages() {
     TRANSLATIONS["ru,enter_multiple_addresses"]="Введите адреса валидаторов для мониторинга (через запятую):"
     TRANSLATIONS["ru,invalid_address_format"]="Неверный формат адреса: %s"
     TRANSLATIONS["ru,processing_address"]="Обработка адреса: %s"
+    TRANSLATIONS["ru,fetching_page"]="Получение страницы %d из %d..."
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -178,6 +180,7 @@ init_languages() {
     TRANSLATIONS["tr,enter_multiple_addresses"]="İzlemek için doğrulayıcı adreslerini girin (virgülle ayrılmış):"
     TRANSLATIONS["tr,invalid_address_format"]="Geçersiz adres formatı: %s"
     TRANSLATIONS["tr,processing_address"]="Adres işleniyor: %s"
+    TRANSLATIONS["tr,fetching_page"]="Sayfa %d/%d alınıyor..."
 }
 
 t() {
@@ -276,48 +279,59 @@ check_validator_queue() {
     local validator_address=$1
     echo -e "${YELLOW}$(t "fetching_queue")${RESET}"
 
-    # Загружаем данные очереди
-    queue_data=$(curl -s "$QUEUE_URL")
-    if [ $? -ne 0 ] || [ -z "$queue_data" ]; then
+    # Получаем первую страницу для получения информации о пагинации
+    first_page_data=$(curl -s "${QUEUE_URL}?page=1&limit=100")
+    if [ $? -ne 0 ] || [ -z "$first_page_data" ]; then
         echo -e "${RED}Error fetching validator queue data${RESET}"
         return 1
     fi
 
     # Проверяем валидность JSON
-    if ! jq -e . >/dev/null 2>&1 <<<"$queue_data"; then
+    if ! jq -e . >/dev/null 2>&1 <<<"$first_page_data"; then
         echo -e "${RED}Invalid JSON data received from queue API${RESET}"
         return 1
     fi
 
-    # Извлекаем список валидаторов в очереди
-    validators_in_queue=$(echo "$queue_data" | jq -r '.validatorsInQueue[]?.address // empty')
-    if [ -z "$validators_in_queue" ]; then
-        echo -e "${YELLOW}No validators found in queue${RESET}"
-        return 1
+    # Получаем общее количество страниц
+    total_pages=$(echo "$first_page_data" | jq -r '.pagination.totalPages // 1')
+    if [ -z "$total_pages" ] || [ "$total_pages" -lt 1 ]; then
+        total_pages=1
     fi
 
     # Нормализуем адрес для поиска (нижний регистр)
     search_address_lower=${validator_address,,}
+    found=false
 
-    # Проверяем наличие валидатора в очереди
-    while IFS= read -r queue_address; do
-        if [ "${queue_address,,}" == "$search_address_lower" ]; then
-            # Получаем полную информацию о валидаторе из очереди
-            validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+    # Проверяем все страницы
+    for ((page=1; page<=total_pages; page++)); do
+        echo -e "${YELLOW}$(t "fetching_page" "$page" "$total_pages")${RESET}"
 
-            if [ -n "$validator_info" ]; then
-                echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
-                echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
-                echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
-                echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
-                echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
-                return 0
-            fi
+        # Получаем данные текущей страницы
+        page_data=$(curl -s "${QUEUE_URL}?page=${page}&limit=100")
+        if [ $? -ne 0 ] || [ -z "$page_data" ]; then
+            echo -e "${RED}Error fetching page ${page}${RESET}"
+            continue
         fi
-    done <<< "$validators_in_queue"
 
-    echo -e "\n${RED}$(t "not_in_queue")${RESET}"
-    return 1
+        # Проверяем наличие валидатора на текущей странице
+        validator_info=$(echo "$page_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+
+        if [ -n "$validator_info" ]; then
+            echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
+            echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
+            echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
+            echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
+            echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
+            found=true
+            break
+        fi
+    done
+
+    if ! $found; then
+        echo -e "\n${RED}$(t "not_in_queue")${RESET}"
+        return 1
+    fi
+    return 0
 }
 
 create_monitor_script() {
@@ -392,23 +406,49 @@ monitor_position() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Last known position: $last_position" >> "$LOG_FILE"
     fi
 
-    local queue_data=$(curl -s "$QUEUE_URL")
-    if [[ $? -ne 0 || -z "$queue_data" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching queue data" >> "$LOG_FILE"
+    # Get first page to check pagination
+    local first_page_data=$(curl -s "${QUEUE_URL}?page=1&limit=100")
+    if [[ $? -ne 0 || -z "$first_page_data" ]]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching first page data" >> "$LOG_FILE"
         return 1
     fi
 
-    if ! jq -e . >/dev/null 2>&1 <<<"$queue_data"; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Invalid queue data received" >> "$LOG_FILE"
+    if ! jq -e . >/dev/null 2>&1 <<<"$first_page_data"; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Invalid first page data received" >> "$LOG_FILE"
         return 1
     fi
 
-    local validator_info=$(echo "$queue_data" | jq -r ".validatorsInQueue[]? | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+    local total_pages=$(echo "$first_page_data" | jq -r '.pagination.totalPages // 1')
+    if [[ -z "$total_pages" || "$total_pages" -lt 1 ]]; then
+        total_pages=1
+    fi
 
-    if [[ -n "$validator_info" ]]; then
-        local current_position=$(echo "$validator_info" | jq -r '.position')
-        local queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
+    local validator_found=false
+    local current_position=""
 
+    # Check all pages
+    for ((page=1; page<=total_pages; page++)); do
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Checking page $page of $total_pages" >> "$LOG_FILE"
+
+        local page_data=$(curl -s "${QUEUE_URL}?page=${page}&limit=100")
+        if [[ $? -ne 0 || -z "$page_data" ]]; then
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching page $page" >> "$LOG_FILE"
+            continue
+        fi
+
+        local validator_info=$(echo "$page_data" | jq -r ".validatorsInQueue[]? | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+
+        if [[ -n "$validator_info" ]]; then
+            validator_found=true
+            current_position=$(echo "$validator_info" | jq -r '.position')
+            local queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
+
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator found on page $page at position $current_position" >> "$LOG_FILE"
+            break
+        fi
+    done
+
+    if [[ "$validator_found" == true ]]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator at position $current_position" >> "$LOG_FILE"
 
         if [[ "$last_position" != "$current_position" ]]; then
