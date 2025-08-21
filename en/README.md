@@ -14,7 +14,7 @@
 
 This script provides a comprehensive solution for launching (via docker-compose or CLI) and monitoring an Aztec node, including container status checks, block synchronization verification, retrieval of important node information, and sending notifications via Telegram.
 
-Also check out the History version under the spoiler, there is a lot of useful information about the functions of the script.
+Also check out the Version History under the spoiler, there is a lot of useful information about the functions of the script.
 
 ## 🌟 Key Features
 

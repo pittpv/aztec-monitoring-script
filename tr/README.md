@@ -14,7 +14,7 @@
 
 Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılığıyla) ve izlemek için kapsamlı bir çözüm sunar. İçerdiği özellikler arasında konteyner durumu kontrolü, blok senkronizasyon doğrulaması, düğüme ait önemli bilgilerin alınması ve Telegram üzerinden bildirim gönderme bulunmaktadır.
 
-Ayrıca spoiler'ın altındaki History versiyonuna da göz atın, orada script'in işlevleri hakkında çok sayıda faydalı bilgi var.
+Ayrıca spoiler'ın altındaki Sürüm Geçmişi da göz atın, orada script'in işlevleri hakkında çok sayıda faydalı bilgi var.
 
 ## 🌟 Temel Özellikler
 
