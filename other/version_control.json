@@ -108,6 +108,11 @@
         "VERSION": "1.11.3",
         "UPDATE_DATE": "06.08.2025",
         "CHANGES": ["Fix for validator queue control"]
+    },
+    {
+        "VERSION": "1.11.4",
+        "UPDATE_DATE": "21.08.2025",
+        "CHANGES": ["Updated PeerID search function", "Updated cron agent creation function"]
     }
 
 ]

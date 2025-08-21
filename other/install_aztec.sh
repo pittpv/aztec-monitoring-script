@@ -97,6 +97,8 @@ init_languages() {
   TRANSLATIONS["en,enter_seq_publisher_key"]="Enter SEQ_PUBLISHER_PRIVATE_KEY (with 0x): "
   TRANSLATIONS["en,validator_setup_header"]="=== Validator Setup ==="
   TRANSLATIONS["en,multiple_validators_prompt"]="Do you want to run multiple validators? (y/n) "
+  TRANSLATIONS["en,ufw_not_installed"]="⚠️ ufw is not installed"
+  TRANSLATIONS["en,ufw_not_active"]="⚠️ ufw is not active"
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -167,6 +169,8 @@ init_languages() {
   TRANSLATIONS["ru,enter_seq_publisher_key"]="Введите SEQ_PUBLISHER_PRIVATE_KEY (с 0x): "
   TRANSLATIONS["ru,validator_setup_header"]="=== Настройка валидатора ==="
   TRANSLATIONS["ru,multiple_validators_prompt"]="Вы хотите запустить несколько валидаторов? (y/n)"
+  TRANSLATIONS["ru,ufw_not_installed"]="⚠️ ufw не установлен"
+  TRANSLATIONS["ru,ufw_not_active"]="⚠️ ufw не активен"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -237,6 +241,8 @@ init_languages() {
   TRANSLATIONS["tr,enter_seq_publisher_key"]="SEQ_PUBLISHER_PRIVATE_KEY girin (0x ile): "
   TRANSLATIONS["tr,validator_setup_header"]="=== Validator Kurulumu ==="
   TRANSLATIONS["tr,multiple_validators_prompt"]="Birden fazla validator çalıştırmak istiyor musunuz? (y/n) "
+  TRANSLATIONS["tr,ufw_not_installed"]="⚠️ ufw yüklü değil"
+  TRANSLATIONS["tr,ufw_not_active"]="⚠️ ufw aktif değil"
 }
 
 # Initialize language (default to en if no argument)
@@ -547,14 +553,22 @@ fi
 
 echo -e "\n${GREEN}$(t "aztec_installed")${NC}"
 
-echo -e "\n${GREEN}$(t "running_aztec_up")${NC}"
-aztec-up latest
-
 # Обновляем настройки firewall
-echo -e "\n${GREEN}$(t "opening_ports")${NC}"
-sudo ufw allow "$p2p_port"
-sudo ufw allow "$http_port"
-echo -e "\n${GREEN}$(t "ports_opened")${NC}"
+# Проверяем, установлен ли ufw
+if ! command -v ufw >/dev/null 2>&1; then
+  echo -e "\n${YELLOW}$(t "ufw_not_installed")${NC}"
+else
+  # Проверяем, активен ли ufw
+  if sudo ufw status | grep -q "inactive"; then
+    echo -e "\n${YELLOW}$(t "ufw_not_active")${NC}"
+  else
+    # Обновляем настройки firewall
+    echo -e "\n${GREEN}$(t "opening_ports")${NC}"
+    sudo ufw allow "$p2p_port"
+    sudo ufw allow "$http_port"
+    echo -e "\n${GREEN}$(t "ports_opened")${NC}"
+  fi
+fi
 
 # Create Aztec node folder and files
 echo -e "\n${GREEN}$(t "creating_folder")${NC}"

@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.11.3"
+SCRIPT_VERSION="1.11.4"
 
 function show_logo() {
     echo -e " "
@@ -199,10 +199,15 @@ init_languages() {
   TRANSLATIONS["en,validators_format"]="Example: 0x123...,0x456...,0x789..."
   TRANSLATIONS["en,validators_empty"]="Error: Validators list cannot be empty"
   TRANSLATIONS["en,agent_notifications_full_info"]="ℹ️ Notifications will be sent for issues, committee, blocks"
+  #find peerID
   TRANSLATIONS["en,fetching_peer_info"]="Fetching peer information from API..."
   TRANSLATIONS["en,peer_found"]="Peer ID found in logs"
   TRANSLATIONS["en,peer_not_in_list"]="Peer not found in the public peers list"
   TRANSLATIONS["en,peer_id_not_critical"]="The presence or absence of a Peer ID in Nethermind.io is not a critical parameter. The data may be outdated."
+  TRANSLATIONS["en,searching_latest"]="Searching in current data..."
+  TRANSLATIONS["en,searching_archive"]="Searching in archive data..."
+  TRANSLATIONS["en,peer_found_archive"]="Note: This peer was found in archive data"
+  #
   TRANSLATIONS["en,cli_quit_old_sessions"]="Closed existing session:"
   #install section
   TRANSLATIONS["en,delete_node"]="🗑️ Deleting Aztec Node..."
@@ -409,10 +414,15 @@ init_languages() {
   TRANSLATIONS["ru,validators_format"]="Пример: 0x123...,0x456...,0x789..."
   TRANSLATIONS["ru,validators_empty"]="Ошибка: Список валидаторов не может быть пустым"
   TRANSLATIONS["ru,agent_notifications_full_info"]="ℹ️ Уведомления будут отправляться при проблемах, выборе в комитет, создании блоков"
+  #peerID
   TRANSLATIONS["ru,fetching_peer_info"]="Получение информации о пире из API..."
   TRANSLATIONS["ru,peer_found"]="Peer ID найден в логах"
   TRANSLATIONS["ru,peer_not_in_list"]="Пир не найден в публичном списке"
   TRANSLATIONS["ru,peer_id_not_critical"]="Наличие или отсутствие Peer ID в Nethermind.io не является критично важным параметром. Данные могут быть неактуальными."
+  TRANSLATIONS["ru,searching_latest"]="Поиск в актуальных данных..."
+  TRANSLATIONS["ru,searching_archive"]="Поиск в архивных данных..."
+  TRANSLATIONS["ru,peer_found_archive"]="Примечание: Этот пир был найден в архивных данных"
+  #
   TRANSLATIONS["ru,cli_quit_old_sessions"]="Закрыта старая сессия:"
   #delete section
   TRANSLATIONS["ru,delete_node"]="🗑️ Удаление ноды Aztec..."
@@ -620,10 +630,15 @@ init_languages() {
   TRANSLATIONS["tr,validators_format"]="Örnek: 0x123...,0x456...,0x789..."
   TRANSLATIONS["tr,validators_empty"]="Hata: Validator listesi boş olamaz"
   TRANSLATIONS["tr,agent_notifications_full_info"]="ℹ️ Sorunlar, komite ve bloklar için bildirimler gönderilecek"
+  #peerID
   TRANSLATIONS["tr,fetching_peer_info"]="API'den eş (peer) bilgisi alınıyor..."
   TRANSLATIONS["tr,peer_found"]="Loglarda Peer ID bulundu"
   TRANSLATIONS["tr,peer_not_in_list"]="Eş, genel listede bulunamadı"
   TRANSLATIONS["tr,peer_id_not_critical"]="Nethermind.io'da Peer ID'nin olup olmaması kritik bir parametre değildir. Veriler güncel olmayabilir."
+  TRANSLATIONS["tr,searching_latest"]="Güncel verilerde aranıyor..."
+  TRANSLATIONS["tr,searching_archive"]="Arşiv verilerinde aranıyor..."
+  TRANSLATIONS["tr,peer_found_archive"]="Not: Bu eş (peer) arşiv verilerinde bulundu"
+  #
   TRANSLATIONS["tr,cli_quit_old_sessions"]="Eski oturum kapatıldı:"
   # install section
   TRANSLATIONS["tr,delete_node"]="🗑️ Aztec Node siliniyor..."
@@ -1045,6 +1060,7 @@ find_rollup_address() {
   fi
 }
 
+# === Find PeerID in logs ===
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
@@ -1078,39 +1094,119 @@ find_peer_id() {
   else
     echo -e "\n${GREEN}$(t "peer_found")${NC}: $peer_id"
 
-    # Получаем JSON с информацией о пирах
+    # Получаем информацию о пире напрямую по ID
     echo -e "\n${CYAN}$(t "fetching_peer_info")${NC}"
-    peers_json=$(curl -s "https://aztec.nethermind.io/api/peers?page_size=30000&latest=true")
 
-    # Ищем информацию о нашем пире
-    peer_info=$(echo "$peers_json" | jq -r --arg peer_id "$peer_id" '.peers[] | select(.id == $peer_id)')
+    # Сначала ищем в актуальных данных (latest=true)
+    echo -e "${YELLOW}$(t "searching_latest")${NC}"
+    url="https://aztec.nethermind.io/api/peers?latest=true&id=$peer_id"
 
-    if [ -z "$peer_info" ]; then
-      echo -e "${YELLOW}$(t "peer_not_in_list")${NC}"
-	  echo -e "\n$(t "peer_id_not_critical")"
+    # Получаем данные
+    response_file="/tmp/peer_response.json"
+    curl -s "$url" > "$response_file"
+
+    if [ $? -ne 0 ] || [ ! -s "$response_file" ]; then
+      echo -e "${RED}$(t "fetch_error")${NC}"
+      rm -f "$response_file"
       return 1
-    else
+    fi
+
+    # Проверяем, есть ли информация о пире в актуальных данных
+    if jq -e '.peers != null and .peers[0] != null' "$response_file" > /dev/null 2>&1; then
+      # Извлекаем данные первого пира из массива
+      peer_info=$(jq -r '.peers[0]' "$response_file")
+      echo "$peer_info" > "/tmp/peer_info.json"
+
       # Извлекаем данные из JSON
-      created_at=$(echo "$peer_info" | jq -r '.created_at')
-      last_seen=$(echo "$peer_info" | jq -r '.last_seen')
-      client=$(echo "$peer_info" | jq -r '.client')
-      country=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].country_name')
-      city=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].city_name')
-      latitude=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].latitude')
-      longitude=$(echo "$peer_info" | jq -r '.multi_addresses[0].ip_info[0].longitude')
+      created_at=$(jq -r '.created_at' "/tmp/peer_info.json")
+      last_seen=$(jq -r '.last_seen' "/tmp/peer_info.json")
+      client=$(jq -r '.client' "/tmp/peer_info.json")
+      country=$(jq -r '.multi_addresses[0].ip_info[0].country_name' "/tmp/peer_info.json")
+      city=$(jq -r '.multi_addresses[0].ip_info[0].city_name' "/tmp/peer_info.json")
+      latitude=$(jq -r '.multi_addresses[0].ip_info[0].latitude' "/tmp/peer_info.json")
+      longitude=$(jq -r '.multi_addresses[0].ip_info[0].longitude' "/tmp/peer_info.json")
+      block_height=$(jq -r '.block_height' "/tmp/peer_info.json")
+      is_synced=$(jq -r '.is_synced' "/tmp/peer_info.json")
 
       # Выводим информацию в красивом виде
-      echo -e "\n${GREEN}=== Peer Information ===${NC}"
+      echo -e "\n${GREEN}=== Peer Information (Current) ===${NC}"
       echo -e "${BLUE}Peer ID:${NC} $peer_id"
       echo -e "${BLUE}Client Version:${NC} $client"
+      echo -e "${BLUE}Block Height:${NC} $block_height"
+      echo -e "${BLUE}Synced:${NC} $is_synced"
       echo -e "${BLUE}Created At:${NC} $created_at"
       echo -e "${BLUE}Last Seen:${NC} $last_seen"
-      echo -e "${BLUE}Location:${NC} $city, $country"
-      echo -e "${BLUE}Coordinates:${NC} $latitude, $longitude"
 
-	  echo -e "\n$(t "peer_id_not_critical")"
+      if [ "$country" != "null" ] && [ "$city" != "null" ]; then
+        echo -e "${BLUE}Location:${NC} $city, $country"
+      fi
+
+      if [ "$latitude" != "null" ] && [ "$longitude" != "null" ]; then
+        echo -e "${BLUE}Coordinates:${NC} $latitude, $longitude"
+      fi
+
+      # Очищаем временные файлы
+      rm -f "$response_file" "/tmp/peer_info.json"
 
       return 0
+    else
+      # Если не нашли в актуальных данных, ищем в архивных (latest=false)
+      echo -e "${YELLOW}$(t "searching_archive")${NC}"
+      url="https://aztec.nethermind.io/api/peers?latest=false&id=$peer_id"
+
+      curl -s "$url" > "$response_file"
+
+      if [ $? -ne 0 ] || [ ! -s "$response_file" ]; then
+        echo -e "${RED}$(t "fetch_error")${NC}"
+        rm -f "$response_file"
+        return 1
+      fi
+
+      # Проверяем, есть ли информацию о пире в архивных данных
+      if jq -e '.peers != null and .peers[0] != null' "$response_file" > /dev/null 2>&1; then
+        # Извлекаем данные первого пира из массива
+        peer_info=$(jq -r '.peers[0]' "$response_file")
+        echo "$peer_info" > "/tmp/peer_info.json"
+
+        # Извлекаем данные из JSON
+        created_at=$(jq -r '.created_at' "/tmp/peer_info.json")
+        last_seen=$(jq -r '.last_seen' "/tmp/peer_info.json")
+        client=$(jq -r '.client' "/tmp/peer_info.json")
+        country=$(jq -r '.multi_addresses[0].ip_info[0].country_name' "/tmp/peer_info.json")
+        city=$(jq -r '.multi_addresses[0].ip_info[0].city_name' "/tmp/peer_info.json")
+        latitude=$(jq -r '.multi_addresses[0].ip_info[0].latitude' "/tmp/peer_info.json")
+        longitude=$(jq -r '.multi_addresses[0].ip_info[0].longitude' "/tmp/peer_info.json")
+        block_height=$(jq -r '.block_height' "/tmp/peer_info.json")
+        is_synced=$(jq -r '.is_synced' "/tmp/peer_info.json")
+
+        # Выводим информацию в красивом виде с пометкой об архивных данных
+        echo -e "\n${GREEN}=== Peer Information (${RED}Archive${GREEN}) ===${NC}"
+        echo -e "${YELLOW}$(t "peer_found_archive")${NC}"
+        echo -e "${BLUE}Peer ID:${NC} $peer_id"
+        echo -e "${BLUE}Client Version:${NC} $client"
+        echo -e "${BLUE}Block Height:${NC} $block_height"
+        echo -e "${BLUE}Synced:${NC} $is_synced"
+        echo -e "${BLUE}Created At:${NC} $created_at"
+        echo -e "${BLUE}Last Seen:${NC} $last_seen"
+
+        if [ "$country" != "null" ] && [ "$city" != "null" ]; then
+          echo -e "${BLUE}Location:${NC} $city, $country"
+        fi
+
+        if [ "$latitude" != "null" ] && [ "$longitude" != "null" ]; then
+          echo -e "${BLUE}Coordinates:${NC} $latitude, $longitude"
+        fi
+
+        # Очищаем временные файлы
+        rm -f "$response_file" "/tmp/peer_info.json"
+
+        return 0
+      else
+        echo -e "${YELLOW}$(t "peer_not_in_list")${NC}"
+        echo -e "\n$(t "peer_id_not_critical")"
+        rm -f "$response_file"
+        return 1
+      fi
     fi
   fi
 }
@@ -1477,7 +1573,6 @@ find_last_log_line() {
   echo "\$line"
 }
 
-
 # === Новые функции для проверки комитета и создания блоков ===
 check_committee() {
   if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then return; fi
@@ -1518,20 +1613,22 @@ check_committee() {
   found_validators=()
   for validator in "\${VALIDATOR_ARRAY[@]}"; do
     if echo "\$committee" | grep -qi "\$validator"; then
-      found_validators+=("\$validator")
+      # Форматируем адрес как ссылку для Telegram
+      validator_link="[\${validator}](https://dashtec.xyz/validators/\${validator})"
+      found_validators+=("\$validator_link")
     fi
   done
 
   # Если не нашли ни одного валидатора - выходим
   if [ \${#found_validators[@]} -eq 0 ]; then return; fi
 
-  last_epoch_file="\$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
+  last_epoch_file="$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
   if [ -f "\$last_epoch_file" ] && grep -q "\$epoch" "\$last_epoch_file"; then return; fi
   echo "\$epoch" > "\$last_epoch_file"
 
   # Формируем сообщение
   current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-  validator_list=\$(IFS=, ; echo "\${found_validators[*]}")
+  validator_list=\$(IFS=\$'\n' ; echo "\${found_validators[*]}")
   message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
   message+="\$(t "found_validators" "\$validator_list")%0A"
   message+="\$(t "server_info" "\$ip")%0A"

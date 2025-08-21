@@ -14,6 +14,8 @@
 
 Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılığıyla) ve izlemek için kapsamlı bir çözüm sunar. İçerdiği özellikler arasında konteyner durumu kontrolü, blok senkronizasyon doğrulaması, düğüme ait önemli bilgilerin alınması ve Telegram üzerinden bildirim gönderme bulunmaktadır.
 
+Ayrıca spoiler'ın altındaki History versiyonuna da göz atın, orada script'in işlevleri hakkında çok sayıda faydalı bilgi var.
+
 ## 🌟 Temel Özellikler
 
 * 🏃🏻‍ Node başlatma (docker-compose veya CLI ile)
@@ -33,13 +35,22 @@ Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılı�
 | 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
 | ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
 
-## 📌 Son Güncellemeler 06-08-2025  
-- Validatör kuyruğu kontrol fonksiyonu yeniden etkinleştirildi.
-
-Lütfen betiği güncelleyin, 9. seçeneği ile arama yapıp validatör kontrolü gerçekleştirin. Validatör pozisyon takibini tekrar ekleyin.
+## 📌 Son Güncellemeler 21-08-2025  
+- PeerID arama işlevi güncellendi (işlev çalışması geri yüklendi + yeni özellikler)
+  - Betik, düğümün PeerID'sini günlüklerde bulur
+  - Nethermind.io'daki güncel veriler arasında arar
+  - Nethermind.io'daki güncel verilerde bulunamazsa, arşivde arar
+- Cron ajanı oluşturma işlevi güncellendi
+  - Artık komite dahil etme bildiriminde, doğrulayıcı adresine tıklayabilir ve dashtec.xyz'deki sayfasına gidebilirsiniz
+- Aztec düğüm kurulum betiği güncellendi
+  - ufw aktivite kontrolü eklendi.
+  - ufw aktifse, 8080 ve 40400 portları için kurallar eklenir, aksi takdirde kurallar eklenmez.
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 06-08-2025
+- Validatör kuyruğu kontrol fonksiyonu yeniden etkinleştirildi.
 
 ### 02-08-2025
 - Validatör komite dahiliyet kontrol fonksiyonu güncellendi (fonksiyon çalışması yeniden sağlandı)

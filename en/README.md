@@ -14,6 +14,8 @@
 
 This script provides a comprehensive solution for launching (via docker-compose or CLI) and monitoring an Aztec node, including container status checks, block synchronization verification, retrieval of important node information, and sending notifications via Telegram.
 
+Also check out the History version under the spoiler, there is a lot of useful information about the functions of the script.
+
 ## 🌟 Key Features
 
 * 🏃🏻‍ Node launch (docker-compose or CLI)
@@ -33,13 +35,22 @@ This script provides a comprehensive solution for launching (via docker-compose 
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 06-08-2025
-- The validator queue check function has been restored.
-
-Please, update script, perform search and validator check by option 9. Add validator position tracking again.
+## 📌 Latest Updates 21-08-2025
+- Updated PeerID search function (restored function operation + new features)
+    - The script finds the node's PeerID in the logs
+    - Searches among current data on Nethermind.io
+    - If not found in current Nethermind.io data, searches in the archive
+- Updated cron agent creation function
+    - Now in the committee inclusion notification, you can click on the validator address and go to its page on dashtec.xyz
+- Updated Aztec node installation script
+    - Added ufw activity check.
+    - If ufw is active, rules for ports 8080 and 40400 are added, otherwise rules are not added.
 
 <details>
 <summary>📅 Version History</summary>
+
+### 06-08-2025
+- The validator queue check function has been restored.
 
 ### 02-08-2025
 - Updated the validator committee inclusion check function (restored function operation)
