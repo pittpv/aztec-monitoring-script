@@ -52,10 +52,10 @@ init_languages() {
     TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
     TRANSLATIONS["en,exiting"]="Exiting."
     TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 0."
-    TRANSLATIONS["en,status_0"]="NOT_IN_SET - The validator is not in the validator set"
+    TRANSLATIONS["en,status_0"]="NONE - The validator is not in the validator set"
     TRANSLATIONS["en,status_1"]="ACTIVE - The validator is currently in the validator set"
-    TRANSLATIONS["en,status_2"]="INACTIVE - The validator is not active; possibly in withdrawal delay"
-    TRANSLATIONS["en,status_3"]="READY_TO_EXIT - The validator has completed exit delay and can be exited"
+    TRANSLATIONS["en,status_2"]="ZOMBIE - Not participating as validator, but have funds in setup, hit if slashes and going below the minimum"
+    TRANSLATIONS["en,status_3"]="EXITING - In the process of exiting the system"
     TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in /root/.env-aztec-agent"
     TRANSLATIONS["en,error_file_missing"]="Error: /root/.env-aztec-agent file not found"
     TRANSLATIONS["en,select_mode"]="Select loading mode:"
@@ -104,10 +104,10 @@ init_languages() {
     TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
     TRANSLATIONS["ru,exiting"]="Выход."
     TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 0."
-    TRANSLATIONS["ru,status_0"]="NOT_IN_SET - Валидатор не в наборе валидаторов"
+    TRANSLATIONS["ru,status_0"]="NONE - Валидатор не в наборе валидаторов"
     TRANSLATIONS["ru,status_1"]="ACTIVE - Валидатор в настоящее время в наборе валидаторов"
-    TRANSLATIONS["ru,status_2"]="INACTIVE - Валидатор не активен; возможно, в задержке вывода"
-    TRANSLATIONS["ru,status_3"]="READY_TO_EXIT - Валидатор завершил задержку выхода и может быть выведен"
+    TRANSLATIONS["ru,status_2"]="ZOMBIE - Не участвует в качестве валидатора, но есть средства в стейкинге, получает штраф за слэшинг, баланс снижается до минимума"
+    TRANSLATIONS["ru,status_3"]="EXITING - В процессе выхода из системы"
     TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
     TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл /root/.env-aztec-agent не найден"
     TRANSLATIONS["ru,select_mode"]="Выберите режим загрузки:"
@@ -156,10 +156,10 @@ init_languages() {
     TRANSLATIONS["tr,validator_not_found"]="%s adresli doğrulayıcı bulunamadı."
     TRANSLATIONS["tr,exiting"]="Çıkılıyor."
     TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2, 3 veya 0 seçin."
-    TRANSLATIONS["tr,status_0"]="NOT_IN_SET - Doğrulayıcı, doğrulayıcı setinde değil"
-    TRANSLATIONS["tr,status_1"]="AKTİF - Doğrulayıcı şu anda doğrulayıcı setinde"
-    TRANSLATIONS["tr,status_2"]="PASİF - Doğrulayıcı aktif değil; muhtemelen çekme gecikmesinde"
-    TRANSLATIONS["tr,status_3"]="ÇIKIŞA_HAZIR - Doğrulayıcı çıkış gecikmesini tamamladı и çıkış yapılabilir"
+    TRANSLATIONS["tr,status_0"]="NONE - Doğrulayıcı, doğrulayıcı setinde değil"
+    TRANSLATIONS["tr,status_1"]="VALIDATING - Doğrulayıcı şu anda doğrulayıcı setinde"
+    TRANSLATIONS["tr,status_2"]="ZOMBIE - Doğrulayıcı (validator) olarak katılmıyor, ancak staking'te fonları bulunuyor. Slashing (kesinti) cezası alıyor ve bakiyesi minimum seviyeye düşüyor."
+    TRANSLATIONS["tr,status_3"]="EXITING - Sistemden çıkış sürecinde"
     TRANSLATIONS["tr,error_rpc_missing"]="Hata: /root/.env-aztec-agent dosyasında RPC_URL bulunamadı"
     TRANSLATIONS["tr,error_file_missing"]="Hata: /root/.env-aztec-agent dosyası bulunamadı"
     TRANSLATIONS["tr,select_mode"]="Yükleme modunu seçin:"
@@ -556,7 +556,7 @@ fast_load_validators() {
     local current_batch=0
     local total_processed=0
 
-    echo -e "${YELLOW}$(t "loading_validators")${RESET}"
+    echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
 
     # Функция для обработки одного валидатора
     process_validator() {
