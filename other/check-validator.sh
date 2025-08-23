@@ -81,6 +81,8 @@ init_languages() {
     TRANSLATIONS["en,invalid_address_format"]="Invalid address format: %s"
     TRANSLATIONS["en,processing_address"]="Processing address: %s"
     TRANSLATIONS["en,fetching_page"]="Fetching page %d of %d..."
+    TRANSLATIONS["en,loading_validators"]="Loading validator data..."
+    TRANSLATIONS["en,validators_loaded"]="Validator data loaded successfully"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -131,6 +133,8 @@ init_languages() {
     TRANSLATIONS["ru,invalid_address_format"]="Неверный формат адреса: %s"
     TRANSLATIONS["ru,processing_address"]="Обработка адреса: %s"
     TRANSLATIONS["ru,fetching_page"]="Получение страницы %d из %d..."
+    TRANSLATIONS["ru,loading_validators"]="Загрузка данных валидаторов..."
+    TRANSLATIONS["ru,validators_loaded"]="Данные валидаторов успешно загружены"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -155,7 +159,7 @@ init_languages() {
     TRANSLATIONS["tr,status_0"]="NOT_IN_SET - Doğrulayıcı, doğrulayıcı setinde değil"
     TRANSLATIONS["tr,status_1"]="AKTİF - Doğrulayıcı şu anda doğrulayıcı setinde"
     TRANSLATIONS["tr,status_2"]="PASİF - Doğrulayıcı aktif değil; muhtemelen çekme gecikmesinde"
-    TRANSLATIONS["tr,status_3"]="ÇIKIŞA_HAZIR - Doğrulayıcı çıkış gecikmesini tamamladı ve çıkış yapılabilir"
+    TRANSLATIONS["tr,status_3"]="ÇIKIŞA_HAZIR - Doğrulayıcı çıkış gecikmesini tamamladı и çıkış yapılabilir"
     TRANSLATIONS["tr,error_rpc_missing"]="Hata: /root/.env-aztec-agent dosyasında RPC_URL bulunamadı"
     TRANSLATIONS["tr,error_file_missing"]="Hata: /root/.env-aztec-agent dosyası bulunamadı"
     TRANSLATIONS["tr,select_mode"]="Yükleme modunu seçin:"
@@ -168,7 +172,7 @@ init_languages() {
     TRANSLATIONS["tr,queued_at"]="Kuyruğa eklendi"
     TRANSLATIONS["tr,not_in_queue"]="Doğrulayıcı kuyrukta da yok."
     TRANSLATIONS["tr,fetching_queue"]="Doğrulayıcı kuyruk verileri alınıyor..."
-    TRANSLATIONS["tr,notification_script_created"]="Bildirim betiği oluşturuldu ve zamanlandı. İzlenen doğrulayıcı: %s"
+    TRANSLATIONS["tr,notification_script_created"]="Bildirim betiği oluşturuldu и zamanlandı. İzlenen doğrulayıcı: %s"
     TRANSLATIONS["tr,notification_exists"]="Bu doğrulayıcı için zaten bir bildirim var."
     TRANSLATIONS["tr,enter_validator_address"]="İzlemek için doğrulayıcı adresini girin:"
     TRANSLATIONS["tr,notification_removed"]="%s doğrulayıcısı için bildirim kaldırıldı."
@@ -181,6 +185,8 @@ init_languages() {
     TRANSLATIONS["tr,invalid_address_format"]="Geçersiz adres formatı: %s"
     TRANSLATIONS["tr,processing_address"]="Adres işleniyor: %s"
     TRANSLATIONS["tr,fetching_page"]="Sayfa %d/%d alınıyor..."
+    TRANSLATIONS["tr,loading_validators"]="Doğrulayıcı verileri yükleniyor..."
+    TRANSLATIONS["tr,validators_loaded"]="Doğrulayıcı verileri başarıyla yüklendi"
 }
 
 t() {
@@ -229,8 +235,6 @@ hex_to_dec() {
     echo "ibase=16; $hex" | bc
 }
 
-
-
 wei_to_token() {
     local wei_value=$1
     local int_part=$(echo "$wei_value / 1000000000000000000" | bc)
@@ -277,7 +281,7 @@ check_validator_queue() {
     echo -e "${YELLOW}$(t "fetching_queue")${RESET}"
 
     # Получаем первую страницу для получения информации о пагинации
-    first_page_data=$(curl -s "${QUEUE_URL}?page=1&limit=100")
+    first_page_data=$(curl -s "${QUEUE_URL?page=1&limit=100}")
     if [ $? -ne 0 ] || [ -z "$first_page_data" ]; then
         echo -e "${RED}Error fetching validator queue data${RESET}"
         return 1
@@ -303,8 +307,8 @@ check_validator_queue() {
     for ((page=1; page<=total_pages; page++)); do
         echo -e "${YELLOW}$(t "fetching_page" "$page" "$total_pages")${RESET}"
 
-        # Получаем данные текущей страницы
-        page_data=$(curl -s "${QUEUE_URL}?page=${page}&limit=100")
+        # Получаем данные текульной страницы
+        page_data=$(curl -s "${QUEUE_URL?page=${page}&limit=100}")
         if [ $? -ne 0 ] || [ -z "$page_data" ]; then
             echo -e "${RED}Error fetching page ${page}${RESET}"
             continue
@@ -404,7 +408,7 @@ monitor_position() {
     fi
 
     # Get first page to check pagination
-    local first_page_data=$(curl -s "${QUEUE_URL}?page=1&limit=100")
+    local first_page_data=$(curl -s "${QUEUE_URL?page=1&limit=100}")
     if [[ $? -ne 0 || -z "$first_page_data" ]]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching first page data" >> "$LOG_FILE"
         return 1
@@ -427,7 +431,7 @@ monitor_position() {
     for ((page=1; page<=total_pages; page++)); do
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Checking page $page of $total_pages" >> "$LOG_FILE"
 
-        local page_data=$(curl -s "${QUEUE_URL}?page=${page}&limit=100")
+        local page_data=$(curl -s "${QUEUE_URL?page=${page}&limit=100}")
         if [[ $? -ne 0 || -z "$page_data" ]]; then
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching page $page" >> "$LOG_FILE"
             continue
@@ -552,7 +556,7 @@ fast_load_validators() {
     local current_batch=0
     local total_processed=0
 
-    echo -e "${YELLOW}Starting fast processing of $VALIDATOR_COUNT validators...${RESET}"
+    echo -e "${YELLOW}$(t "loading_validators")${RESET}"
 
     # Функция для обработки одного валидатора
     process_validator() {
@@ -588,8 +592,6 @@ fast_load_validators() {
             batch_end=$VALIDATOR_COUNT
         fi
 
-        echo -e "${CYAN}Processing batch $((i/BATCH_SIZE + 1))/$((VALIDATOR_COUNT/BATCH_SIZE + 1)) (validators $((i+1))-$batch_end)${RESET}"
-
         # Запускаем процессы для текущего батча
         for ((j=i; j<batch_end; j++)); do
             process_validator "${VALIDATOR_ADDRESSES[j]}"
@@ -611,17 +613,17 @@ fast_load_validators() {
         # Обновляем прогресс
         total_processed=$batch_end
         progress_bar $total_processed $VALIDATOR_COUNT
-        echo ""  # Новая строка после прогресс-бара
 
         # Пауза между батчами для снижения нагрузки на RPC
         sleep 0.5
     done
 
+    echo ""  # Новая строка после прогресс-бара
+
     # Загружаем результаты в память более эффективно
     local processed_count=0
     while IFS='|' read -r validator stake withdrawer status; do
         if [[ "$stake" == "ERROR" ]]; then
-            echo -e "${RED}Error fetching info for $validator${RESET}"
             continue
         fi
 
@@ -630,19 +632,10 @@ fast_load_validators() {
 
         RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
         processed_count=$((processed_count + 1))
-
-        # Показываем прогресс загрузки каждые 1000 записей
-        if [[ $((processed_count % 1000)) -eq 0 ]]; then
-            echo -e "${YELLOW}Loaded $processed_count results...${RESET}"
-        fi
     done < "$TMP_RESULTS"
 
-    echo -e "${GREEN}Successfully loaded $processed_count validator results${RESET}"
+    echo -e "${GREEN}$(t "validators_loaded")${RESET}"
 }
-
-
-
-
 
 # Основной код
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
@@ -662,17 +655,9 @@ if echo "$VALIDATORS_RESPONSE" | grep -q "Error:"; then
 fi
 
 # Оптимизированный парсинг массива адресов из ответа
-# Ответ будет в формате: [0xaddr1, 0xaddr2, 0xaddr3, ...]
-echo -e "${YELLOW}Parsing validator addresses...${RESET}"
-
-# Убираем квадратные скобки и используем sed для быстрой обработки
 VALIDATORS_RESPONSE=${VALIDATORS_RESPONSE:1:-1}  # Убираем квадратные скобки
-
-# Используем sed для быстрого удаления пробелов и создания массива
 VALIDATOR_ADDRESSES=($(echo "$VALIDATORS_RESPONSE" | sed 's/,/\n/g' | sed 's/ //g'))
-
 VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES[@]}
-echo -e "${GREEN}Successfully parsed $VALIDATOR_COUNT addresses${RESET}"
 
 echo -e "${GREEN}$(t "found_validators")${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
 echo "----------------------------------------"
@@ -691,8 +676,6 @@ declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
 found_count=0
 not_found_count=0
 
-echo -e "\n${YELLOW}Validating addresses...${RESET}"
-
 for address in "${INPUT_ADDRESSES[@]}"; do
     # Очищаем адрес от пробелов
     clean_address=$(echo "$address" | tr -d ' ')
@@ -704,22 +687,14 @@ for address in "${INPUT_ADDRESSES[@]}"; do
             VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
             found=true
             found_count=$((found_count + 1))
-            echo -e "${GREEN}✓ Found: $validator${RESET}"
             break
         fi
     done
 
     if ! $found; then
-        echo -e "${RED}✗ Not found: $clean_address${RESET}"
         not_found_count=$((not_found_count + 1))
     fi
 done
-
-echo ""
-echo -e "${GREEN}Found $found_count validators to check${RESET}"
-if [[ $not_found_count -gt 0 ]]; then
-    echo -e "${RED}$not_found_count addresses not found in validator list${RESET}"
-fi
 
 if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
     echo -e "${RED}No valid addresses to check. Exiting.${RESET}"
@@ -783,10 +758,8 @@ while true; do
 
             # Очищаем адреса от пробелов и проверяем их наличие в общем списке
             declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
-            local found_count=0
-            local not_found_count=0
-
-            echo -e "${YELLOW}Validating addresses...${RESET}"
+            found_count=0
+            not_found_count=0
 
             for address in "${INPUT_ADDRESSES[@]}"; do
                 # Очищаем адрес от пробелов
@@ -810,12 +783,6 @@ while true; do
                 fi
             done
 
-            echo ""
-            echo -e "${GREEN}Found $found_count validators to check${RESET}"
-            if [[ $not_found_count -gt 0 ]]; then
-                echo -e "${RED}$not_found_count addresses not found in validator list${RESET}"
-            fi
-
             if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
                 echo -e "${RED}No valid addresses to check.${RESET}"
                 continue
@@ -838,7 +805,6 @@ while true; do
             VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
             VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
 
-            echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
             echo "----------------------------------------"
 
             # Сразу показываем результат
@@ -854,6 +820,7 @@ while true; do
                 echo -e ""
                 echo "----------------------------------------"
             done
+            echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
             ;;
         2)
             echo -e "\n${BOLD}$(t "queue_notification_title")${RESET}"
