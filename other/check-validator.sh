@@ -691,10 +691,10 @@ IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
 
 # Очищаем адреса от пробелов и проверяем их наличие в общем списке
 declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
-local found_count=0
-local not_found_count=0
+found_count=0
+not_found_count=0
 
-echo -e "${YELLOW}Validating addresses...${RESET}"
+echo -e "\n${YELLOW}Validating addresses...${RESET}"
 
 for address in "${INPUT_ADDRESSES[@]}"; do
     # Очищаем адрес от пробелов
@@ -731,7 +731,7 @@ fi
 
 # Запускаем быструю загрузку сразу
 declare -a RESULTS
-echo -e "${BOLD}Checking ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} validators...${RESET}"
+echo -e "\n${BOLD}Checking ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} validators...${RESET}"
 
 # Временно заменяем массив для обработки только выбранных валидаторов
 ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
@@ -746,7 +746,6 @@ fast_load_validators
 VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
 VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
 
-echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
 echo "----------------------------------------"
 
 # Сразу показываем результат
@@ -762,6 +761,7 @@ for line in "${RESULTS[@]}"; do
     echo -e ""
     echo "----------------------------------------"
 done
+echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
 
 while true; do
     echo ""
