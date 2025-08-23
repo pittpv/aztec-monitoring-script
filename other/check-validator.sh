@@ -541,7 +541,7 @@ list_monitor_scripts() {
     done
 }
 
-# Функция для быстрой загрузки (оптимизированная асинхронная)
+# Функция для загрузки валидаторов (асинхронная)
 fast_load_validators() {
     local TMP_RESULTS=$(mktemp)
     trap 'rm -f "$TMP_RESULTS"' EXIT
@@ -643,141 +643,9 @@ fast_load_validators() {
     echo -e "${GREEN}Successfully loaded $processed_count validator results${RESET}"
 }
 
-# Функция для ультра-быстрой загрузки (для больших объемов данных)
-ultra_fast_load_validators() {
-    local TMP_RESULTS=$(mktemp)
-    trap 'rm -f "$TMP_RESULTS"' EXIT
 
-    # Агрессивные настройки для максимальной скорости
-    local MAX_CONCURRENT=20  # Больше одновременных запросов
-    local BATCH_SIZE=500     # Больший размер батча
-    local current_batch=0
-    local total_processed=0
 
-    echo -e "${YELLOW}Starting ultra-fast processing of $VALIDATOR_COUNT validators...${RESET}"
-    echo -e "${YELLOW}Using $MAX_CONCURRENT concurrent requests, batch size: $BATCH_SIZE${RESET}"
-    echo -e "${RED}Warning: This mode may cause high RPC server load${RESET}"
 
-    # Функция для обработки одного валидатора
-    process_validator() {
-        local validator=$1
-        (
-            # Получаем данные через getAttesterView()
-            response=$(cast call $ROLLUP_ADDRESS "getAttesterView(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
-            if [[ $? -ne 0 || -z "$response" ]]; then
-                echo "$validator|ERROR" >> "$TMP_RESULTS"
-                exit 0
-            fi
-
-            # Получаем отдельно withdrawer адрес через getConfig()
-            config_response=$(cast call $ROLLUP_ADDRESS "getConfig(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
-            withdrawer="0x${config_response:26:40}"
-
-            # Парсим данные из getAttesterView()
-            data=${response:2}
-            status_hex=${data:0:64}
-            stake_hex=${data:64:64}
-
-            status=$(hex_to_dec "$status_hex")
-            stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
-
-            echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
-        ) &
-    }
-
-    # Обрабатываем валидаторов большими батчами
-    for ((i=0; i<VALIDATOR_COUNT; i+=BATCH_SIZE)); do
-        local batch_end=$((i + BATCH_SIZE))
-        if [[ $batch_end -gt $VALIDATOR_COUNT ]]; then
-            batch_end=$VALIDATOR_COUNT
-        fi
-
-        echo -e "${CYAN}Processing batch $((i/BATCH_SIZE + 1))/$((VALIDATOR_COUNT/BATCH_SIZE + 1)) (validators $((i+1))-$batch_end)${RESET}"
-
-        # Запускаем процессы для текущего батча
-        for ((j=i; j<batch_end; j++)); do
-            process_validator "${VALIDATOR_ADDRESSES[j]}"
-            current_batch=$((current_batch + 1))
-
-            # Если достигли лимита одновременных запросов, ждем завершения
-            if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
-                wait
-                current_batch=0
-                # Минимальная пауза для ультра-быстрого режима
-                sleep 0.05
-            fi
-        done
-
-        # Ждем завершения всех процессов в текущем батче
-        wait
-        current_batch=0
-
-        # Обновляем прогресс
-        total_processed=$batch_end
-        progress_bar $total_processed $VALIDATOR_COUNT
-        echo ""
-
-        # Минимальная пауза между батчами
-        sleep 0.2
-    done
-
-    echo -e "${GREEN}All validators processed. Loading results...${RESET}"
-
-    # Быстрая загрузка результатов
-    local processed_count=0
-    while IFS='|' read -r validator stake withdrawer status; do
-        if [[ "$stake" == "ERROR" ]]; then
-            echo -e "${RED}Error fetching info for $validator${RESET}"
-            continue
-        fi
-
-        status_text=${STATUS_MAP[$status]:-UNKNOWN}
-        status_color=${STATUS_COLOR[$status]:-$RESET}
-
-        RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
-        processed_count=$((processed_count + 1))
-
-        # Показываем прогресс загрузки каждые 2000 записей
-        if [[ $((processed_count % 2000)) -eq 0 ]]; then
-            echo -e "${YELLOW}Loaded $processed_count results...${RESET}"
-        fi
-    done < "$TMP_RESULTS"
-
-    echo -e "${GREEN}Successfully loaded $processed_count validator results${RESET}"
-}
-
-# Функция для медленной загрузки (синхронной)
-slow_load_validators() {
-    CURRENT=0
-    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
-        # Получаем данные через getAttesterView()
-        response=$(cast call $ROLLUP_ADDRESS "getAttesterView(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
-        if [[ $? -ne 0 || -z "$response" ]]; then
-            echo -e "${RED}Error fetching info for $validator${RESET}"
-            continue
-        fi
-
-        # Получаем отдельно withdrawer адрес через getConfig()
-        config_response=$(cast call $ROLLUP_ADDRESS "getConfig(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
-        withdrawer="0x${config_response:26:40}"
-
-        # Парсим данные из getAttesterView()
-        data=${response:2}
-        status_hex=${data:0:64}
-        stake_hex=${data:64:64}
-
-        status=$(hex_to_dec "$status_hex")
-        stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
-
-        status_text=${STATUS_MAP[$status]:-UNKNOWN}
-        status_color=${STATUS_COLOR[$status]:-$RESET}
-
-        RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
-
-        CURRENT=$((CURRENT + 1))
-        progress_bar $CURRENT $VALIDATOR_COUNT
-    done
-}
 
 # Основной код
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
@@ -861,16 +729,7 @@ if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
     exit 1
 fi
 
-# Выбор режима загрузки
-echo ""
-echo -e "${BOLD}$(t "select_mode")${RESET}"
-echo -e "${CYAN}$(t "mode_fast")${RESET}"
-echo -e "${CYAN}$(t "mode_slow")${RESET}"
-if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 10 ]]; then
-    echo -e "${CYAN}3. Ultra-fast mode (for >10 validators)${RESET}"
-fi
-read -p "$(t "enter_option") " mode
-
+# Запускаем быструю загрузку сразу
 declare -a RESULTS
 echo -e "${BOLD}Checking ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} validators...${RESET}"
 
@@ -880,26 +739,8 @@ ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
 VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
 VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
 
-case $mode in
-    1)
-        fast_load_validators
-        ;;
-    2)
-        slow_load_validators
-        ;;
-    3)
-        if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 10 ]]; then
-            ultra_fast_load_validators
-        else
-            echo -e "\n${RED}Ultra-fast mode is only available for more than 10 validators${RESET}"
-            exit 1
-        fi
-        ;;
-    *)
-        echo -e "\n${RED}$(t "mode_invalid")${RESET}"
-        exit 1
-        ;;
-esac
+# Запускаем быструю загрузку
+fast_load_validators
 
 # Восстанавливаем оригинальный массив
 VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
@@ -1021,17 +862,7 @@ while true; do
                 continue
             fi
 
-            # Выбор режима загрузки
-            echo ""
-            echo -e "${BOLD}$(t "select_mode")${RESET}"
-            echo -e "${CYAN}$(t "mode_fast")${RESET}"
-            echo -e "${CYAN}$(t "mode_slow")${RESET}"
-            if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 10 ]]; then
-                echo -e "${CYAN}3. Ultra-fast mode (for >10 validators)${RESET}"
-            fi
-            read -p "$(t "enter_option") " mode
-
-            # Очищаем предыдущие результаты
+            # Очищаем предыдущие результаты и запускаем быструю загрузку
             RESULTS=()
             echo -e "${BOLD}Checking ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} validators...${RESET}"
 
@@ -1041,26 +872,8 @@ while true; do
             VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
             VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
 
-            case $mode in
-                1)
-                    fast_load_validators
-                    ;;
-                2)
-                    slow_load_validators
-                    ;;
-                3)
-                    if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 10 ]]; then
-                        ultra_fast_load_validators
-                    else
-                        echo -e "\n${RED}Ultra-fast mode is only available for more than 10 validators${RESET}"
-                        continue
-                    fi
-                    ;;
-                *)
-                    echo -e "\n${RED}$(t "mode_invalid")${RESET}"
-                    continue
-                    ;;
-            esac
+            # Запускаем быструю загрузку
+            fast_load_validators
 
             # Восстанавливаем оригинальный массив
             VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
