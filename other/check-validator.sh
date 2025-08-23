@@ -687,11 +687,13 @@ for address in "${INPUT_ADDRESSES[@]}"; do
             VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
             found=true
             found_count=$((found_count + 1))
+            echo -e "${GREEN}✓ Found: $validator${RESET}"
             break
         fi
     done
 
     if ! $found; then
+        echo -e "${RED}✗ Not found: $clean_address${RESET}"
         not_found_count=$((not_found_count + 1))
     fi
 done
