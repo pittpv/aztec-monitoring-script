@@ -544,20 +544,13 @@ list_monitor_scripts() {
     done
 }
 
-# Функция для быстрой загрузки (оптимизированная асинхронная)
+# Функция для быстрой загрузки (асинхронной)
 fast_load_validators() {
     local TMP_RESULTS=$(mktemp)
     trap 'rm -f "$TMP_RESULTS"' EXIT
 
-    # Ограничиваем количество одновременных запросов
-    local MAX_CONCURRENT=5
-    local current_batch=0
-    local total_validators=${#VALIDATOR_ADDRESSES[@]}
-    local processed=0
-
-    # Функция для обработки одного валидатора
-    process_validator() {
-        local validator=$1
+    CURRENT=0
+    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
         (
             # Получаем данные через getAttesterView()
             response=$(cast call $ROLLUP_ADDRESS "getAttesterView(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
@@ -580,26 +573,8 @@ fast_load_validators() {
 
             echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
         ) &
-    }
-
-    # Обрабатываем валидаторов батчами
-    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
-        process_validator "$validator"
-        current_batch=$((current_batch + 1))
-
-        # Если достигли лимита одновременных запросов, ждем завершения
-        if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
-            wait
-            current_batch=0
-            # Небольшая пауза между батчами для снижения нагрузки
-            sleep 0.2
-        fi
     done
 
-    # Ждем завершения оставшихся процессов
-    wait
-
-    # Обновляем прогресс-бар
     while true; do
         CURRENT=$(wc -l < "$TMP_RESULTS" 2>/dev/null || echo 0)
         progress_bar $CURRENT $VALIDATOR_COUNT
