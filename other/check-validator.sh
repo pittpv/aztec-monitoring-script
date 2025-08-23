@@ -643,8 +643,8 @@ VALIDATORS_RESPONSE=$(cast call $ROLLUP_ADDRESS "getAttesters()(address[])" --rp
 
 # Проверяем на ошибку VM execution error
 if echo "$VALIDATORS_RESPONSE" | grep -q "error code -32015: VM execution error"; then
-    echo -e "${RED}Error: VM execution error - insufficient data available${RESET}"
-    echo -e "${YELLOW}Please check your RPC URL or try a different one${RESET}"
+    echo -e "${RED}Error: VM execution error - insufficient data available in your RPC${RESET}"
+    echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
     exit 1
 fi
 
