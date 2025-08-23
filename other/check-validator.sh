@@ -553,7 +553,6 @@ fast_load_validators() {
     local total_processed=0
 
     echo -e "${YELLOW}Starting fast processing of $VALIDATOR_COUNT validators...${RESET}"
-    echo -e "${YELLOW}Using $MAX_CONCURRENT concurrent requests${RESET}"
 
     # Функция для обработки одного валидатора
     process_validator() {
@@ -617,8 +616,6 @@ fast_load_validators() {
         # Пауза между батчами для снижения нагрузки на RPC
         sleep 0.5
     done
-
-    echo -e "${GREEN}All validators processed. Loading results...${RESET}"
 
     # Загружаем результаты в память более эффективно
     local processed_count=0
@@ -731,7 +728,6 @@ fi
 
 # Запускаем быструю загрузку сразу
 declare -a RESULTS
-echo -e "\n${BOLD}Checking ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} validators...${RESET}"
 
 # Временно заменяем массив для обработки только выбранных валидаторов
 ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
