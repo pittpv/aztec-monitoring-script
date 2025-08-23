@@ -639,7 +639,7 @@ fast_load_validators() {
 
 # Основной код
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
-VALIDATORS_RESPONSE=$(cast call $ROLLUP_ADDRESS "getAttesters()(address[])" --rpc-url $RPC_URL)
+VALIDATORS_RESPONSE=$(cast call $ROLLUP_ADDRESS "getAttesters()(address[])" --rpc-url $RPC_URL 2>&1)
 
 # Проверяем на ошибку VM execution error
 if echo "$VALIDATORS_RESPONSE" | grep -q "error code -32015: VM execution error"; then
