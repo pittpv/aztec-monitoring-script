@@ -248,19 +248,6 @@ wei_to_token() {
     fi
 }
 
-progress_bar() {
-    local current=$1
-    local total=$2
-    local width=40
-    local filled=$(( current * width / total ))
-    local empty=$(( width - filled ))
-
-    printf "\r["
-    for ((i=0; i<filled; i++)); do printf "="; done
-    for ((i=0; i<empty; i++)); do printf " "; done
-    printf "] %d/%d" "$current" "$total"
-}
-
 # Функция для отправки уведомления в Telegram
 send_telegram_notification() {
     local message="$1"
@@ -610,15 +597,9 @@ fast_load_validators() {
         wait
         current_batch=0
 
-        # Обновляем прогресс
-        total_processed=$batch_end
-        progress_bar $total_processed $VALIDATOR_COUNT
-
         # Пауза между батчами для снижения нагрузки на RPC
         sleep 0.5
     done
-
-    echo ""  # Новая строка после прогресс-бара
 
     # Загружаем результаты в память более эффективно
     local processed_count=0
@@ -633,8 +614,6 @@ fast_load_validators() {
         RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
         processed_count=$((processed_count + 1))
     done < "$TMP_RESULTS"
-
-    echo -e "${GREEN}$(t "validators_loaded")${RESET}"
 }
 
 # Основной код
@@ -717,8 +696,6 @@ fast_load_validators
 # Восстанавливаем оригинальный массив
 VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
 VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
-
-echo "----------------------------------------"
 
 # Сразу показываем результат
 echo ""
