@@ -1,30 +1,5 @@
 #!/bin/bash
 
-# Функция для запроса нового RPC URL
-request_new_rpc_url() {
-    echo -e "${RED}$(t "rpc_error")${RESET}"
-    echo -e "${YELLOW}$(t "enter_new_rpc")${RESET}"
-    read -p "> " new_rpc_url
-
-    if [ -n "$new_rpc_url" ]; then
-        # Обновляем файл конфигурации
-        if [ -f "/root/.env-aztec-agent" ]; then
-            if grep -q "^RPC_URL=" "/root/.env-aztec-agent"; then
-                sed -i "s|^RPC_URL=.*|RPC_URL=$new_rpc_url|" "/root/.env-aztec-agent"
-            else
-                echo "RPC_URL=$new_rpc_url" >> "/root/.env-aztec-agent"
-            fi
-        fi
-
-        echo -e "${GREEN}$(t "rpc_updated")${RESET}"
-        echo "$new_rpc_url"
-        return 0
-    else
-        echo -e "${RED}No RPC URL provided. Exiting.${RESET}"
-        exit 1
-    fi
-}
-
 # Функция загрузки RPC URL с обработкой ошибок
 load_rpc_config() {
     if [ -f "/root/.env-aztec-agent" ]; then
@@ -106,10 +81,6 @@ init_languages() {
     TRANSLATIONS["en,invalid_address_format"]="Invalid address format: %s"
     TRANSLATIONS["en,processing_address"]="Processing address: %s"
     TRANSLATIONS["en,fetching_page"]="Fetching page %d of %d..."
-    TRANSLATIONS["en,rpc_error"]="RPC server error: insufficient data available"
-    TRANSLATIONS["en,enter_new_rpc"]="Please enter a new RPC URL:"
-    TRANSLATIONS["en,rpc_updated"]="RPC URL updated successfully"
-    TRANSLATIONS["en,retrying_request"]="Retrying request with new RPC URL..."
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -160,10 +131,6 @@ init_languages() {
     TRANSLATIONS["ru,invalid_address_format"]="Неверный формат адреса: %s"
     TRANSLATIONS["ru,processing_address"]="Обработка адреса: %s"
     TRANSLATIONS["ru,fetching_page"]="Получение страницы %d из %d..."
-    TRANSLATIONS["ru,rpc_error"]="Ошибка RPC сервера: недостаточно данных"
-    TRANSLATIONS["ru,enter_new_rpc"]="Пожалуйста, введите новый RPC URL:"
-    TRANSLATIONS["ru,rpc_updated"]="RPC URL успешно обновлен"
-    TRANSLATIONS["ru,retrying_request"]="Повторная попытка запроса с новым RPC URL..."
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -214,10 +181,6 @@ init_languages() {
     TRANSLATIONS["tr,invalid_address_format"]="Geçersiz adres formatı: %s"
     TRANSLATIONS["tr,processing_address"]="Adres işleniyor: %s"
     TRANSLATIONS["tr,fetching_page"]="Sayfa %d/%d alınıyor..."
-    TRANSLATIONS["tr,rpc_error"]="RPC sunucu hatası: yetersiz veri"
-    TRANSLATIONS["tr,enter_new_rpc"]="Lütfen yeni bir RPC URL girin:"
-    TRANSLATIONS["tr,rpc_updated"]="RPC URL başarıyla güncellendi"
-    TRANSLATIONS["tr,retrying_request"]="Yeni RPC URL ile istek tekrarlanıyor..."
 }
 
 t() {
@@ -266,10 +229,7 @@ hex_to_dec() {
     echo "ibase=16; $hex" | bc
 }
 
-hex_to_address() {
-    local hex=$1
-    echo "0x${hex:24:40}"
-}
+
 
 wei_to_token() {
     local wei_value=$1
@@ -581,20 +541,13 @@ list_monitor_scripts() {
     done
 }
 
-# Функция для быстрой загрузки (оптимизированная асинхронная)
+# Функция для быстрой загрузки (асинхронной)
 fast_load_validators() {
     local TMP_RESULTS=$(mktemp)
     trap 'rm -f "$TMP_RESULTS"' EXIT
 
-    # Ограничиваем количество одновременных запросов
-    local MAX_CONCURRENT=5
-    local current_batch=0
-    local total_validators=${#VALIDATOR_ADDRESSES[@]}
-    local processed=0
-
-    # Функция для обработки одного валидатора
-    process_validator() {
-        local validator=$1
+    CURRENT=0
+    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
         (
             # Получаем данные через getAttesterView()
             response=$(cast call $ROLLUP_ADDRESS "getAttesterView(address)" $validator --rpc-url $RPC_URL 2>/dev/null)
@@ -617,26 +570,8 @@ fast_load_validators() {
 
             echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
         ) &
-    }
-
-    # Обрабатываем валидаторов батчами
-    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
-        process_validator "$validator"
-        current_batch=$((current_batch + 1))
-
-        # Если достигли лимита одновременных запросов, ждем завершения
-        if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
-            wait
-            current_batch=0
-            # Небольшая пауза между батчами для снижения нагрузки
-            sleep 0.2
-        fi
     done
 
-    # Ждем завершения оставшихся процессов
-    wait
-
-    # Обновляем прогресс-бар
     while true; do
         CURRENT=$(wc -l < "$TMP_RESULTS" 2>/dev/null || echo 0)
         progress_bar $CURRENT $VALIDATOR_COUNT
@@ -694,56 +629,32 @@ slow_load_validators() {
 
 # Основной код
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
+VALIDATORS_RESPONSE=$(cast call $ROLLUP_ADDRESS "getAttesters()(address[])" --rpc-url $RPC_URL)
 
-# Функция для получения списка валидаторов с обработкой ошибок
-fetch_validators_list() {
-    local max_retries=3
-    local retry_count=0
-    local current_rpc_url="$RPC_URL"
+# Проверяем на ошибку VM execution error
+if echo "$VALIDATORS_RESPONSE" | grep -q "error code -32015: VM execution error"; then
+    echo -e "${RED}Error: VM execution error - insufficient data available${RESET}"
+    echo -e "${YELLOW}Please check your RPC URL or try a different one${RESET}"
+    exit 1
+fi
 
-    while [ $retry_count -lt $max_retries ]; do
-        VALIDATORS_RESPONSE=$(cast call $ROLLUP_ADDRESS "getAttesters()" --rpc-url "$current_rpc_url" 2>&1)
+# Проверяем на другие ошибки
+if echo "$VALIDATORS_RESPONSE" | grep -q "Error:"; then
+    echo -e "${RED}Error fetching validators: $VALIDATORS_RESPONSE${RESET}"
+    exit 1
+fi
 
-        # Проверяем на ошибку VM execution error
-        if echo "$VALIDATORS_RESPONSE" | grep -q "error code -32015: VM execution error"; then
-            echo -e "${RED}Error: VM execution error - insufficient data available${RESET}"
-            current_rpc_url=$(request_new_rpc_url)
-            retry_count=$((retry_count + 1))
-            echo -e "${YELLOW}$(t "retrying_request")${RESET}"
-            continue
-        fi
+# Парсим массив адресов из ответа
+# Ответ будет в формате: [0xaddr1, 0xaddr2, 0xaddr3, ...]
+VALIDATORS_RESPONSE=${VALIDATORS_RESPONSE:1:-1}  # Убираем квадратные скобки
+IFS=',' read -ra VALIDATOR_ADDRESSES <<< "$VALIDATORS_RESPONSE"
 
-        # Проверяем на другие ошибки
-        if echo "$VALIDATORS_RESPONSE" | grep -q "Error:"; then
-            echo -e "${RED}Error fetching validators: $VALIDATORS_RESPONSE${RESET}"
-            current_rpc_url=$(request_new_rpc_url)
-            retry_count=$((retry_count + 1))
-            echo -e "${YELLOW}$(t "retrying_request")${RESET}"
-            continue
-        fi
-
-        # Если успешно, выходим из цикла
-        break
-    done
-
-    if [ $retry_count -ge $max_retries ]; then
-        echo -e "${RED}Failed to fetch validators after $max_retries attempts. Exiting.${RESET}"
-        exit 1
-    fi
-}
-
-# Получаем список валидаторов
-fetch_validators_list
-
-VALIDATORS_HEX=${VALIDATORS_RESPONSE:130}
-VALIDATOR_COUNT=$(( ${#VALIDATORS_HEX} / 64 ))
-VALIDATOR_ADDRESSES=()
-
-for (( i=0; i<$VALIDATOR_COUNT; i++ )); do
-    PART=${VALIDATORS_HEX:$((i*64)):64}
-    ADDRESS_HEX=${PART:24:40}
-    VALIDATOR_ADDRESSES+=("0x$ADDRESS_HEX")
+# Убираем пробелы из адресов
+for i in "${!VALIDATOR_ADDRESSES[@]}"; do
+    VALIDATOR_ADDRESSES[$i]=$(echo "${VALIDATOR_ADDRESSES[$i]}" | tr -d ' ')
 done
+
+VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES[@]}
 
 echo -e "${GREEN}$(t "found_validators")${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
 echo "----------------------------------------"
