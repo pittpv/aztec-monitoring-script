@@ -665,7 +665,6 @@ echo "----------------------------------------"
 # Запрашиваем адреса валидаторов для проверки
 echo ""
 echo -e "${BOLD}Enter validator addresses to check (comma separated):${RESET}"
-echo -e "${YELLOW}Example: 0xdEc08eb67aEa96cd8C2F576aEFD5b9F6bA4bc973, 0x2Feec28A408724665Ea13325CC26054Fd40C9CA1${RESET}"
 read -p "> " input_addresses
 
 # Парсим введенные адреса
