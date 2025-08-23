@@ -746,70 +746,33 @@ fast_load_validators
 VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
 VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
 
-echo -e "\n${GREEN}${BOLD}$(t "check_completed")${RESET}"
+echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
 echo "----------------------------------------"
+
+# Сразу показываем результат
+echo ""
+echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
+echo "----------------------------------------"
+for line in "${RESULTS[@]}"; do
+    IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
+    echo -e "${BOLD}$(t "address"):${RESET} $validator"
+    echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
+    echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+    echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
+    echo -e ""
+    echo "----------------------------------------"
+done
 
 while true; do
     echo ""
     echo -e "${BOLD}Select an action:${RESET}"
-    echo -e "${CYAN}1. Search and display data for a specific validator${RESET}"
-    echo -e "${CYAN}2. Display the checked validators list${RESET}"
-    echo -e "${CYAN}3. Set up queue position notification for validator${RESET}"
-    echo -e "${CYAN}4. Check another set of validators${RESET}"
+    echo -e "${CYAN}1. Check another set of validators${RESET}"
+    echo -e "${CYAN}2. Set up queue position notification for validator${RESET}"
     echo -e "${RED}0. Exit${RESET}"
     read -p "$(t "enter_option") " choice
 
     case $choice in
         1)
-            read -p "$(t "enter_address") " search_address
-            found=false
-            for line in "${RESULTS[@]}"; do
-                IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
-                if [[ "${validator,,}" == "${search_address,,}" ]]; then
-                    echo -e "\n${BOLD}$(t "validator_info")${RESET}\n"
-                    echo -e "  ${BOLD}$(t "address"):${RESET} $validator"
-                    echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
-                    echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
-                    echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}\n"
-                    found=true
-                    break
-                fi
-            done
-            if ! $found; then
-                echo -e "\n${YELLOW}$(t "validator_not_found" "$search_address")${RESET}"
-                echo -e "${YELLOW}$(t "checking_queue")${RESET}"
-                check_validator_queue "$search_address"
-            fi
-            ;;
-        2)
-            echo ""
-            echo -e "${BOLD}Checked validators (${#RESULTS[@]} total):${RESET}"
-            echo "----------------------------------------"
-            for line in "${RESULTS[@]}"; do
-                IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
-                echo -e "${BOLD}$(t "address"):${RESET} $validator"
-                echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
-                echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
-                echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
-                echo -e ""
-                echo "----------------------------------------"
-            done
-            ;;
-        3)
-            echo -e "\n${BOLD}$(t "queue_notification_title")${RESET}"
-            list_monitor_scripts
-            echo ""
-            read -p "$(t "enter_multiple_addresses") " validator_addresses
-
-            # Создаем скрипты для всех указанных адресов
-            IFS=',' read -ra ADDRESSES_TO_MONITOR <<< "$validator_addresses"
-            for address in "${ADDRESSES_TO_MONITOR[@]}"; do
-                clean_address=$(echo "$address" | tr -d ' ')
-                echo -e "${YELLOW}$(t "processing_address" "$clean_address")${RESET}"
-                create_monitor_script "$clean_address"
-            done
-            ;;
-        4)
             echo -e "\n${CYAN}Starting new validator check...${RESET}"
             echo "----------------------------------------"
 
@@ -881,6 +844,34 @@ while true; do
 
             echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
             echo "----------------------------------------"
+
+            # Сразу показываем результат
+            echo ""
+            echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
+            echo "----------------------------------------"
+            for line in "${RESULTS[@]}"; do
+                IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
+                echo -e "${BOLD}$(t "address"):${RESET} $validator"
+                echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
+                echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+                echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
+                echo -e ""
+                echo "----------------------------------------"
+            done
+            ;;
+        2)
+            echo -e "\n${BOLD}$(t "queue_notification_title")${RESET}"
+            list_monitor_scripts
+            echo ""
+            read -p "$(t "enter_multiple_addresses") " validator_addresses
+
+            # Создаем скрипты для всех указанных адресов
+            IFS=',' read -ra ADDRESSES_TO_MONITOR <<< "$validator_addresses"
+            for address in "${ADDRESSES_TO_MONITOR[@]}"; do
+                clean_address=$(echo "$address" | tr -d ' ')
+                echo -e "${YELLOW}$(t "processing_address" "$clean_address")${RESET}"
+                create_monitor_script "$clean_address"
+            done
             ;;
         0)
             echo -e "\n${CYAN}$(t "exiting")${RESET}"
