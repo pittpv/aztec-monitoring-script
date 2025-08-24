@@ -26,6 +26,7 @@ load_rpc_config() {
 }
 
 # Функция для получения нового RPC URL
+# Функция для получения нового RPC URL
 get_new_rpc_url() {
     echo -e "${YELLOW}$(t "getting_new_rpc")${RESET}"
 
@@ -58,6 +59,10 @@ get_new_rpc_url() {
                 # Обновляем текущую переменную
                 RPC_URL_VCHECK="$rpc_url"
                 USING_BACKUP_RPC=true
+
+                # Перезагружаем конфигурацию, чтобы обновить переменные
+                source "/root/.env-aztec-agent"
+
                 return 0
             else
                 echo -e "${RED}RPC is not responding properly: $rpc_url${RESET}"
@@ -71,6 +76,7 @@ get_new_rpc_url() {
     return 1
 }
 
+# Функция для выполнения cast call с обработкой ошибок RPC
 # Функция для выполнения cast call с обработкой ошибок RPC
 cast_call_with_fallback() {
     local contract_address=$1
@@ -96,8 +102,8 @@ cast_call_with_fallback() {
         if echo "$response" | grep -q -E "(Error|error|timed out|connection refused|connection reset)"; then
             echo -e "${RED}RPC error: $response${RESET}"
 
-            # Если это запрос валидаторов, получаем новый RPC URL
-            if [ "$use_validator_rpc" = true ]; then
+            # Если это запрос валидаторов и у нас есть RPC_URL_VCHECK, получаем новый RPC URL
+            if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
                 if get_new_rpc_url; then
                     retry_count=$((retry_count + 1))
                     sleep 2
