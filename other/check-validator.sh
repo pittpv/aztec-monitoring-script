@@ -682,7 +682,8 @@ fast_load_validators() {
 
             # Получаем данные через getAttesterView() с использованием функции с fallback
             # Используем основной RPC для этих запросов (третий параметр false)
-            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
+            # ПРАВИЛЬНЫЙ ФОРМАТ: getAttesterView(address)(uint256,uint256)
+            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)(uint256,uint256)" $validator false)
             echo -e "${YELLOW}DEBUG: getAttesterView response for $validator: $response${RESET}" >&2
 
             if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
@@ -693,36 +694,22 @@ fast_load_validators() {
 
             # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
             # Используем основной RPC для этих запросов (третий параметр false)
-            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
+            # ПРАВИЛЬНЫЙ ФОРМАТ: getConfig(address)(address)
+            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)(address)" $validator false)
             echo -e "${YELLOW}DEBUG: getConfig response for $validator: $config_response${RESET}" >&2
 
             if [[ $? -ne 0 || -z "$config_response" || "$config_response" == *"Error"* || "$config_response" == *"error"* ]]; then
                 withdrawer="ERROR"
                 echo -e "${RED}DEBUG: Error in getConfig for $validator${RESET}" >&2
             else
-                # Более безопасное извлечение withdrawer адреса
-                if [ ${#config_response} -ge 66 ]; then
-                    withdrawer="0x${config_response:26:40}"
-                    echo -e "${YELLOW}DEBUG: Withdrawer for $validator: $withdrawer${RESET}" >&2
-                else
-                    withdrawer="ERROR"
-                    echo -e "${RED}DEBUG: Invalid config response length for $validator: ${#config_response}${RESET}" >&2
-                fi
+                # Для getConfig ответ уже является готовым адресом, не нужно извлекать подстроку
+                withdrawer="$config_response"
+                echo -e "${YELLOW}DEBUG: Withdrawer for $validator: $withdrawer${RESET}" >&2
             fi
 
             # Парсим данные из getAttesterView()
-            data=${response:2}
-            echo -e "${YELLOW}DEBUG: Data for $validator: $data${RESET}" >&2
-
-            if [ ${#data} -lt 128 ]; then
-                echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
-                echo -e "${RED}DEBUG: Data too short for $validator: ${#data}${RESET}" >&2
-                exit 0
-            fi
-
-            status_hex=${data:0:64}
-            stake_hex=${data:64:64}
-
+            # Ответ должен быть в формате "uint256 uint256", разделенные пробелом
+            IFS=' ' read -r status_hex stake_hex <<< "$response"
             echo -e "${YELLOW}DEBUG: Status hex: $status_hex, Stake hex: $stake_hex${RESET}" >&2
 
             # Проверяем, что hex значения не пустые
@@ -731,6 +718,10 @@ fast_load_validators() {
                 echo -e "${RED}DEBUG: Empty hex values for $validator${RESET}" >&2
                 exit 0
             fi
+
+            # Убираем префикс "0x" если есть
+            status_hex=${status_hex#0x}
+            stake_hex=${stake_hex#0x}
 
             status=$(hex_to_dec "$status_hex")
             stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
