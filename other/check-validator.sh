@@ -680,8 +680,7 @@ fast_load_validators() {
         (
             # Получаем данные через getAttesterView() с использованием функции с fallback
             # Используем основной RPC для этих запросов (третий параметр false)
-#            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
-            response=$(cast $ROLLUP_ADDRESS "getAttesterView(address)" $validator --rpc-url $RPC_URL false)
+            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
             if [[ $? -ne 0 || -z "$response" ]]; then
                 echo "$validator|ERROR" >> "$TMP_RESULTS"
                 exit 0
@@ -689,7 +688,7 @@ fast_load_validators() {
 
             # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
             # Используем основной RPC для этих запросов (третий параметр false)
-            config_response=$(cast $ROLLUP_ADDRESS "getConfig(address)" $validator --rpc-url $RPC_URL false)
+            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
             withdrawer="0x${config_response:26:40}"
 
             # Парсим данные из getAttesterView()
