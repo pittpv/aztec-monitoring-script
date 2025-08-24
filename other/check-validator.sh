@@ -159,7 +159,7 @@ init_languages() {
     TRANSLATIONS["en,exiting"]="Exiting."
     TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 0."
     TRANSLATIONS["en,status_0"]="NONE - The validator is not in the validator set"
-    TRANSLATIONS["en,status_1"]="ACTIVE - The validator is currently in the validator set"
+    TRANSLATIONS["en,status_1"]="VALIDATING - The validator is currently in the validator set"
     TRANSLATIONS["en,status_2"]="ZOMBIE - Not participating as validator, but have funds in setup, hit if slashes and going below the minimum"
     TRANSLATIONS["en,status_3"]="EXITING - In the process of exiting the system"
     TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in /root/.env-aztec-agent"
@@ -214,7 +214,7 @@ init_languages() {
     TRANSLATIONS["ru,exiting"]="Выход."
     TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 0."
     TRANSLATIONS["ru,status_0"]="NONE - Валидатор не в наборе валидаторов"
-    TRANSLATIONS["ru,status_1"]="ACTIVE - Валидатор в настоящее время в наборе валидаторов"
+    TRANSLATIONS["ru,status_1"]="VALIDATING - Валидатор в настоящее время в наборе валидаторов"
     TRANSLATIONS["ru,status_2"]="ZOMBIE - Не участвует в качестве валидатора, но есть средства в стейкинге, получает штраф за слэшинг, баланс снижается до минимума"
     TRANSLATIONS["ru,status_3"]="EXITING - В процессе выхода из системы"
     TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
@@ -670,22 +670,20 @@ fast_load_validators() {
         BATCH_SIZE=1      # Обрабатываем по одному валидатору за раз
     fi
 
-    # В функции fast_load_validators также используем cast_call_with_fallback
-    # но без специального RPC для валидаторов (третий параметр false или не указан)
     process_validator() {
         local validator=$1
         (
             # Получаем данные через getAttesterView() с использованием функции с fallback
-            # Используем основной RPC для этих запросов
-            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator)
+            # Используем основной RPC для этих запросов (третий параметр false)
+            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
             if [[ $? -ne 0 || -z "$response" ]]; then
                 echo "$validator|ERROR" >> "$TMP_RESULTS"
                 exit 0
             fi
 
             # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
-            # Используем основной RPC для этих запросов
-            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator)
+            # Используем основной RPC для этих запросов (третий параметр false)
+            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
             withdrawer="0x${config_response:26:40}"
 
             # Парсим данные из getAttesterView()
@@ -753,7 +751,7 @@ fast_load_validators() {
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
 
 # Используем новую функцию для получения списка валидаторов с обработкой ошибок RPC
-# Передаем третий параметр true, чтобы использовать RPC для валидаторов
+# Передаем третий параметр true, чтобы использовать RPC для валидаторов (RPC_URL_VCHECK)
 VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])" true)
 
 if [ $? -ne 0 ]; then
@@ -870,7 +868,6 @@ while true; do
             # Запрашиваем новые адреса валидаторов для проверки
             echo ""
             echo -e "${BOLD}Enter validator addresses to check (comma separated):${RESET}"
-            echo -e "${YELLOW}Example: 0xdEc08eb67aEa96cd8C2F576aEFD5b9F6bA4bc973, 0x2Feec28A408724665Ea13325CC26054Fd40C9CA1${RESET}"
             read -p "> " input_addresses
 
             # Парсим введенные адреса
