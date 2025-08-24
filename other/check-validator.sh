@@ -77,13 +77,14 @@ get_new_rpc_url() {
 }
 
 # Функция для выполнения cast call с обработкой ошибок RPC
-# Функция для выполнения cast call с обработкой ошибок RPC
 cast_call_with_fallback() {
     local contract_address=$1
     local function_signature=$2
     local max_retries=3
     local retry_count=0
     local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
+
+    echo -e "${YELLOW}DEBUG: use_validator_rpc=$use_validator_rpc, RPC_URL_VCHECK=$RPC_URL_VCHECK${RESET}"
 
     while [ $retry_count -lt $max_retries ]; do
         # Определяем какой RPC использовать
@@ -96,14 +97,17 @@ cast_call_with_fallback() {
             echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
         fi
 
+        echo -e "${YELLOW}DEBUG: Executing cast call with RPC: $current_rpc${RESET}"
         local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
+        echo -e "${YELLOW}DEBUG: Response: $response${RESET}"
 
         # Проверяем на ошибки RPC
         if echo "$response" | grep -q -E "(Error|error|timed out|connection refused|connection reset)"; then
             echo -e "${RED}RPC error: $response${RESET}"
 
-            # Если это запрос валидаторов и у нас есть RPC_URL_VCHECK, получаем новый RPC URL
-            if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
+            # Если это запрос валидаторов, получаем новый RPC URL
+            if [ "$use_validator_rpc" = true ]; then
+                echo -e "${YELLOW}DEBUG: Trying to get new RPC URL for validator request${RESET}"
                 if get_new_rpc_url; then
                     retry_count=$((retry_count + 1))
                     sleep 2
