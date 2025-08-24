@@ -84,8 +84,6 @@ cast_call_with_fallback() {
     local retry_count=0
     local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
 
-    echo -e "${YELLOW}DEBUG: use_validator_rpc=$use_validator_rpc, RPC_URL_VCHECK=$RPC_URL_VCHECK${RESET}"
-
     while [ $retry_count -lt $max_retries ]; do
         # Определяем какой RPC использовать
         local current_rpc
@@ -97,17 +95,14 @@ cast_call_with_fallback() {
             echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
         fi
 
-        echo -e "${YELLOW}DEBUG: Executing cast call with RPC: $current_rpc${RESET}"
         local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
-        echo -e "${YELLOW}DEBUG: Response: $response${RESET}"
 
-        # Проверяем на ошибки RPC
-        if echo "$response" | grep -q -E "(Error|error|timed out|connection refused|connection reset)"; then
+        # Проверяем на ошибки RPC (но игнорируем успешные ответы, которые могут содержать текст)
+        if echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset)"; then
             echo -e "${RED}RPC error: $response${RESET}"
 
             # Если это запрос валидаторов, получаем новый RPC URL
             if [ "$use_validator_rpc" = true ]; then
-                echo -e "${YELLOW}DEBUG: Trying to get new RPC URL for validator request${RESET}"
                 if get_new_rpc_url; then
                     retry_count=$((retry_count + 1))
                     sleep 2
@@ -769,23 +764,25 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Проверяем на ошибку VM execution error
-if echo "$VALIDATORS_RESPONSE" | grep -q "error code -32015: VM execution error"; then
+# Проверяем на ошибку VM execution error (только если ответ начинается с ошибки)
+if echo "$VALIDATORS_RESPONSE" | grep -q "^error code -32015: VM execution error"; then
     echo -e "${RED}Error: VM execution error - insufficient data available in your RPC${RESET}"
     echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
     exit 1
 fi
 
-# Проверяем на другие ошибки
-if echo "$VALIDATORS_RESPONSE" | grep -q "Error:"; then
+# Проверяем на другие ошибки (только если ответ начинается с Error)
+if echo "$VALIDATORS_RESPONSE" | grep -q "^Error:"; then
     echo -e "${RED}Error fetching validators: $VALIDATORS_RESPONSE${RESET}"
     echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
     exit 1
 fi
 
 # Оптимизированный парсинг массива адресов из ответа
+# Убираем возможные пробелы и переносы строк
+VALIDATORS_RESPONSE=$(echo "$VALIDATORS_RESPONSE" | tr -d '[:space:]')
 VALIDATORS_RESPONSE=${VALIDATORS_RESPONSE:1:-1}  # Убираем квадратные скобки
-VALIDATOR_ADDRESSES=($(echo "$VALIDATORS_RESPONSE" | sed 's/,/\n/g' | sed 's/ //g'))
+VALIDATOR_ADDRESSES=($(echo "$VALIDATORS_RESPONSE" | sed 's/,/\n/g'))
 VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES[@]}
 
 echo -e "${GREEN}$(t "found_validators")${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
