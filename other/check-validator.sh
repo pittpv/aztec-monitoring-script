@@ -657,217 +657,100 @@ list_monitor_scripts() {
 
 # Функция для загрузки валидаторов (асинхронная)
 fast_load_validators() {
-    local TMP_RESULTS
-    TMP_RESULTS=$(mktemp)
+    local TMP_RESULTS=$(mktemp)
     trap 'rm -f "$TMP_RESULTS"' EXIT
 
-    local MAX_CONCURRENT=10   # Кол-во одновременных запросов
-    local BATCH_SIZE=100      # Размер батча
+    # Оптимизированные настройки для большого количества валидаторов
+    local MAX_CONCURRENT=10  # Увеличиваем количество одновременных запросов
+    local BATCH_SIZE=100     # Размер батча для обработки
     local current_batch=0
+    local total_processed=0
 
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
 
-    # Получаем список валидаторов через fallback (резервный RPC, если есть)
-    local validators_raw
-    if ! validators_raw=$(cast_call_with_fallback "$ROLLUP_ADDRESS" "getAttesters()(address[])" true); then
-        echo -e "${RED}$(t "rpc_error")${RESET}"
-        return 1
-    fi
+#    # Если используем резервный RPC, показываем предупреждение об ограничении скорости
+#    if [ "$USING_BACKUP_RPC" = true ]; then
+#        echo -e "${YELLOW}$(t "rate_limit_notice")${RESET}"
+#        MAX_CONCURRENT=1  # Ограничиваем до 1 одновременного запроса
+#        BATCH_SIZE=1      # Обрабатываем по одному валидатору за раз
+#    fi
 
-    # Преобразуем результат в массив VALIDATOR_ADDRESSES
-    local -a VALIDATOR_ADDRESSES=()
-    while IFS= read -r line; do
-        line="${line//[/}"            # [
-        line="${line//]/}"            # ]
-        line="${line//\"/}"           # "
-        line="${line//,/ }"           # , -> пробел
-        for addr in $line; do
-            [[ -n "$addr" && "$addr" =~ ^0x[0-9a-fA-F]{40}$ ]] && VALIDATOR_ADDRESSES+=("$addr")
-        done
-    done <<< "$validators_raw"
-
-    local VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES[@]}
-    if [[ $VALIDATOR_COUNT -eq 0 ]]; then
-        echo -e "${YELLOW}$(t "validator_not_found")${RESET}"
-        return 0
-    fi
-
-    echo -e "${GREEN}$(t "validators_loaded") ($VALIDATOR_COUNT)${RESET}"
-
-    # Если используем резервный RPC, уменьшаем нагрузку
-    if [ "$USING_BACKUP_RPC" = true ]; then
-        MAX_CONCURRENT=1
-        BATCH_SIZE=1
-        echo -e "${YELLOW}$(t "rate_limit_notice")${RESET}"
-    fi
-
-    # Функция обработки одного валидатора
     process_validator() {
         local validator=$1
         (
-            # Данные из getAttesterView()
-            local response
-            if ! response=$(cast_call_with_fallback "$ROLLUP_ADDRESS" "getAttesterView(address)" "$validator" false); then
+            # Получаем данные через getAttesterView() с использованием функции с fallback
+            # Используем основной RPC для этих запросов (третий параметр false)
+            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
+            if [[ $? -ne 0 || -z "$response" ]]; then
                 echo "$validator|ERROR" >> "$TMP_RESULTS"
                 exit 0
             fi
 
-            # Данные из getConfig()
-            local config_response
-            if ! config_response=$(cast_call_with_fallback "$ROLLUP_ADDRESS" "getConfig(address)" "$validator" false); then
-                echo "$validator|ERROR" >> "$TMP_RESULTS"
-                exit 0
-            fi
+            # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
+            # Используем основной RPC для этих запросов (третий параметр false)
+            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
+            withdrawer="0x${config_response:26:40}"
 
-            local withdrawer="0x${config_response:26:40}"
+            # Парсим данные из getAttesterView()
+            data=${response:2}
+            status_hex=${data:0:64}
+            stake_hex=${data:64:64}
 
-            # Парсим данные
-            local data=${response:2}
-            local status_hex=${data:0:64}
-            local stake_hex=${data:64:64}
-
-            local status=$(hex_to_dec "$status_hex")
-            local stake=$(wei_to_token "$(hex_to_dec "$stake_hex")")
+            status=$(hex_to_dec "$status_hex")
+            stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
 
             echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
         ) &
     }
 
-    # Обрабатываем валидаторов батчами
+    # Обрабатываем валидаторов батчами для лучшего контроля памяти
     for ((i=0; i<VALIDATOR_COUNT; i+=BATCH_SIZE)); do
         local batch_end=$((i + BATCH_SIZE))
-        [[ $batch_end -gt $VALIDATOR_COUNT ]] && batch_end=$VALIDATOR_COUNT
+        if [[ $batch_end -gt $VALIDATOR_COUNT ]]; then
+            batch_end=$VALIDATOR_COUNT
+        fi
 
+        # Запускаем процессы для текущего батча
         for ((j=i; j<batch_end; j++)); do
             process_validator "${VALIDATOR_ADDRESSES[j]}"
             current_batch=$((current_batch + 1))
 
+            # Если достигли лимита одновременных запросов, ждем завершения
             if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
                 wait
                 current_batch=0
+                # Небольшая пауза между группами для снижения нагрузки
                 sleep 0.1
             fi
         done
 
+        # Ждем завершения всех процессов в текущем батче
         wait
         current_batch=0
 
-        # Задержка между батчами
+        # Пауза между батчами для снижения нагрузки на RPC
+        # Если используем резервный RPC, добавляем дополнительную задержку
         if [ "$USING_BACKUP_RPC" = true ]; then
-            sleep 1
+            sleep 1  # 1 секунда задержки между запросами для резервного RPC
         else
-            sleep 0.5
+            sleep 0.5  # Обычная задержка для основного RPC
         fi
     done
 
-    # Загружаем результаты
+    # Загружаем результаты в память более эффективно
+    local processed_count=0
     while IFS='|' read -r validator stake withdrawer status; do
-        [[ "$stake" == "ERROR" ]] && continue
-        local status_text=${STATUS_MAP[$status]:-UNKNOWN}
-        local status_color=${STATUS_COLOR[$status]:-$RESET}
+        if [[ "$stake" == "ERROR" ]]; then
+            continue
+        fi
+
+        status_text=${STATUS_MAP[$status]:-UNKNOWN}
+        status_color=${STATUS_COLOR[$status]:-$RESET}
+
         RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
+        processed_count=$((processed_count + 1))
     done < "$TMP_RESULTS"
-
-    echo -e "${GREEN}$(t "check_completed")${RESET}"
 }
-
-
-## Функция для загрузки валидаторов (асинхронная)
-#fast_load_validators() {
-#    local TMP_RESULTS=$(mktemp)
-#    trap 'rm -f "$TMP_RESULTS"' EXIT
-#
-#    # Оптимизированные настройки для большого количества валидаторов
-#    local MAX_CONCURRENT=10  # Увеличиваем количество одновременных запросов
-#    local BATCH_SIZE=100     # Размер батча для обработки
-#    local current_batch=0
-#    local total_processed=0
-#
-#    echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
-#
-##    # Если используем резервный RPC, показываем предупреждение об ограничении скорости
-##    if [ "$USING_BACKUP_RPC" = true ]; then
-##        echo -e "${YELLOW}$(t "rate_limit_notice")${RESET}"
-##        MAX_CONCURRENT=1  # Ограничиваем до 1 одновременного запроса
-##        BATCH_SIZE=1      # Обрабатываем по одному валидатору за раз
-##    fi
-#
-#    process_validator() {
-#        local validator=$1
-#        (
-#            # Получаем данные через getAttesterView() с использованием функции с fallback
-#            # Используем основной RPC для этих запросов (третий параметр false)
-#            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
-#            if [[ $? -ne 0 || -z "$response" ]]; then
-#                echo "$validator|ERROR" >> "$TMP_RESULTS"
-#                exit 0
-#            fi
-#
-#            # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
-#            # Используем основной RPC для этих запросов (третий параметр false)
-#            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
-#            withdrawer="0x${config_response:26:40}"
-#
-#            # Парсим данные из getAttesterView()
-#            data=${response:2}
-#            status_hex=${data:0:64}
-#            stake_hex=${data:64:64}
-#
-#            status=$(hex_to_dec "$status_hex")
-#            stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
-#
-#            echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
-#        ) &
-#    }
-#
-#    # Обрабатываем валидаторов батчами для лучшего контроля памяти
-#    for ((i=0; i<VALIDATOR_COUNT; i+=BATCH_SIZE)); do
-#        local batch_end=$((i + BATCH_SIZE))
-#        if [[ $batch_end -gt $VALIDATOR_COUNT ]]; then
-#            batch_end=$VALIDATOR_COUNT
-#        fi
-#
-#        # Запускаем процессы для текущего батча
-#        for ((j=i; j<batch_end; j++)); do
-#            process_validator "${VALIDATOR_ADDRESSES[j]}"
-#            current_batch=$((current_batch + 1))
-#
-#            # Если достигли лимита одновременных запросов, ждем завершения
-#            if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
-#                wait
-#                current_batch=0
-#                # Небольшая пауза между группами для снижения нагрузки
-#                sleep 0.1
-#            fi
-#        done
-#
-#        # Ждем завершения всех процессов в текущем батче
-#        wait
-#        current_batch=0
-#
-#        # Пауза между батчами для снижения нагрузки на RPC
-#        # Если используем резервный RPC, добавляем дополнительную задержку
-#        if [ "$USING_BACKUP_RPC" = true ]; then
-#            sleep 1  # 1 секунда задержки между запросами для резервного RPC
-#        else
-#            sleep 0.5  # Обычная задержка для основного RPC
-#        fi
-#    done
-#
-#    # Загружаем результаты в память более эффективно
-#    local processed_count=0
-#    while IFS='|' read -r validator stake withdrawer status; do
-#        if [[ "$stake" == "ERROR" ]]; then
-#            continue
-#        fi
-#
-#        status_text=${STATUS_MAP[$status]:-UNKNOWN}
-#        status_color=${STATUS_COLOR[$status]:-$RESET}
-#
-#        RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
-#        processed_count=$((processed_count + 1))
-#    done < "$TMP_RESULTS"
-#}
 
 # Основной код
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
