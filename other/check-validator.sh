@@ -25,31 +25,6 @@ load_rpc_config() {
     fi
 }
 
-# Функция для проверки сигнатуры функции
-check_function_signature() {
-    local contract=$1
-    local function_sig=$2
-    local validator=$3
-
-    echo -e "${YELLOW}Checking signature: $function_signature${RESET}" >&2
-    response=$(cast call "$contract_address" "$function_signature" "$validator" --rpc-url "$RPC_URL" 2>&1)
-
-    if echo "$response" | grep -q -E "(Error|error|encode length mismatch)"; then
-        echo -e "${RED}Invalid signature: $function_signature - $response${RESET}" >&2
-        return 1
-    else
-        echo -e "${GREEN}Valid signature: $function_signature - $response${RESET}" >&2
-        return 0
-    fi
-}
-
-# Проверим правильную сигнатуру функций
-echo -e "${YELLOW}Testing function signatures...${RESET}"
-check_function_signature $ROLLUP_ADDRESS "getAttesterView(address)(uint256,uint256)" ${VALIDATOR_ADDRESSES[0]}
-check_function_signature $ROLLUP_ADDRESS "getAttesterView(address)((uint256,uint256))" ${VALIDATOR_ADDRESSES[0]}
-check_function_signature $ROLLUP_ADDRESS "getAttesterView(address)" ${VALIDATOR_ADDRESSES[0]}
-check_function_signature $ROLLUP_ADDRESS "getConfig(address)(address)" ${VALIDATOR_ADDRESSES[0]}
-
 # Функция для получения нового RPC URL
 # Функция для получения нового RPC URL
 get_new_rpc_url() {
@@ -380,48 +355,21 @@ declare -A STATUS_COLOR=(
 
 hex_to_dec() {
     local hex=${1^^}
-    echo -e "${YELLOW}DEBUG: Converting hex to dec: $hex${RESET}" >&2
-    local result=$(echo "ibase=16; $hex" | bc 2>/dev/null)
-    echo -e "${YELLOW}DEBUG: Conversion result: $result${RESET}" >&2
-    echo "$result"
+    echo "ibase=16; $hex" | bc
 }
 
 wei_to_token() {
     local wei_value=$1
-    echo -e "${YELLOW}DEBUG: Converting wei to token: $wei_value${RESET}" >&2
-
-    local int_part=$(echo "$wei_value / 1000000000000000000" | bc 2>/dev/null)
-    local frac_part=$(echo "$wei_value % 1000000000000000000" | bc 2>/dev/null)
-    local frac_str=$(printf "%018d" $frac_part 2>/dev/null)
-    frac_str=$(echo "$frac_str" | sed 's/0*$//' 2>/dev/null)
-
+    local int_part=$(echo "$wei_value / 1000000000000000000" | bc)
+    local frac_part=$(echo "$wei_value % 1000000000000000000" | bc)
+    local frac_str=$(printf "%018d" $frac_part)
+    frac_str=$(echo "$frac_str" | sed 's/0*$//')
     if [[ -z "$frac_str" ]]; then
-        echo -e "${YELLOW}DEBUG: Token result: $int_part${RESET}" >&2
         echo "$int_part"
     else
-        local result="$int_part.$frac_str"
-        echo -e "${YELLOW}DEBUG: Token result: $result${RESET}" >&2
-        echo "$result"
+        echo "$int_part.$frac_str"
     fi
 }
-
-#hex_to_dec() {
-#    local hex=${1^^}
-#    echo "ibase=16; $hex" | bc
-#}
-#
-#wei_to_token() {
-#    local wei_value=$1
-#    local int_part=$(echo "$wei_value / 1000000000000000000" | bc)
-#    local frac_part=$(echo "$wei_value % 1000000000000000000" | bc)
-#    local frac_str=$(printf "%018d" $frac_part)
-#    frac_str=$(echo "$frac_str" | sed 's/0*$//')
-#    if [[ -z "$frac_str" ]]; then
-#        echo "$int_part"
-#    else
-#        echo "$int_part.$frac_str"
-#    fi
-#}
 
 # Функция для отправки уведомления в Telegram
 send_telegram_notification() {
@@ -730,88 +678,55 @@ fast_load_validators() {
     process_validator() {
         local validator=$1
         (
-            echo -e "${YELLOW}DEBUG: Processing validator: $validator${RESET}" >&2
-
-            # Попробуем разные форматы вызова для getAttesterView
-            # Вариант 1: если функция возвращает структуру
-            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)((uint256,uint256))" $validator false)
-
-            # Если не сработало, пробуем вариант 2: отдельные значения
-            if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
-                response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)(uint256,uint256)" $validator false)
-            fi
-
-            # Если все еще не сработало, пробуем вариант 3: байтовый ответ
-            if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
-                response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
-            fi
-
-            echo -e "${YELLOW}DEBUG: getAttesterView response for $validator: $response${RESET}" >&2
-
+            # Получаем данные через getAttesterView() с использованием функции с fallback
+            # Используем основной RPC для этих запросов (третий параметр false)
+            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
             if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
                 echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
-                echo -e "${RED}DEBUG: Error in getAttesterView for $validator${RESET}" >&2
                 exit 0
             fi
 
-            # Парсим ответ в зависимости от формата
-            if [[ "$response" == *"("*")"* ]]; then
-                # Если ответ в формате структуры (tuple)
-                # Убираем скобки и разделяем значения
-                clean_response=${response//(/}
-                clean_response=${clean_response//)/}
-                IFS=',' read -r status_hex stake_hex <<< "$clean_response"
-            elif [[ "$response" == *" "* ]]; then
-                # Если ответ разделен пробелом
-                IFS=' ' read -r status_hex stake_hex <<< "$response"
+            # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
+            # Используем основной RPC для этих запросов (третий параметр false)
+            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
+            if [[ $? -ne 0 || -z "$config_response" || "$config_response" == *"Error"* || "$config_response" == *"error"* ]]; then
+                withdrawer="ERROR"
             else
-                # Если это байтовый ответ, парсим вручную
-                data=${response:2}
-                if [ ${#data} -ge 128 ]; then
-                    status_hex=${data:0:64}
-                    stake_hex=${data:64:64}
+                # Более безопасное извлечение withdrawer адреса
+                if [ ${#config_response} -ge 66 ]; then
+                    withdrawer="0x${config_response:26:40}"
                 else
-                    echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
-                    echo -e "${RED}DEBUG: Invalid response format for $validator${RESET}" >&2
-                    exit 0
+                    withdrawer="ERROR"
                 fi
             fi
 
-            echo -e "${YELLOW}DEBUG: Status hex: $status_hex, Stake hex: $stake_hex${RESET}" >&2
-
-            # Убираем префикс "0x" если есть
-            status_hex=${status_hex#0x}
-            stake_hex=${stake_hex#0x}
-
-            # Получаем отдельно withdrawer адрес через getConfig()
-            config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)(address)" $validator false)
-            echo -e "${YELLOW}DEBUG: getConfig response for $validator: $config_response${RESET}" >&2
-
-            if [[ $? -ne 0 || -z "$config_response" || "$config_response" == *"Error"* || "$config_response" == *"error"* ]]; then
-                withdrawer="ERROR"
-                echo -e "${RED}DEBUG: Error in getConfig for $validator${RESET}" >&2
-            else
-                withdrawer="$config_response"
-                echo -e "${YELLOW}DEBUG: Withdrawer for $validator: $withdrawer${RESET}" >&2
+            # Парсим данные из getAttesterView()
+            data=${response:2}
+            if [ ${#data} -lt 128 ]; then
+                echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
+                exit 0
             fi
 
-            # Конвертируем hex в decimal
+            status_hex=${data:0:64}
+            stake_hex=${data:64:64}
+
+            # Проверяем, что hex значения не пустые
+            if [ -z "$status_hex" ] || [ -z "$stake_hex" ]; then
+                echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
+                exit 0
+            fi
+
             status=$(hex_to_dec "$status_hex")
             stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
-
-            echo -e "${YELLOW}DEBUG: Status: $status, Stake: $stake${RESET}" >&2
 
             # Проверяем корректность преобразований
             if [ -z "$status" ] || [ -z "$stake" ]; then
                 echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
-                echo -e "${RED}DEBUG: Empty conversion results for $validator${RESET}" >&2
             else
                 echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
-                echo -e "${GREEN}DEBUG: Successfully processed $validator${RESET}" >&2
             fi
         ) &
     }
-
 
     # Обрабатываем валидаторов батчами для лучшего контроля памяти
     for ((i=0; i<VALIDATOR_COUNT; i+=BATCH_SIZE)); do
