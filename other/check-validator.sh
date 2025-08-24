@@ -31,14 +31,14 @@ check_function_signature() {
     local function_sig=$2
     local validator=$3
 
-    echo -e "${YELLOW}Checking signature: $function_sig${RESET}" >&2
-    response=$(cast call "$contract" "$function_sig" "$validator" --rpc-url "$RPC_URL" 2>&1)
+    echo -e "${YELLOW}Checking signature: $function_signature${RESET}" >&2
+    response=$(cast call "$contract_address" "$function_signature" "$validator" --rpc-url "$RPC_URL" 2>&1)
 
     if echo "$response" | grep -q -E "(Error|error|encode length mismatch)"; then
-        echo -e "${RED}Invalid signature: $function_sig - $response${RESET}" >&2
+        echo -e "${RED}Invalid signature: $function_signature - $response${RESET}" >&2
         return 1
     else
-        echo -e "${GREEN}Valid signature: $function_sig - $response${RESET}" >&2
+        echo -e "${GREEN}Valid signature: $function_signature - $response${RESET}" >&2
         return 0
     fi
 }
