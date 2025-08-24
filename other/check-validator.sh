@@ -681,50 +681,25 @@ fast_load_validators() {
             # Получаем данные через getAttesterView() с использованием функции с fallback
             # Используем основной RPC для этих запросов (третий параметр false)
             response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
-            if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
-                echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
+            if [[ $? -ne 0 || -z "$response" ]]; then
+                echo "$validator|ERROR" >> "$TMP_RESULTS"
                 exit 0
             fi
 
             # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
             # Используем основной RPC для этих запросов (третий параметр false)
             config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
-            if [[ $? -ne 0 || -z "$config_response" || "$config_response" == *"Error"* || "$config_response" == *"error"* ]]; then
-                withdrawer="ERROR"
-            else
-                # Более безопасное извлечение withdrawer адреса
-                if [ ${#config_response} -ge 66 ]; then
-                    withdrawer="0x${config_response:26:40}"
-                else
-                    withdrawer="ERROR"
-                fi
-            fi
+            withdrawer="0x${config_response:26:40}"
 
             # Парсим данные из getAttesterView()
             data=${response:2}
-            if [ ${#data} -lt 128 ]; then
-                echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
-                exit 0
-            fi
-
             status_hex=${data:0:64}
             stake_hex=${data:64:64}
-
-            # Проверяем, что hex значения не пустые
-            if [ -z "$status_hex" ] || [ -z "$stake_hex" ]; then
-                echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
-                exit 0
-            fi
 
             status=$(hex_to_dec "$status_hex")
             stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
 
-            # Проверяем корректность преобразований
-            if [ -z "$status" ] || [ -z "$stake" ]; then
-                echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
-            else
-                echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
-            fi
+            echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
         ) &
     }
 
@@ -765,8 +740,7 @@ fast_load_validators() {
     # Загружаем результаты в память более эффективно
     local processed_count=0
     while IFS='|' read -r validator stake withdrawer status; do
-        if [[ "$stake" == "ERROR" ]] || [[ "$status" == "ERROR" ]]; then
-            echo -e "${RED}Error processing validator: $validator${RESET}"
+        if [[ "$stake" == "ERROR" ]]; then
             continue
         fi
 
@@ -775,14 +749,7 @@ fast_load_validators() {
 
         RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
         processed_count=$((processed_count + 1))
-
-        # Выводим прогресс обработки
-        if (( processed_count % 10 == 0 )); then
-            echo -e "${YELLOW}Processed $processed_count/$VALIDATOR_COUNT validators${RESET}"
-        fi
     done < "$TMP_RESULTS"
-
-    echo -e "${GREEN}Successfully processed $processed_count validators${RESET}"
 }
 
 # Основной код
