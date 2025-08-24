@@ -75,39 +75,66 @@ get_new_rpc_url() {
 cast_call_with_fallback() {
     local contract_address=$1
     local function_signature=$2
+    local mode=${3:-"normal"}
     local max_retries=3
     local retry_count=0
 
-    while [ $retry_count -lt $max_retries ]; do
-        # Используем основной RPC или резервный для проверки валидаторов
-        local current_rpc="${RPC_URL_VCHECK:-$RPC_URL}"
+    if [[ "$mode" == "validator_list" ]]; then
+        # Сначала пробуем основной RPC
+        echo -e "${YELLOW}Using primary RPC: $RPC_URL${RESET}"
+        local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$RPC_URL" 2>&1)
 
-        echo -e "${YELLOW}Using RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
-
-        local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
-
-        # Проверяем на ошибки RPC
         if echo "$response" | grep -q -E "(Error|error|timed out|connection refused|connection reset)"; then
-            echo -e "${RED}RPC error: $response${RESET}"
+            echo -e "${RED}Primary RPC failed: $response${RESET}"
 
-            # Получаем новый RPC URL
-            if get_new_rpc_url; then
-                retry_count=$((retry_count + 1))
-                sleep 2
-                continue
+            # Пробуем резервный RPC один раз
+            if [ -n "$RPC_URL_VCHECK" ]; then
+                echo -e "${YELLOW}Trying backup RPC for validator list: $RPC_URL_VCHECK${RESET}"
+                local response_backup=$(cast call "$contract_address" "$function_signature" --rpc-url "$RPC_URL_VCHECK" 2>&1)
+
+                if echo "$response_backup" | grep -q -E "(Error|error|timed out|connection refused|connection reset)"; then
+                    echo -e "${RED}Backup RPC also failed${RESET}"
+                    return 1
+                else
+                    echo "$response_backup"
+                    return 0
+                fi
             else
-                echo -e "${RED}All RPC attempts failed${RESET}"
+                echo -e "${RED}No backup RPC available${RESET}"
                 return 1
             fi
+        else
+            echo "$response"
+            return 0
         fi
+    else
+        # === Обычный режим (fallback с поиском нового RPC) ===
+        while [ $retry_count -lt $max_retries ]; do
+            local current_rpc="${RPC_URL_VCHECK:-$RPC_URL}"
+            echo -e "${YELLOW}Using RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
 
-        # Если нет ошибки, возвращаем ответ
-        echo "$response"
-        return 0
-    done
+            local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
 
-    echo -e "${RED}Maximum retries exceeded${RESET}"
-    return 1
+            if echo "$response" | grep -q -E "(Error|error|timed out|connection refused|connection reset)"; then
+                echo -e "${RED}RPC error: $response${RESET}"
+
+                if get_new_rpc_url; then
+                    retry_count=$((retry_count + 1))
+                    sleep 2
+                    continue
+                else
+                    echo -e "${RED}All RPC attempts failed${RESET}"
+                    return 1
+                fi
+            fi
+
+            echo "$response"
+            return 0
+        done
+
+        echo -e "${RED}Maximum retries exceeded${RESET}"
+        return 1
+    fi
 }
 
 # === Language settings ===
@@ -737,7 +764,7 @@ fast_load_validators() {
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
 
 # Используем новую функцию для получения списка валидаторов с обработкой ошибок RPC
-VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])")
+VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])" "validator_list")
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Failed to fetch validators after multiple RPC attempts${RESET}"
