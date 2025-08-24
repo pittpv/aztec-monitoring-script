@@ -15,6 +15,9 @@ load_rpc_config() {
         # Если есть резервный RPC, используем его
         if [ -n "$RPC_URL_VCHECK" ]; then
             echo -e "${YELLOW}Using backup RPC for validator checks: $RPC_URL_VCHECK${RESET}"
+            USING_BACKUP_RPC=true
+        else
+            USING_BACKUP_RPC=false
         fi
     else
         echo -e "${RED}$(t "error_file_missing")${RESET}"
@@ -29,8 +32,8 @@ get_new_rpc_url() {
     # Список возможных RPC провайдеров (можно расширить)
     local rpc_providers=(
         "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://sepolia.drpc.org"
         "https://1rpc.io/sepolia"
+        "https://sepolia.drpc.org"
     )
 
     # Пробуем каждый RPC пока не найдем рабочий
@@ -54,6 +57,7 @@ get_new_rpc_url() {
 
                 # Обновляем текущую переменную
                 RPC_URL_VCHECK="$rpc_url"
+                USING_BACKUP_RPC=true
                 return 0
             else
                 echo -e "${RED}RPC is not responding properly: $rpc_url${RESET}"
@@ -97,7 +101,7 @@ cast_call_with_fallback() {
             fi
         fi
 
-        # Если нет ошибок, возвращаем ответ
+        # Если нет ошибки, возвращаем ответ
         echo "$response"
         return 0
     done
@@ -174,6 +178,7 @@ init_languages() {
     TRANSLATIONS["en,validators_loaded"]="Validator data loaded successfully"
     TRANSLATIONS["en,rpc_error"]="RPC error occurred, trying alternative RPC"
     TRANSLATIONS["en,getting_new_rpc"]="Getting new RPC URL..."
+    TRANSLATIONS["en,rate_limit_notice"]="Using backup RPC - rate limiting to 1 request per second"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -228,6 +233,7 @@ init_languages() {
     TRANSLATIONS["ru,validators_loaded"]="Данные валидаторов успешно загружены"
     TRANSLATIONS["ru,rpc_error"]="Произошла ошибка RPC, пробуем альтернативный RPC"
     TRANSLATIONS["ru,getting_new_rpc"]="Получение нового RPC URL..."
+    TRANSLATIONS["ru,rate_limit_notice"]="Используется резервный RPC - ограничение скорости: 1 запрос в секунду"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -251,7 +257,7 @@ init_languages() {
     TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2, 3 veya 0 seçin."
     TRANSLATIONS["tr,status_0"]="NONE - Doğrulayıcı, doğrulayıcı setinde değil"
     TRANSLATIONS["tr,status_1"]="VALIDATING - Doğrulayıcı şu anda doğrulayıcı setinde"
-    TRANSLATIONS["tr,status_2"]="ZOMBIE - Doğrulayıcı (validator) olarak katılmıyor, ancak staking'te fonları bulunuyor. Slashing (kesinti) cezası alıyor ve bakiyesi minimum seviyeye düşüyor."
+    TRANSLATIONS["tr,status_2"]="ZOMBIE - Doğrulayıcı (validator) olarak katılmıyor, ancak staking'te fonları bulunuyor. Slashing (kesinti) cezası alıyor и bakiyesi minimum seviyeye düşüyor."
     TRANSLATIONS["tr,status_3"]="EXITING - Sistemden çıkış sürecinde"
     TRANSLATIONS["tr,error_rpc_missing"]="Hata: /root/.env-aztec-agent dosyasında RPC_URL bulunamadı"
     TRANSLATIONS["tr,error_file_missing"]="Hata: /root/.env-aztec-agent dosyası bulunamadı"
@@ -282,6 +288,7 @@ init_languages() {
     TRANSLATIONS["tr,validators_loaded"]="Doğrulayıcı verileri başarıyla yüklendi"
     TRANSLATIONS["tr,rpc_error"]="RPC hatası oluştu, alternatif RPC deneniyor"
     TRANSLATIONS["tr,getting_new_rpc"]="Yeni RPC URL alınıyor..."
+    TRANSLATIONS["tr,rate_limit_notice"]="Yedek RPC kullanılıyor - hız sınırlaması: saniyede 1 istek"
 }
 
 t() {
@@ -298,6 +305,9 @@ init_languages "$1"
 ROLLUP_ADDRESS="0x216f071653a82ced3ef9d29f3f0c0ed7829c8f81"
 QUEUE_URL="https://dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
+
+# Глобальная переменная для отслеживания использования резервного RPC
+USING_BACKUP_RPC=false
 
 load_rpc_config
 
@@ -640,6 +650,13 @@ fast_load_validators() {
 
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
 
+    # Если используем резервный RPC, показываем предупреждение об ограничении скорости
+    if [ "$USING_BACKUP_RPC" = true ]; then
+        echo -e "${YELLOW}$(t "rate_limit_notice")${RESET}"
+        MAX_CONCURRENT=1  # Ограничиваем до 1 одновременного запроса
+        BATCH_SIZE=1      # Обрабатываем по одному валидатору за раз
+    fi
+
     # Функция для обработки одного валидатора
     process_validator() {
         local validator=$1
@@ -693,7 +710,12 @@ fast_load_validators() {
         current_batch=0
 
         # Пауза между батчами для снижения нагрузки на RPC
-        sleep 0.5
+        # Если используем резервный RPC, добавляем дополнительную задержку
+        if [ "$USING_BACKUP_RPC" = true ]; then
+            sleep 1  # 1 секунда задержки между запросами для резервного RPC
+        else
+            sleep 0.5  # Обычная задержка для основного RPC
+        fi
     done
 
     # Загружаем результаты в память более эффективно
@@ -908,7 +930,7 @@ while true; do
             echo ""
             read -p "$(t "enter_multiple_addresses") " validator_addresses
 
-            # Создаем скрипты для всех указанных адресов
+            # Создаем скрипты для всех указанных адреса
             IFS=',' read -ra ADDRESSES_TO_MONITOR <<< "$validator_addresses"
             for address in "${ADDRESSES_TO_MONITOR[@]}"; do
                 clean_address=$(echo "$address" | tr -d ' ')
