@@ -25,6 +25,31 @@ load_rpc_config() {
     fi
 }
 
+# Функция для проверки сигнатуры функции
+check_function_signature() {
+    local contract=$1
+    local function_sig=$2
+    local validator=$3
+
+    echo -e "${YELLOW}Checking signature: $function_sig${RESET}" >&2
+    response=$(cast call "$contract" "$function_sig" "$validator" --rpc-url "$RPC_URL" 2>&1)
+
+    if echo "$response" | grep -q -E "(Error|error|encode length mismatch)"; then
+        echo -e "${RED}Invalid signature: $function_sig - $response${RESET}" >&2
+        return 1
+    else
+        echo -e "${GREEN}Valid signature: $function_sig - $response${RESET}" >&2
+        return 0
+    fi
+}
+
+# Проверим правильную сигнатуру функций
+echo -e "${YELLOW}Testing function signatures...${RESET}"
+check_function_signature $ROLLUP_ADDRESS "getAttesterView(address)(uint256,uint256)" ${VALIDATOR_ADDRESSES[0]}
+check_function_signature $ROLLUP_ADDRESS "getAttesterView(address)((uint256,uint256))" ${VALIDATOR_ADDRESSES[0]}
+check_function_signature $ROLLUP_ADDRESS "getAttesterView(address)" ${VALIDATOR_ADDRESSES[0]}
+check_function_signature $ROLLUP_ADDRESS "getConfig(address)(address)" ${VALIDATOR_ADDRESSES[0]}
+
 # Функция для получения нового RPC URL
 # Функция для получения нового RPC URL
 get_new_rpc_url() {
@@ -707,10 +732,20 @@ fast_load_validators() {
         (
             echo -e "${YELLOW}DEBUG: Processing validator: $validator${RESET}" >&2
 
-            # Получаем данные через getAttesterView() с использованием функции с fallback
-            # Используем основной RPC для этих запросов (третий параметр false)
-            # ПРАВИЛЬНЫЙ ФОРМАТ: getAttesterView(address)(uint256,uint256)
-            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)(uint256,uint256)" $validator false)
+            # Попробуем разные форматы вызова для getAttesterView
+            # Вариант 1: если функция возвращает структуру
+            response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)((uint256,uint256))" $validator false)
+
+            # Если не сработало, пробуем вариант 2: отдельные значения
+            if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
+                response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)(uint256,uint256)" $validator false)
+            fi
+
+            # Если все еще не сработало, пробуем вариант 3: байтовый ответ
+            if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
+                response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
+            fi
+
             echo -e "${YELLOW}DEBUG: getAttesterView response for $validator: $response${RESET}" >&2
 
             if [[ $? -ne 0 || -z "$response" || "$response" == *"Error"* || "$response" == *"error"* ]]; then
@@ -719,9 +754,36 @@ fast_load_validators() {
                 exit 0
             fi
 
-            # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
-            # Используем основной RPC для этих запросов (третий параметр false)
-            # ПРАВИЛЬНЫЙ ФОРМАТ: getConfig(address)(address)
+            # Парсим ответ в зависимости от формата
+            if [[ "$response" == *"("*")"* ]]; then
+                # Если ответ в формате структуры (tuple)
+                # Убираем скобки и разделяем значения
+                clean_response=${response//(/}
+                clean_response=${clean_response//)/}
+                IFS=',' read -r status_hex stake_hex <<< "$clean_response"
+            elif [[ "$response" == *" "* ]]; then
+                # Если ответ разделен пробелом
+                IFS=' ' read -r status_hex stake_hex <<< "$response"
+            else
+                # Если это байтовый ответ, парсим вручную
+                data=${response:2}
+                if [ ${#data} -ge 128 ]; then
+                    status_hex=${data:0:64}
+                    stake_hex=${data:64:64}
+                else
+                    echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
+                    echo -e "${RED}DEBUG: Invalid response format for $validator${RESET}" >&2
+                    exit 0
+                fi
+            fi
+
+            echo -e "${YELLOW}DEBUG: Status hex: $status_hex, Stake hex: $stake_hex${RESET}" >&2
+
+            # Убираем префикс "0x" если есть
+            status_hex=${status_hex#0x}
+            stake_hex=${stake_hex#0x}
+
+            # Получаем отдельно withdrawer адрес через getConfig()
             config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)(address)" $validator false)
             echo -e "${YELLOW}DEBUG: getConfig response for $validator: $config_response${RESET}" >&2
 
@@ -729,27 +791,11 @@ fast_load_validators() {
                 withdrawer="ERROR"
                 echo -e "${RED}DEBUG: Error in getConfig for $validator${RESET}" >&2
             else
-                # Для getConfig ответ уже является готовым адресом, не нужно извлекать подстроку
                 withdrawer="$config_response"
                 echo -e "${YELLOW}DEBUG: Withdrawer for $validator: $withdrawer${RESET}" >&2
             fi
 
-            # Парсим данные из getAttesterView()
-            # Ответ должен быть в формате "uint256 uint256", разделенные пробелом
-            IFS=' ' read -r status_hex stake_hex <<< "$response"
-            echo -e "${YELLOW}DEBUG: Status hex: $status_hex, Stake hex: $stake_hex${RESET}" >&2
-
-            # Проверяем, что hex значения не пустые
-            if [ -z "$status_hex" ] || [ -z "$stake_hex" ]; then
-                echo "$validator|ERROR|$withdrawer|ERROR" >> "$TMP_RESULTS"
-                echo -e "${RED}DEBUG: Empty hex values for $validator${RESET}" >&2
-                exit 0
-            fi
-
-            # Убираем префикс "0x" если есть
-            status_hex=${status_hex#0x}
-            stake_hex=${stake_hex#0x}
-
+            # Конвертируем hex в decimal
             status=$(hex_to_dec "$status_hex")
             stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
 
