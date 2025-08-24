@@ -355,21 +355,48 @@ declare -A STATUS_COLOR=(
 
 hex_to_dec() {
     local hex=${1^^}
-    echo "ibase=16; $hex" | bc
+    echo -e "${YELLOW}DEBUG: Converting hex to dec: $hex${RESET}" >&2
+    local result=$(echo "ibase=16; $hex" | bc 2>/dev/null)
+    echo -e "${YELLOW}DEBUG: Conversion result: $result${RESET}" >&2
+    echo "$result"
 }
 
 wei_to_token() {
     local wei_value=$1
-    local int_part=$(echo "$wei_value / 1000000000000000000" | bc)
-    local frac_part=$(echo "$wei_value % 1000000000000000000" | bc)
-    local frac_str=$(printf "%018d" $frac_part)
-    frac_str=$(echo "$frac_str" | sed 's/0*$//')
+    echo -e "${YELLOW}DEBUG: Converting wei to token: $wei_value${RESET}" >&2
+
+    local int_part=$(echo "$wei_value / 1000000000000000000" | bc 2>/dev/null)
+    local frac_part=$(echo "$wei_value % 1000000000000000000" | bc 2>/dev/null)
+    local frac_str=$(printf "%018d" $frac_part 2>/dev/null)
+    frac_str=$(echo "$frac_str" | sed 's/0*$//' 2>/dev/null)
+
     if [[ -z "$frac_str" ]]; then
+        echo -e "${YELLOW}DEBUG: Token result: $int_part${RESET}" >&2
         echo "$int_part"
     else
-        echo "$int_part.$frac_str"
+        local result="$int_part.$frac_str"
+        echo -e "${YELLOW}DEBUG: Token result: $result${RESET}" >&2
+        echo "$result"
     fi
 }
+
+#hex_to_dec() {
+#    local hex=${1^^}
+#    echo "ibase=16; $hex" | bc
+#}
+#
+#wei_to_token() {
+#    local wei_value=$1
+#    local int_part=$(echo "$wei_value / 1000000000000000000" | bc)
+#    local frac_part=$(echo "$wei_value % 1000000000000000000" | bc)
+#    local frac_str=$(printf "%018d" $frac_part)
+#    frac_str=$(echo "$frac_str" | sed 's/0*$//')
+#    if [[ -z "$frac_str" ]]; then
+#        echo "$int_part"
+#    else
+#        echo "$int_part.$frac_str"
+#    fi
+#}
 
 # Функция для отправки уведомления в Telegram
 send_telegram_notification() {
