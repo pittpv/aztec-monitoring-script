@@ -159,7 +159,7 @@ init_languages() {
     TRANSLATIONS["en,exiting"]="Exiting."
     TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 0."
     TRANSLATIONS["en,status_0"]="NONE - The validator is not in the validator set"
-    TRANSLATIONS["en,status_1"]="VALIDATING - The validator is currently in the validator set"
+    TRANSLATIONS["en,status_1"]="ACTIVE - The validator is currently in the validator set"
     TRANSLATIONS["en,status_2"]="ZOMBIE - Not participating as validator, but have funds in setup, hit if slashes and going below the minimum"
     TRANSLATIONS["en,status_3"]="EXITING - In the process of exiting the system"
     TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in /root/.env-aztec-agent"
@@ -214,7 +214,7 @@ init_languages() {
     TRANSLATIONS["ru,exiting"]="Выход."
     TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 0."
     TRANSLATIONS["ru,status_0"]="NONE - Валидатор не в наборе валидаторов"
-    TRANSLATIONS["ru,status_1"]="VALIDATING - Валидатор в настоящее время в наборе валидаторов"
+    TRANSLATIONS["ru,status_1"]="ACTIVE - Валидатор в настоящее время в наборе валидаторов"
     TRANSLATIONS["ru,status_2"]="ZOMBIE - Не участвует в качестве валидатора, но есть средства в стейкинге, получает штраф за слэшинг, баланс снижается до минимума"
     TRANSLATIONS["ru,status_3"]="EXITING - В процессе выхода из системы"
     TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
@@ -870,6 +870,7 @@ while true; do
             # Запрашиваем новые адреса валидаторов для проверки
             echo ""
             echo -e "${BOLD}Enter validator addresses to check (comma separated):${RESET}"
+            echo -e "${YELLOW}Example: 0xdEc08eb67aEa96cd8C2F576aEFD5b9F6bA4bc973, 0x2Feec28A408724665Ea13325CC26054Fd40C9CA1${RESET}"
             read -p "> " input_addresses
 
             # Парсим введенные адреса
