@@ -31,9 +31,11 @@ get_new_rpc_url() {
 
     # Список возможных RPC провайдеров (можно расширить)
     local rpc_providers=(
-        "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://1rpc.io/sepolia"
-        "https://sepolia.drpc.org"
+        "https://mainnet.optimism.io"
+        "https://optimism-mainnet.public.blastapi.io"
+        "https://optimism.publicnode.com"
+        "https://1rpc.io/op"
+        "https://opt-mainnet.g.alchemy.com/v2/demo"
     )
 
     # Пробуем каждый RPC пока не найдем рабочий
