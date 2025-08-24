@@ -668,12 +668,12 @@ fast_load_validators() {
 
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
 
-    # Если используем резервный RPC, показываем предупреждение об ограничении скорости
-    if [ "$USING_BACKUP_RPC" = true ]; then
-        echo -e "${YELLOW}$(t "rate_limit_notice")${RESET}"
-        MAX_CONCURRENT=1  # Ограничиваем до 1 одновременного запроса
-        BATCH_SIZE=1      # Обрабатываем по одному валидатору за раз
-    fi
+#    # Если используем резервный RPC, показываем предупреждение об ограничении скорости
+#    if [ "$USING_BACKUP_RPC" = true ]; then
+#        echo -e "${YELLOW}$(t "rate_limit_notice")${RESET}"
+#        MAX_CONCURRENT=1  # Ограничиваем до 1 одновременного запроса
+#        BATCH_SIZE=1      # Обрабатываем по одному валидатору за раз
+#    fi
 
     process_validator() {
         local validator=$1
