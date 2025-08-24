@@ -27,7 +27,7 @@ load_rpc_config() {
 
 # Функция для получения нового RPC URL
 get_new_rpc_url() {
-    echo -e "${YELLOW}Requesting new RPC URL...${RESET}"
+    echo -e "${YELLOW}$(t "getting_new_rpc")${RESET}"
 
     # Список возможных RPC провайдеров (можно расширить)
     local rpc_providers=(
@@ -77,12 +77,18 @@ cast_call_with_fallback() {
     local function_signature=$2
     local max_retries=3
     local retry_count=0
+    local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
 
     while [ $retry_count -lt $max_retries ]; do
-        # Используем основной RPC или резервный для проверки валидаторов
-        local current_rpc="${RPC_URL_VCHECK:-$RPC_URL}"
-
-        echo -e "${YELLOW}Using RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
+        # Определяем какой RPC использовать
+        local current_rpc
+        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
+            current_rpc="$RPC_URL_VCHECK"
+            echo -e "${YELLOW}Using validator RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
+        else
+            current_rpc="$RPC_URL"
+            echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
+        fi
 
         local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
 
@@ -90,14 +96,21 @@ cast_call_with_fallback() {
         if echo "$response" | grep -q -E "(Error|error|timed out|connection refused|connection reset)"; then
             echo -e "${RED}RPC error: $response${RESET}"
 
-            # Получаем новый RPC URL
-            if get_new_rpc_url; then
+            # Если это запрос валидаторов, получаем новый RPC URL
+            if [ "$use_validator_rpc" = true ]; then
+                if get_new_rpc_url; then
+                    retry_count=$((retry_count + 1))
+                    sleep 2
+                    continue
+                else
+                    echo -e "${RED}All RPC attempts failed${RESET}"
+                    return 1
+                fi
+            else
+                # Для других запросов просто увеличиваем счетчик попыток
                 retry_count=$((retry_count + 1))
                 sleep 2
                 continue
-            else
-                echo -e "${RED}All RPC attempts failed${RESET}"
-                return 1
             fi
         fi
 
@@ -657,11 +670,13 @@ fast_load_validators() {
         BATCH_SIZE=1      # Обрабатываем по одному валидатору за раз
     fi
 
-    # Функция для обработки одного валидатора
+    # В функции fast_load_validators также используем cast_call_with_fallback
+    # но без специального RPC для валидаторов (третий параметр false или не указан)
     process_validator() {
         local validator=$1
         (
             # Получаем данные через getAttesterView() с использованием функции с fallback
+            # Используем основной RPC для этих запросов
             response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator)
             if [[ $? -ne 0 || -z "$response" ]]; then
                 echo "$validator|ERROR" >> "$TMP_RESULTS"
@@ -669,6 +684,7 @@ fast_load_validators() {
             fi
 
             # Получаем отдельно withdrawer адрес через getConfig() с использованием функции с fallback
+            # Используем основной RPC для этих запросов
             config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator)
             withdrawer="0x${config_response:26:40}"
 
@@ -737,7 +753,8 @@ fast_load_validators() {
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
 
 # Используем новую функцию для получения списка валидаторов с обработкой ошибок RPC
-VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])")
+# Передаем третий параметр true, чтобы использовать RPC для валидаторов
+VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])" true)
 
 if [ $? -ne 0 ]; then
     echo -e "${RED}Error: Failed to fetch validators after multiple RPC attempts${RESET}"
