@@ -800,8 +800,8 @@ fast_load_validators() {
     trap 'rm -f "$TMP_RESULTS"' EXIT
 
     # Более консервативные настройки
-    local MAX_CONCURRENT=5  # Уменьшаем параллелизм
-    local BATCH_SIZE=50     # Уменьшаем размер батча
+    local MAX_CONCURRENT=5
+    local BATCH_SIZE=50
     local current_batch=0
 
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
@@ -811,13 +811,14 @@ fast_load_validators() {
         local attempt=0
         local max_attempts=3
 
-        while [ $attempt -lt $max_attempts ]; do
-            (
+        (
+            while [ $attempt -lt $max_attempts ]; do
                 response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
                 if [[ $? -ne 0 || -z "$response" || ${#response} -lt 130 ]]; then
                     attempt=$((attempt + 1))
                     if [ $attempt -eq $max_attempts ]; then
                         echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
+                        exit 0
                     fi
                     sleep 1
                     continue
@@ -834,14 +835,20 @@ fast_load_validators() {
                 status_hex=${data:0:64}
                 stake_hex=${data:64:64}
 
-                status=$(hex_to_dec "$status_hex")
-                stake=$(wei_to_token $(hex_to_dec "$stake_hex"))
+                # Безопасное преобразование hex в decimal
+                status=$((16#${status_hex}))
+
+                # Безопасное преобразование stake
+                stake_decimal=$((16#${stake_hex}))
+                stake=$(wei_to_token $stake_decimal 2>/dev/null || echo "0")
 
                 echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
-                break
-            ) &
-            return
-        done
+                exit 0
+            done
+
+            # Если все попытки неудачны
+            echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
+        ) &
     }
 
     # Добавляем прогресс-бар
@@ -870,7 +877,7 @@ fast_load_validators() {
         wait
         current_batch=0
 
-        # Динамическая задержка в зависимости от нагрузки
+        # Динамическая задержка
         local delay=0.3
         [ "$USING_BACKUP_RPC" = true ] && delay=1.5
         sleep $delay
@@ -883,13 +890,15 @@ fast_load_validators() {
     local error_count=0
 
     while IFS='|' read -r validator stake withdrawer status; do
-        if [[ "$stake" == "ERROR" ]]; then
+        # Пропускаем ошибки
+        if [[ "$stake" == "ERROR" || -z "$status" ]]; then
             error_count=$((error_count + 1))
             continue
         fi
 
-        status_text=${STATUS_MAP[$status]:-UNKNOWN}
-        status_color=${STATUS_COLOR[$status]:-$RESET}
+        # Безопасное получение статуса и цвета
+        local status_text="${STATUS_MAP[$status]:-UNKNOWN}"
+        local status_color="${STATUS_COLOR[$status]:-$RESET}"
 
         RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
         processed_count=$((processed_count + 1))
