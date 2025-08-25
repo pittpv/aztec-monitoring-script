@@ -799,89 +799,94 @@ fast_load_validators() {
     local TMP_RESULTS=$(mktemp)
     trap 'rm -f "$TMP_RESULTS"' EXIT
 
-    # Более консервативные настройки
-    local MAX_CONCURRENT=5
-    local BATCH_SIZE=50
-    local current_batch=0
-
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
+    echo -e "${YELLOW}Using RPC: $RPC_URL${RESET}"
+
+    # Упрощаем настройки для отладки
+    local MAX_CONCURRENT=3
+    local current_batch=0
 
     process_validator() {
         local validator=$1
         local attempt=0
-        local max_attempts=3
+        local max_attempts=2
 
         (
             while [ $attempt -lt $max_attempts ]; do
-                response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesterView(address)" $validator false)
-                if [[ $? -ne 0 || -z "$response" || ${#response} -lt 130 ]]; then
+                # Отладочная информация
+                echo -e "${GRAY}Processing validator: $validator (attempt $((attempt + 1)))${RESET}" >&2
+
+                # Получаем данные getAttesterView
+                response=$(cast_call_with_fallback "$ROLLUP_ADDRESS" "getAttesterView(address)" "$validator" false)
+                local ret=$?
+
+                if [[ $ret -ne 0 || -z "$response" ]]; then
+                    echo -e "${RED}Error getting attester view for $validator: $response${RESET}" >&2
                     attempt=$((attempt + 1))
-                    if [ $attempt -eq $max_attempts ]; then
-                        echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
-                        exit 0
-                    fi
                     sleep 1
                     continue
                 fi
 
-                config_response=$(cast_call_with_fallback $ROLLUP_ADDRESS "getConfig(address)" $validator false)
+                if [[ ${#response} -lt 130 ]]; then
+                    echo -e "${RED}Invalid response length for $validator: ${#response}${RESET}" >&2
+                    attempt=$((attempt + 1))
+                    sleep 1
+                    continue
+                fi
+
+                # Получаем данные getConfig
+                config_response=$(cast_call_with_fallback "$ROLLUP_ADDRESS" "getConfig(address)" "$validator" false)
                 if [[ $? -ne 0 || -z "$config_response" ]]; then
+                    echo -e "${YELLOW}Warning: Could not get config for $validator, using default withdrawer${RESET}" >&2
                     withdrawer="0x0000000000000000000000000000000000000000"
                 else
                     withdrawer="0x${config_response:26:40}"
                 fi
 
+                # Парсим данные
                 data=${response:2}
                 status_hex=${data:0:64}
                 stake_hex=${data:64:64}
 
-                # Безопасное преобразование hex в decimal
-                status=$((16#${status_hex}))
+                echo -e "${GRAY}Raw data: status_hex=$status_hex, stake_hex=$stake_hex${RESET}" >&2
 
-                # Безопасное преобразование stake
-                stake_decimal=$((16#${stake_hex}))
-                stake=$(wei_to_token $stake_decimal 2>/dev/null || echo "0")
+                # Преобразуем hex в decimal
+                status=$((16#${status_hex#0x}))
+                stake_decimal=$((16#${stake_hex#0x}))
+                stake=$(wei_to_token "$stake_decimal")
 
+                echo -e "${GREEN}Success: $validator -> status: $status, stake: $stake${RESET}" >&2
+
+                # Записываем результат
                 echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
                 exit 0
             done
 
             # Если все попытки неудачны
+            echo -e "${RED}All attempts failed for validator: $validator${RESET}" >&2
             echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
         ) &
     }
 
-    # Добавляем прогресс-бар
-    local total=$VALIDATOR_COUNT
-    local processed=0
+    # Обрабатываем валидаторов
+    for ((i=0; i<VALIDATOR_COUNT; i++)); do
+        process_validator "${VALIDATOR_ADDRESSES[i]}"
+        current_batch=$((current_batch + 1))
 
-    for ((i=0; i<VALIDATOR_COUNT; i+=BATCH_SIZE)); do
-        local batch_end=$((i + BATCH_SIZE))
-        [[ $batch_end -gt $VALIDATOR_COUNT ]] && batch_end=$VALIDATOR_COUNT
-
-        # Показываем прогресс
-        processed=$((processed + (batch_end - i)))
-        echo -ne "${YELLOW}Processing: $processed/$total validators${RESET}\r"
-
-        for ((j=i; j<batch_end; j++)); do
-            process_validator "${VALIDATOR_ADDRESSES[j]}"
-            current_batch=$((current_batch + 1))
-
-            if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
-                wait
-                current_batch=0
-                sleep 0.2
-            fi
-        done
-
-        wait
-        current_batch=0
-
-        # Динамическая задержка
-        local delay=0.3
-        [ "$USING_BACKUP_RPC" = true ] && delay=1.5
-        sleep $delay
+        if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
+            wait
+            current_batch=0
+            sleep 0.5
+        fi
     done
+
+    # Ждем завершения всех процессов
+    wait
+
+    # Показываем содержимое временного файла для отладки
+    echo -e "\n${YELLOW}Contents of temporary file:${RESET}"
+    cat "$TMP_RESULTS"
+    echo -e "\n${YELLOW}End of temporary file${RESET}"
 
     echo -e "\n${GREEN}Loading completed. Processing results...${RESET}"
 
@@ -889,23 +894,33 @@ fast_load_validators() {
     local processed_count=0
     local error_count=0
 
+    # Читаем результаты из файла
     while IFS='|' read -r validator stake withdrawer status; do
-        # Пропускаем ошибки
-        if [[ "$stake" == "ERROR" || -z "$status" ]]; then
+        if [[ "$stake" == "ERROR" || -z "$stake" ]]; then
+            echo -e "${RED}Error entry: $validator${RESET}"
             error_count=$((error_count + 1))
             continue
         fi
 
-        # Безопасное получение статуса и цвета
-        local status_text="${STATUS_MAP[$status]:-UNKNOWN}"
-        local status_color="${STATUS_COLOR[$status]:-$RESET}"
+        # Преобразуем статус в число (на случай если это строка)
+        local status_num=$((status))
 
-        RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
+        # Безопасное получение статуса и цвета
+        local status_text="${STATUS_MAP[$status_num]:-UNKNOWN}"
+        local status_color="${STATUS_COLOR[$status_num]:-$RESET}"
+
+        RESULTS+=("$validator|$stake|$withdrawer|$status_num|$status_text|$status_color")
         processed_count=$((processed_count + 1))
+
+        echo -e "${GREEN}Added to results: $validator - $stake - $status_text${RESET}"
+
     done < "$TMP_RESULTS"
 
     echo -e "${GREEN}Successfully loaded: $processed_count/$VALIDATOR_COUNT validators${RESET}"
     [[ $error_count -gt 0 ]] && echo -e "${RED}Failed to load: $error_count validators${RESET}"
+
+    # Дополнительная отладочная информация
+    echo -e "${YELLOW}Total results in array: ${#RESULTS[@]}${RESET}"
 }
 
 # Основной код
