@@ -77,99 +77,99 @@ get_new_rpc_url() {
 }
 
 # Функция для выполнения cast call с обработкой ошибок RPC
-cast_call_with_fallback() {
-    local contract_address=$1
-    local function_signature=$2
-    local max_retries=5  # Увеличиваем количество попыток
-    local retry_count=0
-    local use_validator_rpc=${3:-false}
-    local timeout=30  # Добавляем таймаут
-
-    while [ $retry_count -lt $max_retries ]; do
-        local current_rpc
-        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
-            current_rpc="$RPC_URL_VCHECK"
-        else
-            current_rpc="$RPC_URL"
-        fi
-
-        # Добавляем таймаут и подробное логирование
-        echo -e "${YELLOW}Calling $function_signature on $contract_address (attempt $((retry_count + 1))/$max_retries)${RESET}"
-
-        local response=$(timeout $timeout cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
-
-        # Проверяем различные типы ошибок
-        if [[ $? -eq 124 ]]; then
-            echo -e "${RED}Timeout error on attempt $((retry_count + 1))${RESET}"
-        elif echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset|rate limit|too many requests)"; then
-            echo -e "${RED}RPC error: $(echo "$response" | head -1)${RESET}"
-        elif [[ -z "$response" ]]; then
-            echo -e "${RED}Empty response from RPC${RESET}"
-        else
-            # Успешный ответ
-            echo "$response"
-            return 0
-        fi
-
-        retry_count=$((retry_count + 1))
-        sleep $((retry_count * 2))  # Экспоненциальная backoff задержка
-    done
-
-    echo -e "${RED}Maximum retries exceeded for $function_signature${RESET}"
-    return 1
-}
-
-## Функция для выполнения cast call с обработкой ошибок RPC
 #cast_call_with_fallback() {
 #    local contract_address=$1
 #    local function_signature=$2
-#    local max_retries=3
+#    local max_retries=5  # Увеличиваем количество попыток
 #    local retry_count=0
-#    local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
+#    local use_validator_rpc=${3:-false}
+#    local timeout=30  # Добавляем таймаут
 #
 #    while [ $retry_count -lt $max_retries ]; do
-#        # Определяем какой RPC использовать
 #        local current_rpc
 #        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
 #            current_rpc="$RPC_URL_VCHECK"
-#            echo -e "${YELLOW}Using validator RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
 #        else
 #            current_rpc="$RPC_URL"
-#            echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
 #        fi
 #
-#        local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
+#        # Добавляем таймаут и подробное логирование
+#        echo -e "${YELLOW}Calling $function_signature on $contract_address (attempt $((retry_count + 1))/$max_retries)${RESET}"
 #
-#        # Проверяем на ошибки RPC (но игнорируем успешные ответы, которые могут содержать текст)
-#        if echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset)"; then
-#            echo -e "${RED}RPC error: $response${RESET}"
+#        local response=$(timeout $timeout cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
 #
-#            # Если это запрос валидаторов, получаем новый RPC URL
-#            if [ "$use_validator_rpc" = true ]; then
-#                if get_new_rpc_url; then
-#                    retry_count=$((retry_count + 1))
-#                    sleep 2
-#                    continue
-#                else
-#                    echo -e "${RED}All RPC attempts failed${RESET}"
-#                    return 1
-#                fi
-#            else
-#                # Для других запросов просто увеличиваем счетчик попыток
-#                retry_count=$((retry_count + 1))
-#                sleep 2
-#                continue
-#            fi
+#        # Проверяем различные типы ошибок
+#        if [[ $? -eq 124 ]]; then
+#            echo -e "${RED}Timeout error on attempt $((retry_count + 1))${RESET}"
+#        elif echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset|rate limit|too many requests)"; then
+#            echo -e "${RED}RPC error: $(echo "$response" | head -1)${RESET}"
+#        elif [[ -z "$response" ]]; then
+#            echo -e "${RED}Empty response from RPC${RESET}"
+#        else
+#            # Успешный ответ
+#            echo "$response"
+#            return 0
 #        fi
 #
-#        # Если нет ошибки, возвращаем ответ
-#        echo "$response"
-#        return 0
+#        retry_count=$((retry_count + 1))
+#        sleep $((retry_count * 2))  # Экспоненциальная backoff задержка
 #    done
 #
-#    echo -e "${RED}Maximum retries exceeded${RESET}"
+#    echo -e "${RED}Maximum retries exceeded for $function_signature${RESET}"
 #    return 1
 #}
+
+## Функция для выполнения cast call с обработкой ошибок RPC
+cast_call_with_fallback() {
+    local contract_address=$1
+    local function_signature=$2
+    local max_retries=3
+    local retry_count=0
+    local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
+
+    while [ $retry_count -lt $max_retries ]; do
+        # Определяем какой RPC использовать
+        local current_rpc
+        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
+            current_rpc="$RPC_URL_VCHECK"
+            echo -e "${YELLOW}Using validator RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
+        else
+            current_rpc="$RPC_URL"
+            echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
+        fi
+
+        local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
+
+        # Проверяем на ошибки RPC (но игнорируем успешные ответы, которые могут содержать текст)
+        if echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset)"; then
+            echo -e "${RED}RPC error: $response${RESET}"
+
+            # Если это запрос валидаторов, получаем новый RPC URL
+            if [ "$use_validator_rpc" = true ]; then
+                if get_new_rpc_url; then
+                    retry_count=$((retry_count + 1))
+                    sleep 2
+                    continue
+                else
+                    echo -e "${RED}All RPC attempts failed${RESET}"
+                    return 1
+                fi
+            else
+                # Для других запросов просто увеличиваем счетчик попыток
+                retry_count=$((retry_count + 1))
+                sleep 2
+                continue
+            fi
+        fi
+
+        # Если нет ошибки, возвращаем ответ
+        echo "$response"
+        return 0
+    done
+
+    echo -e "${RED}Maximum retries exceeded${RESET}"
+    return 1
+}
 
 # === Language settings ===
 LANG="en"
