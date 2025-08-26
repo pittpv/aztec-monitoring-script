@@ -699,109 +699,50 @@ list_monitor_scripts() {
 }
 
 fast_load_validators() {
-    local TMP_RESULTS=$(mktemp)
-    trap 'rm -f "$TMP_RESULTS"' EXIT
-
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
     echo -e "${YELLOW}Using RPC: $RPC_URL${RESET}"
 
-    # Упрощаем настройки для отладки
-    local MAX_CONCURRENT=3
-    local current_batch=0
-
-    process_validator() {
-        local validator=$1
-        local attempt=0
-        local max_attempts=2
-
-        (
-            while [ $attempt -lt $max_attempts ]; do
-                # Получаем данные getAttesterView
-                response=$(cast_call_with_fallback "$ROLLUP_ADDRESS" "getAttesterView(address)" "$validator" false)
-                local ret=$?
-
-                if [[ $ret -ne 0 || -z "$response" ]]; then
-                    attempt=$((attempt + 1))
-                    sleep 1
-                    continue
-                fi
-
-                if [[ ${#response} -lt 130 ]]; then
-                    attempt=$((attempt + 1))
-                    sleep 1
-                    continue
-                fi
-
-                # Получаем данные getConfig
-                config_response=$(cast_call_with_fallback "$ROLLUP_ADDRESS" "getConfig(address)" "$validator" false)
-                if [[ $? -ne 0 || -z "$config_response" ]]; then
-                    withdrawer="0x0000000000000000000000000000000000000000"
-                else
-                    withdrawer="0x${config_response:26:40}"
-                fi
-
-                # Парсим данные
-                data=${response:2}
-                status_hex=${data:0:64}
-                stake_hex=${data:64:64}
-
-                # Преобразуем hex в decimal
-                status=$((16#${status_hex#0x}))
-                stake_decimal=$((16#${stake_hex#0x}))
-                stake=$(wei_to_token "$stake_decimal")
-
-                # Записываем результат
-                echo "$validator|$stake|$withdrawer|$status" >> "$TMP_RESULTS"
-                exit 0
-            done
-
-            # Если все попытки неудачны
-            echo "$validator|ERROR|ERROR|ERROR" >> "$TMP_RESULTS"
-        ) &
-    }
-
-    # Обрабатываем валидаторов
+    # Обрабатываем валидаторов последовательно
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
-        process_validator "${VALIDATOR_ADDRESSES[i]}"
-        current_batch=$((current_batch + 1))
+        local validator="${VALIDATOR_ADDRESSES[i]}"
+        echo -e "${GRAY}Processing: $validator${RESET}"
 
-        if [[ $current_batch -ge $MAX_CONCURRENT ]]; then
-            wait
-            current_batch=0
-            sleep 0.5
-        fi
-    done
+        # Получаем данные getAttesterView
+        response=$(cast call "$ROLLUP_ADDRESS" "getAttesterView(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null)
 
-    # Ждем завершения всех процессов
-    wait
-
-    echo -e "\n${GREEN}Loading completed. Processing results...${RESET}"
-
-    # Обработка результатов
-    local processed_count=0
-    local error_count=0
-
-    # Читаем результаты из файла
-    while IFS='|' read -r validator stake withdrawer status; do
-        if [[ "$stake" == "ERROR" || -z "$stake" ]]; then
-            error_count=$((error_count + 1))
+        if [[ $? -ne 0 || -z "$response" || ${#response} -lt 130 ]]; then
+            echo -e "${RED}Error getting data for: $validator${RESET}"
             continue
         fi
 
-        # Преобразуем статус в число (на случай если это строка)
-        local status_num=$((status))
+        # Получаем данные getConfig
+        config_response=$(cast call "$ROLLUP_ADDRESS" "getConfig(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null)
+        if [[ $? -ne 0 || -z "$config_response" ]]; then
+            withdrawer="0x0000000000000000000000000000000000000000"
+        else
+            withdrawer="0x${config_response:26:40}"
+        fi
+
+        # Парсим данные
+        data=${response:2}
+        status_hex=${data:0:64}
+        stake_hex=${data:64:64}
+
+        # Преобразуем hex в decimal
+        status=$((16#${status_hex#0x}))
+        stake_decimal=$((16#${stake_hex#0x}))
+        stake=$(wei_to_token "$stake_decimal")
 
         # Безопасное получение статуса и цвета
-        local status_text="${STATUS_MAP[$status_num]:-UNKNOWN}"
-        local status_color="${STATUS_COLOR[$status_num]:-$RESET}"
+        local status_text="${STATUS_MAP[$status]:-UNKNOWN}"
+        local status_color="${STATUS_COLOR[$status]:-$RESET}"
 
-        RESULTS+=("$validator|$stake|$withdrawer|$status_num|$status_text|$status_color")
-        processed_count=$((processed_count + 1))
+        # Добавляем в результаты
+        RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
+        echo -e "${GREEN}✓ Loaded: $validator - $stake STK - $status_text${RESET}"
+    done
 
-    done < "$TMP_RESULTS"
-
-    echo -e "${GREEN}Successfully loaded: $processed_count/$VALIDATOR_COUNT validators${RESET}"
-    [[ $error_count -gt 0 ]] && echo -e "${RED}Failed to load: $error_count validators${RESET}"
+    echo -e "${GREEN}Successfully loaded: ${#RESULTS[@]}/$VALIDATOR_COUNT validators${RESET}"
 }
 
 #  fast_load_validators() {
