@@ -1,174 +1,14 @@
 #!/bin/bash
 
-# Функция загрузки RPC URL с обработкой ошибок
-load_rpc_config() {
-    if [ -f "/root/.env-aztec-agent" ]; then
-        source "/root/.env-aztec-agent"
-        if [ -z "$RPC_URL" ]; then
-            echo -e "${RED}$(t "error_rpc_missing")${RESET}"
-            exit 1
-        fi
-        if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo -e "${YELLOW}Warning: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in /root/.env-aztec-agent${RESET}"
-        fi
-
-        # Если есть резервный RPC, используем его
-        if [ -n "$RPC_URL_VCHECK" ]; then
-            echo -e "${YELLOW}Using backup RPC for validator checks: $RPC_URL_VCHECK${RESET}"
-            USING_BACKUP_RPC=true
-        else
-            USING_BACKUP_RPC=false
-        fi
-    else
-        echo -e "${RED}$(t "error_file_missing")${RESET}"
-        exit 1
-    fi
-}
-
-# Функция для получения нового RPC URL
-get_new_rpc_url() {
-    echo -e "${YELLOW}$(t "getting_new_rpc")${RESET}"
-
-    # Список возможных RPC провайдеров (можно расширить)
-    local rpc_providers=(
-        "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://1rpc.io/sepolia"
-        "https://sepolia.drpc.org"
-    )
-
-    # Пробуем каждый RPC пока не найдем рабочий
-    for rpc_url in "${rpc_providers[@]}"; do
-        echo -e "${YELLOW}Trying RPC: $rpc_url${RESET}"
-
-        # Проверяем доступность RPC
-        if curl -s --head --connect-timeout 5 "$rpc_url" >/dev/null; then
-            echo -e "${GREEN}RPC is available: $rpc_url${RESET}"
-
-            # Проверяем, что RPC может отвечать на запросы
-            if cast block latest --rpc-url "$rpc_url" >/dev/null 2>&1; then
-                echo -e "${GREEN}RPC is working properly: $rpc_url${RESET}"
-
-                # Добавляем новый RPC в файл конфигурации
-                if grep -q "RPC_URL_VCHECK=" "/root/.env-aztec-agent"; then
-                    sed -i "s|RPC_URL_VCHECK=.*|RPC_URL_VCHECK=$rpc_url|" "/root/.env-aztec-agent"
-                else
-                    echo "RPC_URL_VCHECK=$rpc_url" >> "/root/.env-aztec-agent"
-                fi
-
-                # Обновляем текущую переменную
-                RPC_URL_VCHECK="$rpc_url"
-                USING_BACKUP_RPC=true
-
-                # Перезагружаем конфигурацию, чтобы обновить переменные
-                source "/root/.env-aztec-agent"
-
-                return 0
-            else
-                echo -e "${RED}RPC is not responding properly: $rpc_url${RESET}"
-            fi
-        else
-            echo -e "${RED}RPC is not available: $rpc_url${RESET}"
-        fi
-    done
-
-    echo -e "${RED}Failed to find a working RPC URL${RESET}"
-    return 1
-}
-
-# Функция для выполнения cast call с обработкой ошибок RPC
-#cast_call_with_fallback() {
-#    local contract_address=$1
-#    local function_signature=$2
-#    local max_retries=5  # Увеличиваем количество попыток
-#    local retry_count=0
-#    local use_validator_rpc=${3:-false}
-#    local timeout=30  # Добавляем таймаут
-#
-#    while [ $retry_count -lt $max_retries ]; do
-#        local current_rpc
-#        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
-#            current_rpc="$RPC_URL_VCHECK"
-#        else
-#            current_rpc="$RPC_URL"
-#        fi
-#
-#        # Добавляем таймаут и подробное логирование
-#        echo -e "${YELLOW}Calling $function_signature on $contract_address (attempt $((retry_count + 1))/$max_retries)${RESET}"
-#
-#        local response=$(timeout $timeout cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
-#
-#        # Проверяем различные типы ошибок
-#        if [[ $? -eq 124 ]]; then
-#            echo -e "${RED}Timeout error on attempt $((retry_count + 1))${RESET}"
-#        elif echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset|rate limit|too many requests)"; then
-#            echo -e "${RED}RPC error: $(echo "$response" | head -1)${RESET}"
-#        elif [[ -z "$response" ]]; then
-#            echo -e "${RED}Empty response from RPC${RESET}"
-#        else
-#            # Успешный ответ
-#            echo "$response"
-#            return 0
-#        fi
-#
-#        retry_count=$((retry_count + 1))
-#        sleep $((retry_count * 2))  # Экспоненциальная backoff задержка
-#    done
-#
-#    echo -e "${RED}Maximum retries exceeded for $function_signature${RESET}"
-#    return 1
-#}
-
-## Функция для выполнения cast call с обработкой ошибок RPC
-cast_call_with_fallback() {
-    local contract_address=$1
-    local function_signature=$2
-    local max_retries=3
-    local retry_count=0
-    local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
-
-    while [ $retry_count -lt $max_retries ]; do
-        # Определяем какой RPC использовать
-        local current_rpc
-        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
-            current_rpc="$RPC_URL_VCHECK"
-            echo -e "${YELLOW}Using validator RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
-        else
-            current_rpc="$RPC_URL"
-            echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
-        fi
-
-        local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
-
-        # Проверяем на ошибки RPC (но игнорируем успешные ответы, которые могут содержать текст)
-        if echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset)"; then
-            echo -e "${RED}RPC error: $response${RESET}"
-
-            # Если это запрос валидаторов, получаем новый RPC URL
-            if [ "$use_validator_rpc" = true ]; then
-                if get_new_rpc_url; then
-                    retry_count=$((retry_count + 1))
-                    sleep 2
-                    continue
-                else
-                    echo -e "${RED}All RPC attempts failed${RESET}"
-                    return 1
-                fi
-            else
-                # Для других запросов просто увеличиваем счетчик попыток
-                retry_count=$((retry_count + 1))
-                sleep 2
-                continue
-            fi
-        fi
-
-        # Если нет ошибки, возвращаем ответ
-        echo "$response"
-        return 0
-    done
-
-    echo -e "${RED}Maximum retries exceeded${RESET}"
-    return 1
-}
+# Цвета
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+GRAY="\e[90m"
+CYAN="\e[36m"
+BLUE="\e[34m"
+BOLD="\e[1m"
+RESET="\e[0m"
 
 # === Language settings ===
 LANG="en"
@@ -366,20 +206,137 @@ ROLLUP_ADDRESS="0x216f071653a82ced3ef9d29f3f0c0ed7829c8f81"
 QUEUE_URL="https://dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
+# Функция загрузки RPC URL с обработкой ошибок
+load_rpc_config() {
+    if [ -f "/root/.env-aztec-agent" ]; then
+        source "/root/.env-aztec-agent"
+        if [ -z "$RPC_URL" ]; then
+            echo -e "${RED}$(t "error_rpc_missing")${RESET}"
+            exit 1
+        fi
+        if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo -e "${YELLOW}Warning: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in /root/.env-aztec-agent${RESET}"
+        fi
+
+        # Если есть резервный RPC, используем его
+        if [ -n "$RPC_URL_VCHECK" ]; then
+            echo -e "${YELLOW}Using backup RPC to load the list of validators: $RPC_URL_VCHECK${RESET}"
+            USING_BACKUP_RPC=true
+        else
+            USING_BACKUP_RPC=false
+        fi
+    else
+        echo -e "${RED}$(t "error_file_missing")${RESET}"
+        exit 1
+    fi
+}
+
+# Функция для получения нового RPC URL
+get_new_rpc_url() {
+    echo -e "${YELLOW}$(t "getting_new_rpc")${RESET}"
+
+    # Список возможных RPC провайдеров (можно расширить)
+    local rpc_providers=(
+        "https://ethereum-sepolia-rpc.publicnode.com"
+        "https://1rpc.io/sepolia"
+        "https://sepolia.drpc.org"
+    )
+
+    # Пробуем каждый RPC пока не найдем рабочий
+    for rpc_url in "${rpc_providers[@]}"; do
+        echo -e "${YELLOW}Trying RPC: $rpc_url${RESET}"
+
+        # Проверяем доступность RPC
+        if curl -s --head --connect-timeout 5 "$rpc_url" >/dev/null; then
+            echo -e "${GREEN}RPC is available: $rpc_url${RESET}"
+
+            # Проверяем, что RPC может отвечать на запросы
+            if cast block latest --rpc-url "$rpc_url" >/dev/null 2>&1; then
+                echo -e "${GREEN}RPC is working properly: $rpc_url${RESET}"
+
+                # Добавляем новый RPC в файл конфигурации
+                if grep -q "RPC_URL_VCHECK=" "/root/.env-aztec-agent"; then
+                    sed -i "s|RPC_URL_VCHECK=.*|RPC_URL_VCHECK=$rpc_url|" "/root/.env-aztec-agent"
+                else
+                    echo "RPC_URL_VCHECK=$rpc_url" >> "/root/.env-aztec-agent"
+                fi
+
+                # Обновляем текущую переменную
+                RPC_URL_VCHECK="$rpc_url"
+                USING_BACKUP_RPC=true
+
+                # Перезагружаем конфигурацию, чтобы обновить переменные
+                source "/root/.env-aztec-agent"
+
+                return 0
+            else
+                echo -e "${RED}RPC is not responding properly: $rpc_url${RESET}"
+            fi
+        else
+            echo -e "${RED}RPC is not available: $rpc_url${RESET}"
+        fi
+    done
+
+    echo -e "${RED}Failed to find a working RPC URL${RESET}"
+    return 1
+}
+
+## Функция для выполнения cast call с обработкой ошибок RPC
+cast_call_with_fallback() {
+    local contract_address=$1
+    local function_signature=$2
+    local max_retries=3
+    local retry_count=0
+    local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
+
+    while [ $retry_count -lt $max_retries ]; do
+        # Определяем какой RPC использовать
+        local current_rpc
+        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
+            current_rpc="$RPC_URL_VCHECK"
+            echo -e "${YELLOW}Using validator RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
+        else
+            current_rpc="$RPC_URL"
+            echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
+        fi
+
+        local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
+
+        # Проверяем на ошибки RPC (но игнорируем успешные ответы, которые могут содержать текст)
+        if echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset)"; then
+            echo -e "${RED}RPC error: $response${RESET}"
+
+            # Если это запрос валидаторов, получаем новый RPC URL
+            if [ "$use_validator_rpc" = true ]; then
+                if get_new_rpc_url; then
+                    retry_count=$((retry_count + 1))
+                    sleep 2
+                    continue
+                else
+                    echo -e "${RED}All RPC attempts failed${RESET}"
+                    return 1
+                fi
+            else
+                # Для других запросов просто увеличиваем счетчик попыток
+                retry_count=$((retry_count + 1))
+                sleep 2
+                continue
+            fi
+        fi
+
+        # Если нет ошибки, возвращаем ответ
+        echo "$response"
+        return 0
+    done
+
+    echo -e "${RED}Maximum retries exceeded${RESET}"
+    return 1
+}
+
 # Глобальная переменная для отслеживания использования резервного RPC
 USING_BACKUP_RPC=false
 
 load_rpc_config
-
-# Цвета
-RED="\e[31m"
-GREEN="\e[32m"
-YELLOW="\e[33m"
-GRAY="\e[90m"
-CYAN="\e[36m"
-BLUE="\e[34m"
-BOLD="\e[1m"
-RESET="\e[0m"
 
 declare -A STATUS_MAP=(
     [0]=$(t "status_0")
