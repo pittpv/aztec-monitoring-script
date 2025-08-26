@@ -26,7 +26,6 @@ load_rpc_config() {
 }
 
 # Функция для получения нового RPC URL
-# Функция для получения нового RPC URL
 get_new_rpc_url() {
     echo -e "${YELLOW}$(t "getting_new_rpc")${RESET}"
 
@@ -728,9 +727,9 @@ fast_load_validators() {
         status_hex=${data:0:64}
         stake_hex=${data:64:64}
 
-        # Преобразуем hex в decimal
-        status=$((16#${status_hex#0x}))
-        stake_decimal=$((16#${stake_hex#0x}))
+        # Преобразуем hex в decimal с использованием вспомогательных функций
+        status=$(hex_to_dec "$status_hex")
+        stake_decimal=$(hex_to_dec "$stake_hex")
         stake=$(wei_to_token "$stake_decimal")
 
         # Безопасное получение статуса и цвета
