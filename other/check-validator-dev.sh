@@ -670,7 +670,7 @@ list_monitor_scripts() {
 # Функция для получения списка валидаторов через GSE контракт
 get_validators_via_gse() {
     echo -e "${YELLOW}$(t "getting_validator_count")${RESET}"
-    VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getAttesterCount()" --rpc-url "$RPC_URL" | cast to-dec)
+    VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$RPC_URL" | cast to-dec)
     echo -e "${GREEN}Validator count: $VALIDATOR_COUNT${RESET}"
 
     echo -e "${YELLOW}$(t "getting_current_slot")${RESET}"
