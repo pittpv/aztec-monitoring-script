@@ -670,15 +670,57 @@ list_monitor_scripts() {
 # Функция для получения списка валидаторов через GSE контракт
 get_validators_via_gse() {
     echo -e "${YELLOW}$(t "getting_validator_count")${RESET}"
+
+    # Отладочный вывод команды
+    echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+
     VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$RPC_URL" | cast to-dec)
+
+    # Проверяем успешность выполнения и валидность результата
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to get validator count${RESET}"
+        return 1
+    fi
+
+    if ! [[ "$VALIDATOR_COUNT" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Invalid validator count format: '$VALIDATOR_COUNT'${RESET}"
+        return 1
+    fi
+
     echo -e "${GREEN}Validator count: $VALIDATOR_COUNT${RESET}"
 
     echo -e "${YELLOW}$(t "getting_current_slot")${RESET}"
+    echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+
     SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$RPC_URL" | cast to-dec)
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to get current slot${RESET}"
+        return 1
+    fi
+
+    if ! [[ "$SLOT" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Invalid slot format: '$SLOT'${RESET}"
+        return 1
+    fi
+
     echo -e "${GREEN}Current slot: $SLOT${RESET}"
 
     echo -e "${YELLOW}$(t "deriving_timestamp")${RESET}"
+    echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+
     TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$RPC_URL" | cast to-dec)
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to get timestamp for slot${RESET}"
+        return 1
+    fi
+
+    if ! [[ "$TIMESTAMP" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Invalid timestamp format: '$TIMESTAMP'${RESET}"
+        return 1
+    fi
+
     echo -e "${GREEN}Timestamp for slot $SLOT: $TIMESTAMP${RESET}"
 
     # Создаем массив индексов от 0 до VALIDATOR_COUNT-1
@@ -691,24 +733,98 @@ get_validators_via_gse() {
     INDICES_STR=$(printf "%s," "${INDICES[@]}")
     INDICES_STR="${INDICES_STR%,}"  # Убираем последнюю запятую
 
+    echo -e "${GRAY}Indices array: [${INDICES_STR}]${RESET}"
+    echo -e "${GRAY}Number of indices: ${#INDICES[@]}${RESET}"
+
     echo -e "${YELLOW}$(t "querying_attesters")${RESET}"
 
-    # Вызываем GSE контракт для получения списка валидаторов
-    VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
-        "getAttestersFromIndicesAtTime(address[])" \
-        "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
-        --rpc-url "$RPC_URL")
+    # Формируем команду для отладки
+    GSE_COMMAND="cast call \"$GSE_ADDRESS\" \"getAttestersFromIndicesAtTime(address,uint256,uint256[])\" \"$ROLLUP_ADDRESS\" \"$TIMESTAMP\" \"[$INDICES_STR]\" --rpc-url \"$RPC_URL\""
+    echo -e "${GRAY}Command: $GSE_COMMAND${RESET}"
 
-    if [ $? -ne 0 ] || [ -z "$VALIDATORS_RESPONSE" ]; then
-        echo -e "${RED}Error fetching validators from GSE contract${RESET}"
+    # Вызываем GSE контракт для получения списка валидаторов
+    VALIDATORS_RESPONSE=$(eval "$GSE_COMMAND")
+    local exit_code=$?
+
+    echo -e "${GRAY}Exit code: $exit_code${RESET}"
+    echo -e "${GRAY}Raw response: '$VALIDATORS_RESPONSE'${RESET}"
+
+    if [ $exit_code -ne 0 ]; then
+        echo -e "${RED}Error: GSE contract call failed with exit code $exit_code${RESET}"
+
+        # Пробуем альтернативный RPC если есть
+        if [ -n "$RPC_URL_VCHECK" ] && [ "$RPC_URL" != "$RPC_URL_VCHECK" ]; then
+            echo -e "${YELLOW}Trying alternative RPC: $RPC_URL_VCHECK${RESET}"
+            VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
+                "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
+                "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
+                --rpc-url "$RPC_URL_VCHECK")
+
+            if [ $? -eq 0 ] && [ -n "$VALIDATORS_RESPONSE" ]; then
+                echo -e "${GREEN}Success with alternative RPC${RESET}"
+            else
+                echo -e "${RED}Alternative RPC also failed${RESET}"
+                return 1
+            fi
+        else
+            return 1
+        fi
+    fi
+
+    if [ -z "$VALIDATORS_RESPONSE" ]; then
+        echo -e "${RED}Error: Empty response from GSE contract${RESET}"
         return 1
+    fi
+
+    # Проверяем формат ответа (должен начинаться с [ и заканчиваться ])
+    if [[ ! "$VALIDATORS_RESPONSE" =~ ^\[.*\]$ ]]; then
+        echo -e "${RED}Error: Invalid response format from GSE contract${RESET}"
+        echo -e "${RED}Expected array format like [address1,address2,...] but got: '$VALIDATORS_RESPONSE'${RESET}"
+
+        # Пробуем обработать как одиночный адрес
+        if [[ "$VALIDATORS_RESPONSE" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo -e "${YELLOW}Received single address, converting to array format${RESET}"
+            VALIDATORS_RESPONSE="[$VALIDATORS_RESPONSE]"
+        else
+            return 1
+        fi
     fi
 
     # Парсим ответ - убираем квадратные скобки и разделяем по запятым
     VALIDATORS_RESPONSE=$(echo "$VALIDATORS_RESPONSE" | sed 's/^\[//;s/\]$//')
+    echo -e "${GRAY}Parsed response: '$VALIDATORS_RESPONSE'${RESET}"
+
     IFS=',' read -ra VALIDATOR_ADDRESSES <<< "$VALIDATORS_RESPONSE"
 
+    # Проверяем каждый адрес на валидность
+    VALID_ADDRESSES=()
+    for addr in "${VALIDATOR_ADDRESSES[@]}"; do
+        # Убираем возможные пробелы и кавычки
+        addr=$(echo "$addr" | tr -d ' ' | tr -d '"')
+
+        if [[ "$addr" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            VALID_ADDRESSES+=("$addr")
+        else
+            echo -e "${YELLOW}Warning: Invalid address format skipped: '$addr'${RESET}"
+        fi
+    done
+
+    VALIDATOR_ADDRESSES=("${VALID_ADDRESSES[@]}")
+
     echo -e "${GREEN}$(t "found_validators") ${#VALIDATOR_ADDRESSES[@]}${RESET}"
+
+    if [ ${#VALIDATOR_ADDRESSES[@]} -eq 0 ]; then
+        echo -e "${RED}Error: No valid validator addresses found${RESET}"
+        return 1
+    fi
+
+    # Выводим первые несколько адресов для проверки
+    if [ ${#VALIDATOR_ADDRESSES[@]} -le 5 ]; then
+        echo -e "${GRAY}Validator addresses: ${VALIDATOR_ADDRESSES[*]}${RESET}"
+    else
+        echo -e "${GRAY}First 5 validator addresses: ${VALIDATOR_ADDRESSES[*]:0:5}...${RESET}"
+    fi
+
     return 0
 }
 
