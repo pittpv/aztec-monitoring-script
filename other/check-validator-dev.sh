@@ -79,6 +79,10 @@ init_languages() {
     TRANSLATIONS["en,rpc_error"]="RPC error occurred, trying alternative RPC"
     TRANSLATIONS["en,getting_new_rpc"]="Getting new RPC URL..."
     TRANSLATIONS["en,rate_limit_notice"]="Using backup RPC - rate limiting to 1 request per second"
+    TRANSLATIONS["en,getting_validator_count"]="Getting validator count..."
+    TRANSLATIONS["en,getting_current_slot"]="Getting current slot..."
+    TRANSLATIONS["en,deriving_timestamp"]="Deriving timestamp for slot..."
+    TRANSLATIONS["en,querying_attesters"]="Querying attesters from GSE contract..."
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -134,6 +138,10 @@ init_languages() {
     TRANSLATIONS["ru,rpc_error"]="Произошла ошибка RPC, пробуем альтернативный RPC"
     TRANSLATIONS["ru,getting_new_rpc"]="Получение нового RPC URL..."
     TRANSLATIONS["ru,rate_limit_notice"]="Используется резервный RPC - ограничение скорости: 1 запрос в секунду"
+    TRANSLATIONS["ru,getting_validator_count"]="Получение количества валидаторов..."
+    TRANSLATIONS["ru,getting_current_slot"]="Получение текущего слота..."
+    TRANSLATIONS["ru,deriving_timestamp"]="Получение временной метки для слота..."
+    TRANSLATIONS["ru,querying_attesters"]="Запрос аттестующих из GSE контракта..."
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -189,6 +197,10 @@ init_languages() {
     TRANSLATIONS["tr,rpc_error"]="RPC hatası oluştu, alternatif RPC deneniyor"
     TRANSLATIONS["tr,getting_new_rpc"]="Yeni RPC URL alınıyor..."
     TRANSLATIONS["tr,rate_limit_notice"]="Yedek RPC kullanılıyor - hız sınırlaması: saniyede 1 istek"
+    TRANSLATIONS["tr,getting_validator_count"]="Doğrulayıcı sayısı alınıyor..."
+    TRANSLATIONS["tr,getting_current_slot"]="Mevcut slot alınıyor..."
+    TRANSLATIONS["tr,deriving_timestamp"]="Slot için zaman damgası türetiliyor..."
+    TRANSLATIONS["tr,querying_attesters"]="GSE kontratından onaylayıcılar sorgulanıyor..."
 }
 
 t() {
@@ -203,6 +215,7 @@ t() {
 init_languages "$1"
 
 ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
+GSE_ADDRESS="0xb088487022867ed1127ba6eb9b2e8040ceda312e"
 QUEUE_URL="https://dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
@@ -654,6 +667,51 @@ list_monitor_scripts() {
     done
 }
 
+# Функция для получения списка валидаторов через GSE контракт
+get_validators_via_gse() {
+    echo -e "${YELLOW}$(t "getting_validator_count")${RESET}"
+    VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getAttesterCount()" --rpc-url "$RPC_URL" | cast to-dec)
+    echo -e "${GREEN}Validator count: $VALIDATOR_COUNT${RESET}"
+
+    echo -e "${YELLOW}$(t "getting_current_slot")${RESET}"
+    SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$RPC_URL" | cast to-dec)
+    echo -e "${GREEN}Current slot: $SLOT${RESET}"
+
+    echo -e "${YELLOW}$(t "deriving_timestamp")${RESET}"
+    TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$RPC_URL" | cast to-dec)
+    echo -e "${GREEN}Timestamp for slot $SLOT: $TIMESTAMP${RESET}"
+
+    # Создаем массив индексов от 0 до VALIDATOR_COUNT-1
+    INDICES=()
+    for ((i=0; i<VALIDATOR_COUNT; i++)); do
+        INDICES+=("$i")
+    done
+
+    # Преобразуем массив в строку для передачи в cast call
+    INDICES_STR=$(printf "%s," "${INDICES[@]}")
+    INDICES_STR="${INDICES_STR%,}"  # Убираем последнюю запятую
+
+    echo -e "${YELLOW}$(t "querying_attesters")${RESET}"
+
+    # Вызываем GSE контракт для получения списка валидаторов
+    VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
+        "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
+        "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
+        --rpc-url "$RPC_URL")
+
+    if [ $? -ne 0 ] || [ -z "$VALIDATORS_RESPONSE" ]; then
+        echo -e "${RED}Error fetching validators from GSE contract${RESET}"
+        return 1
+    fi
+
+    # Парсим ответ - убираем квадратные скобки и разделяем по запятым
+    VALIDATORS_RESPONSE=$(echo "$VALIDATORS_RESPONSE" | sed 's/^\[//;s/\]$//')
+    IFS=',' read -ra VALIDATOR_ADDRESSES <<< "$VALIDATORS_RESPONSE"
+
+    echo -e "${GREEN}$(t "found_validators") ${#VALIDATOR_ADDRESSES[@]}${RESET}"
+    return 0
+}
+
 fast_load_validators() {
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
     echo -e "${YELLOW}Using RPC: $RPC_URL${RESET}"
@@ -701,41 +759,16 @@ fast_load_validators() {
     echo -e "${GREEN}Successfully loaded: ${#RESULTS[@]}/$VALIDATOR_COUNT validators${RESET}"
 }
 
-## Основной код
-#echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
-#
-## Используем новую функцию для получения списка валидаторов с обработкой ошибок RPC
-## Передаем третий параметр true, чтобы использовать RPC для валидаторов (RPC_URL_VCHECK)
-#VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])" true)
-#
-#if [ $? -ne 0 ]; then
-#    echo -e "${RED}Error: Failed to fetch validators after multiple RPC attempts${RESET}"
-#    exit 1
-#fi
-#
-## Проверяем на ошибку VM execution error (только если ответ начинается с ошибки)
-#if echo "$VALIDATORS_RESPONSE" | grep -q "^error code -32015: VM execution error"; then
-#    echo -e "${RED}Error: VM execution error - insufficient data available in your RPC${RESET}"
-#    echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
-#    exit 1
-#fi
-#
-## Проверяем на другие ошибки (только если ответ начинается с Error)
-#if echo "$VALIDATORS_RESPONSE" | grep -q "^Error:"; then
-#    echo -e "${RED}Error fetching validators: $VALIDATORS_RESPONSE${RESET}"
-#    echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
-#    exit 1
-#fi
-#
-## Оптимизированный парсинг массива адресов из ответа
-## Убираем возможные пробелы и переносы строк
-#VALIDATORS_RESPONSE=$(echo "$VALIDATORS_RESPONSE" | tr -d '[:space:]')
-#VALIDATORS_RESPONSE=${VALIDATORS_RESPONSE:1:-1}  # Убираем квадратные скобки
-#VALIDATOR_ADDRESSES=($(echo "$VALIDATORS_RESPONSE" | sed 's/,/\n/g'))
-#VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES[@]}
-#
-#echo -e "${GREEN}$(t "found_validators")${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
-#echo "----------------------------------------"
+# Основной код
+echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
+
+# Используем новую функцию для получения списка валидаторов через GSE контракт
+if ! get_validators_via_gse; then
+    echo -e "${RED}Error: Failed to fetch validators using GSE contract method${RESET}"
+    exit 1
+fi
+
+echo "----------------------------------------"
 
 # Запрашиваем адреса валидаторов для проверки
 echo ""
@@ -747,35 +780,35 @@ IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
 
 # Очищаем адреса от пробелов и проверяем их наличие в общем списке
 declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
-#found_count=0
-#not_found_count=0
+found_count=0
+not_found_count=0
 
-#for address in "${INPUT_ADDRESSES[@]}"; do
-#    # Очищаем адрес от пробелов
-#    clean_address=$(echo "$address" | tr -d ' ')
-#
-#    # Проверяем, есть ли адрес в общем списке
-#    found=false
-#    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
-#        if [[ "${validator,,}" == "${clean_address,,}" ]]; then
-#            VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
-#            found=true
-#            found_count=$((found_count + 1))
-#            echo -e "${GREEN}✓ Found: $validator${RESET}"
-#            break
-#        fi
-#    done
-#
-#    if ! $found; then
-#        echo -e "${RED}✗ Not found: $clean_address${RESET}"
-#        not_found_count=$((not_found_count + 1))
-#    fi
-#done
-#
-#if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
-#    echo -e "${RED}No valid addresses to check. Exiting.${RESET}"
-#    exit 1
-#fi
+for address in "${INPUT_ADDRESSES[@]}"; do
+    # Очищаем адрес от пробелов
+    clean_address=$(echo "$address" | tr -d ' ')
+
+    # Проверяем, есть ли адрес в общем списке
+    found=false
+    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
+        if [[ "${validator,,}" == "${clean_address,,}" ]]; then
+            VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
+            found=true
+            found_count=$((found_count + 1))
+            echo -e "${GREEN}✓ Found: $validator${RESET}"
+            break
+        fi
+    done
+
+    if ! $found; then
+        echo -e "${RED}✗ Not found: $clean_address${RESET}"
+        not_found_count=$((not_found_count + 1))
+    fi
+done
+
+if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
+    echo -e "${RED}No valid addresses to check. Exiting.${RESET}"
+    exit 1
+fi
 
 # Запускаем быструю загрузку сразу
 declare -a RESULTS
