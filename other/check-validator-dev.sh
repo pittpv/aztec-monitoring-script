@@ -701,41 +701,41 @@ fast_load_validators() {
     echo -e "${GREEN}Successfully loaded: ${#RESULTS[@]}/$VALIDATOR_COUNT validators${RESET}"
 }
 
-# Основной код
-echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
-
-# Используем новую функцию для получения списка валидаторов с обработкой ошибок RPC
-# Передаем третий параметр true, чтобы использовать RPC для валидаторов (RPC_URL_VCHECK)
-VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])" true)
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Failed to fetch validators after multiple RPC attempts${RESET}"
-    exit 1
-fi
-
-# Проверяем на ошибку VM execution error (только если ответ начинается с ошибки)
-if echo "$VALIDATORS_RESPONSE" | grep -q "^error code -32015: VM execution error"; then
-    echo -e "${RED}Error: VM execution error - insufficient data available in your RPC${RESET}"
-    echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
-    exit 1
-fi
-
-# Проверяем на другие ошибки (только если ответ начинается с Error)
-if echo "$VALIDATORS_RESPONSE" | grep -q "^Error:"; then
-    echo -e "${RED}Error fetching validators: $VALIDATORS_RESPONSE${RESET}"
-    echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
-    exit 1
-fi
-
-# Оптимизированный парсинг массива адресов из ответа
-# Убираем возможные пробелы и переносы строк
-VALIDATORS_RESPONSE=$(echo "$VALIDATORS_RESPONSE" | tr -d '[:space:]')
-VALIDATORS_RESPONSE=${VALIDATORS_RESPONSE:1:-1}  # Убираем квадратные скобки
-VALIDATOR_ADDRESSES=($(echo "$VALIDATORS_RESPONSE" | sed 's/,/\n/g'))
-VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES[@]}
-
-echo -e "${GREEN}$(t "found_validators")${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
-echo "----------------------------------------"
+## Основной код
+#echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
+#
+## Используем новую функцию для получения списка валидаторов с обработкой ошибок RPC
+## Передаем третий параметр true, чтобы использовать RPC для валидаторов (RPC_URL_VCHECK)
+#VALIDATORS_RESPONSE=$(cast_call_with_fallback $ROLLUP_ADDRESS "getAttesters()(address[])" true)
+#
+#if [ $? -ne 0 ]; then
+#    echo -e "${RED}Error: Failed to fetch validators after multiple RPC attempts${RESET}"
+#    exit 1
+#fi
+#
+## Проверяем на ошибку VM execution error (только если ответ начинается с ошибки)
+#if echo "$VALIDATORS_RESPONSE" | grep -q "^error code -32015: VM execution error"; then
+#    echo -e "${RED}Error: VM execution error - insufficient data available in your RPC${RESET}"
+#    echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
+#    exit 1
+#fi
+#
+## Проверяем на другие ошибки (только если ответ начинается с Error)
+#if echo "$VALIDATORS_RESPONSE" | grep -q "^Error:"; then
+#    echo -e "${RED}Error fetching validators: $VALIDATORS_RESPONSE${RESET}"
+#    echo -e "${YELLOW}Please check your RPC URL or try a different one with archive data${RESET}"
+#    exit 1
+#fi
+#
+## Оптимизированный парсинг массива адресов из ответа
+## Убираем возможные пробелы и переносы строк
+#VALIDATORS_RESPONSE=$(echo "$VALIDATORS_RESPONSE" | tr -d '[:space:]')
+#VALIDATORS_RESPONSE=${VALIDATORS_RESPONSE:1:-1}  # Убираем квадратные скобки
+#VALIDATOR_ADDRESSES=($(echo "$VALIDATORS_RESPONSE" | sed 's/,/\n/g'))
+#VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES[@]}
+#
+#echo -e "${GREEN}$(t "found_validators")${RESET} ${BOLD}${#VALIDATOR_ADDRESSES[@]}${RESET}"
+#echo "----------------------------------------"
 
 # Запрашиваем адреса валидаторов для проверки
 echo ""
