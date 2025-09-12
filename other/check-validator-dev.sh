@@ -747,28 +747,12 @@ get_validators_via_gse() {
     local exit_code=$?
 
     echo -e "${GRAY}Exit code: $exit_code${RESET}"
-    echo -e "${GRAY}Raw response: '$VALIDATORS_RESPONSE'${RESET}"
+    echo -e "${GRAY}Raw response length: ${#VALIDATORS_RESPONSE} characters${RESET}"
+    echo -e "${GRAY}First 200 chars: '${VALIDATORS_RESPONSE:0:200}...'${RESET}"
 
     if [ $exit_code -ne 0 ]; then
         echo -e "${RED}Error: GSE contract call failed with exit code $exit_code${RESET}"
-
-        # Пробуем альтернативный RPC если есть
-        if [ -n "$RPC_URL_VCHECK" ] && [ "$RPC_URL" != "$RPC_URL_VCHECK" ]; then
-            echo -e "${YELLOW}Trying alternative RPC: $RPC_URL_VCHECK${RESET}"
-            VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
-                "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
-                "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
-                --rpc-url "$RPC_URL_VCHECK")
-
-            if [ $? -eq 0 ] && [ -n "$VALIDATORS_RESPONSE" ]; then
-                echo -e "${GREEN}Success with alternative RPC${RESET}"
-            else
-                echo -e "${RED}Alternative RPC also failed${RESET}"
-                return 1
-            fi
-        else
-            return 1
-        fi
+        return 1
     fi
 
     if [ -z "$VALIDATORS_RESPONSE" ]; then
@@ -776,40 +760,59 @@ get_validators_via_gse() {
         return 1
     fi
 
-    # Проверяем формат ответа (должен начинаться с [ и заканчиваться ])
-    if [[ ! "$VALIDATORS_RESPONSE" =~ ^\[.*\]$ ]]; then
-        echo -e "${RED}Error: Invalid response format from GSE contract${RESET}"
-        echo -e "${RED}Expected array format like [address1,address2,...] but got: '$VALIDATORS_RESPONSE'${RESET}"
+    # Парсим ABI-encoded динамический массив
+    # Формат:
+    # 0x - префикс
+    # 0000000000000000000000000000000000000000000000000000000000000020 - смещение данных массива (32 bytes)
+    # 00000000000000000000000000000000000000000000000000000000000000b8 - длина массива (184 элемента)
+    # затем идут элементы массива (каждый по 32 bytes)
 
-        # Пробуем обработать как одиночный адрес
-        if [[ "$VALIDATORS_RESPONSE" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
-            echo -e "${YELLOW}Received single address, converting to array format${RESET}"
-            VALIDATORS_RESPONSE="[$VALIDATORS_RESPONSE]"
-        else
-            return 1
-        fi
+    echo -e "${YELLOW}Parsing ABI-encoded dynamic array...${RESET}"
+
+    # Убираем префикс 0x
+    RESPONSE_WITHOUT_PREFIX=${VALIDATORS_RESPONSE#0x}
+
+    # Извлекаем длину массива (первые 64 символа после смещения)
+    OFFSET_HEX=${RESPONSE_WITHOUT_PREFIX:0:64}
+    ARRAY_LENGTH_HEX=${RESPONSE_WITHOUT_PREFIX:64:64}
+
+    # Конвертируем hex в decimal
+    OFFSET=$(printf "%d" "0x$OFFSET_HEX")
+    ARRAY_LENGTH=$(printf "%d" "0x$ARRAY_LENGTH_HEX")
+
+    echo -e "${GRAY}Offset: $OFFSET (0x$OFFSET_HEX)${RESET}"
+    echo -e "${GRAY}Array length: $ARRAY_LENGTH (0x$ARRAY_LENGTH_HEX)${RESET}"
+
+    if [ $ARRAY_LENGTH -eq 0 ]; then
+        echo -e "${RED}Error: Empty validator array${RESET}"
+        return 1
     fi
 
-    # Парсим ответ - убираем квадратные скобки и разделяем по запятым
-    VALIDATORS_RESPONSE=$(echo "$VALIDATORS_RESPONSE" | sed 's/^\[//;s/\]$//')
-    echo -e "${GRAY}Parsed response: '$VALIDATORS_RESPONSE'${RESET}"
+    if [ $ARRAY_LENGTH -ne $VALIDATOR_COUNT ]; then
+        echo -e "${YELLOW}Warning: Array length ($ARRAY_LENGTH) doesn't match validator count ($VALIDATOR_COUNT)${RESET}"
+    fi
 
-    IFS=',' read -ra VALIDATOR_ADDRESSES <<< "$VALIDATORS_RESPONSE"
+    # Извлекаем адреса из массива
+    VALIDATOR_ADDRESSES=()
+    START_POS=$((64 + 64))  # Пропускаем offset и length (по 64 символа каждый)
 
-    # Проверяем каждый адрес на валидность
-    VALID_ADDRESSES=()
-    for addr in "${VALIDATOR_ADDRESSES[@]}"; do
-        # Убираем возможные пробелы и кавычки
-        addr=$(echo "$addr" | tr -d ' ' | tr -d '"')
+    for ((i=0; i<ARRAY_LENGTH; i++)); do
+        # Каждый адрес занимает 64 символа (32 bytes), но нам нужны только последние 40 символов (20 bytes)
+        ADDR_HEX=${RESPONSE_WITHOUT_PREFIX:$START_POS:64}
+        ADDR="0x${ADDR_HEX:24:40}"  # Берем последние 20 bytes (40 символов)
 
-        if [[ "$addr" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
-            VALID_ADDRESSES+=("$addr")
+        # Проверяем валидность адреса
+        if [[ "$ADDR" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            VALIDATOR_ADDRESSES+=("$ADDR")
+            if [ $i -lt 3 ]; then  # Показываем первые 3 адреса для отладки
+                echo -e "${GRAY}Address $((i+1)): $ADDR${RESET}"
+            fi
         else
-            echo -e "${YELLOW}Warning: Invalid address format skipped: '$addr'${RESET}"
+            echo -e "${YELLOW}Warning: Invalid address format at position $i: '$ADDR'${RESET}"
         fi
-    done
 
-    VALIDATOR_ADDRESSES=("${VALID_ADDRESSES[@]}")
+        START_POS=$((START_POS + 64))
+    done
 
     echo -e "${GREEN}$(t "found_validators") ${#VALIDATOR_ADDRESSES[@]}${RESET}"
 
@@ -817,6 +820,9 @@ get_validators_via_gse() {
         echo -e "${RED}Error: No valid validator addresses found${RESET}"
         return 1
     fi
+
+    # Выводим статистику
+    echo -e "${GRAY}Expected: $VALIDATOR_COUNT, Found: ${#VALIDATOR_ADDRESSES[@]}${RESET}"
 
     # Выводим первые несколько адресов для проверки
     if [ ${#VALIDATOR_ADDRESSES[@]} -le 5 ]; then
