@@ -747,8 +747,8 @@ IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
 
 # Очищаем адреса от пробелов и проверяем их наличие в общем списке
 declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
-found_count=0
-not_found_count=0
+#found_count=0
+#not_found_count=0
 
 #for address in "${INPUT_ADDRESSES[@]}"; do
 #    # Очищаем адрес от пробелов
