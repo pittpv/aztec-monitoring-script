@@ -750,32 +750,32 @@ declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
 found_count=0
 not_found_count=0
 
-for address in "${INPUT_ADDRESSES[@]}"; do
-    # Очищаем адрес от пробелов
-    clean_address=$(echo "$address" | tr -d ' ')
-
-    # Проверяем, есть ли адрес в общем списке
-    found=false
-    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
-        if [[ "${validator,,}" == "${clean_address,,}" ]]; then
-            VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
-            found=true
-            found_count=$((found_count + 1))
-            echo -e "${GREEN}✓ Found: $validator${RESET}"
-            break
-        fi
-    done
-
-    if ! $found; then
-        echo -e "${RED}✗ Not found: $clean_address${RESET}"
-        not_found_count=$((not_found_count + 1))
-    fi
-done
-
-if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
-    echo -e "${RED}No valid addresses to check. Exiting.${RESET}"
-    exit 1
-fi
+#for address in "${INPUT_ADDRESSES[@]}"; do
+#    # Очищаем адрес от пробелов
+#    clean_address=$(echo "$address" | tr -d ' ')
+#
+#    # Проверяем, есть ли адрес в общем списке
+#    found=false
+#    for validator in "${VALIDATOR_ADDRESSES[@]}"; do
+#        if [[ "${validator,,}" == "${clean_address,,}" ]]; then
+#            VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
+#            found=true
+#            found_count=$((found_count + 1))
+#            echo -e "${GREEN}✓ Found: $validator${RESET}"
+#            break
+#        fi
+#    done
+#
+#    if ! $found; then
+#        echo -e "${RED}✗ Not found: $clean_address${RESET}"
+#        not_found_count=$((not_found_count + 1))
+#    fi
+#done
+#
+#if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
+#    echo -e "${RED}No valid addresses to check. Exiting.${RESET}"
+#    exit 1
+#fi
 
 # Запускаем быструю загрузку сразу
 declare -a RESULTS
