@@ -854,18 +854,31 @@ fast_load_validators() {
             continue
         fi
 
-        # Получаем данные getConfig
-        config_response=$(cast call "$ROLLUP_ADDRESS" "getConfig(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null)
-        if [[ $? -ne 0 || -z "$config_response" ]]; then
-            withdrawer="0x0000000000000000000000000000000000000000"
-        else
-            withdrawer="0x${config_response:26:40}"
-        fi
+        # Парсим данные из getAttesterView
+        # Формат ответа:
+        # - status (uint8, 32 bytes)
+        # - stake (uint256, 32 bytes)
+        # - ... другие поля ...
+        # - withdrawer (address, 32 bytes) в конце
 
-        # Парсим данные
-        data=${response:2}
+        data=${response:2}  # Убираем префикс 0x
+
+        # Извлекаем статус (первые 64 символа)
         status_hex=${data:0:64}
+
+        # Извлекаем стейк (следующие 64 символа)
         stake_hex=${data:64:64}
+
+        # Извлекаем withdrawer из конца ответа (последние 64 символа)
+        # withdrawer находится в последних 64 символах, но нам нужны только последние 40 символов
+        withdrawer_hex=${data: -64}  # Последние 64 символа
+        withdrawer="0x${withdrawer_hex:24:40}"  # Берем последние 20 bytes (40 символов)
+
+        # Проверяем валидность адреса withdrawer
+        if [[ ! "$withdrawer" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo -e "${YELLOW}Warning: Invalid withdrawer format for $validator, using zero address${RESET}"
+            withdrawer="0x0000000000000000000000000000000000000000"
+        fi
 
         # Преобразуем hex в decimal с использованием вспомогательных функций
         status=$(hex_to_dec "$status_hex")
