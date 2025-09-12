@@ -695,7 +695,7 @@ get_validators_via_gse() {
 
     # Вызываем GSE контракт для получения списка валидаторов
     VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
-        "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
+        "getAttestersFromIndicesAtTime(address[])" \
         "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
         --rpc-url "$RPC_URL")
 
