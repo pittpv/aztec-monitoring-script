@@ -615,6 +615,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     done
 
     # Ask if user wants to use first address as publisher for all validators
+    echo ""
     read -p "Use first address as publisher for all validators? (y/n) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
