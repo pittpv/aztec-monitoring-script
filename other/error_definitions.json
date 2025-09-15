@@ -8,5 +8,15 @@
     "pattern": "ERROR: Database corruption detected",
     "message": "Database corruption error",
     "solution": "1. Stop node\n2. Remove database files\n3. Restart node"
+  },
+  {
+    "pattern": "ERROR: sequencer Error building/enqueuing block: InsufficientFundsError",
+    "message": "Insufficient funds for gas * price + value",
+    "solution": "Fill funds in the publisher address"
+  },
+  {
+    "pattern": "ERROR: sequencer Error in running promise: Error: Failed to find an available publisher",
+    "message": "Failed to find an available publisher",
+    "solution": "Put private key for publisher in keystore.json"
   }
 ]
