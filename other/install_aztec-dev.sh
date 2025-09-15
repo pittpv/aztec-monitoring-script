@@ -675,11 +675,11 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
     address="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
 
     if [ "$USE_FIRST_AS_PUBLISHER" = true ] && [ $i -gt 0 ]; then
-        # Use first address as publisher for all other validators
-        publisher="${VALIDATOR_ADDRESSES_ARRAY[0]}"
+        # Use first private key as publisher for all other validators
+        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[0]}"
     else
-        # Use own address as publisher
-        publisher="$address"
+        # Use own private key as publisher
+        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
     fi
 
     VALIDATOR_JSON=$(cat <<EOF
