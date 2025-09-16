@@ -122,6 +122,6 @@
     {
         "VERSION": "2.0.0",
         "UPDATE_DATE": "16.09.2025",
-        "CHANGES": ["Full support for the new network and testnet", "New node installation script", "New monitoring agent script for the node","New script for searching and verifying validators directly in Rollup and GSE contracts", "Added new errors detected by the critical error control module", "Minor improvements to other features"]
+        "CHANGES": ["Full support for the new network and testnet", "New node installation script", "New monitoring agent script for the node","New script for searching and verifying validators directly in Rollup and GSE contracts", "Added new errors detected by the critical error control module", "Updated script version control function. Now short descriptions of new versions and updates are shown", "Minor improvements to other features"]
     }
 ]
