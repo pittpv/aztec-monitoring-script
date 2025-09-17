@@ -744,13 +744,13 @@ services:
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: debug
     entrypoint: >
-      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network staging-public --node --archiver --sequencer'
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network testnet --node --archiver --sequencer'
     ports:
       - ${p2p_port}:${p2p_port}/tcp
       - ${p2p_port}:${p2p_port}/udp
       - ${http_port}:${http_port}
     volumes:
-      - /root/.aztec/staging-public/data/:/data
+      - /root/.aztec/testnet/data/:/data
       - $HOME/aztec/config:/config
     labels:
       - com.centurylinklabs.watchtower.enable=true
