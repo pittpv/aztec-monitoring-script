@@ -35,7 +35,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 16-09-2025
+## 📌 Latest Updates 17-09-2025
 - Full support for the new network and testnet.
 - New node installation script.
     - Automatic creation of YML key files for web3signer.
@@ -261,7 +261,7 @@ If there is an update for the cron-agent, first update the entire script. Then d
 
 To install the Aztec node, select **option 11** and follow the script instructions.
 
-A step-by-step description of the node installation process can be found here:
+A step-by-step description of the node installation process can be found here: [Aztec-Install-by-Script.md](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/en/Aztec-Install-by-Script.md)
 
 ## ⚠️ Important
 
