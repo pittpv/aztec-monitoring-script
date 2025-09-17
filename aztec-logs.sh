@@ -2333,7 +2333,7 @@ function start_aztec_containers() {
 
       if screen -dmS "$session_name" && \
          screen -S "$session_name" -p 0 -X stuff "aztec start --node --archiver --sequencer \
---network staging-public \
+--network testnet \
 --l1-rpc-urls $ethereum_rpc_url \
 --l1-consensus-host-urls $consensus_beacon_url \
 --sequencer.validatorPrivateKeys 0x$validator_private_key \
