@@ -2,7 +2,7 @@
   {
     "pattern": "ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync",
     "message": "World state trees are out of sync - node needs resync",
-    "solution": "1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/alpha-testnet/data/\n3. Run the container. Use option 14"
+    "solution": "1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/testnet/data/\n3. Run the container. Use option 14"
   },
   {
     "pattern": "ERROR: Database corruption detected",

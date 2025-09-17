@@ -968,7 +968,7 @@ check_aztec_container_logs() {
             ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
         )
         error_solutions=(
-            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/alpha-testnet/data/\n3. Run the container. Use option 14"
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/testnet/data/\n3. Run the container. Use option 14"
         )
     fi
 
