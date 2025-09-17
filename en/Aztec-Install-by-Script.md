@@ -37,12 +37,12 @@ Next, it will check for software specific to the Aztec node and again offer to i
 
 At this stage, the script will initiate the download and installation of node components using the original script from the Aztec team.
 
-**Attention! When the following prompt appears:**
+**Attention! If the following prompt appears:**
 ```
 Add it to /root/.bash_profile to make the aztec binaries accessible?
 ```
 
-**Enter `n` (no).** This is a important step for the management script to work correctly.
+**Enter `n` (no).** Only for the question listed above. Please be careful.
 
 ![Prompt about adding to .bash_profile](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/2.jpg)
 

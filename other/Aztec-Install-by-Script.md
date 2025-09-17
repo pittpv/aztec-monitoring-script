@@ -37,12 +37,12 @@ curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-
 
 На этом этапе скрипт запустит скачивание и установку компонентов ноды с помощью оригинального скрипта от команды Aztec.
 
-**Внимание! Когда появится вопрос:**
+**Внимание! Если появится вопрос:**
 ```
 Add it to /root/.bash_profile to make the aztec binaries accessible?
 ```
 
-**Введите `n` (no).** Это важный шаг для корректной работы скрипта управления.
+**Введите `n` (no).** Только для вопроса, который указан выше. Будьте внимательны.
 
 ![Вопрос о добавлении в .bash_profile](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/2.jpg)
 

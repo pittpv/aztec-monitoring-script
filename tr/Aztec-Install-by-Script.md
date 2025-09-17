@@ -37,12 +37,12 @@ Ardından, Aztec düğümüne özel yazılımları kontrol edecek ve yeniden kur
 
 Bu aşamada, betik, Aztec ekibinin orijinal betiğini kullanarak düğüm bileşenlerinin indirilmesini ve kurulmasını başlatacaktır.
 
-**Dikkat! Aşağıdaki istem göründüğünde:**
+**Dikkat! Aşağıdaki uyarı görüntülenirse:**
 ```
 Add it to /root/.bash_profile to make the aztec binaries accessible?
 ```
 
-**`n` (hayır) girin.** Bu, yönetim betiğinin doğru çalışması için önemli bir adımdır.
+**`n` (hayır) girin.** Sadece yukarıda listelenen soru için. Lütfen dikkatli olun.
 
 ![.bash_profile'a ekleme istemi](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/2.jpg)
 
