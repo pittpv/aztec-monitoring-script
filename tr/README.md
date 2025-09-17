@@ -1,164 +1,180 @@
-# Aztec Düğüm Kurulum ve İzleme Betiği
+# Aztec Node Kurulum ve İzleme Betiği
 
-**Açıklama:**
-- [🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "Açıklamanın İngilizce versiyonu")
-- [🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Açıklamanın Rusça versiyonu")
+**Açıklama Dilleri:**
+- [🇷🇺 Rusça Versiyon](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Rusça açıklama")
+- [🇹🇷 Türkçe Versiyon](https://github.com/pittpv/aztec-monitoring-script/blob/main/tr/ "Türkçe açıklama")
 
 ![Bash](https://img.shields.io/badge/Bash-5.2-blue)
 ![Docker](https://img.shields.io/badge/Docker-20.10+-blue)
 ![Telegram](https://img.shields.io/badge/Telegram-API-blue)
 
-![Ana Ekran](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-tr-2025-06-06-13-19-12.png)
+![Ana Ekran](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/img-en-2025-05-25-05-44-01.png)
 
 ## 📝 Açıklama
 
-Bu betik, bir Aztec düğümünü başlatmak (docker-compose veya CLI aracılığıyla) ve izlemek için kapsamlı bir çözüm sunar. İçerdiği özellikler arasında konteyner durumu kontrolü, blok senkronizasyon doğrulaması, düğüme ait önemli bilgilerin alınması ve Telegram üzerinden bildirim gönderme bulunmaktadır.
+Bu betik, bir Aztec düğümünü çalıştırmak (docker-compose veya CLI) ve izlemek için otomatik güncellemeler, konteyner durumunu kontrol etme, blok senkronizasyonu, düğüm hakkında önemli bilgiler alma ve Telegram'a bildirim gönderme dahil olmak üzere eksiksiz bir çözüm sunar.
 
-Ayrıca spoiler'ın altındaki Sürüm Geçmişi da göz atın, orada script'in işlevleri hakkında çok sayıda faydalı bilgi var.
+Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevleri hakkında birçok yararlı bilgi bulunmaktadır.
 
 ## 🌟 Temel Özellikler
 
-* 🏃🏻‍ Node başlatma (docker-compose veya CLI ile)
-* 🐳 Aztec konteyner izleme
-* 🔗 Blok güncelliği kontrolü (akıllı kontratla karşılaştırma)
-* 🔍 Log analizi ile kritik parametre kontrolü
-* 📨 Sorunlar için Telegram uyarıları
-* ⏰ Otomatik izleme için cron görevi
+* 🏃🏻‍ Düğüm başlatma (docker-compose veya CLI)
+* 🐳 Aztec düğümünün çalışmasının izlenmesi
+* 🔗 Blok tazelik kontrolleri (akıllı sözleşmeyle karşılaştırmalı)
+* 🔍 Kritik parametreler için günlük ayrıştırma
+* 📨 Sorunlar ve doğrulayıcı aktivitesi hakkında Telegram uyarıları
+* ⏰ Otomatik izleme için systemd servisi
 
 ## 🛠️ İşlevsellik
 
-| Özellik         | Açıklama                                       |
-| --------------- | ---------------------------------------------- |
-| ✅ **Konteyner** | Aztec Docker konteyner durumunu izler          |
-| 🔄 **Bloklar**  | Yerel blok yüksekliğini zincirle karşılaştırır |
-| 🤖 **Telegram** | Telegram üzerinden anlık uyarılar              |
-| 🌐 **Diller**   | Dil desteği İngilizce/Rusça/Türkçe                 |
-| ⚙️ **RPC**      | Esnek RPC uç noktası yapılandırması            |
+| Özellik          | Açıklama                                       |
+| ---------------- | ------------------------------------------------- |
+| ✅ **Konteyner**  | Aztec Docker konteynerının durumunu izler |
+| 🔄 **Bloklar**    | Yerel blok yüksekliğini zincir üzerindeki yükseklikle karşılaştırır  |
+| 🤖 **Telegram**  | Telegram üzerinden anlık sorun uyarıları                 |
+| 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
+| ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 21-08-2025  
-- PeerID arama işlevi güncellendi (işlev çalışması geri yüklendi + yeni özellikler)
-  - Betik, düğümün PeerID'sini günlüklerde bulur
-  - Nethermind.io'daki güncel veriler arasında arar
-  - Nethermind.io'daki güncel verilerde bulunamazsa, arşivde arar
-- Cron ajanı oluşturma işlevi güncellendi
-  - Artık komite dahil etme bildiriminde, doğrulayıcı adresine tıklayabilir ve dashtec.xyz'deki sayfasına gidebilirsiniz
-- Aztec düğüm kurulum betiği güncellendi
-  - ufw aktivite kontrolü eklendi.
-  - ufw aktifse, 8080 ve 40400 portları için kurallar eklenir, aksi takdirde kurallar eklenmez.
+## 📌 Son Güncellemeler 16-09-2025
+- Yeni ağ ve testnet için tam destek.
+- Yeni düğüm kurulum betiği.
+  - Web3signer için YML anahtar dosyalarının otomatik oluşturulması.
+  - Web3signer kurulumu ve başlatılması.
+  - Keystore.json anahtar şemasının otomatik oluşturulması.
+  - Çoklu doğrulayıcı modu desteği (düğüm başına 10'a kadar).
+  - Tüm doğrulayıcılar için bir ortak yayıncı adresi atama veya her birinin kendi adresini kullanma (attester ile aynı) yeteneği.
+  - Tüm önceki özellikler (gerekli yazılımların otomatik kurulumu, port kontrolleri, özel port atama yeteneği, doğrulamalar).
+- Düğüm için yeni izleme aracı betiği (seçenek 2).
+  - Tüm durum türlerini (✅ onaylama, ❌ onaylama, ⛏️ Blok kazıldı, 📤 Blok önerildi, ⚠️ Blok kaçırıldı) içeren slot bazlı istatistiklerle yeni Telegram bildirimleri.
+  - Çoklu doğrulayıcı modu (komiteye katılan tüm doğrulayıcılar için istatistikler) ve tek doğrulayıcı modu desteği.
+  - DEBUG modu – oldukça ayrıntılı izleme günlükleri almayı sağlar. Günlük /root/aztec-monitor-agent/agent.log dosyasına yazılır. Etkinleştirmek için /root/.env-aztec-agent içinde DEBUG=true yapın (varsayılan false).
+  - Kontroller bir systemd zamanlayıcısı ile tam olarak her 37 saniyede bir (bir slotun yaklaşık süresi) çalışır – hiçbir durumu kaçırmazsınız!
+  - Tüm önceki özellikler (senkronizasyon kontrolü, kritik hata tespiti, hızlı günlük görüntüleme, otomatik güncellemeler, düşürme işlevi, konteyner yönetimi ve daha fazlası).
+- Rollup ve GSE sözleşmelerinde doğrudan doğrulayıcı arama ve doğrulama için yeni betik (seçenek 9).
+  - Hızlı doğrulayıcı arama ve durum kontrolü.
+  - Tek bir istekte birden çok doğrulayıcının kontrolünü destekler.
+  - Ağdaki aktif doğrulayıcıların tam sayısı.
+  - Her zaman güncel bilgiler.
+- Güncellenmiş betik sürüm kontrol işlevi. Artık yeni sürümler ve güncellemeler hakkında kısa açıklamalar gösteriliyor.
+- Kritik hata kontrol modülü tarafından tespit edilen yeni hatalar eklendi, düzeltme yönergeleri ve Telegram bildirimleri ile birlikte.
+- Diğer özelliklere yönelik küçük iyileştirmeler
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
 
+### 21-08-2025
+- PeerID arama işlevi güncellendi (işlev geri yüklendi + yeni özellikler)
+  - Betik, günlüklerde düğümün PeerID'sini bulur
+  - Mevcut Nethermind.io verileri arasında arar
+  - Mevcut Nethermind.io verilerinde bulunamazsa, arşivde arar
+- Cron aracı oluşturma işlevi güncellendi
+  - Artık komite dahil etme bildiriminde, doğrulayıcı adresine tıklayarak dashtec.xyz'deki sayfasına gidebilirsiniz.
+- Aztec düğüm kurulum betiği güncellendi
+  - Ufw aktivite kontrolü eklendi.
+  - Ufw aktifse, 8080 ve 40400 portları için kurallar eklenir, aksi takdirde kurallar eklenmez.
+
 ### 06-08-2025
-- Validatör kuyruğu kontrol fonksiyonu yeniden etkinleştirildi.
+- Doğrulayıcı kuyruğu kontrol işlevi geri yüklendi.
 
 ### 02-08-2025
-- Validatör komite dahiliyet kontrol fonksiyonu güncellendi (fonksiyon çalışması yeniden sağlandı)
-  - Birden fazla validatör adresi belirtilebilir
+- Doğrulayıcı komite dahil etme kontrol işlevi güncellendi (işlev geri yüklendi)
+  - Birden fazla doğrulayıcı adresi belirtilebilir
 
 ### 01-08-2025
-- Aztec Node Güncelleme fonksiyonu eklendi. Bu fonksiyon, Watchtower'ın otomatik güncellemesini beklemeden nodu anında günceller.
-- Validatör kontrol skripti güncellendi. Kontrol modları eklendi.
-  - Hızlı işleme - CPU'da yüksek yük
-  - Yavaş işleme - CPU'da yük yok
-- Aztec düğüm sürüm kontrolü, skript yüklenirken zaman kaybetmemek için ayrı bir menü öğesine taşındı.
+- Doğrulayıcı kontrol betiği güncellendi. Kontrol modları eklendi.
+  - Hızlı işleme – yüksek CPU yükü
+  - Yavaş işleme – CPU yükü yok
+- Aztec düğüm sürüm kontrolü, betik yüklenirken zaman kaybını önlemek için ayrı bir menü öğesine taşındı.
 
 ### 29-07-2025
-- Aztec Node Güncelleme fonksiyonu eklendi. Bu fonksiyon, Watchtower'ın otomatik güncellemesini beklemeden nodu anında günceller.
-  - Ayrıca, eğer bir düşürme işlemi yaptıysanız ve geri dönmeniz gerekiyorsa bu seçeneği kullanın.
-  - `docker-compose.yml` dosyasını kontrol eder ve etiketi `latest` olarak değiştirir
-- Aztec Node Sürüm Düşürme fonksiyonu eklendi. Bu fonksiyon, Docker Hub'daki tüm node versiyonlarını gösterir ve listeden seçilen herhangi bir versiyona geri dönmeyi sağlar.
-  - İstenilen versiyonun seçimi
+- Aztec Düğüm Güncelleme işlevi eklendi. İşlev, Watchtower'dan otomatik güncellemeleri beklemek yerine düğümü anında günceller.
+  - Ayrıca, bir düşürme işlemi yaptıysanız ve geri dönmek istiyorsanız bu seçeneği kullanın.
+  - `docker-compose.yml` dosyasını kontrol eder ve etiketi `latest` ile değiştirir
+- Aztec Düğüm Düşürme işlevi eklendi. İşlev, Docker Hub'daki tüm düğüm sürümlerini gösterir, listeden seçilen herhangi bir sürüme geri dönüşe izin verir.
+  - İstenilen sürümün seçimi
   - `docker-compose.yml` dosyasının güncellenmesi
   - Konteynerlerin durdurulması, indirilmesi ve başlatılması
 
 ### 28-07-2025
-- Aztec düğüm kurulum betiği Watchtower ile güncellendi. Kurulum sırasında betik, "Birden fazla validator çalıştırmak istiyor musunuz? (y/n)" sorusunu soracak.
-    - Çoklu doğrulayıcı modunda kurulum (bir düğüm başına en fazla 10 doğrulayıcı)
-    - Tek doğrulayıcı modunda kurulum
+- Watchtower ile Aztec düğüm kurulum betiği güncellendi. Kurulum sırasında betik soracaktır: "Birden fazla doğrulayıcı çalıştırmak istiyor musunuz? (y/n)"
+  - Çoklu doğrulayıcı modunda kurulum (düğüm başına 10'a kadar doğrulayıcı)
+  - Tek doğrulayıcı modunda kurulum
 
 ### 21-07-2025
-- 1.1.0 ve üzeri düğüm sürümleri için CLI'deki düğüm başlatma komutu (validatorPrivateKey**s**) güncellendi
-- CLI'da düğümle ilgili eski ekran oturumlarını kontrol etme ve yeni bir oturum oluşturmadan önce bunları silme işlevi eklendi
-- Rollup adresi güncellendi
+- CLI'de düğüm başlatma komutu güncellendi (validatorPrivateKey**s**) 1.1.0 ve üzeri düğüm sürümleri için
+- CLI'de düğüm içeren eski ekran oturumlarını kontrol etme ve yeni bir oturum oluşturmadan önce silme işlevi eklendi.
+- Rollup sözleşme adresi güncellendi.
 
 ### 15-07-2025
-- **Validatörler** için Telegram bildirim sistemi **geliştirildi**. Fikir için teşekkürler @malbur187 (Discord)
-    - Düğüm izleme cron ajanı kurulurken hangi bildirimlerin alınacağı seçilebilir: sadece hatalar veya komite seçimi ve blok oluşturma bildirimleri de dahil.
-    - Seçim `.env-aztec-agent` dosyasına kaydedilir ve sonraki ajan oluşturmalarında uygulanır. Değiştirmek isterseniz `.env-aztec-agent` dosyasını düzenleyin.
-- Kritik hata tespit özelliği eklendi. Düğüm loglarında kritik bir hata tespit edilirse, Telegram'a bildirim gönderilir.
-    - Hata listesi, tek bir JSON dosyası üzerinden güncellenerek yeni hataların ve çözüm yollarının hızlıca eklenmesi sağlanmıştır.
-- PeerID arama fonksiyonu güncellendi. Fikir için teşekkürler @web3.creed (Discord)
-    - Loglarda başarılı bir şekilde bulunduktan sonra, PeerID `aztec.nethermind.io` veritabanında kontrol edilir ve sonuç gösterilir.
+- **Doğrulayıcılar** için Telegram bildirim sistemi geliştirildi. Fikir için teşekkürler @malbur187 (Discord)
+  - Düğüm izleme cron aracı kurulurken, artık hangi bildirimleri alacağınızı seçebilirsiniz: sadece hatalar veya ayrıca komite seçimi ve blok oluşturma uyarıları.
+  - Seçim `.env-aztec-agent` dosyasına kaydedilir ve sonraki araç yeniden oluşturmalarında uygulanır. Değiştirmek için `.env-aztec-agent` dosyasını düzenleyin.
+- Kritik hata tespiti eklendi. Düğüm günlüklerinde kritik bir hata bulunursa, bir Telegram bildirimi gönderilir.
+  - Hata dizisi, birleşik bir JSON dosyası aracılığıyla güncellenir, yeni hataların ve çözümlerinin hızlı bir şekilde eklenmesine olanak tanır.
+- PeerID arama işlevi güncellendi. Fikir için teşekkürler @web3.creed (Discord)
+  - Başarılı günlük tespitinden sonra, PeerID genel veritabanı `aztec.nethermind.io`'da kontrol edilir ve sonuç gösterilir.
 - Küçük iyileştirmeler
 
 ### 25-06-2025
-- "Aztec Node Containers'ı Durdur" işlevi eklendi – node konteynerini yönetme yönteminizi (docker-compose veya CLI) hatırlayan ve seçilen modda çalışmaya devam eden akıllı bir işlev.
-    - Çalışma yöntemi sorulduğunda, node’unuzun nasıl çalıştığını belirtin: `docker-compose` veya `CLI`
-    - docker-compose dosyasının yolu sorulduğunda, kök dizinden itibaren `/root/aztec` veya `./aztec` formatında yolu girin
-    - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
-- "Aztec Node Containers'ı Başlat" işlevi eklendi – bu işlev, "Aztec Node Containers'ı Durdur" işlevinde (seçenek 13) belirlenen konteyner yönetim yöntemini kullanır.
-    - Eğer konteyner yönetim yöntemini **belirlemediyseniz** (seçenek 13) ve "Aztec Node Containers'ı Başlat" işlevini kullanırsanız, bu işlev **CLI node başlatma sihirbazı** olarak çalışır. Bu durumda betik, gerekli CLI başlatma parametrelerini sorar, komutu oluşturur ve CLI node'u bir screen oturumunda başlatır.
-    - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz bunları değiştirebilirsiniz.
-- Telegram bildirimleriyle cron-agent oluşturma işlevi güncellendi – artık ChatID ve Telegram token bilgileri `.env-aztec-agent` dosyasına kaydediliyor ve cron-agent silinirken/oluşturulurken tekrar girilmesi gerekmiyor.
-- Betik yüklendiğinde Aztec Node sürüm kontrolü eklendi.
+- "Aztec Düğüm Konteynerlerini Durdur" işlevi eklendi – akıllı bir işlev, düğüm konteynerini çalıştırma yönteminizi (docker-compose veya CLI) hatırlar ve seçilen modda çalışmaya devam eder.
+  - Çalışma yöntemi sorulduğunda, düğümünüzün nasıl çalıştığını belirtin: `docker-compose` veya `CLI`
+  - Docker-compose dosyasının yolu sorulduğunda, kök dizinden itibaren yolu şu biçimde verin: `/root/aztec` veya `./aztec`
+  - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz değiştirebilirsiniz.
+- "Aztec Düğüm Konteynerlerini Başlat" işlevi eklendi – "Aztec Düğüm Konteynerlerini Durdur" işlevinde (seçenek 13) atanan konteyner çalıştırma yöntemini kullanan akıllı bir işlev.
+  - **Konteyner yönetim yöntemini ayarlamadıysanız** (seçenek 13) ve "Aztec Düğüm Konteynerlerini Başlat" işlevini kullanırsanız, **bir CLI düğümü başlatma sihirbazı** olarak çalışacaktır. Bu durumda, betik gerekli CLI başlatma parametrelerini soracak, komutu oluşturacak ve CLI düğümünü bir ekran oturumunda başlatacaktır.
+  - Tüm ayarlar `.env-aztec-agent` dosyasına kaydedilir. İsterseniz değiştirebilirsiniz.
+- Cron-agent oluşturma işlevi güncellendi – artık ChatID ve Telegram token'ı `.env-aztec-agent` dosyasına kaydediliyor ve cron-agent'ı kaldırırken/oluştururken yeniden girilmesi gerekmiyor.
+- Betik yüklendiğinde Aztec Düğüm sürüm kontrolü eklendi.
 
-### 22-06-2025  
-- Aztec loglarını görüntüle fonksiyonu - son 500 satırı otomatik yenileme ile gösterecek şekilde güncellendi  
-- Konteyner ve mevcut bloğu kontrol et fonksiyonu - iyileştirilmiş günlük okuma ve bellek sorunu önleme 
-- Gerekli araçların kontrolü ve kurulumu - geliştirilmiş bağımlılık yönetimi 
+### 22-06-2025
+- Aztec günlüklerini görüntüleme işlevi – otomatik yenileme ile son 500 satırı gösterecek şekilde güncellendi.
+- Konteyner ve mevcut blok kontrol işlevi - günlük okuma iyileştirildi ve bellek sorunlarının önlenmesi sağlandı
+- Gerekli betik araçları için geliştirilmiş bağımlılık kontrolü ve kurulumu.
 
 ### 06-06-2025
 
-- Telegram bildirimleri de dahil olmak üzere betik tamamen üç dile yerelleştirildi. Türkçe dili eklendi.
-- Docker ile **Watchtower** kullanarak Aztec node kurulum özelliği eklendi. Watchtower, yapılandırmaları koruyarak node konteynerini otomatik olarak güncellemeye ayarlanmıştır.
+- Betiğin ve Telegram bildirimlerinin tam yerelleştirmesi, üç dilde yapıldı. Türkçe dili eklendi.
+- Docker ve **Watchtower** ile Aztec düğümü kurma işlevi eklendi. Watchtower, yapılandırmayı korurken düğüm konteynerini otomatik olarak güncellemek üzere yapılandırılmıştır.
   - Bağımlılıkların kurulumu
-  - Docker ve Docker Compose'un varlığının kontrolü ve gerekirse kurulumu
-  - Varsayılan portların kullanılabilirliğinin kontrolü, portları değiştirme seçeneği ile
-  - Node’un en son binary dosyasının kurulumu
+  - Docker ve Docker Compose kontrolü ve gerekirse kurulumu
+  - Varsayılan portların kullanılabilirliğinin kontrolü ve gerekirse portları değiştirme seçeneği.
+  - En son düğüm ikilisinin kurulumu
   - `.env` ve `docker-compose` dosyalarının otomatik oluşturulması
-  - ufw üzerinden portlarının açılması
-  - Node’un başlatılması ve ilk logların gösterimi 
-- Aztec düğümünü silme işlevi eklendi 
+  - UFW'de portların açılması
+  - Düğümün başlatılması ve ilk günlüklerin gösterilmesi
+- Aztec düğümünü silme işlevi eklendi
 
 ### 05-06-2025
-
-* Watchtower uyumluluğu güncellendi
+- Watchtower uyumluluğu için güncelleme
 
 ### 04-06-2025
-
-* Gelişmiş blok numarası arama (Seçenek 1 ve cron ajanı), debug seviyesindeki günlüklerde çalışır. Tüm log seviyeleriyle (debug, info vb.) uyumludur.
-* Blok doğrulama hata yönetimi geliştirildi
-* Log’ları doğrudan betikten görüntüleme seçeneği eklendi (Ctrl+C ile çıkılır)
-* Seçenek 1 çalıştırıldığında log’tan blok numarası gösterimi eklendi
-* Sürüm kontrolü eklendi – yeni sürüm varsa kullanıcı bilgilendirilir
-* Küçük iyileştirmeler
+- Hata ayıklama düzeyi günlüklerinde blok numarası arama mekanizması (Seçenek 1 ve cron aracı) geliştirildi. Hata ayıklama, bilgi (ve muhtemelen diğer tüm) günlük düzeylerini destekler. Maksimum doğru arama sonuçları.
+- Geliştirilmiş blok doğrulama hata işleme
+- Yeni bir seçenek eklendi – Betikten doğrudan düğüm günlüklerini görüntüleme (Günlüklerden çıkmak için Ctrl+C)
+- Seçenek 1 çalıştırılırken günlüklerden blok numarası çıktısı eklendi.
+- Betik sürüm kontrolü eklendi. Güncellemeler varsa, betik sizi bu konuda bilgilendirecektir.
+- Küçük iyileştirmeler
 
 ### 02-06-2025
-
-* Farklı Aztec node sürümleriyle daha iyi uyumluluk için log filtreleri güncellendi
-* RPC/cast hataları için loglama eklendi
-* Betik sürüm bilgisi loglanıyor
+- Farklı Aztec düğüm sürümleriyle daha iyi uyumluluk için günlük okuma filtre değerleri güncellendi
+- RPC/cast hataları için günlüğe kaydetme eklendi
+- Betik sürüm günlüğü eklendi
 
 ### 01-06-2025
-
-* Docker ve CLI tabanlı Aztec node’larıyla uyumluluk sağlandı
-* "block NNNN" formatındaki yeni log desteği eklendi
-* Seçenek 9 için `bc` yardımcı aracının otomatik kurulumu
-* Analizden önce ANSI kodlarının temizlenmesi
-* Log’larda PeerID tespiti düzeltildi
-* Blok hex değeri işleme optimize edildi
-* Telegram bildirim sistemi geliştirildi
+- Geliştirilmiş uyumluluk. Betik artık hem Docker tabanlı hem de CLI Aztec düğümleriyle çalışıyor
+- Yeni günlük formatı "block NNNN" için destek eklendi
+- Seçenek 9'daki hesaplamalar için `bc` yardımcı programının otomatik kontrolü ve kurulumu
+- Daha güvenilir veri ayrıştırma için analiz öncesi ANSI kodlarının kaldırılması
+- Günlüklerde PeerID tespiti sorunu düzeltildi
+- Blok onaltılık değerlerinin işlenmesi optimize edildi
+- Telegram bildirim sistemi geliştirildi
 
 ### 30-05-2025
-
-* Doğrulayıcı kontrol işlevi eklendi. Tüm doğrulayıcıları analiz eder, belirli doğrulayıcıları gösterir ve tam listeyi sunar.
-* Eğer node portu değiştirildiyse, kanıt üretimi için özel port yapılandırma desteği eklendi.
+- Doğrulayıcı kontrol işlevi eklendi. Tüm doğrulayıcıları analiz eder, belirli olanlar için bilgi gösterir, tam listeyi görüntüler.
+- İspat oluşturma seçeneği için Aztec düğümü özel port kurulumu. Bu, kurulum sırasında düğüm portunu değiştirdiyseniz gereklidir.
 
 ### 29-05-2025
-
-* Log dosyası 1 MB’a ulaştığında temizlenir, ilk rapor saklanır.
-
+- 1 MB'a ulaşıldığında günlük dosyası temizleme, ilk rapor korunur.
 </details>
 
 ---
@@ -166,81 +182,89 @@ Ayrıca spoiler'ın altındaki Sürüm Geçmişi da göz atın, orada script'in 
 ## ⚙️ Kurulum ve Başlatma
 
 1. **Gereksinimler**:
-   Betik, gerekli bileşenleri kontrol eder ve eksikse yüklemeyi önerir.
+   Betik, gerekli bileşenleri kontrol edecek ve eksik olanları kurmayı teklif edecektir.
 
 2. **Başlatma veya Güncelleme**:
 
-```bash
-curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/aztec-logs.sh && chmod +x aztec-logs.sh && ./aztec-logs.sh
-```
+   ```bash
+   curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/aztec-logs.sh && chmod +x aztec-logs.sh && ./aztec-logs.sh
+   ```
 
-Sonraki çalıştırmalar için:
+   Gelecekteki çalıştırmalar için:
 
-```bash
-cd $HOME && ./aztec-logs.sh
-```
+   ```bash
+   cd $HOME && ./aztec-logs.sh
+   ```
 
 3. **Talimatları izleyin**:
 
-   * Dil seçin
-   * RPC URL’sini girin
-   * Telegram bot’unu yapılandırın
-   * İzlemeyi etkinleştirin
+  * Bir dil seçin
+  * RPC URL'sini girin
+  * Telegram botunu yapılandırın
+  * İzlemeyi etkinleştirin (seçenek 2)
 
 ## 🖥️ Kullanım
 
 Ana menü:
 
-1. 🔍 Konteyner ve blokları kontrol et
-2. ⚙️ İzleme ajanını kur
-3. 🗑️ İzleme ajanını kaldır
-4. 🏷️ rollupAddress bul
-5. 👥 PeerID bul
-6. 🏛️ governanceProposerPayload bul
-7. 🔗 Proven L2 Block kontrol et *(Discord'da Apprentice rolünü almak için önceden gereken veriler)*
-   - Artık kendi portunuzu ayarlayabilirsiniz (varsayılan 8080). Yeni port .env-aztec-agent dosyasına kaydedilir.
-8. 🔌 RPC URL’sini değiştir
-9. 🔍 Doğrulayıcı ara ve durumunu kontrol et
+1. 🔍 Konteyner ve düğüm senkronizasyonunun kontrol et
+2. ⚙️ Bildirimlerle düğüm izleme aracısını yükleyin
+3. 🗑️ Düğüm izleme aracısını ve dosyalarını kaldırın
+4. 🏷️ Loglarda rollupAddress bul
+5. 👥 Loglarda PeerID bul
+6. 🏛️ Loglarda governanceProposerPayload bul
+7. 🔗 Kanıtlanmış L2 Bloğunu ve Sync Proof'u Kontrol Et *(daha önce Discord'da Çırak rolü almak için gereken veriler)*
+  - Artık kendi portunuzu ayarlayabilirsiniz (varsayılan port 8080). Yeni port numarası .env-aztec-agent ortam dosyasına kaydedilecektir.
+8. 🔌 RPC URL'sini değiştir
+9. 🔍 Validator ara ve durumunu kontrol et
 10. Aztec loglarını görüntüle
 11. Watchtower ile birlikte Aztec Node Kurulumu
 12. Aztec düğümünü sil
 13. Aztec düğüm konteynerlerini durdur
 14. Aztec düğüm konteynerlerini başlat
+15. Aztec düğümünü güncelle
+16. Aztec düğümünü eski sürüme düşür
+17. Aztek sürümünü kontrol edin
 
 0. 🚪 Çıkış
 
-## 🚀 Cron Ajanı Kullanımı
+## 🚀 Düğüm İzleme Aracını Kullanma
 
-Betik çalıştırıldıktan sonra, **Cron izleme ajanını kur** seçeneğini seçin:
+Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını yükleyin` seçeneğini seçin:
 
-- `~/aztec-monitor-agent` dizininde ajan oluşturur
-- Bir cron görevi kurar
-- Telegram'a ilk durum güncellemesini gönderir
-- Node’u sürekli izler, \~/aztec-monitor-agent/agent.log dosyasına log yazar
-- Aşağıdaki durumlarda Telegram’a uyarı gönderir:
-  - Aztec konteyneri bulunamadıysa
-  - Log’lardaki en son blok ile akıllı kontrattaki blok **> 3 blok** fark varsa
-  - RPC sunucusunda sorun varsa
-  - İşte orijinal formatı koruyarak Türkçe çevirisi:
-  - Kritik hatalar bulundu
-  - Komiteye seçildi
-  - Blok oluşturuldu
-- Log dosyası 1 MB’a ulaştığında temizlenir, ilk rapor saklanır
+- `~/aztec-monitor-agent` konumunda bir aracı oluşturur
+- Bir systemd servisi ve zamanlayıcısı kurar (her 37 saniyede bir çalışır)
+- Telegram'a bir başlangıç durum güncellemesi gönderir
+- Düğümü sürekli izler ve günlükleri `~/aztec-monitor-agent/agent.log` dosyasına kaydeder
+- Aşağıdaki durumlarda Telegram uyarıları gönderir:
+  - Aztec konteyneri bulunamazsa
+  - Günlüklerdeki en son blok ile akıllı sözleşmedeki blok arasında **> 3 blok** uyuşmazlık varsa
+  - RPC sunucusu sorunu varsa
+  - Kritik hatalar bulunursa
+  - Komiteye seçilirse
+  - Doğrulayıcı komitedeyken her slot için istatistikler (başarılı/kaçırılmış onaylama, önerilen/kazılmış/kaçırılmış blok)
+- Günlük dosyası boyutu 1 MB'a ulaştığında temizler, en ilk raporu kaydeder.
 
-### Cron Ajanı Gereksinimleri:
+### İzleme Aracı Gereksinimleri:
 
-1. [BotFather](https://t.me/BotFather) üzerinden bir Telegram token alın
-2. [IDBot](https://t.me/myidbot) ile chat\_id’nizi öğrenin
-3. Kurulum sırasında bu bilgileri girin
-   Betik hem token hem de chat ID’yi doğrular – yanlış girilirse uyarı alırsınız
+1. [BotFather](https://t.me/BotFather)'dan bir Telegram token'ı alın
+2. [IDBot](https://t.me/myidbot) kullanarak `chat_id`nizi bulun
+3. Bunları cron-agent kurulumu sırasında betiğe girin.
+   Betik hem token'ı hem de chat ID'sini doğrular — yanlış girilirse bir uyarı görürsünüz.
 
-### Cron ajanını güncelleme
+### İzleme Aracını Güncelleme
 
-Ajan güncellemesi varsa, önce betiğin tamamını güncelleyin. Sonra eski ajanı silin ve yenisini oluşturun. Daha önce girdiğiniz ChatID ve Telegram token, yeni ajan için otomatik olarak atanır.
+Cron-agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
+
+## 🚀 Aztec düğümünü kurma
+
+Aztec düğümünü kurmak için **seçenek 11**'i seçin ve betik talimatlarını izleyin.
+
+Düğüm kurulum sürecinin adım adım açıklaması burada bulunabilir: [Aztec-Install-by-Script.md](https://github.com/pittpv/aztec-monitoring-script/blob/main/tr/Aztec-Install-by-Script.md)
 
 ## ⚠️ Önemli
 
-Bu betik Aztec Network’ün resmi ürünü değildir ve “olduğu gibi” sunulmaktadır.
+Bu betik, Aztec Network'ün resmi bir ürünü değildir ve "olduğu gibi" sağlanmıştır.
 
 ## 📜 Lisans
 
@@ -248,10 +272,10 @@ MIT Lisansı © 2025
 
 ## ✍️ Geri Bildirim
 
-Sorularınız, önerileriniz veya geri bildirimleriniz için:
+Herhangi bir sorun, öneri veya geri bildirim için:
 
 [https://t.me/+DLsyG6ol3SFjM2Vk](https://t.me/+DLsyG6ol3SFjM2Vk)
 
-## 🔗 Faydalı Bağlantılar
+## 🔗 Yararlı Bağlantılar
 
-[Tek tıkla RPC kurulum betiği](https://github.com/pittpv/sepolia-auto-install "Sepolia node'unu hızlıca RPC için kurun")
+[Tek tıklamayla RPC kurulum betiği](https://github.com/pittpv/sepolia-auto-install "RPC için hızlı bir şekilde Sepolia düğümü kurun")
