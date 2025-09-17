@@ -254,7 +254,7 @@
 
 Для установки ноды Aztec выберите **опцию 11** и следуйте инструкциям скрипта.
 
-C пошаговым описанием процесса установки ноды можно ознакомиться тут: [Aztec-Install-by-Script.md](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script.md)
+C пошаговым описанием процесса установки ноды можно ознакомиться тут: [Aztec-Install-by-Script.md](https://github.com/pittpv/aztec-monitoring-script/blob/main/other/Aztec-Install-by-Script.md)
 
 ## ⚠️ Важно
 

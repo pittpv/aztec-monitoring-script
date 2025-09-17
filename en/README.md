@@ -261,7 +261,7 @@ If there is an update for the cron-agent, first update the entire script. Then d
 
 To install the Aztec node, select **option 11** and follow the script instructions.
 
-A step-by-step description of the node installation process can be found here: [Aztec-Install-by-Script.md](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/en/Aztec-Install-by-Script.md)
+A step-by-step description of the node installation process can be found here: [Aztec-Install-by-Script.md](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/Aztec-Install-by-Script.md)
 
 ## ⚠️ Important
 
