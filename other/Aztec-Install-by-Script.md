@@ -22,6 +22,7 @@ curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-
 В главном меню скрипта вам будет представлен список опций. Для начала установки ноды:
 
 1.  **Выберите пункт `11` основного меню и нажмите Enter.**
+
     ![Главное меню скрипта](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/1.jpg)
 
 ## Проверка портов и установка зависимостей
@@ -42,6 +43,7 @@ Add it to /root/.bash_profile to make the aztec binaries accessible?
 ```
 
 **Введите `n` (no).** Это важный шаг для корректной работы скрипта управления.
+
 ![Вопрос о добавлении в .bash_profile](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/2.jpg)
 
 ## Настройка валидаторов
@@ -53,6 +55,7 @@ Do you want to run multiple validators?
 
 *   Если вы запускаете **одного валидатора**, введите `n`.
 *   Если планируете запускать **несколько валидаторов**, введите `y`.
+
     ![Выбор количества валидаторов](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/3.jpg)
 
 Далее необходимо ввести данные валидаторов. Для каждого валидатора введите данные в строгом формате:
@@ -60,9 +63,11 @@ Do you want to run multiple validators?
 
 Пример:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
+
 ![Ввод данных валидатора](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
 После этого скрипт запросит **Aztec L2 адрес**, который вы можете создать на официальном сайте: https://app.obsidion.xyz/.
+
 ![Ввод L2 адреса](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 
 > **Важно:** Скрипт автоматически создаст все необходимые конфигурационные файлы (`YML` для web3signer в `/root/aztec/keys` и `keystore.json` в `/root/aztec/config`).
@@ -75,6 +80,7 @@ Do you want to run multiple validators?
 *   **`CONSENSUS_BEACON_URL`** — ваш RPC-адрес для Beacon Chain.
 *   **`COINBASE`** — адрес eth кошелька. Введите адрес вашего валидатора.
 *   **`P2P_IP`** — этот параметр скрипт определит автоматически.
+
     ![Ввод RPC и других данных](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
 ## Установка Watchtower
@@ -85,6 +91,7 @@ Do you want to run multiple validators?
 2.  **Chat ID:** Узнайте свой ID чата, например, с помощью бота [@myidbot](https://t.me/myidbot).
 
 Введите запрошенные данные при появлении соответствующих запросов.
+
 ![Ввод данных для Telegram-уведомлений](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/7.jpg)
 
 ## Установка web3signer

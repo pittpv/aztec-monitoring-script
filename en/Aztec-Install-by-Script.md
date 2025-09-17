@@ -22,6 +22,7 @@ After launch, the script will check for the necessary system software (such as `
 In the script's main menu, you will be presented with a list of options. To begin the node installation:
 
 1.  **Select item `11` from the main menu and press Enter.**
+
     ![Script Main Menu](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/1.jpg)
 
 ## Port Check and Dependency Installation
@@ -42,6 +43,7 @@ Add it to /root/.bash_profile to make the aztec binaries accessible?
 ```
 
 **Enter `n` (no).** This is a important step for the management script to work correctly.
+
 ![Prompt about adding to .bash_profile](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/2.jpg)
 
 ## Validator Setup
@@ -53,6 +55,7 @@ Do you want to run multiple validators?
 
 *   If you are running **one validator**, enter `n`.
 *   If you plan to run **multiple validators**, enter `y`.
+
     ![Choosing the number of validators](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/3.jpg)
 
 Next, you need to enter the validator data. For each validator, enter the data in the strict format:
@@ -60,9 +63,11 @@ Next, you need to enter the validator data. For each validator, enter the data i
 
 Example:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
+
 ![Entering validator data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
 After this, the script will request your **Aztec L2 address**, which you can create on the official website: https://app.obsidion.xyz/.
+
 ![Entering L2 address](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 
 > **Important:** The script will automatically create all necessary configuration files (`YML` for web3signer in `/root/aztec/keys` and `keystore.json` in `/root/aztec/config`).
@@ -75,6 +80,7 @@ For the final node setup, the script will request data to generate the `docker-c
 *   **`CONSENSUS_BEACON_URL`** — Your RPC URL for the Beacon Chain.
 *   **`COINBASE`** — The Ethereum wallet address. Enter the address of your validator.
 *   **`P2P_IP`** — This parameter will be determined automatically by the script.
+
     ![Entering RPC and other data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
 ## Installing Watchtower
@@ -85,6 +91,7 @@ The script will offer to install **Watchtower** — a service for automatically 
 2.  **Chat ID:** Find out your chat ID, for example, using the [@myidbot](https://t.me/myidbot).
 
 Enter the requested data when the corresponding prompts appear.
+
 ![Entering data for Telegram notifications](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/7.jpg)
 
 ## Installing web3signer

@@ -22,6 +22,7 @@ Betik başlatıldıktan sonra, gerekli sistem yazılımlarını (`docker`, `dock
 Betiğin ana menüsünde size bir seçenek listesi sunulacaktır. Düğüm kurulumuna başlamak için:
 
 1.  **Ana menüden `11` numaralı öğeyi seçin ve Enter'a basın.**
+
     ![Betik Ana Menüsü](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/1.jpg)
 
 ## Port Kontrolü ve Bağımlılık Kurulumu
@@ -42,6 +43,7 @@ Add it to /root/.bash_profile to make the aztec binaries accessible?
 ```
 
 **`n` (hayır) girin.** Bu, yönetim betiğinin doğru çalışması için önemli bir adımdır.
+
 ![.bash_profile'a ekleme istemi](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/2.jpg)
 
 ## Doğrulayıcı Kurulumu
@@ -53,6 +55,7 @@ Do you want to run multiple validators?
 
 *   **Bir doğrulayıcı** çalıştırıyorsanız, `n` girin.
 *   **Birden fazla doğrulayıcı** çalıştırmayı planlıyorsanız, `y` girin.
+
     ![Doğrulayıcı sayısını seçme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/3.jpg)
 
 Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı için verileri kesin biçimde girin:
@@ -60,9 +63,11 @@ Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı 
 
 Örnek:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
+
 ![Doğrulayıcı verilerini girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
 Bundan sonra, betik resmi web sitesinde oluşturabileceğiniz **Aztec L2 adresinizi** isteyecektir: https://app.obsidion.xyz/.
+
 ![L2 adresini girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 
 > **Önemli:** Betik, gerekli tüm yapılandırma dosyalarını (web3signer için `/root/aztec/keys` içinde `YML` ve `/root/aztec/config` içinde `keystore.json`) otomatik olarak oluşturacaktır.
@@ -75,6 +80,7 @@ Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak 
 *   **`CONSENSUS_BEACON_URL`** — Beacon Chain için RPC URL'niz.
 *   **`COINBASE`** — Ethereum cüzdan adresiniz. Doğrulayıcınızın adresini girin.
 *   **`P2P_IP`** — Bu parametre betik tarafından otomatik olarak belirlenecektir.
+
     ![RPC ve diğer verileri girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
 ## Watchtower Kurulumu
@@ -85,6 +91,7 @@ Betik, düğüm konteynerlerinizi otomatik olarak güncellemek için bir servis 
 2.  **Chat ID:** Chat ID'nizi öğrenin, örneğin [@myidbot](https://t.me/myidbot) kullanarak.
 
 İlgili istemler göründüğünde istenen verileri girin.
+
 ![Telegram bildirimleri için veri girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/7.jpg)
 
 ## Web3signer Kurulumu
