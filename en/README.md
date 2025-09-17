@@ -12,18 +12,18 @@
 
 ## 📝 Description
 
-This script provides a comprehensive solution for launching (via docker-compose or CLI) and monitoring an Aztec node, including container status checks, block synchronization verification, retrieval of important node information, and sending notifications via Telegram.
+This script provides a complete solution for running (docker-compose or CLI) and monitoring an Aztec node, including automatic updates, checking container status, syncing blocks, getting important information about the node, and sending notifications to Telegram.
 
 Also check out the Version History under the spoiler, there is a lot of useful information about the functions of the script.
 
 ## 🌟 Key Features
 
 * 🏃🏻‍ Node launch (docker-compose or CLI)
-* 🐳 Aztec container monitoring
+* 🐳 Monitoring the operation of the Aztec node
 * 🔗 Block freshness checks (compared to the smart contract)
 * 🔍 Log parsing for critical parameters
-* 📨 Telegram alerts on issues
-* ⏰ Cron job for automatic monitoring
+* 📨 Telegram alerts on issues and validator activity
+* ⏰ systemd service for automatic monitoring
 
 ## 🛠️ Functionality
 
@@ -35,7 +35,34 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 21-08-2025
+## 📌 Latest Updates 16-09-2025
+- Full support for the new network and testnet.
+- New node installation script.
+    - Automatic creation of YML key files for web3signer.
+    - Installation and launch of web3signer.
+    - Automatic creation of keystore.json key schema.
+    - Support for multi-validator mode (up to 10 per node).
+    - Ability to assign one common publisher address for all validators or have each use its own address (same as attester).
+    - All previous features (automatic installation of required software, port checks, ability to assign custom ports, validations).
+- New monitoring agent script for the node (option 2).
+    - New Telegram notifications with slot-by-slot statistics including all status types (✅ attestation, ❌ attestation, ⛏️ Block mined, 📤 Block proposed, ⚠️ Block missed).
+    - Support for multi-validator mode (statistics for all validators that joined the committee), as well as single-validator mode.
+    - DEBUG mode – allows receiving highly detailed monitoring logs. Log is written to /root/aztec-monitor-agent/agent.log. To enable, set DEBUG=true in /root/.env-aztec-agent (default is false).
+    - Checks run exactly on a systemd timer every 37 seconds (approximate duration of one slot) – you won’t miss any status!
+    - All previous features (sync control, critical error detection, quick log view, automatic updates, downgrade function, container management, and more).
+- New script for searching and verifying validators directly in Rollup and GSE contracts (option 9).
+    - Fast validator search and status check.
+    - Supports checking multiple validators in a single request.
+    - Exact number of active validators in the network.
+    - Always up-to-date information.
+- Updated script version control function. Now short descriptions of new versions and updates are shown.
+- Added new errors detected by the critical error control module, with details on how to fix them and Telegram notifications.
+- Minor improvements to other features
+
+<details>
+<summary>📅 Version History</summary>
+
+### 21-08-2025
 - Updated PeerID search function (restored function operation + new features)
     - The script finds the node's PeerID in the logs
     - Searches among current data on Nethermind.io
@@ -45,9 +72,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 - Updated Aztec node installation script
     - Added ufw activity check.
     - If ufw is active, rules for ports 8080 and 40400 are added, otherwise rules are not added.
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 06-08-2025
 - The validator queue check function has been restored.
@@ -178,14 +202,14 @@ Also check out the Version History under the spoiler, there is a lot of useful i
    * Select a language
    * Enter RPC URL
    * Configure the Telegram bot
-   * Enable monitoring
+   * Enable monitoring (option 2)
 
 ## 🖥️ Usage
 
 Main menu:
 
-1. 🔍 Check container and blocks
-2. ⚙️ Install monitoring agent
+1. 🔍 Check container and node synchronization 
+2. ⚙️ Install node monitoring agent with notifications
 3. 🗑️ Remove monitoring agent
 4. 🏷️ Find rollupAddress
 5. 👥 Find PeerID
@@ -199,15 +223,18 @@ Main menu:
 12. Delete Aztec node
 13. Stop Aztec node containers
 14. Start Aztec node containers
+15. Update Aztec node
+16. Downgrade Aztec node
+17. Check Aztec version
 
 0. 🚪 Exit
 
-## 🚀 Using the Cron Agent
+## 🚀 Using the Node Monitoring Agent
 
-After running the script, select the option to **Install the cron monitoring agent**:
+After running the script, select the option to `Install node monitoring agent with notifications`:
 
 - Creates an agent at `~/aztec-monitor-agent`
-- Sets up a cron job
+- Set up a systemd service and timer (run every 37 seconds)
 - Sends an initial status update to Telegram
 - Continuously monitors the node and logs to `~/aztec-monitor-agent/agent.log`
 - Sends Telegram alerts if:
@@ -216,19 +243,25 @@ After running the script, select the option to **Install the cron monitoring age
    - There is an RPC server issue
    - Critical errors found
    - Selected for committee
-   - Created a block
+   - Statistics for each slot while validator to the committee (successful/missed attestation, proposed/mined/missed block)
 - Clears the log file when it reaches 1 MB in size, saving the very first report.
 
-### Requirements for Cron Agent:
+### Requirements for Monitoring Agent:
 
 1. Get a Telegram token from [BotFather](https://t.me/BotFather)
 2. Find your `chat_id` using [IDBot](https://t.me/myidbot)
 3. Enter these in the script during cron-agent setup.
    The script validates both token and chat ID — if entered incorrectly, you will see a warning.
 
-### Updating the cron agent
+### Updating the Monitoring Agent
 
 If there is an update for the cron-agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
+
+## 🚀 Installing the Aztec node
+
+To install the Aztec node, select **option 11** and follow the script instructions.
+
+A step-by-step description of the node installation process can be found here:
 
 ## ⚠️ Important
 

@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="1.11.4"
+SCRIPT_VERSION="2.0.0"
 
 function show_logo() {
     echo -e " "
@@ -46,11 +46,11 @@ init_languages() {
   # English translations
   TRANSLATIONS["en,welcome"]="Welcome to the Aztec node monitoring script"
   TRANSLATIONS["en,title"]="========= Main Menu ========="
-  TRANSLATIONS["en,option1"]="1. Check container and current block"
-  TRANSLATIONS["en,option2"]="2. Install cron monitoring agent"
-  TRANSLATIONS["en,option3"]="3. Remove cron agent and files"
+  TRANSLATIONS["en,option1"]="1. Check container and node synchronization"
+  TRANSLATIONS["en,option2"]="2. Install node monitoring agent with notifications"
+  TRANSLATIONS["en,option3"]="3. Remove node monitoring agent and files"
   TRANSLATIONS["en,option4"]="4. Find rollupAddress in logs"
-  TRANSLATIONS["en,option5"]="5. Find PeerID in logs and Nethermind.io"
+  TRANSLATIONS["en,option5"]="5. Find PeerID in logs"
   TRANSLATIONS["en,option6"]="6. Find governanceProposerPayload in logs"
   TRANSLATIONS["en,option7"]="7. Check Proven L2 Block and Sync Proof"
   TRANSLATIONS["en,option8"]="8. Change RPC URL"
@@ -185,20 +185,21 @@ init_languages() {
   TRANSLATIONS["en,error_prefix"]="ERROR:"
   TRANSLATIONS["en,solution_prefix"]="Solution:"
   TRANSLATIONS["en,notifications_prompt"]="Do you want to receive additional notifications?"
-  TRANSLATIONS["en,notifications_option1"]="1. Critical errors only (recommended)"
-  TRANSLATIONS["en,notifications_option2"]="2. All notifications (including committee participation and block creation)"
-  TRANSLATIONS["en,notifications_debug_warning"]="DEBUG log level is required for committee and block creation notifications"
+  TRANSLATIONS["en,notifications_option1"]="1. Critical errors only"
+  TRANSLATIONS["en,notifications_option2"]="2. All notifications (including committee participation and validators activity)"
+  TRANSLATIONS["en,notifications_debug_warning"]="DEBUG log level is required for committee and slot statistics notifications"
   TRANSLATIONS["en,notifications_input_error"]="Error: please enter 1 or 2"
   TRANSLATIONS["en,choose_option_prompt"]="Choose option"
   TRANSLATIONS["en,committee_selected"]="🎉 You've been selected for the committee"
   TRANSLATIONS["en,found_validators"]="Found validators in committee: %s"
   TRANSLATIONS["en,epoch_info"]="Epoch %s"
   TRANSLATIONS["en,block_built"]="✅ Block %s successfully built"
-  TRANSLATIONS["en,slot_info"]="🧩 Slot: %s"
+  TRANSLATIONS["en,slot_info"]="Slot %s"
   TRANSLATIONS["en,validators_prompt"]="Enter your validator addresses (comma separated, without spaces):"
   TRANSLATIONS["en,validators_format"]="Example: 0x123...,0x456...,0x789..."
   TRANSLATIONS["en,validators_empty"]="Error: Validators list cannot be empty"
-  TRANSLATIONS["en,agent_notifications_full_info"]="ℹ️ Notifications will be sent for issues, committee, blocks"
+  TRANSLATIONS["en,agent_notifications_full_info"]="ℹ️ Notifications will be sent for issues, committee, slot stats"
+  TRANSLATIONS["en,attestation_status"]="ℹ️ Slot stats"
   #find peerID
   TRANSLATIONS["en,fetching_peer_info"]="Fetching peer information from API..."
   TRANSLATIONS["en,peer_found"]="Peer ID found in logs"
@@ -257,15 +258,23 @@ init_languages() {
   TRANSLATIONS["en,downgrade_starting"]="Starting node with version"
   TRANSLATIONS["en,downgrade_start_error"]="Error starting containers"
   TRANSLATIONS["en,downgrade_success"]="Aztec node successfully downgraded to version"
+  #agent
+  TRANSLATIONS["en,agent_systemd_added"]="Agent added (running every 37 seconds via systemd)"
+  TRANSLATIONS["en,agent_timer_status"]="Timer status:"
+  TRANSLATIONS["en,agent_timer_error"]="Error while creating systemd timer"
+  TRANSLATIONS["en,removing_systemd_agent"]="Removing agent and systemd units..."
+  TRANSLATIONS["en,agent_systemd_removed"]="Agent removed successfully"
+  #version module
+  TRANSLATIONS["en,update_changes"]="Changes in the update"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
   TRANSLATIONS["ru,title"]="========= Главное меню ========="
-  TRANSLATIONS["ru,option1"]="1. Проверить контейнер и актуальный блок"
-  TRANSLATIONS["ru,option2"]="2. Установить cron-агент для мониторинга"
-  TRANSLATIONS["ru,option3"]="3. Удалить cron-агент и файлы"
+  TRANSLATIONS["ru,option1"]="1. Проверить контейнер и синхронизацию ноды"
+  TRANSLATIONS["ru,option2"]="2. Установить агент мониторинга ноды с уведомлениями"
+  TRANSLATIONS["ru,option3"]="3. Удалить агент мониторинга и файлы"
   TRANSLATIONS["ru,option4"]="4. Найти адрес rollupAddress в логах"
-  TRANSLATIONS["ru,option5"]="5. Найти PeerID в логах и Nethermind.io"
+  TRANSLATIONS["ru,option5"]="5. Найти PeerID в логах"
   TRANSLATIONS["ru,option6"]="6. Найти governanceProposerPayload в логах"
   TRANSLATIONS["ru,option7"]="7. Проверить Proven L2 блок и Sync Proof"
   TRANSLATIONS["ru,option8"]="8. Изменить RPC URL"
@@ -400,20 +409,21 @@ init_languages() {
   TRANSLATIONS["ru,error_prefix"]="ОШИБКА:"
   TRANSLATIONS["ru,solution_prefix"]="Решение:"
   TRANSLATIONS["ru,notifications_prompt"]="Хотите получать дополнительные уведомления?"
-  TRANSLATIONS["ru,notifications_option1"]="1. Только критические ошибки (рекомендуется)"
-  TRANSLATIONS["ru,notifications_option2"]="2. Все уведомления (включая попадание в комитет и создание блоков)"
-  TRANSLATIONS["ru,notifications_debug_warning"]="Для получения уведомлений о попадании в комитет и создании блоков требуется уровень логов DEBUG"
+  TRANSLATIONS["ru,notifications_option1"]="1. Только критические ошибки"
+  TRANSLATIONS["ru,notifications_option2"]="2. Все уведомления (включая попадание в комитет и активность валидатора)"
+  TRANSLATIONS["ru,notifications_debug_warning"]="Для получения уведомлений о попадании в комитет и статистике слотов требуется уровень логов DEBUG"
   TRANSLATIONS["ru,notifications_input_error"]="Ошибка: введите 1 или 2"
   TRANSLATIONS["ru,choose_option_prompt"]="Выберите вариант"
   TRANSLATIONS["ru,committee_selected"]="🎉 Тебя выбрали в комитет"
   TRANSLATIONS["ru,found_validators"]="Найдены валидаторы в комитете: %s"
   TRANSLATIONS["ru,epoch_info"]="Эпоха %s"
   TRANSLATIONS["ru,block_built"]="✅ Блок %s успешно построен"
-  TRANSLATIONS["ru,slot_info"]="🧩 Слот: %s"
+  TRANSLATIONS["ru,slot_info"]="Слот %s"
   TRANSLATIONS["ru,validators_prompt"]="Введите адреса валидаторов (через запятую, без пробелов):"
   TRANSLATIONS["ru,validators_format"]="Пример: 0x123...,0x456...,0x789..."
   TRANSLATIONS["ru,validators_empty"]="Ошибка: Список валидаторов не может быть пустым"
-  TRANSLATIONS["ru,agent_notifications_full_info"]="ℹ️ Уведомления будут отправляться при проблемах, выборе в комитет, создании блоков"
+  TRANSLATIONS["ru,agent_notifications_full_info"]="ℹ️ Уведомления будут отправляться при проблемах, выборе в комитет, статистике слотов"
+  TRANSLATIONS["ru,attestation_status"]="ℹ️ Статистика слота"
   #peerID
   TRANSLATIONS["ru,fetching_peer_info"]="Получение информации о пире из API..."
   TRANSLATIONS["ru,peer_found"]="Peer ID найден в логах"
@@ -472,16 +482,23 @@ init_languages() {
   TRANSLATIONS["ru,downgrade_starting"]="Запуск ноды с версией"
   TRANSLATIONS["ru,downgrade_start_error"]="Ошибка при запуске контейнеров"
   TRANSLATIONS["ru,downgrade_success"]="Нода Aztec успешно даунгрейднута до версии"
-
+  #agent
+  TRANSLATIONS["ru,agent_systemd_added"]="Агент добавлен (запуск каждые 37 секунд через systemd)"
+  TRANSLATIONS["ru,agent_timer_status"]="Статус таймера:"
+  TRANSLATIONS["ru,agent_timer_error"]="Ошибка при создании systemd таймера"
+  TRANSLATIONS["ru,removing_systemd_agent"]="Удаление агента и systemd unit-файлов..."
+  TRANSLATIONS["ru,agent_systemd_removed"]="Агент успешно удалён"
+  #version module
+  TRANSLATIONS["ru,update_changes"]="Изменения в обновлении"
 
   # Turkish translations
   TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
   TRANSLATIONS["tr,title"]="========= Ana Menü ========="
-  TRANSLATIONS["tr,option1"]="1. Konteyner ve mevcut bloğu kontrol et"
-  TRANSLATIONS["tr,option2"]="2. Cron izleme aracısını yükle"
-  TRANSLATIONS["tr,option3"]="3. Cron aracısını ve dosyaları kaldır"
+  TRANSLATIONS["tr,option1"]="1. Konteyner ve düğüm senkronizasyonunun kontrol et"
+  TRANSLATIONS["tr,option2"]="2. Bildirimlerle düğüm izleme aracısını yükleyin"
+  TRANSLATIONS["tr,option3"]="3. Düğüm izleme aracısını ve dosyalarını kaldırın"
   TRANSLATIONS["tr,option4"]="4. Loglarda rollupAddress bul"
-  TRANSLATIONS["tr,option5"]="5. Loglarda ve Nethermind.io PeerID bul"
+  TRANSLATIONS["tr,option5"]="5. Loglarda PeerID bul"
   TRANSLATIONS["tr,option6"]="6. Loglarda governanceProposerPayload bul"
   TRANSLATIONS["tr,option7"]="7. Kanıtlanmış L2 Bloğunu ve Sync Proof'u Kontrol Et"
   TRANSLATIONS["tr,option8"]="8. RPC URL'sini değiştir"
@@ -616,20 +633,21 @@ init_languages() {
   TRANSLATIONS["tr,error_prefix"]="HATA:"
   TRANSLATIONS["tr,solution_prefix"]="Çözüm:"
   TRANSLATIONS["tr,notifications_prompt"]="Ek bildirim almak istiyor musunuz?"
-  TRANSLATIONS["tr,notifications_option1"]="1. Sadece kritik hatalar (tavsiye edilen)"
-  TRANSLATIONS["tr,notifications_option2"]="2. Tüm bildirimler (komite katılımı ve blok oluşturma dahil)"
-  TRANSLATIONS["tr,notifications_debug_warning"]="Komite ve blok oluşturma bildirimleri için DEBUG log seviyesi gereklidir"
+  TRANSLATIONS["tr,notifications_option1"]="1. Sadece kritik hatalar"
+  TRANSLATIONS["tr,notifications_option2"]="2. Tüm bildirimler (komite katılımı ve doğrulayıcı etkinliği dahil)"
+  TRANSLATIONS["tr,notifications_debug_warning"]="Komite ve slot istatistik bildirimleri için DEBUG günlük seviyesi gereklidir"
   TRANSLATIONS["tr,notifications_input_error"]="Hata: lütfen 1 veya 2 girin"
   TRANSLATIONS["tr,choose_option_prompt"]="Seçenek belirleyin"
   TRANSLATIONS["tr,committee_selected"]="🎉 Komiteye seçildiniz"
   TRANSLATIONS["tr,found_validators"]="Komitede bulunan doğrulayıcılar: %s"
   TRANSLATIONS["tr,epoch_info"]="Dönem %s"
   TRANSLATIONS["tr,block_built"]="✅ %s bloğu başarıyla oluşturuldu"
-  TRANSLATIONS["tr,slot_info"]="🧩 Slot: %s"
+  TRANSLATIONS["tr,slot_info"]="Slot %s"
   TRANSLATIONS["tr,validators_prompt"]="Validator adreslerinizi girin (virgülle ayırarak, boşluk olmadan):"
   TRANSLATIONS["tr,validators_format"]="Örnek: 0x123...,0x456...,0x789..."
   TRANSLATIONS["tr,validators_empty"]="Hata: Validator listesi boş olamaz"
-  TRANSLATIONS["tr,agent_notifications_full_info"]="ℹ️ Sorunlar, komite ve bloklar için bildirimler gönderilecek"
+  TRANSLATIONS["tr,agent_notifications_full_info"]="ℹ️ Sorunlar, komite ve slot istatistikleri için bildirimler gönderilecektir"
+  TRANSLATIONS["tr,attestation_status"]="ℹ️ Slot istatistik"
   #peerID
   TRANSLATIONS["tr,fetching_peer_info"]="API'den eş (peer) bilgisi alınıyor..."
   TRANSLATIONS["tr,peer_found"]="Loglarda Peer ID bulundu"
@@ -688,11 +706,18 @@ init_languages() {
   TRANSLATIONS["tr,downgrade_starting"]="Düğüm şu sürümle başlatılıyor"
   TRANSLATIONS["tr,downgrade_start_error"]="Kapsayıcılar başlatılırken hata oluştu"
   TRANSLATIONS["tr,downgrade_success"]="Aztec düğümü başarıyla şu sürüme düşürüldü"
-
+  #agent
+  TRANSLATIONS["tr,agent_systemd_added"]="Aracı eklendi (systemd ile her 37 saniyede bir çalışıyor)"
+  TRANSLATIONS["tr,agent_timer_status"]="Zamanlayıcı durumu:"
+  TRANSLATIONS["tr,agent_timer_error"]="Systemd zamanlayıcı oluşturulurken hata oluştu"
+  TRANSLATIONS["tr,removing_systemd_agent"]="Aracı ve systemd birimlerini kaldırılıyor..."
+  TRANSLATIONS["tr,agent_systemd_removed"]="Aracı başarıyla kaldırıldı"
+  #version module
+  TRANSLATIONS["tr,update_changes"]="Güncellemedeki değişiklikler"
 }
 
 # === Configuration ===
-CONTRACT_ADDRESS="0x216f071653a82ced3ef9d29f3f0c0ed7829c8f81"
+CONTRACT_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
 FUNCTION_SIG="getPendingBlockNumber()"
 
 REQUIRED_TOOLS=("cast" "curl" "crontab" "grep" "sed" "jq" "bc")
@@ -700,7 +725,6 @@ AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 
 # === Dependency check ===
-
 check_dependencies() {
   missing=()
   echo -e "\n${BLUE}$(t "checking_deps")${NC}\n"
@@ -786,7 +810,6 @@ check_dependencies() {
     fi
   fi
 
-
   # Request RPC URL from user and create .env file
   if [ ! -f .env-aztec-agent ]; then
     echo -e "\n${BLUE}$(t "rpc_prompt")${NC}"
@@ -797,7 +820,6 @@ check_dependencies() {
     source .env-aztec-agent
     echo -e "\n${GREEN}$(t "env_exists") $RPC_URL${NC}"
   fi
-
 
   # === Проверяем и добавляем ключ VERSION в ~/.env-aztec-agent ===
   # Если ключа VERSION в .env-aztec-agent нет – дописать его, не затронув остальные переменные
@@ -825,10 +847,50 @@ check_dependencies() {
   echo -e "\n${CYAN}$(t "current_script_version") ${INSTALLED_VERSION}${NC}"
   if [ -n "$REMOTE_LATEST_VERSION" ] && [ "$REMOTE_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
     echo -e "${YELLOW}$(t "new_version_avialable") ${REMOTE_LATEST_VERSION}. $(t "new_version_update").${NC}"
+
+    # === ВЫВОД СПИСКА ОБНОВЛЕНИЙ ===
+    echo -e "\n${BLUE}=== $(t "update_changes") ===${NC}"
+
+    # Функция для сравнения версий (правильная реализация)
+    version_gt() {
+      if [ "$1" = "$2" ]; then
+        return 1
+      fi
+      local IFS=.
+      local i ver1=($1) ver2=($2)
+      for ((i=0; i<${#ver1[@]}; i++)); do
+        if [[ -z ${ver2[i]} ]]; then
+          ver2[i]=0
+        fi
+        if ((10#${ver1[i]} > 10#${ver2[i]})); then
+          return 0
+        fi
+        if ((10#${ver1[i]} < 10#${ver2[i]})); then
+          return 1
+        fi
+      done
+      return 1
+    }
+
+    # Выводим обновления только для версий НОВЕЕ текущей
+    echo "$remote_data" | jq -c '.[]' | while read -r update; do
+      version=$(echo "$update" | jq -r '.VERSION')
+      date=$(echo "$update" | jq -r '.UPDATE_DATE')
+
+      # Используем правильное сравнение версий
+      if version_gt "$version" "$INSTALLED_VERSION"; then
+        echo -e "\n${GREEN}Version: $version (${date})${NC}"
+
+        # Выводим список изменений
+        echo "$update" | jq -r '.CHANGES[]' | while read -r change; do
+          echo -e "  • ${YELLOW}$change${NC}"
+        done
+      fi
+    done
+
   elif [ -n "$REMOTE_LATEST_VERSION" ]; then
     echo -e "${GREEN}$(t "version_up_to_date")${NC}"
   fi
-
 }
 
 # === Spinner function ===
@@ -847,7 +909,6 @@ spinner() {
   printf "\r                 \r"
 }
 
-
 # === Check container logs for block ===
 check_aztec_container_logs() {
     cd $HOME
@@ -865,6 +926,7 @@ check_aztec_container_logs() {
             echo -e "${YELLOW}Warning: Failed to download error definitions from GitHub${NC}"
             return 1
         fi
+        return 0
         return 0
     }
 
@@ -1093,121 +1155,7 @@ find_peer_id() {
     return 1
   else
     echo -e "\n${GREEN}$(t "peer_found")${NC}: $peer_id"
-
-    # Получаем информацию о пире напрямую по ID
-    echo -e "\n${CYAN}$(t "fetching_peer_info")${NC}"
-
-    # Сначала ищем в актуальных данных (latest=true)
-    echo -e "${YELLOW}$(t "searching_latest")${NC}"
-    url="https://aztec.nethermind.io/api/peers?latest=true&id=$peer_id"
-
-    # Получаем данные
-    response_file="/tmp/peer_response.json"
-    curl -s "$url" > "$response_file"
-
-    if [ $? -ne 0 ] || [ ! -s "$response_file" ]; then
-      echo -e "${RED}$(t "fetch_error")${NC}"
-      rm -f "$response_file"
-      return 1
-    fi
-
-    # Проверяем, есть ли информация о пире в актуальных данных
-    if jq -e '.peers != null and .peers[0] != null' "$response_file" > /dev/null 2>&1; then
-      # Извлекаем данные первого пира из массива
-      peer_info=$(jq -r '.peers[0]' "$response_file")
-      echo "$peer_info" > "/tmp/peer_info.json"
-
-      # Извлекаем данные из JSON
-      created_at=$(jq -r '.created_at' "/tmp/peer_info.json")
-      last_seen=$(jq -r '.last_seen' "/tmp/peer_info.json")
-      client=$(jq -r '.client' "/tmp/peer_info.json")
-      country=$(jq -r '.multi_addresses[0].ip_info[0].country_name' "/tmp/peer_info.json")
-      city=$(jq -r '.multi_addresses[0].ip_info[0].city_name' "/tmp/peer_info.json")
-      latitude=$(jq -r '.multi_addresses[0].ip_info[0].latitude' "/tmp/peer_info.json")
-      longitude=$(jq -r '.multi_addresses[0].ip_info[0].longitude' "/tmp/peer_info.json")
-      block_height=$(jq -r '.block_height' "/tmp/peer_info.json")
-      is_synced=$(jq -r '.is_synced' "/tmp/peer_info.json")
-
-      # Выводим информацию в красивом виде
-      echo -e "\n${GREEN}=== Peer Information (Current) ===${NC}"
-      echo -e "${BLUE}Peer ID:${NC} $peer_id"
-      echo -e "${BLUE}Client Version:${NC} $client"
-      echo -e "${BLUE}Block Height:${NC} $block_height"
-      echo -e "${BLUE}Synced:${NC} $is_synced"
-      echo -e "${BLUE}Created At:${NC} $created_at"
-      echo -e "${BLUE}Last Seen:${NC} $last_seen"
-
-      if [ "$country" != "null" ] && [ "$city" != "null" ]; then
-        echo -e "${BLUE}Location:${NC} $city, $country"
-      fi
-
-      if [ "$latitude" != "null" ] && [ "$longitude" != "null" ]; then
-        echo -e "${BLUE}Coordinates:${NC} $latitude, $longitude"
-      fi
-
-      # Очищаем временные файлы
-      rm -f "$response_file" "/tmp/peer_info.json"
-
-      return 0
-    else
-      # Если не нашли в актуальных данных, ищем в архивных (latest=false)
-      echo -e "${YELLOW}$(t "searching_archive")${NC}"
-      url="https://aztec.nethermind.io/api/peers?latest=false&id=$peer_id"
-
-      curl -s "$url" > "$response_file"
-
-      if [ $? -ne 0 ] || [ ! -s "$response_file" ]; then
-        echo -e "${RED}$(t "fetch_error")${NC}"
-        rm -f "$response_file"
-        return 1
-      fi
-
-      # Проверяем, есть ли информацию о пире в архивных данных
-      if jq -e '.peers != null and .peers[0] != null' "$response_file" > /dev/null 2>&1; then
-        # Извлекаем данные первого пира из массива
-        peer_info=$(jq -r '.peers[0]' "$response_file")
-        echo "$peer_info" > "/tmp/peer_info.json"
-
-        # Извлекаем данные из JSON
-        created_at=$(jq -r '.created_at' "/tmp/peer_info.json")
-        last_seen=$(jq -r '.last_seen' "/tmp/peer_info.json")
-        client=$(jq -r '.client' "/tmp/peer_info.json")
-        country=$(jq -r '.multi_addresses[0].ip_info[0].country_name' "/tmp/peer_info.json")
-        city=$(jq -r '.multi_addresses[0].ip_info[0].city_name' "/tmp/peer_info.json")
-        latitude=$(jq -r '.multi_addresses[0].ip_info[0].latitude' "/tmp/peer_info.json")
-        longitude=$(jq -r '.multi_addresses[0].ip_info[0].longitude' "/tmp/peer_info.json")
-        block_height=$(jq -r '.block_height' "/tmp/peer_info.json")
-        is_synced=$(jq -r '.is_synced' "/tmp/peer_info.json")
-
-        # Выводим информацию в красивом виде с пометкой об архивных данных
-        echo -e "\n${GREEN}=== Peer Information (${RED}Archive${GREEN}) ===${NC}"
-        echo -e "${YELLOW}$(t "peer_found_archive")${NC}"
-        echo -e "${BLUE}Peer ID:${NC} $peer_id"
-        echo -e "${BLUE}Client Version:${NC} $client"
-        echo -e "${BLUE}Block Height:${NC} $block_height"
-        echo -e "${BLUE}Synced:${NC} $is_synced"
-        echo -e "${BLUE}Created At:${NC} $created_at"
-        echo -e "${BLUE}Last Seen:${NC} $last_seen"
-
-        if [ "$country" != "null" ] && [ "$city" != "null" ]; then
-          echo -e "${BLUE}Location:${NC} $city, $country"
-        fi
-
-        if [ "$latitude" != "null" ] && [ "$longitude" != "null" ]; then
-          echo -e "${BLUE}Coordinates:${NC} $latitude, $longitude"
-        fi
-
-        # Очищаем временные файлы
-        rm -f "$response_file" "/tmp/peer_info.json"
-
-        return 0
-      else
-        echo -e "${YELLOW}$(t "peer_not_in_list")${NC}"
-        echo -e "\n$(t "peer_id_not_critical")"
-        rm -f "$response_file"
-        return 1
-      fi
-    fi
+    return 0
   fi
 }
 
@@ -1231,6 +1179,7 @@ find_governance_proposer_payload() {
       grep -i '"governanceProposerPayload"' | \
       grep -o '"governanceProposerPayload":"0x[a-fA-F0-9]\{40\}"' | \
       cut -d'"' -f4 | \
+      tr '[:upper:]' '[:lower:]' | \
       awk '!seen[$0]++ {print}' | \
       tail -n 10 > /tmp/gov_payloads.tmp
   }
@@ -1267,8 +1216,8 @@ find_governance_proposer_payload() {
   return 0
 }
 
-# === Create agent and cron task ===
-create_cron_agent() {
+# === Create agent and systemd task ===
+create_systemd_agent() {
   local env_file
   env_file=$(_ensure_env_file)
   source "$env_file"
@@ -1437,10 +1386,11 @@ t() {
     "epoch_info") printf "$(t "epoch_info")" "\$value1" ;;
     "block_built") printf "$(t "block_built")" "\$value1" ;;
     "slot_info") printf "$(t "slot_info")" "\$value1" ;;
-	"found_validators") printf "$(t "found_validators")" "\$value1" ;;
-	"validators_prompt") echo "$(t "validators_prompt")" ;;
-	"validators_format") echo "$(t "validators_format")" ;;
-	"validators_empty") echo "$(t "validators_empty")" ;;
+    "found_validators") printf "$(t "found_validators")" "\$value1" ;;
+    "validators_prompt") echo "$(t "validators_prompt")" ;;
+    "validators_format") echo "$(t "validators_format")" ;;
+    "validators_empty") echo "$(t "validators_empty")" ;;
+    "attestation_status") echo "$(t "attestation_status")" ;;
     *) echo "\$key" ;;
   esac
 }
@@ -1573,11 +1523,57 @@ find_last_log_line() {
   echo "\$line"
 }
 
-# === Новые функции для проверки комитета и создания блоков ===
-check_committee() {
-  if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then return; fi
+# === Функция для проверки и добавления переменной DEBUG ===
+ensure_debug_variable() {
+  local env_file="/root/.env-aztec-agent"
+  if [ ! -f "\$env_file" ]; then
+    return
+  fi
 
-  # Получаем список валидаторов из файла .env-aztec-agent
+  # Проверяем, существует ли уже переменная DEBUG
+  if ! grep -q "^DEBUG=" "\$env_file"; then
+    # Добавляем DEBUG переменную в конец файла
+    echo "DEBUG=false" >> "\$env_file"
+    log "Added DEBUG variable to \$env_file"
+  fi
+}
+
+# Вызываем функцию при загрузке скрипта
+ensure_debug_variable
+
+# === Функция для проверки отладочного режима ===
+is_debug_enabled() {
+  if [ ! -f "/root/.env-aztec-agent" ]; then
+    return 1
+  fi
+
+  # Загружаем только переменную DEBUG
+  debug_value=\$(grep "^DEBUG=" "/root/.env-aztec-agent" | cut -d'=' -f2 | tr -d '"' | tr -d "'" | tr '[:upper:]' '[:lower:]')
+
+  if [ "\$debug_value" = "true" ] || [ "\$debug_value" = "1" ] || [ "\$debug_value" = "yes" ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# === Функция для отладочного логирования ===
+debug_log() {
+  if is_debug_enabled; then
+    log "DEBUG: \$1"
+  fi
+}
+
+# === Новая версия функции для проверки комитета и статусов ===
+check_committee() {
+  debug_log "check_committee started. NOTIFICATION_TYPE=\$NOTIFICATION_TYPE"
+
+  if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then
+    debug_log "NOTIFICATION_TYPE != 2, skipping committee check"
+    return
+  fi
+
+  # Загружаем список валидаторов
   if [ ! -f "/root/.env-aztec-agent" ]; then
     log "Validator file /root/.env-aztec-agent not found"
     return
@@ -1589,97 +1585,167 @@ check_committee() {
     return
   fi
 
-  # Преобразуем список валидаторов в массив
   IFS=',' read -ra VALIDATOR_ARRAY <<< "\$VALIDATORS"
+  debug_log "Validators loaded: \${VALIDATOR_ARRAY[*]}"
 
   container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
-  if [ -z "\$container_id" ]; then return; fi
+  if [ -z "\$container_id" ]; then
+    debug_log "No aztec container found"
+    return
+  fi
+  debug_log "Container ID: \$container_id"
 
-  # Ищем последнее упоминание Computing stats for slot
+  # --- Получаем данные о комитете ---
   committee_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -a "Computing stats for slot" | tail -n 1)
-  if [ -z "\$committee_line" ]; then return; fi
+  [ -z "\$committee_line" ] && { debug_log "No committee line found in logs"; return; }
+  debug_log "Committee line found: \$committee_line"
 
-  # Извлекаем JSON-часть строки
   json_part=\$(echo "\$committee_line" | sed -n 's/.*\({.*}\).*/\1/p')
-  if [ -z "\$json_part" ]; then return; fi
+  [ -z "\$json_part" ] && { debug_log "No JSON part extracted"; return; }
+  debug_log "JSON part: \$json_part"
 
-  # Извлекаем номер эпохи и список комитета
   epoch=\$(echo "\$json_part" | jq -r '.epoch')
+  slot=\$(echo "\$json_part" | jq -r '.slot')
   committee=\$(echo "\$json_part" | jq -r '.committee[]')
 
-  if [ -z "\$epoch" ] || [ -z "\$committee" ]; then return; fi
+  if [ -z "\$epoch" ] || [ -z "\$slot" ] || [ -z "\$committee" ]; then
+    debug_log "Missing epoch/slot/committee data. epoch=\$epoch, slot=\$slot, committee=\$committee"
+    return
+  fi
+  debug_log "Epoch=\$epoch, Slot=\$slot, Committee=\$committee"
 
-  # Проверяем каждый валидатор на наличие в комитете
   found_validators=()
+  committee_validators=()
   for validator in "\${VALIDATOR_ARRAY[@]}"; do
-    if echo "\$committee" | grep -qi "\$validator"; then
-      # Форматируем адрес как ссылку для Telegram
-      validator_link="[\${validator}](https://dashtec.xyz/validators/\${validator})"
+    validator_lower=\$(echo "\$validator" | tr '[:upper:]' '[:lower:]')
+    if echo "\$committee" | grep -qi "\$validator_lower"; then
+      validator_link="[\$validator](https://dashtec.xyz/validators/\$validator)"
       found_validators+=("\$validator_link")
+      committee_validators+=("\$validator_lower")
+      debug_log "Validator \$validator found in committee"
     fi
   done
 
-  # Если не нашли ни одного валидатора - выходим
-  if [ \${#found_validators[@]} -eq 0 ]; then return; fi
+  # Если не нашли валидаторов в комитете - выходим
+  if [ \${#found_validators[@]} -eq 0 ]; then
+    debug_log "No validators found in committee"
+    return
+  fi
+  debug_log "Found validators: \${found_validators[*]}"
 
+  # === Уведомление о включении в комитет (раз за эпоху) ===
   last_epoch_file="$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
-  if [ -f "\$last_epoch_file" ] && grep -q "\$epoch" "\$last_epoch_file"; then return; fi
-  echo "\$epoch" > "\$last_epoch_file"
+  if [ ! -f "\$last_epoch_file" ] || ! grep -q "\$epoch" "\$last_epoch_file"; then
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    validator_list=\$(IFS=\$'\n' ; echo "\${found_validators[*]}")
+    committee_message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
+    committee_message+="%0A\$(t "found_validators" "\$validator_list")%0A"
+    committee_message+="%0A\$(t "server_info" "\$ip")%0A"
+    committee_message+="\$(t "time_info" "\$current_time")"
 
-  # Формируем сообщение
-  current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-  validator_list=\$(IFS=\$'\n' ; echo "\${found_validators[*]}")
-  message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
-  message+="\$(t "found_validators" "\$validator_list")%0A"
-  message+="\$(t "server_info" "\$ip")%0A"
-  message+="\$(t "time_info" "\$current_time")"
+    debug_log "Sending committee message: \$committee_message"
+    send_telegram_message "\$committee_message"
+    echo "\$epoch" > "\$last_epoch_file"
+    log "Committee selection notification sent for epoch \$epoch: found validators \${found_validators[*]}"
 
-  send_telegram_message "\$message"
-  log "Committee notification sent for epoch \$epoch: found validators \${found_validators[*]}"
-}
+    # Очищаем файл слотов при смене эпохи
+    last_slot_file="$AGENT_SCRIPT_PATH/aztec_last_committee_slot"
+    > "\$last_slot_file"
+    debug_log "Cleared slot file for new epoch \$epoch"
+  else
+    debug_log "Already notified for epoch \$epoch"
+  fi
 
-check_block_built() {
-  if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then return; fi
+  # === Уведомление о статусах аттестаций (каждый слот) ===
+  last_slot_file="$AGENT_SCRIPT_PATH/aztec_last_committee_slot"
+  last_slot_key="\${epoch}_\${slot}"
 
-  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
-  if [ -z "\$container_id" ]; then return; fi
+  # Пропускаем если уже отправляли для этого слота
+  if [ -f "\$last_slot_file" ] && grep -q "\$last_slot_key" "\$last_slot_file"; then
+    debug_log "Already processed slot \$last_slot_key"
+    return
+  fi
 
-  log_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep "Built block" | grep "with" | grep "INFO: sequencer" | tail -n 1)
-  if [ -z "\$log_line" ]; then return; fi
+  # Проверяем, что слот принадлежит текущей эпохе (очищенной при смене эпохи)
+  current_epoch=\$(cat "\$last_epoch_file" 2>/dev/null)
+  if [ -n "\$current_epoch" ] && [ "\$epoch" != "\$current_epoch" ]; then
+    debug_log "Slot \$slot belongs to epoch \$epoch, but current epoch is \$current_epoch - skipping"
+    return
+  fi
 
-  block_number=\$(echo "\$log_line" | grep -oE 'block [0-9]+' | awk '{print \$2}')
-  slot_number=\$(echo "\$log_line" | grep -oE 'slot [0-9]+' | awk '{print \$2}')
-  last_block_file="$AGENT_SCRIPT_PATH/aztec_last_block_built"
+  echo "\$last_slot_key" >> "\$last_slot_file"
+  debug_log "Added slot to file: \$last_slot_key"
 
-  if [ -f "\$last_block_file" ] && grep -q "\$block_number" "\$last_block_file"; then return; fi
-  echo "\$block_number" > "\$last_block_file"
+  activity_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -a "Updating L2 slot \$slot observed activity" | tail -n 1)
+  attestation_info=""
 
-  current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-  message="\$(t "block_built" "\$block_number")!%0A\$(t "slot_info" "\$slot_number")%0A\$(t "server_info" "\$ip")%0A\$(t "time_info" "\$current_time")"
-  send_telegram_message "\$message"
-  log "Block built notification sent: block \$block_number slot \$slot_number"
+  if [ -n "\$activity_line" ]; then
+    debug_log "Activity line found: \$activity_line"
+    activity_json=\$(echo "\$activity_line" | sed 's/.*observed activity //')
+    if [ -n "\$activity_json" ]; then
+      attestation_info="%0A"
+      for validator_lower in "\${committee_validators[@]}"; do
+        status=\$(echo "\$activity_json" | jq -r ".\"\$validator_lower\"")
+        if [ "\$status" != "null" ] && [ -n "\$status" ]; then
+          case "\$status" in
+            attestation-sent)   status_text="✅ attestation" ;;
+            attestation-missed) status_text="❌ attestation" ;;
+            block-mined)        status_text="⛏️ Block mined" ;;
+            block-proposed)     status_text="📤 Block proposed" ;;
+            block-missed)       status_text="⚠️ Block missed" ;;
+            *)                  status_text="\$status" ;;
+          esac
+          validator_link="[\$validator_lower](https://dashtec.xyz/validators/\$validator_lower)"
+          attestation_info+="\$validator_link → \$status_text%0A"
+          debug_log "Validator \$validator_lower status: \$status"
+        fi
+      done
+    fi
+  else
+    debug_log "No activity line found for slot \$slot"
+  fi
+
+  if [ -n "\$attestation_info" ] && [ "\$attestation_info" != "%0A" ]; then
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    attestation_message="\$(t "attestation_status")%0A\$(t "epoch_info" "\$epoch"), \$(t "slot_info" "\$slot")%0A"
+    attestation_message+="\$attestation_info"
+    attestation_message+="%0A\$(t "server_info" "\$ip")%0A"
+    attestation_message+="\$(t "time_info" "\$current_time")"
+
+    debug_log "Sending attestation message: \$attestation_message"
+    send_telegram_message "\$attestation_message"
+    log "Attestation status notification sent for epoch \$epoch, slot \$slot"
+  else
+    debug_log "No attestation info to send"
+  fi
 }
 
 # === Основная функция: проверка контейнера и сравнение блоков ===
 check_blocks() {
+  debug_log "check_blocks started at \$(date)"
+
   container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then
     log "Container 'aztec' not found."
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     message="\$(t "container_not_found")%0A\$(t "server_info" "\$ip")%0A\$(t "time_info" "\$current_time")"
+    debug_log "Sending container not found message"
     send_telegram_message "\$message"
     exit 1
   fi
+  debug_log "Container found: \$container_id"
 
   # Проверка критических ошибок
   check_critical_errors "\$container_id"
 
   # Получаем текущий блок из контракта
+  debug_log "Getting block from contract: \$CONTRACT_ADDRESS"
   block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
   if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
-    log "Block Fetch Error. Check RPC or cast"
+    log "Block Fetch Error. Check RPC or cast: \$block_hex"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     message="\$(t "block_fetch_error")%0A\$(t "server_info" "\$ip")%0A\$(t "rpc_info" "\$RPC_URL")%0A\$(t "error_info" "\$block_hex")%0A\$(t "time_info" "\$current_time")"
+    debug_log "Sending block fetch error message"
     send_telegram_message "\$message"
     exit 1
   fi
@@ -1690,11 +1756,13 @@ check_blocks() {
 
   # Получаем последнюю релевантную строку из логов
   latest_log_line=\$(find_last_log_line "\$container_id")
+  debug_log "Latest log line: \$latest_log_line"
 
   if [ -z "\$latest_log_line" ]; then
     log "No suitable block line found in logs"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     message="\$(t "no_block_in_logs")%0A\$(t "server_info" "\$ip")%0A\$(t "block_info" "\$block_number")%0A\$(t "time_info" "\$current_time")"
+    debug_log "Sending no block in logs message"
     send_telegram_message "\$message"
     exit 1
   fi
@@ -1703,15 +1771,18 @@ check_blocks() {
   if grep -q 'Sequencer sync check succeeded' <<<"\$latest_log_line"; then
     # формат: ..."worldState":{"number":18254,...
     log_block_number=\$(echo "\$latest_log_line" | grep -o '"worldState":{"number":[0-9]\+' | grep -o '[0-9]\+$')
+    debug_log "Extracted from worldState: \$log_block_number"
   else
     # формат: ..."blockNumber":18254,...
     log_block_number=\$(echo "\$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
+    debug_log "Extracted from blockNumber: \$log_block_number"
   fi
 
   if [ -z "\$log_block_number" ]; then
     log "Failed to extract blockNumber from line: \$latest_log_line"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     message="\$(t "failed_extract_block")%0A\$(t "server_info" "\$ip")%0A\$(t "line_info" "\$latest_log_line")%0A\$(t "time_info" "\$current_time")"
+    debug_log "Sending failed extract block message"
     send_telegram_message "\$message"
     exit 1
   fi
@@ -1727,6 +1798,7 @@ check_blocks() {
     if [ "\$blocks_diff" -gt 3 ]; then
       current_time=\$(date '+%Y-%m-%d %H:%M:%S')
       message="\$(t "node_behind" "\$blocks_diff")%0A\$(t "server_info" "\$ip")%0A\$(t "block_info" "\$block_number")%0A\$(t "log_block_info" "\$log_block_number")%0A\$(t "time_info" "\$current_time")"
+      debug_log "Sending node behind message, diff=\$blocks_diff"
       send_telegram_message "\$message"
     fi
   fi
@@ -1734,25 +1806,32 @@ check_blocks() {
   log "Status: \$status (logs: \$log_block_number, contract: \$block_number)"
 
   if [ ! -f "\$LOG_FILE.initialized" ]; then
-  current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
 
-  if [ "\$NOTIFICATION_TYPE" -eq 2 ]; then
-    # Полные уведомления (все включено)
-    message="\$(t "agent_started")%0A\$(t "server_info" "\$ip")%0A\$status%0A\$(t "notifications_full_info")%0A\$(t "time_info" "\$current_time")"
-  else
-    # Только критические уведомления
-    message="\$(t "agent_started")%0A\$(t "server_info" "\$ip")%0A\$status%0A\$(t "notifications_info")%0A\$(t "time_info" "\$current_time")"
+    if [ "\$NOTIFICATION_TYPE" -eq 2 ]; then
+      # Полные уведомления (все включено)
+      message="\$(t "agent_started")%0A\$(t "server_info" "\$ip")%0A\$status%0A\$(t "notifications_full_info")%0A\$(t "time_info" "\$current_time")"
+    else
+      # Только критические уведомления
+      message="\$(t "agent_started")%0A\$(t "server_info" "\$ip")%0A\$status%0A\$(t "notifications_info")%0A\$(t "time_info" "\$current_time")"
+    fi
+
+    debug_log "Sending initialization message"
+    send_telegram_message "\$message"
+    touch "\$LOG_FILE.initialized"
+    echo "v.\$VERSION" >> "\$LOG_FILE"
+    echo "INITIALIZED" >> "\$LOG_FILE"
   fi
 
-  send_telegram_message "\$message"
-  touch "\$LOG_FILE.initialized"
-  echo "v.\$VERSION" >> "\$LOG_FILE"
-  echo "INITIALIZED" >> "\$LOG_FILE"
-fi
-
    # Дополнительные проверки (только если NOTIFICATION_TYPE == 2)
-  check_committee
-  check_block_built
+  if [ "\$NOTIFICATION_TYPE" -eq 2 ]; then
+    debug_log "Starting committee check"
+    check_committee
+  else
+    debug_log "Skipping committee check (NOTIFICATION_TYPE=\$NOTIFICATION_TYPE)"
+  fi
+
+  debug_log "check_blocks completed at \$(date)"
 }
 
 check_blocks
@@ -1760,11 +1839,50 @@ EOF
 
   chmod +x "$AGENT_SCRIPT_PATH/agent.sh"
 
-  if ! crontab -l | grep -q "$AGENT_SCRIPT_PATH/agent.sh"; then
-    (crontab -l 2>/dev/null; echo "* * * * * $AGENT_SCRIPT_PATH/agent.sh") | crontab -
-    echo -e "\n${GREEN}$(t "agent_added")${NC}"
+  # Создаем systemd сервис
+  cat > /etc/systemd/system/aztec-agent.service <<EOF
+[Unit]
+Description=Aztec Monitoring Agent
+After=network.target
+
+[Service]
+Type=oneshot
+EnvironmentFile=$env_file
+ExecStart=$AGENT_SCRIPT_PATH/agent.sh
+User=root
+WorkingDirectory=$AGENT_SCRIPT_PATH
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  # Создаем systemd timer
+  cat > /etc/systemd/system/aztec-agent.timer <<EOF
+[Unit]
+Description=Run Aztec Agent every 37 seconds
+Requires=aztec-agent.service
+
+[Timer]
+OnBootSec=37
+OnUnitActiveSec=37
+AccuracySec=1us
+
+[Install]
+WantedBy=timers.target
+EOF
+
+  # Активируем и запускаем timer
+  systemctl daemon-reload
+  systemctl enable aztec-agent.timer
+  systemctl start aztec-agent.timer
+
+  # Проверяем статус
+  if systemctl is-active --quiet aztec-agent.timer; then
+    echo -e "\n${GREEN}$(t "agent_systemd_added")${NC}"
+    echo -e "${GREEN}$(t "agent_timer_status")$(systemctl status aztec-agent.timer --no-pager -q | grep Active)${NC}"
   else
-    echo -e "\n${YELLOW}$(t "agent_exists")${NC}"
+    echo -e "\n${RED}$(t "agent_timer_error")${NC}"
+    systemctl status aztec-agent.timer --no-pager
   fi
 }
 
@@ -1775,6 +1893,17 @@ remove_cron_agent() {
   rm -rf "$AGENT_SCRIPT_PATH"
   echo -e "\n${GREEN}$(t "agent_removed")${NC}"
 }
+
+# === Remove cron task and agent ===
+remove_systemd_agent() {
+  echo -e "\n${BLUE}$(t "removing_systemd_agent")${NC}"
+  systemctl stop aztec-agent.timer
+  systemctl disable aztec-agent.timer
+  rm /etc/systemd/system/aztec-agent.*
+  rm -rf "$AGENT_SCRIPT_PATH"
+  echo -e "\n${GREEN}$(t "agent_systemd_removed")${NC}"
+}
+
 
 check_proven_block() {
   ENV_FILE="/root/.env-aztec-agent"
@@ -2204,7 +2333,7 @@ function start_aztec_containers() {
 
       if screen -dmS "$session_name" && \
          screen -S "$session_name" -p 0 -X stuff "aztec start --node --archiver --sequencer \
---network alpha-testnet \
+--network staging-public \
 --l1-rpc-urls $ethereum_rpc_url \
 --l1-consensus-host-urls $consensus_beacon_url \
 --sequencer.validatorPrivateKeys 0x$validator_private_key \
@@ -2238,15 +2367,26 @@ function check_aztec_version() {
 
     echo -e "${GREEN}$(t "container_found") ${BLUE}$container_id${NC}"
 
-    version=$(docker exec "$container_id" node /usr/src/yarn-project/aztec/dest/bin/index.js --version 2>/dev/null)
+    # Получаем вывод команды и фильтруем только версию
+    version_output=$(docker exec "$container_id" node /usr/src/yarn-project/aztec/dest/bin/index.js --version 2>/dev/null)
 
-    if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    # Извлекаем только строку с версией (игнорируем debug/verbose сообщения)
+    version=$(echo "$version_output" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+' | tail -n 1)
+
+    # Альтернативный вариант: ищем последнюю строку, которая соответствует формату версии
+    if [ -z "$version" ]; then
+        version=$(echo "$version_output" | tail -n 1 | grep -E '^[0-9]+\.[0-9]+\.[0-9]+')
+    fi
+
+    # Проверяем версию с поддержкой rc версий (например: 2.0.0-rc.27)
+    if [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]; then
         echo -e "${GREEN}$(t "aztec_node_version") ${BLUE}$version${NC}"
     else
         echo -e "\n${RED}$(t "aztec_version_failed")${NC}"
+        echo -e "${YELLOW}$(t "raw_output"):${NC}"
+        echo "$version_output"
     fi
 }
-
 
 # === Main menu ===
 main_menu() {
@@ -2254,8 +2394,8 @@ main_menu() {
   while true; do
     echo -e "\n${BLUE}$(t "title")${NC}"
     echo -e "${CYAN}$(t "option1")${NC}"
-    echo -e "${CYAN}$(t "option2")${NC}"
-    echo -e "${CYAN}$(t "option3")${NC}"
+    echo -e "${GREEN}$(t "option2")${NC}"
+    echo -e "${RED}$(t "option3")${NC}"
     echo -e "${CYAN}$(t "option4")${NC}"
     echo -e "${CYAN}$(t "option5")${NC}"
     echo -e "${CYAN}$(t "option6")${NC}"
@@ -2263,12 +2403,12 @@ main_menu() {
     echo -e "${CYAN}$(t "option8")${NC}"
     echo -e "${CYAN}$(t "option9")${NC}"
     echo -e "${CYAN}$(t "option10")${NC}"
-    echo -e "${CYAN}$(t "option11")${NC}"
-    echo -e "${CYAN}$(t "option12")${NC}"
+    echo -e "${GREEN}$(t "option11")${NC}"
+    echo -e "${RED}$(t "option12")${NC}"
     echo -e "${CYAN}$(t "option13")${NC}"
     echo -e "${CYAN}$(t "option14")${NC}"
     echo -e "${CYAN}$(t "option15")${NC}"
-    echo -e "${CYAN}$(t "option16")${NC}"
+    echo -e "${YELLOW}$(t "option16")${NC}"
     echo -e "${CYAN}$(t "option17")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
@@ -2277,8 +2417,8 @@ main_menu() {
 
     case "$choice" in
       1) check_aztec_container_logs ;;
-      2) create_cron_agent ;;
-      3) remove_cron_agent ;;
+      2) create_systemd_agent ;;
+      3) remove_systemd_agent ;;
       4) find_rollup_address ;;
       5) find_peer_id ;;
       6) find_governance_proposer_payload ;;

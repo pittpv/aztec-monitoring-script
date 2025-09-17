@@ -113,6 +113,15 @@
         "VERSION": "1.11.4",
         "UPDATE_DATE": "21.08.2025",
         "CHANGES": ["Updated PeerID search function", "Updated cron agent creation function"]
+    },
+    {
+        "VERSION": "1.11.5",
+        "UPDATE_DATE": "24.08.2025",
+        "CHANGES": ["New search & check validator function"]
+    },
+    {
+        "VERSION": "2.0.0",
+        "UPDATE_DATE": "17.09.2025",
+        "CHANGES": ["Full support for the new network and testnet", "New node installation script", "New monitoring agent script for the node","New script for searching and verifying validators directly in Rollup and GSE contracts", "Added new errors detected by the critical error control module", "Updated script version control function. Now short descriptions of new versions and updates are shown", "Minor improvements to other features"]
     }
-
 ]

@@ -138,7 +138,7 @@ init_languages() {
   TRANSLATIONS["ru,enter_http_port"]="Введите HTTP порт"
   TRANSLATIONS["ru,enter_p2p_port"]="Введите P2P порт"
   TRANSLATIONS["ru,installation_aborted"]="Установка прервана пользователем"
-  TRANSLATIONS["ru,checking_ports_desc"]="Проверка, что порты не используются другими процессами..."
+  TRANSLATIONS["ru,checking_ports_desc"]="Проверка, что порты не используются другим процессами..."
   TRANSLATIONS["ru,scanning_ports"]="Сканирование портов"
   TRANSLATIONS["ru,busy"]="занят"
   TRANSLATIONS["ru,free"]="свободен"
@@ -245,9 +245,6 @@ init_languages() {
   TRANSLATIONS["tr,ufw_not_active"]="⚠️ ufw aktif değil"
 }
 
-# Initialize language (default to en if no argument)
-init_languages "$1"
-
 # Colors
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -255,6 +252,148 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 GRAY='\033[0;37m'
 NC='\033[0m'
+
+# Initialize language (default to en if no argument)
+init_languages "$1"
+
+# Инициализация портов по умолчанию
+http_port=8080
+p2p_port=40400
+
+check_and_set_ports() {
+    local new_http_port
+    local new_p2p_port
+
+    echo -e "\n${CYAN}=== $(t "checking_ports") ===${NC}"
+    echo -e "${GRAY}$(t "checking_ports_desc")${NC}\n"
+
+    # Установка iproute2 (если не установлен) - содержит утилиту ss
+    if ! command -v ss &> /dev/null; then
+        echo -e "${YELLOW}$(t "installing_ss")...${NC}"
+        sudo apt update -q > /dev/null 2>&1
+        sudo apt install -y iproute2 > /dev/null 2>&1
+        echo -e "${GREEN}$(t "ss_installed") ✔${NC}\n"
+    fi
+
+    while true; do
+        ports=("$http_port" "$p2p_port")
+        ports_busy=()
+
+        echo -e "${CYAN}$(t "scanning_ports")...${NC}"
+
+        # Проверка каждого порта с визуализацией (используем ss вместо lsof)
+        for port in "${ports[@]}"; do
+            echo -n -e "  ${YELLOW}Port $port:${NC} "
+            if sudo ss -tuln | grep -q ":${port}\b"; then
+                echo -e "${RED}$(t "busy") ✖${NC}"
+                ports_busy+=("$port")
+            else
+                echo -e "${GREEN}$(t "free") ✔${NC}"
+            fi
+            sleep 0.1  # Уменьшенная задержка, так как ss работает быстрее
+        done
+
+        # Все порты свободны → выход из цикла
+        if [ ${#ports_busy[@]} -eq 0 ]; then
+            echo -e "\n${GREEN}✓ $(t "ports_free_success")${NC}"
+            echo -e "  HTTP: ${GREEN}$http_port${NC}, P2P: ${GREEN}$p2p_port${NC}\n"
+            break
+        else
+            # Показать занятые порты
+            echo -e "\n${RED}⚠ $(t "ports_busy_error")${NC}"
+            echo -e "  ${RED}${ports_busy[*]}${NC}\n"
+
+            # Предложить изменить порты
+            read -p "$(t "change_ports_prompt") " -n 1 -r
+            echo
+
+            if [[ $REPLY =~ ^[Yy]$ || -z "$REPLY" ]]; then
+                echo -e "\n${YELLOW}$(t "enter_new_ports_prompt")${NC}"
+
+                # Запрос нового HTTP-порта
+                read -p "  $(t "enter_http_port") [${GRAY}by default: $http_port${NC}]: " new_http_port
+                http_port=${new_http_port:-$http_port}
+
+                # Запрос нового P2P-порта
+                read -p "  $(t "enter_p2p_port") [${GRAY}by default: $p2p_port${NC}]: " new_p2p_port
+                p2p_port=${new_p2p_port:-$p2p_port}
+
+                echo -e "\n${CYAN}$(t "ports_updated")${NC}"
+                echo -e "  HTTP: ${YELLOW}$http_port${NC}, P2P: ${YELLOW}$p2p_port${NC}\n"
+            else
+                # Отмена установки
+                #echo -e "\n${RED}✖ $(t "installation_aborted")${NC}\n"
+                exit 2
+            fi
+        fi
+    done
+}
+
+install_docker() {
+    echo -e "\n${YELLOW}$(t "installing_docker")${NC}"
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh get-docker.sh
+    sudo usermod -aG docker $USER
+    echo -e "\n${GREEN}$(t "docker_installed")${NC}"
+}
+
+install_docker_compose() {
+    echo -e "\n${YELLOW}$(t "installing_compose")${NC}"
+    sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    echo -e "\n${GREEN}$(t "compose_installed")${NC}"
+}
+
+delete_aztec_node() {
+    echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
+
+    # Основной запрос
+    while :; do
+        read -p "$(t "delete_confirm") " -n 1 -r
+        [[ $REPLY =~ ^[YyNn]$ ]] && break
+        # Добавляем перевод строки только если ввод был неправильный
+        echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
+    done
+    echo  # Фиксируем окончательный перевод строки
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}$(t "stopping_containers")${NC}"
+        docker compose -f "$HOME/aztec/docker-compose.yml" down || true
+
+        echo -e "${YELLOW}$(t "removing_node_data")${NC}"
+        sudo rm -rf "$HOME/.aztec" "$HOME/aztec"
+
+        echo -e "${GREEN}$(t "node_deleted")${NC}"
+
+        # Проверяем Watchtower
+        if [ -d "$HOME/watchtower" ] || docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
+            while :; do
+                read -p "$(t "delete_watchtower_confirm") " -n 1 -r
+                [[ $REPLY =~ ^[YyNn]$ ]] && break
+                echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
+            done
+            echo
+
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo -e "${YELLOW}$(t "stopping_watchtower")${NC}"
+                docker stop watchtower 2>/dev/null || true
+                docker rm watchtower 2>/dev/null || true
+                [ -f "$HOME/watchtower/docker-compose.yml" ] && docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
+
+                echo -e "${YELLOW}$(t "removing_watchtower_data")${NC}"
+                sudo rm -rf "$HOME/watchtower"
+                echo -e "${GREEN}$(t "watchtower_deleted")${NC}"
+            else
+                echo -e "${GREEN}$(t "watchtower_kept")${NC}"
+            fi
+        fi
+
+        return 0
+    else
+        echo -e "${YELLOW}$(t "delete_canceled")${NC}"
+        return 1
+    fi
+}
 
 # Функция для обновления ноды Aztec до последней версии
 update_aztec_node() {
@@ -360,130 +499,6 @@ downgrade_aztec_node() {
     echo -e "${GREEN}$(t "downgrade_success") $TAG!${NC}"
 }
 
-delete_aztec_node() {
-    echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
-
-    # Основной запрос
-    while :; do
-        read -p "$(t "delete_confirm") " -n 1 -r
-        [[ $REPLY =~ ^[YyNn]$ ]] && break
-        # Добавляем перевод строки только если ввод был неправильный
-        echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
-    done
-    echo  # Фиксируем окончательный перевод строки
-
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${YELLOW}$(t "stopping_containers")${NC}"
-        docker compose -f "$HOME/aztec/docker-compose.yml" down || true
-
-        echo -e "${YELLOW}$(t "removing_node_data")${NC}"
-        sudo rm -rf "$HOME/.aztec" "$HOME/aztec"
-
-        echo -e "${GREEN}$(t "node_deleted")${NC}"
-
-        # Проверяем Watchtower
-        if [ -d "$HOME/watchtower" ] || docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
-            while :; do
-                read -p "$(t "delete_watchtower_confirm") " -n 1 -r
-                [[ $REPLY =~ ^[YyNn]$ ]] && break
-                echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
-            done
-            echo
-
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                echo -e "${YELLOW}$(t "stopping_watchtower")${NC}"
-                docker stop watchtower 2>/dev/null || true
-                docker rm watchtower 2>/dev/null || true
-                [ -f "$HOME/watchtower/docker-compose.yml" ] && docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
-
-                echo -e "${YELLOW}$(t "removing_watchtower_data")${NC}"
-                sudo rm -rf "$HOME/watchtower"
-                echo -e "${GREEN}$(t "watchtower_deleted")${NC}"
-            else
-                echo -e "${GREEN}$(t "watchtower_kept")${NC}"
-            fi
-        fi
-
-        return 0
-    else
-        echo -e "${YELLOW}$(t "delete_canceled")${NC}"
-        return 1
-    fi
-}
-
-# Инициализация портов по умолчанию
-http_port=8080
-p2p_port=40400
-
-check_and_set_ports() {
-    local new_http_port
-    local new_p2p_port
-
-    echo -e "\n${CYAN}=== $(t "checking_ports") ===${NC}"
-    echo -e "${GRAY}$(t "checking_ports_desc")${NC}\n"
-
-    # Установка iproute2 (если не установлен) - содержит утилиту ss
-    if ! command -v ss &> /dev/null; then
-        echo -e "${YELLOW}$(t "installing_ss")...${NC}"
-        sudo apt update -q > /dev/null 2>&1
-        sudo apt install -y iproute2 > /dev/null 2>&1
-        echo -e "${GREEN}$(t "ss_installed") ✔${NC}\n"
-    fi
-
-    while true; do
-        ports=("$http_port" "$p2p_port")
-        ports_busy=()
-
-        echo -e "${CYAN}$(t "scanning_ports")...${NC}"
-
-        # Проверка каждого порта с визуализацией (используем ss вместо lsof)
-        for port in "${ports[@]}"; do
-            echo -n -e "  ${YELLOW}Port $port:${NC} "
-            if sudo ss -tuln | grep -q ":${port}\b"; then
-                echo -e "${RED}$(t "busy") ✖${NC}"
-                ports_busy+=("$port")
-            else
-                echo -e "${GREEN}$(t "free") ✔${NC}"
-            fi
-            sleep 0.1  # Уменьшенная задержка, так как ss работает быстрее
-        done
-
-        # Все порты свободны → выход из цикла
-        if [ ${#ports_busy[@]} -eq 0 ]; then
-            echo -e "\n${GREEN}✓ $(t "ports_free_success")${NC}"
-            echo -e "  HTTP: ${GREEN}$http_port${NC}, P2P: ${GREEN}$p2p_port${NC}\n"
-            break
-        else
-            # Показать занятые порты
-            echo -e "\n${RED}⚠ $(t "ports_busy_error")${NC}"
-            echo -e "  ${RED}${ports_busy[*]}${NC}\n"
-
-            # Предложить изменить порты
-            read -p "$(t "change_ports_prompt") " -n 1 -r
-            echo
-
-            if [[ $REPLY =~ ^[Yy]$ || -z "$REPLY" ]]; then
-                echo -e "\n${YELLOW}$(t "enter_new_ports_prompt")${NC}"
-
-                # Запрос нового HTTP-порта
-                read -p "  $(t "enter_http_port") [${GRAY}by default: $http_port${NC}]: " new_http_port
-                http_port=${new_http_port:-$http_port}
-
-                # Запрос нового P2P-порта
-                read -p "  $(t "enter_p2p_port") [${GRAY}by default: $p2p_port${NC}]: " new_p2p_port
-                p2p_port=${new_p2p_port:-$p2p_port}
-
-                echo -e "\n${CYAN}$(t "ports_updated")${NC}"
-                echo -e "  HTTP: ${YELLOW}$http_port${NC}, P2P: ${YELLOW}$p2p_port${NC}\n"
-            else
-                # Отмена установки
-                #echo -e "\n${RED}✖ $(t "installation_aborted")${NC}\n"
-                exit 2
-            fi
-        fi
-    done
-}
-
 # Вызываем проверку портов
 check_and_set_ports
 
@@ -494,21 +509,6 @@ sudo apt install curl iptables build-essential git wget lz4 jq make gcc nano aut
 echo -e "\n${GREEN}$(t "deps_installed")${NC}"
 
 echo -e "\n${GREEN}$(t "checking_docker")${NC}"
-
-install_docker() {
-    echo -e "\n${YELLOW}$(t "installing_docker")${NC}"
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sudo sh get-docker.sh
-    sudo usermod -aG docker $USER
-    echo -e "\n${GREEN}$(t "docker_installed")${NC}"
-}
-
-install_docker_compose() {
-    echo -e "\n${YELLOW}$(t "installing_compose")${NC}"
-    sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    sudo chmod +x /usr/local/bin/docker-compose
-    echo -e "\n${GREEN}$(t "compose_installed")${NC}"
-}
 
 if ! command -v docker &>/dev/null; then
     echo -e "\n${RED}$(t "docker_not_found")${NC}"
@@ -579,15 +579,136 @@ cd "$HOME/aztec"
 echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
 read -p "$(t "multiple_validators_prompt")" -n 1 -r
 echo
+
+# Initialize arrays for keys and addresses
+VALIDATOR_PRIVATE_KEYS_ARRAY=()
+VALIDATOR_ADDRESSES_ARRAY=()
+USE_FIRST_AS_PUBLISHER=false
+
 if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
-    read -p "$(t "enter_validator_keys") " VALIDATOR_PRIVATE_KEYS
-    read -p "$(t "enter_seq_publisher_key") " SEQ_PUBLISHER_PRIVATE_KEY
+
+    # Get multiple validator key-address pairs
+    echo -e "${YELLOW}Enter validator private keys and addresses (up to 10, format: private_key,address):${NC}"
+    for i in {1..10}; do
+        read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_PAIR
+        if [ -z "$KEY_ADDRESS_PAIR" ]; then
+            break
+        fi
+
+        # Split the input into private key and address
+        IFS=',' read -r PRIVATE_KEY ADDRESS <<< "$KEY_ADDRESS_PAIR"
+
+        # Remove any spaces and ensure private key starts with 0x
+        PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+        if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+            PRIVATE_KEY="0x$PRIVATE_KEY"
+        fi
+
+        # Remove any spaces from address
+        ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+        VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+        VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+
+        echo -e "${GREEN}Added validator $i${NC}"
+    done
+
+    # Ask if user wants to use first address as publisher for all validators
+    echo ""
+    read -p "Use first address as publisher for all validators? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        USE_FIRST_AS_PUBLISHER=true
+        echo -e "${GREEN}Using first address as publisher for all validators${NC}"
+    else
+        echo -e "${GREEN}Each validator will use their own address as publisher${NC}"
+    fi
+
 else
     echo -e "\n${GREEN}$(t "single_validator_mode")${NC}"
-    read -p "$(t "enter_validator_key") " VALIDATOR_PRIVATE_KEYS
-    SEQ_PUBLISHER_PRIVATE_KEY=""
+
+    # Get single validator key-address pair
+    read -p "$(t "enter_validator_key") " PRIVATE_KEY
+    read -p "Enter validator address: " ADDRESS
+
+    # Remove any spaces and ensure private key starts with 0x
+    PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+    if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+        PRIVATE_KEY="0x$PRIVATE_KEY"
+    fi
+
+    # Remove any spaces from address
+    ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+    VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+    VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+    USE_FIRST_AS_PUBLISHER=true  # For single validator, always use own address
 fi
+
+# Ask for Aztec L2 Address for feeRecipient
+echo -e "\n${YELLOW}Enter Aztec L2 Address to use as feeRecipient for all validators:${NC}"
+read -p "Aztec L2 Address: " FEE_RECIPIENT_ADDRESS
+FEE_RECIPIENT_ADDRESS=$(echo "$FEE_RECIPIENT_ADDRESS" | tr -d ' ')
+
+# Create keys directory and YML files
+echo -e "\n${GREEN}Creating key files...${NC}"
+mkdir -p "$HOME/aztec/keys"
+
+for i in "${!VALIDATOR_PRIVATE_KEYS_ARRAY[@]}"; do
+    KEY_FILE="$HOME/aztec/keys/validator_$((i+1)).yml"
+    cat > "$KEY_FILE" <<EOF
+type: "file-raw"
+keyType: "SECP256K1"
+privateKey: "${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
+EOF
+    echo -e "${GREEN}Created key file: $KEY_FILE${NC}"
+done
+
+# Create config directory and keystore.json
+echo -e "\n${GREEN}Creating keystore configuration...${NC}"
+mkdir -p "$HOME/aztec/config"
+
+# Prepare validators array for keystore.json
+VALIDATORS_JSON_ARRAY=()
+for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+    address="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
+
+    if [ "$USE_FIRST_AS_PUBLISHER" = true ] && [ $i -gt 0 ]; then
+        # Use first private key as publisher for all other validators
+        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[0]}"
+    else
+        # Use own private key as publisher
+        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
+    fi
+
+    VALIDATOR_JSON=$(cat <<EOF
+    {
+      "attester": "$address",
+      "publisher": "$publisher",
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
+    }
+EOF
+    )
+    VALIDATORS_JSON_ARRAY+=("$VALIDATOR_JSON")
+done
+
+# Join validators array with commas
+VALIDATORS_JSON_STRING=$(IFS=,; echo "${VALIDATORS_JSON_ARRAY[*]}")
+
+# Create keystore.json
+cat > "$HOME/aztec/config/keystore.json" <<EOF
+{
+  "schemaVersion": 1,
+  "remoteSigner": "http://127.0.0.1:10500",
+  "slasher": "${VALIDATOR_ADDRESSES_ARRAY[0]}",
+  "validators": [
+    $VALIDATORS_JSON_STRING
+  ]
+}
+EOF
+
+echo -e "${GREEN}Created keystore.json configuration${NC}"
 
 DEFAULT_IP=$(hostname -I | awk '{print $1}')
 
@@ -595,23 +716,19 @@ echo -e "\n${GREEN}$(t "creating_env")${NC}"
 read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
 read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
 read -p "COINBASE: " COINBASE
-#read -p "P2P_IP: " P2P_IP
 
+# Create .env file without VALIDATOR_PRIVATE_KEYS
 cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
 CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
-VALIDATOR_PRIVATE_KEYS=${VALIDATOR_PRIVATE_KEYS}
-SEQ_PUBLISHER_PRIVATE_KEY=${SEQ_PUBLISHER_PRIVATE_KEY}
 COINBASE=${COINBASE}
 P2P_IP=${DEFAULT_IP}
 EOF
 
 echo -e "\n${GREEN}$(t "creating_compose")${NC}"
 
-# Создаем docker-compose.yml с учетом выбранного режима
-if [[ -n "$SEQ_PUBLISHER_PRIVATE_KEY" ]]; then
-    # Режим нескольких валидаторов - включаем SEQ_PUBLISHER_PRIVATE_KEY
-    cat > docker-compose.yml <<EOF
+# Создаем docker-compose.yml без VALIDATOR_PRIVATE_KEYS и с KEY_STORE_DIRECTORY
+cat > docker-compose.yml <<EOF
 services:
   aztec-node:
     container_name: aztec-sequencer
@@ -622,51 +739,22 @@ services:
       ETHEREUM_HOSTS: \${ETHEREUM_RPC_URL}
       L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
       DATA_DIRECTORY: /data
-      VALIDATOR_PRIVATE_KEYS: \${VALIDATOR_PRIVATE_KEYS}
-      SEQ_PUBLISHER_PRIVATE_KEY: \${SEQ_PUBLISHER_PRIVATE_KEY}
+      KEY_STORE_DIRECTORY: /config
       COINBASE: \${COINBASE}
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: debug
     entrypoint: >
-      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network alpha-testnet --node --archiver --sequencer'
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network staging-public --node --archiver --sequencer'
     ports:
       - ${p2p_port}:${p2p_port}/tcp
       - ${p2p_port}:${p2p_port}/udp
       - ${http_port}:${http_port}
     volumes:
-      - /root/.aztec/alpha-testnet/data/:/data
+      - /root/.aztec/staging-public/data/:/data
+      - $HOME/aztec/config:/config
     labels:
       - com.centurylinklabs.watchtower.enable=true
 EOF
-else
-    # Режим одного валидатора - не включаем SEQ_PUBLISHER_PRIVATE_KEY
-    cat > docker-compose.yml <<EOF
-services:
-  aztec-node:
-    container_name: aztec-sequencer
-    network_mode: host
-    image: aztecprotocol/aztec:latest
-    restart: unless-stopped
-    environment:
-      ETHEREUM_HOSTS: \${ETHEREUM_RPC_URL}
-      L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
-      DATA_DIRECTORY: /data
-      VALIDATOR_PRIVATE_KEYS: \${VALIDATOR_PRIVATE_KEYS}
-      COINBASE: \${COINBASE}
-      P2P_IP: \${P2P_IP}
-      LOG_LEVEL: debug
-    entrypoint: >
-      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network alpha-testnet --node --archiver --sequencer'
-    ports:
-      - ${p2p_port}:${p2p_port}/tcp
-      - ${p2p_port}:${p2p_port}/udp
-      - ${http_port}:${http_port}
-    volumes:
-      - /root/.aztec/alpha-testnet/data/:/data
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-EOF
-fi
 
 echo -e "\n${GREEN}$(t "compose_created")${NC}"
 
@@ -715,6 +803,31 @@ EOF
 
     echo -e "\n${GREEN}$(t "compose_created")${NC}"
 fi
+
+# Download and run web3signer before starting the node
+echo -e "\n${GREEN}Downloading and starting web3signer...${NC}"
+docker pull consensys/web3signer:latest
+
+# Stop and remove existing web3signer container if it exists
+docker stop web3signer 2>/dev/null || true
+docker rm web3signer 2>/dev/null || true
+
+# Run web3signer container
+docker run -d --name web3signer --restart unless-stopped \
+  -p 127.0.0.1:10500:10500 \
+  -v $HOME/aztec/keys:/keys \
+  consensys/web3signer:latest \
+  --http-listen-host=0.0.0.0 \
+  --http-listen-port=10500 \
+  --http-host-allowlist="*" \
+  --key-store-path=/keys \
+  eth1 --chain-id=11155111
+
+echo -e "${GREEN}web3signer started successfully${NC}"
+
+# Wait a moment for web3signer to initialize
+echo -e "${YELLOW}Waiting for web3signer to initialize...${NC}"
+sleep 5
 
 echo -e "\n${GREEN}$(t "starting_node")${NC}"
 cd "$HOME/aztec"
