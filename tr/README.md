@@ -214,7 +214,7 @@ Ana menü:
 5. 👥 Loglarda PeerID bul
 6. 🏛️ Loglarda governanceProposerPayload bul
 7. 🔗 Kanıtlanmış L2 Bloğunu ve Sync Proof'u Kontrol Et *(daha önce Discord'da Çırak rolü almak için gereken veriler)*
-  - Artık kendi portunuzu ayarlayabilirsiniz (varsayılan port 8080). Yeni port numarası .env-aztec-agent ortam dosyasına kaydedilecektir.
+   - Artık kendi portunuzu ayarlayabilirsiniz (varsayılan port 8080). Yeni port numarası .env-aztec-agent ortam dosyasına kaydedilecektir.
 8. 🔌 RPC URL'sini değiştir
 9. 🔍 Validator ara ve durumunu kontrol et
 10. Aztec loglarını görüntüle
