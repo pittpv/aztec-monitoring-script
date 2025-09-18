@@ -403,59 +403,54 @@ check_validator_queue() {
     local validator_address=$1
     echo -e "${YELLOW}$(t "fetching_queue")${RESET}"
 
-    # Получаем первую страницу для получения информации о пагинации
-    first_page_data=$(curl -s "${QUEUE_URL?page=1&limit=100}")
-    if [ $? -ne 0 ] || [ -z "$first_page_data" ]; then
+    # Нормализуем адрес для поиска (нижний регистр)
+    local search_address_lower=${validator_address,,}
+
+    # Формируем URL с поиском по конкретному адресу
+    local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
+
+    # Получаем данные с поиском по адресу
+    local response_data=$(curl -s "$search_url")
+
+    if [ $? -ne 0 ] || [ -z "$response_data" ]; then
         echo -e "${RED}Error fetching validator queue data${RESET}"
         return 1
     fi
 
     # Проверяем валидность JSON
-    if ! jq -e . >/dev/null 2>&1 <<<"$first_page_data"; then
+    if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
         echo -e "${RED}Invalid JSON data received from queue API${RESET}"
         return 1
     fi
 
-    # Получаем общее количество страниц
-    total_pages=$(echo "$first_page_data" | jq -r '.pagination.totalPages // 1')
-    if [ -z "$total_pages" ] || [ "$total_pages" -lt 1 ]; then
-        total_pages=1
-    fi
+    # Проверяем наличие валидатора в ответе
+    local validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+    local filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
 
-    # Нормализуем адрес для поиска (нижний регистр)
-    search_address_lower=${validator_address,,}
-    found=false
+    if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
+        echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
+        echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
+        echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
+        echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
+        echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
+        echo -e "  ${BOLD}Transaction Hash:${RESET} $(echo "$validator_info" | jq -r '.transactionHash')"
 
-    # Проверяем все страницы
-    for ((page=1; page<=total_pages; page++)); do
-        echo -e "${YELLOW}$(t "fetching_page" "$page" "$total_pages")${RESET}"
+        # Форматируем дату для лучшей читаемости
+        local queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
+        local formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
+        echo -e "  ${BOLD}Formatted Date:${RESET} $formatted_date"
 
-        # Получаем данные текульной страницы
-        page_data=$(curl -s "${QUEUE_URL?page=${page}&limit=100}")
-        if [ $? -ne 0 ] || [ -z "$page_data" ]; then
-            echo -e "${RED}Error fetching page ${page}${RESET}"
-            continue
-        fi
-
-        # Проверяем наличие валидатора на текущей странице
-        validator_info=$(echo "$page_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
-
-        if [ -n "$validator_info" ]; then
-            echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
-            echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
-            echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
-            echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
-            echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
-            found=true
-            break
-        fi
-    done
-
-    if ! $found; then
+        return 0
+    else
         echo -e "\n${RED}$(t "not_in_queue")${RESET}"
+
+        # Дополнительная информация, если нужно
+        if [ "$filtered_count" -eq 0 ]; then
+            echo -e "${GRAY}No validators found matching the search criteria${RESET}"
+        fi
+
         return 1
     fi
-    return 0
 }
 
 create_monitor_script() {
