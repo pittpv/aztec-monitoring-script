@@ -710,17 +710,12 @@ monitor_position() {
 main() {
     log_message "===== Starting monitor cycle ====="
 
-    # Устанавливаем ограничение времени выполнения всего скрипта
-    timeout 300 bash -c "
-        set -e
-        monitor_position
-    "
+    # Вызываем функцию напрямую вместо использования timeout с дочерним shell
+    monitor_position
 
     local exit_code=$?
 
-    if [ $exit_code -eq 124 ]; then
-        log_message "ERROR: Script timed out after 5 minutes"
-    elif [ $exit_code -ne 0 ]; then
+    if [ $exit_code -ne 0 ]; then
         log_message "ERROR: Script failed with exit code: $exit_code"
     fi
 
@@ -728,8 +723,11 @@ main() {
     return $exit_code
 }
 
-# Запускаем основную функцию
-main >> "$LOG_FILE" 2>&1
+# Запускаем основную функцию с таймаутом
+timeout 300 bash -c "
+    cd '$MONITOR_DIR' || exit 1
+    source '$MONITOR_DIR/$script_name' && main
+" >> "$LOG_FILE" 2>&1
 EOF
 
         # Заменяем плейсхолдеры
@@ -746,15 +744,16 @@ EOF
         # Добавляем в cron с таймаутом
         if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
             (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
-            log_message "Added to crontab"
         fi
 
         echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
         echo -e "${YELLOW}Note: Initial notification sent. Script includes safety timeouts.${RESET}"
 
-        # Запускаем скрипт сразу для тестирования
+        # Запускаем скрипт сразу для тестирования (правильно)
         echo -e "${CYAN}Running initial test...${RESET}"
-        timeout 60 "$MONITOR_DIR/$script_name" &
+        timeout 60 bash -c "
+            cd '$MONITOR_DIR' && '$MONITOR_DIR/$script_name'
+        " > /dev/null 2>&1 &
 
     done
 }
