@@ -486,7 +486,7 @@ create_monitor_script() {
         mkdir -p "$MONITOR_DIR"
 
         # Создаем начальное сообщение о создании монитора
-        local start_message="🎯 *Validator Queue Monitoring Started* 🎯
+        local start_message="🎯 *Queue Monitoring Started*
 
 🔹 *Address:* \`$validator_address\`
 ⏰ *Monitoring started at:* $(date '+%d.%m.%Y %H:%M UTC')
