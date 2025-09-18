@@ -472,6 +472,12 @@ create_monitor_script() {
             continue
         fi
 
+        # Проверяем, есть ли валидатор хотя бы в очереди
+        if ! check_validator_queue "$validator_address"; then
+            echo -e "${RED}Validator $validator_address not found in queue. Cannot create monitor.${RESET}"
+            continue
+        fi
+
         local normalized_address=${validator_address,,}
         local script_name="monitor_${normalized_address:2}.sh"
         local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
@@ -940,7 +946,16 @@ for address in "${INPUT_ADDRESSES[@]}"; do
 
     if ! $found; then
         echo -e "${RED}✗ Not found: $clean_address${RESET}"
-        not_found_count=$((not_found_count + 1))
+        echo -e "${YELLOW}$(t "validator_not_in_set")${RESET}"
+
+        # Проверяем в очереди
+        if check_validator_queue "$clean_address"; then
+            # Валидатор найден в очереди
+            found_in_queue=true
+        else
+            # Валидатор не найден нигде
+            not_found_count=$((not_found_count + 1))
+        fi
     fi
 done
 
@@ -1079,6 +1094,11 @@ while true; do
                 echo -e "${YELLOW}$(t "processing_address" "$clean_address")${RESET}"
                 create_monitor_script "$clean_address"
             done
+            ;;
+          3)
+            # Новая опция: проверить валидатора в очереди
+            read -p "$(t "enter_address") " validator_address
+            check_validator_queue "$validator_address"
             ;;
         0)
             echo -e "\n${CYAN}$(t "exiting")${RESET}"
