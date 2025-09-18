@@ -945,40 +945,39 @@ for address in "${INPUT_ADDRESSES[@]}"; do
 done
 
 if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
-    echo -e "${RED}No valid addresses to check.${RESET}"
-    #exit 1
-fi
+    echo -e "${RED}No valid addresses to check. Skipping validator check.${RESET}"
+else
+    # Запускаем быструю загрузку сразу
+    declare -a RESULTS
 
-# Запускаем быструю загрузку сразу
-declare -a RESULTS
+    # Временно заменяем массив для обработки только выбранных валидаторов
+    ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
+    ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
+    VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
+    VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
 
-# Временно заменяем массив для обработки только выбранных валидаторов
-ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
-ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
-VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
-VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
+    # Запускаем быструю загрузку
+    fast_load_validators
 
-# Запускаем быструю загрузку
-fast_load_validators
+    # Восстанавливаем оригинальный массив
+    VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
+    VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
 
-# Восстанавливаем оригинальный массив
-VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
-VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
-
-# Сразу показываем результат
-echo ""
-echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
-echo "----------------------------------------"
-for line in "${RESULTS[@]}"; do
-    IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
-    echo -e "${BOLD}$(t "address"):${RESET} $validator"
-    echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
-    echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
-    echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
-    echo -e ""
+    # Сразу показываем результат
+    echo ""
+    echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
     echo "----------------------------------------"
-done
-echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
+    for line in "${RESULTS[@]}"; do
+        IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
+        echo -e "${BOLD}$(t "address"):${RESET} $validator"
+        echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
+        echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+        echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
+        echo -e ""
+        echo "----------------------------------------"
+    done
+    echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
+fi
 
 while true; do
     echo ""
