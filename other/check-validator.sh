@@ -485,7 +485,7 @@ create_monitor_script() {
 
         mkdir -p "$MONITOR_DIR"
 
-        cat > "$MONITOR_DIR/$script_name" <<'EOF'
+cat > "$MONITOR_DIR/$script_name" <<'EOF'
 #!/bin/bash
 
 # Set safe environment
@@ -523,7 +523,7 @@ format_date() {
 }
 
 monitor_position() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting monitor_position" >> "$LOG_FILE"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting monitor_position for $VALIDATOR_ADDRESS" >> "$LOG_FILE"
 
     local last_position=""
     if [[ -f "$LAST_POSITION_FILE" ]]; then
@@ -531,50 +531,35 @@ monitor_position() {
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] Last known position: $last_position" >> "$LOG_FILE"
     fi
 
-    # Get first page to check pagination
-    local first_page_data=$(curl -s "${QUEUE_URL?page=1&limit=100}")
-    if [[ $? -ne 0 || -z "$first_page_data" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching first page data" >> "$LOG_FILE"
+    # Используем поиск по конкретному адресу через API
+    local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Fetching data from: $search_url" >> "$LOG_FILE"
+
+    local response_data=$(curl -s "$search_url")
+
+    if [[ $? -ne 0 || -z "$response_data" ]]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching queue data" >> "$LOG_FILE"
         return 1
     fi
 
-    if ! jq -e . >/dev/null 2>&1 <<<"$first_page_data"; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Invalid first page data received" >> "$LOG_FILE"
+    if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Invalid JSON data received" >> "$LOG_FILE"
         return 1
     fi
 
-    local total_pages=$(echo "$first_page_data" | jq -r '.pagination.totalPages // 1')
-    if [[ -z "$total_pages" || "$total_pages" -lt 1 ]]; then
-        total_pages=1
-    fi
+    # Проверяем наличие валидатора в ответе
+    local validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+    local filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
 
-    local validator_found=false
-    local current_position=""
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Filtered count: $filtered_count" >> "$LOG_FILE"
 
-    # Check all pages
-    for ((page=1; page<=total_pages; page++)); do
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Checking page $page of $total_pages" >> "$LOG_FILE"
+    if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
+        local current_position=$(echo "$validator_info" | jq -r '.position')
+        local queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
+        local withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
+        local transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
 
-        local page_data=$(curl -s "${QUEUE_URL?page=${page}&limit=100}")
-        if [[ $? -ne 0 || -z "$page_data" ]]; then
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching page $page" >> "$LOG_FILE"
-            continue
-        fi
-
-        local validator_info=$(echo "$page_data" | jq -r ".validatorsInQueue[]? | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
-
-        if [[ -n "$validator_info" ]]; then
-            validator_found=true
-            current_position=$(echo "$validator_info" | jq -r '.position')
-            local queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
-
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator found on page $page at position $current_position" >> "$LOG_FILE"
-            break
-        fi
-    done
-
-    if [[ "$validator_found" == true ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator at position $current_position" >> "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator found at position: $current_position" >> "$LOG_FILE"
 
         if [[ "$last_position" != "$current_position" ]]; then
             local message
@@ -584,6 +569,8 @@ monitor_position() {
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 🔄 *Change:* $last_position → $current_position
 📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue* 🎉
@@ -591,17 +578,24 @@ monitor_position() {
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 📌 *Initial Position:* $current_position
 📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
 
             if send_telegram "$message"; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Notification sent" >> "$LOG_FILE"
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Notification sent successfully" >> "$LOG_FILE"
+            else
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Failed to send notification" >> "$LOG_FILE"
             fi
 
             echo "$current_position" > "$LAST_POSITION_FILE"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Saved new position: $current_position" >> "$LOG_FILE"
+        else
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Position unchanged: $current_position" >> "$LOG_FILE"
         fi
     else
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator not in queue" >> "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator not found in queue" >> "$LOG_FILE"
 
         if [[ -n "$last_position" ]]; then
             local message="❌ *Validator Removed from Queue* ❌
@@ -612,16 +606,21 @@ monitor_position() {
 
             if send_telegram "$message"; then
                 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removal notification sent" >> "$LOG_FILE"
+            else
+                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Failed to send removal notification" >> "$LOG_FILE"
             fi
 
             # Удаляем файл последней позиции
             rm -f "$LAST_POSITION_FILE"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed position file" >> "$LOG_FILE"
 
             # Удаляем сам скрипт мониторинга
             rm -f "$0"
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed monitor script" >> "$LOG_FILE"
 
             # Удаляем задание из cron
             crontab -l | grep -v "$0" | crontab -
+            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed from crontab" >> "$LOG_FILE"
 
             # Удаляем лог-файл
             rm -f "$LOG_FILE"
@@ -629,8 +628,18 @@ monitor_position() {
     fi
 }
 
-{
+# Основная функция с обработкой ошибок
+main() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Starting monitor cycle ====" >> "$LOG_FILE"
     monitor_position
+    local exit_code=$?
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Monitor cycle completed with exit code: $exit_code ====" >> "$LOG_FILE"
+    return $exit_code
+}
+
+# Запускаем основную функцию
+{
+    main
 } >> "$LOG_FILE" 2>&1
 EOF
 
