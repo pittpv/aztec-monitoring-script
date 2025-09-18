@@ -649,7 +649,7 @@ EOF
             (crontab -l 2>/dev/null; echo "0 * * * * $MONITOR_DIR/$script_name") | crontab -
         fi
 
-        echo -e "${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
+        echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
     done
 }
 
@@ -943,7 +943,7 @@ for address in "${INPUT_ADDRESSES[@]}"; do
 
     if ! $found; then
         echo -e "${RED}✗ Not found in active validators: $clean_address${RESET}"
-        echo -e "${YELLOW}$(t "validator_not_in_set")${RESET}"
+        echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
 
         # Проверяем в очереди
         if check_validator_queue "$clean_address"; then
@@ -1015,7 +1015,7 @@ if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
     if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
         # Создаем мониторы для всех валидаторов из очереди
         for validator in "${QUEUE_VALIDATORS[@]}"; do
-            echo -e "${YELLOW}$(t "processing_address" "$validator")${RESET}"
+            echo -e "\n${YELLOW}$(t "processing_address" "$validator")${RESET}"
             create_monitor_script "$validator"
         done
         echo -e "${GREEN}All queue validators added to monitoring.${RESET}"
