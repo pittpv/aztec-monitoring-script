@@ -922,6 +922,7 @@ IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
 declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
 found_count=0
 not_found_count=0
+found_in_queue_count=0
 
 for address in "${INPUT_ADDRESSES[@]}"; do
     # Очищаем адрес от пробелов
@@ -940,19 +941,28 @@ for address in "${INPUT_ADDRESSES[@]}"; do
     done
 
     if ! $found; then
-        echo -e "${RED}✗ Not found: $clean_address${RESET}"
+        echo -e "${RED}✗ Not found in active validators: $clean_address${RESET}"
         echo -e "${YELLOW}$(t "validator_not_in_set")${RESET}"
 
         # Проверяем в очереди
         if check_validator_queue "$clean_address"; then
-            # Валидатор найден в очереди
-            found_in_queue=true
+            # Валидатор найден в очереди - добавляем его для проверки
+            VALIDATOR_ADDRESSES_TO_CHECK+=("$clean_address")
+            found_in_queue_count=$((found_in_queue_count + 1))
+            echo -e "${GREEN}✓ Found in queue: $clean_address${RESET}"
         else
             # Валидатор не найден нигде
             not_found_count=$((not_found_count + 1))
         fi
     fi
 done
+
+# Показываем сводку
+echo -e "\n${CYAN}=== Search Summary ===${RESET}"
+echo -e "Found in active validators: ${GREEN}$found_count${RESET}"
+echo -e "Found in queue: ${YELLOW}$found_in_queue_count${RESET}"
+echo -e "Not found anywhere: ${RED}$not_found_count${RESET}"
+echo -e "Total to check: ${BOLD}${#VALIDATOR_ADDRESSES_TO_CHECK[@]}${RESET}"
 
 if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
     echo -e "${RED}No valid addresses to check. Skipping validator check.${RESET}"
@@ -994,6 +1004,7 @@ while true; do
     echo -e "${BOLD}Select an action:${RESET}"
     echo -e "${CYAN}1. Check another set of validators${RESET}"
     echo -e "${CYAN}2. Set up queue position notification for validator${RESET}"
+    echo -e "${CYAN}3. Check validator in queue${RESET}"
     echo -e "${RED}0. Exit${RESET}"
     read -p "$(t "enter_option") " choice
 
@@ -1014,6 +1025,7 @@ while true; do
             declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
             found_count=0
             not_found_count=0
+            found_in_queue_count=0
 
             for address in "${INPUT_ADDRESSES[@]}"; do
                 # Очищаем адрес от пробелов
@@ -1032,10 +1044,28 @@ while true; do
                 done
 
                 if ! $found; then
-                    echo -e "${RED}✗ Not found: $clean_address${RESET}"
-                    not_found_count=$((not_found_count + 1))
+                    echo -e "${RED}✗ Not found in active validators: $clean_address${RESET}"
+                    echo -e "${YELLOW}$(t "validator_not_in_set")${RESET}"
+
+                    # Проверяем в очереди
+                    if check_validator_queue "$clean_address"; then
+                        # Валидатор найден в очереди - добавляем его для проверки
+                        VALIDATOR_ADDRESSES_TO_CHECK+=("$clean_address")
+                        found_in_queue_count=$((found_in_queue_count + 1))
+                        echo -e "${GREEN}✓ Found in queue: $clean_address${RESET}"
+                    else
+                        # Валидатор не найден нигде
+                        not_found_count=$((not_found_count + 1))
+                    fi
                 fi
             done
+
+            # Показываем сводку
+            echo -e "\n${CYAN}=== Search Summary ===${RESET}"
+            echo -e "Found in active validators: ${GREEN}$found_count${RESET}"
+            echo -e "Found in queue: ${YELLOW}$found_in_queue_count${RESET}"
+            echo -e "Not found anywhere: ${RED}$not_found_count${RESET}"
+            echo -e "Total to check: ${BOLD}${#VALIDATOR_ADDRESSES_TO_CHECK[@]}${RESET}"
 
             if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
                 echo -e "${RED}No valid addresses to check.${RESET}"
@@ -1087,10 +1117,16 @@ while true; do
             for address in "${ADDRESSES_TO_MONITOR[@]}"; do
                 clean_address=$(echo "$address" | tr -d ' ')
                 echo -e "${YELLOW}$(t "processing_address" "$clean_address")${RESET}"
-                create_monitor_script "$clean_address"
+
+                # Проверяем, есть ли валидатор хотя бы в очереди
+                if check_validator_queue_simple "$clean_address"; then
+                    create_monitor_script "$clean_address"
+                else
+                    echo -e "${RED}Validator $clean_address not found in queue. Cannot create monitor.${RESET}"
+                fi
             done
             ;;
-          3)
+        3)
             # Новая опция: проверить валидатора в очереди
             read -p "$(t "enter_address") " validator_address
             check_validator_queue "$validator_address"
