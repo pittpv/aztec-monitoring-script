@@ -501,16 +501,21 @@ LOG_FILE="LOG_FILE_PLACEHOLDER"
 TELEGRAM_BOT_TOKEN="TELEGRAM_BOT_TOKEN_PLACEHOLDER"
 TELEGRAM_CHAT_ID="TELEGRAM_CHAT_ID_PLACEHOLDER"
 
+# Timeout settings (in seconds)
+CURL_CONNECT_TIMEOUT=10
+CURL_MAX_TIME=30
+API_RETRY_DELAY=60
+
 mkdir -p "$MONITOR_DIR"
 
 send_telegram() {
     local message="$1"
 
-    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+    curl -s --connect-timeout $CURL_CONNECT_TIMEOUT --max-time $CURL_MAX_TIME \
+        -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
         -d chat_id="$TELEGRAM_CHAT_ID" \
         -d text="$message" \
-        -d parse_mode="Markdown" \
-        -w "\n%{http_code}" > /dev/null 2>&1
+        -d parse_mode="Markdown" > /dev/null 2>&1
 }
 
 format_date() {
@@ -520,6 +525,32 @@ format_date() {
     else
         echo "$iso_date"
     fi
+}
+
+safe_curl_request() {
+    local url="$1"
+    local max_retries=3
+    local retry_count=0
+
+    while [ $retry_count -lt $max_retries ]; do
+        local response=$(curl -s --connect-timeout $CURL_CONNECT_TIMEOUT --max-time $CURL_MAX_TIME \
+                          -H "Cache-Control: no-cache" \
+                          -H "Pragma: no-cache" \
+                          "$url")
+        local exit_code=$?
+
+        if [ $exit_code -eq 0 ] && [ -n "$response" ]; then
+            echo "$response"
+            return 0
+        fi
+
+        retry_count=$((retry_count + 1))
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] curl attempt $retry_count failed (exit code: $exit_code), retrying in $API_RETRY_DELAY seconds..." >> "$LOG_FILE"
+        sleep $API_RETRY_DELAY
+    done
+
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] All curl attempts failed for URL: $url" >> "$LOG_FILE"
+    return 1
 }
 
 monitor_position() {
@@ -535,15 +566,15 @@ monitor_position() {
     local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] Fetching data from: $search_url" >> "$LOG_FILE"
 
-    local response_data=$(curl -s "$search_url")
+    local response_data=$(safe_curl_request "$search_url")
 
-    if [[ $? -ne 0 || -z "$response_data" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching queue data" >> "$LOG_FILE"
+    if [ $? -ne 0 ] || [ -z "$response_data" ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error: Failed to fetch queue data after retries" >> "$LOG_FILE"
         return 1
     fi
 
     if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Invalid JSON data received" >> "$LOG_FILE"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error: Invalid JSON data received" >> "$LOG_FILE"
         return 1
     fi
 
@@ -619,25 +650,37 @@ monitor_position() {
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed monitor script" >> "$LOG_FILE"
 
             # Удаляем задание из cron
-            crontab -l | grep -v "$0" | crontab -
+            (crontab -l | grep -v "$0") | crontab -
             echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed from crontab" >> "$LOG_FILE"
 
             # Удаляем лог-файл
             rm -f "$LOG_FILE"
         fi
     fi
+
+    return 0
 }
 
 # Основная функция с обработкой ошибок
 main() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Starting monitor cycle ====" >> "$LOG_FILE"
-    monitor_position
+
+    # Устанавливаем ограничение времени выполнения всего скрипта (5 минут)
+    timeout 300 bash -c "
+        monitor_position
+    "
+
     local exit_code=$?
+
+    if [ $exit_code -eq 124 ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Script timed out after 5 minutes" >> "$LOG_FILE"
+    fi
+
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Monitor cycle completed with exit code: $exit_code ====" >> "$LOG_FILE"
     return $exit_code
 }
 
-# Запускаем основную функцию
+# Запускаем основную функцию с ограничением времени
 {
     main
 } >> "$LOG_FILE" 2>&1
@@ -655,10 +698,11 @@ EOF
         chmod +x "$MONITOR_DIR/$script_name"
 
         if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
-            (crontab -l 2>/dev/null; echo "0 * * * * $MONITOR_DIR/$script_name") | crontab -
+            (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
         fi
 
         echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
+        echo -e "${YELLOW}Note: Script includes safety timeouts to prevent hanging${RESET}"
     done
 }
 
