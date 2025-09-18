@@ -486,7 +486,7 @@ create_monitor_script() {
         mkdir -p "$MONITOR_DIR"
 
         # Создаем начальное сообщение о создании монитора
-        local start_message="🎯 *Queue Monitoring Started*
+        local start_message="🎯 *Validator Queue Monitoring Started* 🎯
 
 🔹 *Address:* \`$validator_address\`
 ⏰ *Monitoring started at:* $(date '+%d.%m.%Y %H:%M UTC')
@@ -690,12 +690,13 @@ monitor_position() {
             rm -f "$LAST_POSITION_FILE"
             log_message "Removed position file"
 
-            # Удаляем сам скрипт мониторинга
+            # Удаляем сам скрипт мониторинга (используем $0 вместо script_name)
             rm -f "$0"
             log_message "Removed monitor script"
 
-            # Удаляем задание из cron
-            (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
+            # Удаляем задание из cron (используем полный путь к скрипту)
+            local script_path="$0"
+            (crontab -l | grep -v "$script_path" | crontab - 2>/dev/null) || true
             log_message "Removed from crontab"
 
             # Удаляем лог-файл
