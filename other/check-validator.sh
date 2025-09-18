@@ -485,6 +485,23 @@ create_monitor_script() {
 
         mkdir -p "$MONITOR_DIR"
 
+        # Создаем начальное сообщение о создании монитора
+        local start_message="🎯 *Validator Queue Monitoring Started* 🎯
+
+🔹 *Address:* \`$validator_address\`
+⏰ *Monitoring started at:* $(date '+%d.%m.%Y %H:%M UTC')
+📋 *Check frequency:* Hourly
+🔔 *Notifications:* Position changes"
+
+        # Отправляем начальное уведомление
+        if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            curl -s --connect-timeout 10 --max-time 30 \
+                -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" \
+                -d text="$start_message" \
+                -d parse_mode="Markdown" > /dev/null 2>&1
+        fi
+
 cat > "$MONITOR_DIR/$script_name" <<'EOF'
 #!/bin/bash
 
@@ -502,20 +519,43 @@ TELEGRAM_BOT_TOKEN="TELEGRAM_BOT_TOKEN_PLACEHOLDER"
 TELEGRAM_CHAT_ID="TELEGRAM_CHAT_ID_PLACEHOLDER"
 
 # Timeout settings (in seconds)
-CURL_CONNECT_TIMEOUT=10
-CURL_MAX_TIME=30
-API_RETRY_DELAY=60
+CURL_CONNECT_TIMEOUT=15
+CURL_MAX_TIME=45
+API_RETRY_DELAY=30
+MAX_RETRIES=2
 
 mkdir -p "$MONITOR_DIR"
+
+# Функция для логирования
+log_message() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+}
 
 send_telegram() {
     local message="$1"
 
-    curl -s --connect-timeout $CURL_CONNECT_TIMEOUT --max-time $CURL_MAX_TIME \
+    if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+        log_message "TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set, skipping notification"
+        return 1
+    fi
+
+    local result=$(curl -s --connect-timeout $CURL_CONNECT_TIMEOUT --max-time $CURL_MAX_TIME \
+        -w "%{http_code}" \
         -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
         -d chat_id="$TELEGRAM_CHAT_ID" \
         -d text="$message" \
-        -d parse_mode="Markdown" > /dev/null 2>&1
+        -d parse_mode="Markdown" 2>/dev/null)
+
+    local http_code=${result: -3}
+    local response=${result%???}
+
+    if [ "$http_code" -eq 200 ]; then
+        log_message "Telegram notification sent successfully"
+        return 0
+    else
+        log_message "Failed to send Telegram notification (HTTP $http_code): $response"
+        return 1
+    fi
 }
 
 format_date() {
@@ -529,52 +569,57 @@ format_date() {
 
 safe_curl_request() {
     local url="$1"
-    local max_retries=3
     local retry_count=0
 
-    while [ $retry_count -lt $max_retries ]; do
+    while [ $retry_count -lt $MAX_RETRIES ]; do
+        log_message "CURL attempt $((retry_count + 1)) for URL: $url"
+
         local response=$(curl -s --connect-timeout $CURL_CONNECT_TIMEOUT --max-time $CURL_MAX_TIME \
                           -H "Cache-Control: no-cache" \
                           -H "Pragma: no-cache" \
-                          "$url")
-        local exit_code=$?
+                          -w "HTTP_CODE:%{http_code}" \
+                          "$url" 2>/dev/null)
 
-        if [ $exit_code -eq 0 ] && [ -n "$response" ]; then
-            echo "$response"
+        local http_code=$(echo "$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+        local clean_response=$(echo "$response" | sed 's/HTTP_CODE:[0-9]*//')
+
+        if [ "$http_code" -eq 200 ] && [ -n "$clean_response" ]; then
+            log_message "CURL success (HTTP $http_code)"
+            echo "$clean_response"
             return 0
         fi
 
         retry_count=$((retry_count + 1))
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] curl attempt $retry_count failed (exit code: $exit_code), retrying in $API_RETRY_DELAY seconds..." >> "$LOG_FILE"
+        log_message "CURL attempt $retry_count failed (HTTP $http_code), retrying in $API_RETRY_DELAY seconds..."
         sleep $API_RETRY_DELAY
     done
 
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] All curl attempts failed for URL: $url" >> "$LOG_FILE"
+    log_message "All CURL attempts failed for URL: $url"
     return 1
 }
 
 monitor_position() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting monitor_position for $VALIDATOR_ADDRESS" >> "$LOG_FILE"
+    log_message "Starting monitor_position for $VALIDATOR_ADDRESS"
 
     local last_position=""
     if [[ -f "$LAST_POSITION_FILE" ]]; then
         last_position=$(cat "$LAST_POSITION_FILE")
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Last known position: $last_position" >> "$LOG_FILE"
+        log_message "Last known position: $last_position"
     fi
 
     # Используем поиск по конкретному адресу через API
     local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Fetching data from: $search_url" >> "$LOG_FILE"
+    log_message "Fetching data from: $search_url"
 
     local response_data=$(safe_curl_request "$search_url")
 
     if [ $? -ne 0 ] || [ -z "$response_data" ]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error: Failed to fetch queue data after retries" >> "$LOG_FILE"
+        log_message "Error: Failed to fetch queue data after retries"
         return 1
     fi
 
-    if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error: Invalid JSON data received" >> "$LOG_FILE"
+    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
+        log_message "Error: Invalid JSON data received"
         return 1
     fi
 
@@ -582,7 +627,7 @@ monitor_position() {
     local validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
     local filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
 
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Filtered count: $filtered_count" >> "$LOG_FILE"
+    log_message "Filtered count: $filtered_count"
 
     if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
         local current_position=$(echo "$validator_info" | jq -r '.position')
@@ -590,7 +635,7 @@ monitor_position() {
         local withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
         local transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
 
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator found at position: $current_position" >> "$LOG_FILE"
+        log_message "Validator found at position: $current_position"
 
         if [[ "$last_position" != "$current_position" ]]; then
             local message
@@ -615,18 +660,18 @@ monitor_position() {
             fi
 
             if send_telegram "$message"; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Notification sent successfully" >> "$LOG_FILE"
+                log_message "Notification sent successfully"
             else
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Failed to send notification" >> "$LOG_FILE"
+                log_message "Failed to send notification"
             fi
 
             echo "$current_position" > "$LAST_POSITION_FILE"
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Saved new position: $current_position" >> "$LOG_FILE"
+            log_message "Saved new position: $current_position"
         else
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Position unchanged: $current_position" >> "$LOG_FILE"
+            log_message "Position unchanged: $current_position"
         fi
     else
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator not found in queue" >> "$LOG_FILE"
+        log_message "Validator not found in queue"
 
         if [[ -n "$last_position" ]]; then
             local message="❌ *Validator Removed from Queue* ❌
@@ -636,22 +681,22 @@ monitor_position() {
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
 
             if send_telegram "$message"; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removal notification sent" >> "$LOG_FILE"
+                log_message "Removal notification sent"
             else
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Failed to send removal notification" >> "$LOG_FILE"
+                log_message "Failed to send removal notification"
             fi
 
             # Удаляем файл последней позиции
             rm -f "$LAST_POSITION_FILE"
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed position file" >> "$LOG_FILE"
+            log_message "Removed position file"
 
             # Удаляем сам скрипт мониторинга
             rm -f "$0"
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed monitor script" >> "$LOG_FILE"
+            log_message "Removed monitor script"
 
             # Удаляем задание из cron
-            (crontab -l | grep -v "$0") | crontab -
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removed from crontab" >> "$LOG_FILE"
+            (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
+            log_message "Removed from crontab"
 
             # Удаляем лог-файл
             rm -f "$LOG_FILE"
@@ -661,29 +706,30 @@ monitor_position() {
     return 0
 }
 
-# Основная функция с обработкой ошибок
+# Основная функция
 main() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Starting monitor cycle ====" >> "$LOG_FILE"
+    log_message "===== Starting monitor cycle ====="
 
-    # Устанавливаем ограничение времени выполнения всего скрипта (5 минут)
+    # Устанавливаем ограничение времени выполнения всего скрипта
     timeout 300 bash -c "
+        set -e
         monitor_position
     "
 
     local exit_code=$?
 
     if [ $exit_code -eq 124 ]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] ERROR: Script timed out after 5 minutes" >> "$LOG_FILE"
+        log_message "ERROR: Script timed out after 5 minutes"
+    elif [ $exit_code -ne 0 ]; then
+        log_message "ERROR: Script failed with exit code: $exit_code"
     fi
 
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ===== Monitor cycle completed with exit code: $exit_code ====" >> "$LOG_FILE"
+    log_message "===== Monitor cycle completed ====="
     return $exit_code
 }
 
-# Запускаем основную функцию с ограничением времени
-{
-    main
-} >> "$LOG_FILE" 2>&1
+# Запускаем основную функцию
+main >> "$LOG_FILE" 2>&1
 EOF
 
         # Заменяем плейсхолдеры
@@ -697,12 +743,19 @@ EOF
 
         chmod +x "$MONITOR_DIR/$script_name"
 
+        # Добавляем в cron с таймаутом
         if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
             (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
+            log_message "Added to crontab"
         fi
 
         echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
-        echo -e "${YELLOW}Note: Script includes safety timeouts to prevent hanging${RESET}"
+        echo -e "${YELLOW}Note: Initial notification sent. Script includes safety timeouts.${RESET}"
+
+        # Запускаем скрипт сразу для тестирования
+        echo -e "${CYAN}Running initial test...${RESET}"
+        timeout 60 "$MONITOR_DIR/$script_name" &
+
     done
 }
 
