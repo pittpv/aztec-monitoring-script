@@ -945,8 +945,8 @@ for address in "${INPUT_ADDRESSES[@]}"; do
 done
 
 if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
-    echo -e "${RED}No valid addresses to check. Exiting.${RESET}"
-    exit 1
+    echo -e "${RED}No valid addresses to check.${RESET}"
+    #exit 1
 fi
 
 # Запускаем быструю загрузку сразу
