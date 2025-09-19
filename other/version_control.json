@@ -138,5 +138,10 @@
         "VERSION": "2.0.3",
         "UPDATE_DATE": "19.09.2025",
         "CHANGES": ["FIX in translations"]
+    },
+    {
+        "VERSION": "2.0.4",
+        "UPDATE_DATE": "19.09.2025",
+        "CHANGES": ["FIX for Cloudflare captcha (Invalid JSON response). Restored the functionality of the queue search function and the launch of monitoring the validator's position in the queue with Telegram notifications. Use option 9"]
     }
 ]
