@@ -640,21 +640,21 @@ monitor_position(){
             if [[ -n "$last_position" ]]; then
                 message="📊 *Validator Position Update*
 
-                🔹 *Address:* $VALIDATOR_ADDRESS
-                🔄 *Change:* $last_position → $current_position
-                📅 *Queued since:* $queued_at
-                🏦 *Withdrawer:* $withdrawer_address
-                🔗 *Transaction:* $transaction_hash
-                ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+🔹 *Address:* $VALIDATOR_ADDRESS
+🔄 *Change:* $last_position → $current_position
+📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* $withdrawer_address
+🔗 *Transaction:* $transaction_hash
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue*
 
-                🔹 *Address:* $VALIDATOR_ADDRESS
-                📌 *Initial Position:* $current_position
-                📅 *Queued since:* $queued_at
-                🏦 *Withdrawer:* $withdrawer_address
-                🔗 *Transaction:* $transaction_hash
-                ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+🔹 *Address:* $VALIDATOR_ADDRESS
+📌 *Initial Position:* $current_position
+📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* $withdrawer_address
+🔗 *Transaction:* $transaction_hash
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
             send_telegram "$message" && log_message "Notification sent"
             echo "$current_position" > "$LAST_POSITION_FILE"
@@ -667,12 +667,12 @@ monitor_position(){
         if [[ -n "$last_position" ]]; then
             local message="❌ *Validator Removed from Queue*
 
-            🔹 *Address:* $VALIDATOR_ADDRESS
-            ⌛ *Last Position:* $last_position
-            ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
-            send_telegram "$message" && log_message "Removal notification sent"
-            rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
-            rm -f "$0"; log_message "Removed monitor script"
+🔹 *Address:* $VALIDATOR_ADDRESS
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+send_telegram "$message" && log_message "Removal notification sent"
+rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
+rm -f "$0"; log_message "Removed monitor script"
             (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
             rm -f "$LOG_FILE"
         fi
