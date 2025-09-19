@@ -220,26 +220,6 @@ GSE_ADDRESS="0x67788e5083646ccedeeb07e7bc35ab0d511fc8b9"
 QUEUE_URL="https://dev.dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
-# ========= Ensure python + curl_cffi =========
-need_tool(){ command -v "$1" >/dev/null 2>&1; }
-need_pkg_py(){ python3 - <<'PY' >/dev/null 2>&1 || exit 1
-try:
-    import pkgutil
-    assert pkgutil.find_loader("curl_cffi")
-except Exception:
-    raise SystemExit(1)
-print("OK")
-PY
-}
-
-if ! need_tool python3; then
-  echo -e "${RED}Python3 is required.${RESET}"; exit 1
-fi
-if ! need_pkg_py; then
-  echo -e "${YELLOW}Installing curl_cffi...${RESET}"
-  python3 -m pip install --quiet --upgrade curl_cffi || { echo -e "${RED}Failed to install curl_cffi${RESET}"; exit 1; }
-fi
-
 # ========= HTTP via curl_cffi =========
 # cffi_http_get <url>
 cffi_http_get() {
@@ -658,9 +638,23 @@ monitor_position(){
         if [[ "$last_position" != "$current_position" ]]; then
             local message
             if [[ -n "$last_position" ]]; then
-                message="📊 *Validator Position Update*\n\n🔹 *Address:* $VALIDATOR_ADDRESS\n🔄 *Change:* $last_position → $current_position\n📅 *Queued since:* $queued_at\n🏦 *Withdrawer:* $withdrawer_address\n🔗 *Transaction:* $transaction_hash\n⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+                message="📊 *Validator Position Update*
+
+                🔹 *Address:* $VALIDATOR_ADDRESS
+                🔄 *Change:* $last_position → $current_position
+                📅 *Queued since:* $queued_at
+                🏦 *Withdrawer:* $withdrawer_address
+                🔗 *Transaction:* $transaction_hash
+                ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
-                message="🎉 *New Validator in Queue*\n\n🔹 *Address:* $VALIDATOR_ADDRESS\n📌 *Initial Position:* $current_position\n📅 *Queued since:* $queued_at\n🏦 *Withdrawer:* $withdrawer_address\n🔗 *Transaction:* $transaction_hash\n⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+                message="🎉 *New Validator in Queue*
+
+                🔹 *Address:* $VALIDATOR_ADDRESS
+                📌 *Initial Position:* $current_position
+                📅 *Queued since:* $queued_at
+                🏦 *Withdrawer:* $withdrawer_address
+                🔗 *Transaction:* $transaction_hash
+                ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
             send_telegram "$message" && log_message "Notification sent"
             echo "$current_position" > "$LAST_POSITION_FILE"
@@ -671,7 +665,11 @@ monitor_position(){
     else
         log_message "Validator not found in queue"
         if [[ -n "$last_position" ]]; then
-            local message="❌ *Validator Removed from Queue*\n\n🔹 *Address:* $VALIDATOR_ADDRESS\n⌛ *Last Position:* $last_position\n⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+            local message="❌ *Validator Removed from Queue*
+
+            🔹 *Address:* $VALIDATOR_ADDRESS
+            ⌛ *Last Position:* $last_position
+            ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             send_telegram "$message" && log_message "Removal notification sent"
             rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
             rm -f "$0"; log_message "Removed monitor script"
