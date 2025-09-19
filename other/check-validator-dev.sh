@@ -83,6 +83,9 @@ init_languages() {
     TRANSLATIONS["en,getting_current_slot"]="Getting current slot..."
     TRANSLATIONS["en,deriving_timestamp"]="Deriving timestamp for slot..."
     TRANSLATIONS["en,querying_attesters"]="Querying attesters from GSE contract..."
+    TRANSLATIONS["en,cloudflare_bypass"]="Using Cloudflare bypass with curl_cffi..."
+    TRANSLATIONS["en,installing_deps"]="Installing Python dependencies for Cloudflare bypass..."
+    TRANSLATIONS["en,deps_installed"]="Python dependencies installed successfully"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -142,6 +145,9 @@ init_languages() {
     TRANSLATIONS["ru,getting_current_slot"]="Получение текущего слота..."
     TRANSLATIONS["ru,deriving_timestamp"]="Получение временной метки для слота..."
     TRANSLATIONS["ru,querying_attesters"]="Запрос аттестующих из GSE контракта..."
+    TRANSLATIONS["ru,cloudflare_bypass"]="Используем обход Cloudflare с curl_cffi..."
+    TRANSLATIONS["ru,installing_deps"]="Устанавливаем Python зависимости для обхода Cloudflare..."
+    TRANSLATIONS["ru,deps_installed"]="Python зависимости успешно установлены"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -201,6 +207,9 @@ init_languages() {
     TRANSLATIONS["tr,getting_current_slot"]="Mevcut slot alınıyor..."
     TRANSLATIONS["tr,deriving_timestamp"]="Slot için zaman damgası türetiliyor..."
     TRANSLATIONS["tr,querying_attesters"]="GSE kontratından onaylayıcılar sorgulanıyor..."
+    TRANSLATIONS["tr,cloudflare_bypass"]="Cloudflare bypass curl_cffi ile kullanılıyor..."
+    TRANSLATIONS["tr,installing_deps"]="Cloudflare bypass için Python bağımlılıkları yükleniyor..."
+    TRANSLATIONS["tr,deps_installed"]="Python bağımlılıkları başarıyla yüklendi"
 }
 
 t() {
@@ -219,6 +228,173 @@ ROLLUP_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
 GSE_ADDRESS="0x67788e5083646ccedeeb07e7bc35ab0d511fc8b9"
 QUEUE_URL="https://dev.dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
+PYTHON_SCRIPT_DIR="/root/aztec-monitor-agent/python-scripts"
+
+# Функция для установки Python зависимостей
+install_python_dependencies() {
+    echo -e "${YELLOW}$(t "installing_deps")${RESET}"
+
+    # Проверяем, установлен ли pip
+    if ! command -v pip3 &> /dev/null; then
+        echo -e "${RED}Error: pip3 not found. Please install Python and pip first.${RESET}"
+        return 1
+    fi
+
+    # Устанавливаем необходимые пакеты
+    pip3 install curl_cffi requests > /dev/null 2>&1
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}$(t "deps_installed")${RESET}"
+        return 0
+    else
+        echo -e "${RED}Error: Failed to install Python dependencies${RESET}"
+        return 1
+    fi
+}
+
+# Функция для создания Python скрипта обхода Cloudflare
+create_cloudflare_bypass_script() {
+    mkdir -p "$PYTHON_SCRIPT_DIR"
+
+    cat > "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" << 'EOF'
+#!/usr/bin/env python3
+import sys
+import json
+from curl_cffi import requests
+import time
+
+def bypass_cloudflare(url, validator_address=None, max_retries=3):
+    """
+    Функция для обхода Cloudflare защиты с использованием curl_cffi
+    """
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-origin',
+        'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+    }
+
+    # Формируем URL для поиска
+    search_url = f"{url}?page=1&limit=10"
+    if validator_address:
+        search_url += f"&search={validator_address.lower()}"
+
+    for attempt in range(max_retries):
+        try:
+            # Используем impersonate для обхода Cloudflare
+            response = requests.get(
+                search_url,
+                headers=headers,
+                impersonate="chrome120",
+                timeout=30
+            )
+
+            if response.status_code == 200:
+                try:
+                    data = response.json()
+                    return {
+                        "success": True,
+                        "data": data,
+                        "status_code": response.status_code
+                    }
+                except json.JSONDecodeError:
+                    # Если JSON невалиден, пробуем еще раз
+                    time.sleep(2)
+                    continue
+
+            elif response.status_code in [403, 429, 503]:
+                # Cloudflare блокировка, пробуем другой браузерный профиль
+                time.sleep(3)
+                continue
+
+            else:
+                return {
+                    "success": False,
+                    "error": f"HTTP Error: {response.status_code}",
+                    "status_code": response.status_code
+                }
+
+        except requests.RequestsError as e:
+            if attempt < max_retries - 1:
+                time.sleep(3)
+                continue
+            return {
+                "success": False,
+                "error": f"Request error: {str(e)}",
+                "status_code": 0
+            }
+        except Exception as e:
+            if attempt < max_retries - 1:
+                time.sleep(3)
+                continue
+            return {
+                "success": False,
+                "error": f"Unexpected error: {str(e)}",
+                "status_code": 0
+            }
+
+    return {
+        "success": False,
+        "error": "All retries failed",
+        "status_code": 0
+    }
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print(json.dumps({"success": False, "error": "URL parameter required"}))
+        sys.exit(1)
+
+    url = sys.argv[1]
+    validator_address = sys.argv[2] if len(sys.argv) > 2 else None
+
+    result = bypass_cloudflare(url, validator_address)
+    print(json.dumps(result))
+EOF
+
+    chmod +x "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py"
+}
+
+# Функция для выполнения запроса с обходом Cloudflare
+cloudflare_request() {
+    local url=$1
+    local validator_address=$2
+
+    # Создаем скрипт если он не существует
+    if [ ! -f "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" ]; then
+        create_cloudflare_bypass_script
+    fi
+
+    # Проверяем установлены ли зависимости
+    if ! python3 -c "import curl_cffi" 2>/dev/null; then
+        install_python_dependencies
+    fi
+
+    echo -e "${YELLOW}$(t "cloudflare_bypass")${RESET}"
+
+    # Запускаем Python скрипт
+    local result
+    if [ -n "$validator_address" ]; then
+        result=$(python3 "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "$url" "$validator_address" 2>/dev/null)
+    else
+        result=$(python3 "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "$url" 2>/dev/null)
+    fi
+
+    if [ $? -eq 0 ] && [ -n "$result" ]; then
+        echo "$result"
+        return 0
+    else
+        return 1
+    fi
+}
 
 # Функция загрузки RPC URL с обработкой ошибок
 load_rpc_config() {
@@ -417,57 +593,34 @@ check_validator_queue() {
         local temp_file=$2
 
         local search_address_lower=${validator_address,,}
-        local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
 
-        # Эмулируем браузер Chrome с правильными заголовками
-        local response_data=$(curl -s \
-            --connect-timeout 10 \
-            --max-time 30 \
-            -H "accept: application/json" \
-            -H "origin: https://dev.dashtec.xyz" \
-            -H "referer: https://dev.dashtec.xyz/" \
-            -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" \
-            -H "sec-ch-ua: \"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"" \
-            -H "sec-ch-ua-mobile: ?0" \
-            -H "sec-ch-ua-platform: \"Windows\"" \
-            -H "sec-fetch-site: same-origin" \
-            -H "sec-fetch-mode: cors" \
-            -H "sec-fetch-dest: empty" \
-            -H "accept-language: en-US,en;q=0.9" \
-            "$search_url")
-
+        # Используем Python скрипт для обхода Cloudflare
+        local response_data=$(cloudflare_request "$QUEUE_URL" "$search_address_lower")
         local exit_code=$?
 
         if [ $exit_code -ne 0 ] || [ -z "$response_data" ]; then
-            echo "$validator_address|ERROR|Error fetching data (curl exit: $exit_code)" >> "$temp_file"
+            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"
             return 1
         fi
 
-        # Проверяем, не попали ли мы на страницу Cloudflare
-        if echo "$response_data" | grep -q "Cloudflare" || echo "$response_data" | grep -q "challenge-form"; then
-            echo "$validator_address|ERROR|Cloudflare protection detected" >> "$temp_file"
+        # Парсим JSON ответ от Python скрипта
+        local success=$(echo "$response_data" | jq -r '.success')
+        local error_msg=$(echo "$response_data" | jq -r '.error // empty')
+
+        if [ "$success" != "true" ]; then
+            echo "$validator_address|ERROR|$error_msg" >> "$temp_file"
             return 1
         fi
 
-        # Пытаемся извлечь JSON из ответа (на случай, если есть обертка)
-        local json_data="$response_data"
-        if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
-            # Пытаемся найти JSON в тексте ответа
-            local json_start=$(echo "$response_data" | grep -b -o '{' | head -1 | cut -d: -f1)
-            local json_end=$(echo "$response_data" | grep -b -o '}' | tail -1 | cut -d: -f1)
+        local api_data=$(echo "$response_data" | jq -r '.data')
 
-            if [ -n "$json_start" ] && [ -n "$json_end" ] && [ "$json_start" -lt "$json_end" ]; then
-                json_data=$(echo "$response_data" | cut -c $((json_start+1))-$((json_end+1)))
-            fi
-        fi
-
-        if ! echo "$json_data" | jq -e . >/dev/null 2>&1; then
+        if ! jq -e . >/dev/null 2>&1 <<<"$api_data"; then
             echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
             return 1
         fi
 
-        local validator_info=$(echo "$json_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
-        local filtered_count=$(echo "$json_data" | jq -r '.filteredCount // 0')
+        local validator_info=$(echo "$api_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+        local filtered_count=$(echo "$api_data" | jq -r '.filteredCount // 0')
 
         if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
             local position=$(echo "$validator_info" | jq -r '.position')
@@ -481,30 +634,11 @@ check_validator_queue() {
         fi
     }
 
-    # Ограничиваем количество параллельных запросов для избежания блокировки
-    local max_parallel=3
-    local current_parallel=0
+    # Запускаем проверку всех валидаторов в фоне
     local pids=()
-
     for validator_address in "${validator_addresses[@]}"; do
-        # Ждем, если достигли максимума параллельных запросов
-        while [ $current_parallel -ge $max_parallel ]; do
-            sleep 0.5
-            # Проверяем завершенные процессы
-            for i in "${!pids[@]}"; do
-                if ! kill -0 "${pids[i]}" 2>/dev/null; then
-                    unset "pids[i]"
-                    current_parallel=$((current_parallel - 1))
-                fi
-            done
-        done
-
         check_single_validator "$validator_address" "$temp_file" &
         pids+=($!)
-        current_parallel=$((current_parallel + 1))
-
-        # Небольшая задержка между запросами
-        sleep 0.2
     done
 
     # Ждем завершения всех фоновых процессов
@@ -638,6 +772,7 @@ LAST_POSITION_FILE="$position_file"
 LOG_FILE="$log_file"
 TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
+PYTHON_SCRIPT_DIR="$PYTHON_SCRIPT_DIR"
 
 # Timeout settings (in seconds)
 CURL_CONNECT_TIMEOUT=15
@@ -688,37 +823,27 @@ format_date() {
     fi
 }
 
-safe_curl_request() {
+# Функция для обхода Cloudflare с использованием Python скрипта
+cloudflare_request() {
     local url="\$1"
-    local retry_count=0
+    local validator_address="\$2"
 
-    while [ \$retry_count -lt \$MAX_RETRIES ]; do
-        log_message "CURL attempt \$((retry_count + 1)) for URL: \$url"
+    log_message "Using Cloudflare bypass for: \$url"
 
-        local response=\$(curl -s --connect-timeout \$CURL_CONNECT_TIMEOUT --max-time \$CURL_MAX_TIME \\
-                          -H "Cache-Control: no-cache" \\
-                          -H "Pragma: no-cache" \\
-                          -w "HTTP_CODE:%{http_code}" \\
-                          "\$url" 2>/dev/null)
+    local result
+    if [ -n "\$validator_address" ]; then
+        result=\$(python3 "\$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "\$url" "\$validator_address" 2>/dev/null)
+    else
+        result=\$(python3 "\$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "\$url" 2>/dev/null)
+    fi
 
-        local http_code=\$(echo "\$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
-        local clean_response=\$(echo "\$response" | sed 's/HTTP_CODE:[0-9]*//')
-
-        log_message "CLEAN JSON response: \$clean_response"
-
-        if [ "\$http_code" -eq 200 ] && [ -n "\$clean_response" ]; then
-            log_message "CURL success (HTTP \$http_code)"
-            echo "\$clean_response"
-            return 0
-        fi
-
-        retry_count=\$((retry_count + 1))
-        log_message "CURL attempt \$retry_count failed (HTTP \$http_code), retrying in \$API_RETRY_DELAY seconds..."
-        sleep \$API_RETRY_DELAY
-    done
-
-    log_message "All CURL attempts failed for URL: \$url"
-    return 1
+    if [ \$? -eq 0 ] && [ -n "\$result" ]; then
+        echo "\$result"
+        return 0
+    else
+        log_message "Cloudflare bypass failed"
+        return 1
+    fi
 }
 
 monitor_position() {
@@ -730,25 +855,33 @@ monitor_position() {
         log_message "Last known position: \$last_position"
     fi
 
-    # Используем поиск по конкретному адресу через API
-    local search_url="\${QUEUE_URL}?page=1&limit=10&search=\${VALIDATOR_ADDRESS,,}"
-    log_message "Fetching data from: \$search_url"
-
-    local response_data=\$(safe_curl_request "\$search_url")
+    # Используем поиск по конкретному адресу через API с обходом Cloudflare
+    local response_data=\$(cloudflare_request "\$QUEUE_URL" "\$VALIDATOR_ADDRESS")
 
     if [ \$? -ne 0 ] || [ -z "\$response_data" ]; then
         log_message "Error: Failed to fetch queue data after retries"
         return 1
     fi
 
-    if ! echo "\$response_data" | jq -e . >/dev/null 2>&1; then
+    # Парсим JSON ответ от Python скрипта
+    local success=\$(echo "\$response_data" | jq -r '.success')
+    local error_msg=\$(echo "\$response_data" | jq -r '.error // empty')
+
+    if [ "\$success" != "true" ]; then
+        log_message "Error: \$error_msg"
+        return 1
+    fi
+
+    local api_data=\$(echo "\$response_data" | jq -r '.data')
+
+    if ! echo "\$api_data" | jq -e . >/dev/null 2>&1; then
         log_message "Error: Invalid JSON data received"
         return 1
     fi
 
     # Проверяем наличие валидатора в ответе
-    local validator_info=\$(echo "\$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"\${VALIDATOR_ADDRESS,,}\")")
-    local filtered_count=\$(echo "\$response_data" | jq -r '.filteredCount // 0')
+    local validator_info=\$(echo "\$api_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"\${VALIDATOR_ADDRESS,,}\")")
+    local filtered_count=\$(echo "\$api_data" | jq -r '.filteredCount // 0')
 
     log_message "Filtered count: \$filtered_count"
 
