@@ -216,7 +216,7 @@ init_languages "$1"
 
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
 ROLLUP_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
-GSE_ADDRESS="0xb088487022867ed1127ba6eb9b2e8040ceda312e"
+GSE_ADDRESS="0x67788e5083646ccedeeb07e7bc35ab0d511fc8b9"
 QUEUE_URL="https://dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
