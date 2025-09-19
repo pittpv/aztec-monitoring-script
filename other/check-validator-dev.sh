@@ -710,7 +710,7 @@ monitor_position() {
         if [[ "\$last_position" != "\$current_position" ]]; then
             local message
             if [[ -n "\$last_position" ]]; then
-                message="📊 *Validator Position Update* 📊
+                message="📊 *Validator Position Update*
 
 🔹 *Address:* \$VALIDATOR_ADDRESS
 🔄 *Change:* \$last_position → \$current_position
@@ -721,7 +721,7 @@ monitor_position() {
             else
                 message="🎉 *New Validator in Queue*
 
-🔹 *Address:* \\`\$VALIDATOR_ADDRESS\\`
+🔹 *Address:* \$VALIDATOR_ADDRESS
 📌 *Initial Position:* \$current_position
 📅 *Queued since:* \$queued_at
 🏦 *Withdrawer:* \$withdrawer_address
@@ -744,9 +744,9 @@ monitor_position() {
         log_message "Validator not found in queue"
 
         if [[ -n "\$last_position" ]]; then
-            local message="❌ *Validator Removed from Queue* ❌
+            local message="❌ *Validator Removed from Queue*
 
-🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
+🔹 *Address:* \$VALIDATOR_ADDRESS
 ⌛ *Last Position:* \$last_position
 ⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
 
