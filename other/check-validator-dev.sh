@@ -83,9 +83,6 @@ init_languages() {
     TRANSLATIONS["en,getting_current_slot"]="Getting current slot..."
     TRANSLATIONS["en,deriving_timestamp"]="Deriving timestamp for slot..."
     TRANSLATIONS["en,querying_attesters"]="Querying attesters from GSE contract..."
-    TRANSLATIONS["en,cloudflare_bypass"]="Using Cloudflare bypass with curl_cffi..."
-    TRANSLATIONS["en,installing_deps"]="Installing Python dependencies for Cloudflare bypass..."
-    TRANSLATIONS["en,deps_installed"]="Python dependencies installed successfully"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -145,9 +142,6 @@ init_languages() {
     TRANSLATIONS["ru,getting_current_slot"]="Получение текущего слота..."
     TRANSLATIONS["ru,deriving_timestamp"]="Получение временной метки для слота..."
     TRANSLATIONS["ru,querying_attesters"]="Запрос аттестующих из GSE контракта..."
-    TRANSLATIONS["ru,cloudflare_bypass"]="Используем обход Cloudflare с curl_cffi..."
-    TRANSLATIONS["ru,installing_deps"]="Устанавливаем Python зависимости для обхода Cloudflare..."
-    TRANSLATIONS["ru,deps_installed"]="Python зависимости успешно установлены"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -207,9 +201,6 @@ init_languages() {
     TRANSLATIONS["tr,getting_current_slot"]="Mevcut slot alınıyor..."
     TRANSLATIONS["tr,deriving_timestamp"]="Slot için zaman damgası türetiliyor..."
     TRANSLATIONS["tr,querying_attesters"]="GSE kontratından onaylayıcılar sorgulanıyor..."
-    TRANSLATIONS["tr,cloudflare_bypass"]="Cloudflare bypass curl_cffi ile kullanılıyor..."
-    TRANSLATIONS["tr,installing_deps"]="Cloudflare bypass için Python bağımlılıkları yükleniyor..."
-    TRANSLATIONS["tr,deps_installed"]="Python bağımlılıkları başarıyla yüklendi"
 }
 
 t() {
@@ -228,172 +219,56 @@ ROLLUP_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
 GSE_ADDRESS="0x67788e5083646ccedeeb07e7bc35ab0d511fc8b9"
 QUEUE_URL="https://dev.dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
-PYTHON_SCRIPT_DIR="/root/aztec-monitor-agent/python-scripts"
 
-# Функция для установки Python зависимостей
-install_python_dependencies() {
-    echo -e "${YELLOW}$(t "installing_deps")${RESET}"
-
-    # Проверяем, установлен ли pip
-    if ! command -v pip3 &> /dev/null; then
-        echo -e "${RED}Error: pip3 not found. Please install Python and pip first.${RESET}"
-        return 1
-    fi
-
-    # Устанавливаем необходимые пакеты
-    pip3 install curl_cffi requests > /dev/null 2>&1
-
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}$(t "deps_installed")${RESET}"
-        return 0
-    else
-        echo -e "${RED}Error: Failed to install Python dependencies${RESET}"
-        return 1
-    fi
+# ========= Ensure python + curl_cffi =========
+need_tool(){ command -v "$1" >/dev/null 2>&1; }
+need_pkg_py(){ python3 - <<'PY' >/dev/null 2>&1 || exit 1
+try:
+    import pkgutil
+    assert pkgutil.find_loader("curl_cffi")
+except Exception:
+    raise SystemExit(1)
+print("OK")
+PY
 }
 
-# Функция для создания Python скрипта обхода Cloudflare
-create_cloudflare_bypass_script() {
-    mkdir -p "$PYTHON_SCRIPT_DIR"
+if ! need_tool python3; then
+  echo -e "${RED}Python3 is required.${RESET}"; exit 1
+fi
+if ! need_pkg_py; then
+  echo -e "${YELLOW}Installing curl_cffi...${RESET}"
+  python3 -m pip install --quiet --upgrade curl_cffi || { echo -e "${RED}Failed to install curl_cffi${RESET}"; exit 1; }
+fi
 
-    cat > "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" << 'EOF'
-#!/usr/bin/env python3
-import sys
-import json
+# ========= HTTP via curl_cffi =========
+# cffi_http_get <url>
+cffi_http_get() {
+  local url="$1"
+  python3 - "$url" <<'PY'
+import sys, json
 from curl_cffi import requests
-import time
-
-def bypass_cloudflare(url, validator_address=None, max_retries=3):
-    """
-    Функция для обхода Cloudflare защиты с использованием curl_cffi
-    """
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/json, text/plain, */*',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
-        'Sec-Fetch-Dest': 'empty',
-        'Sec-Fetch-Mode': 'cors',
-        'Sec-Fetch-Site': 'same-origin',
-        'sec-ch-ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-        'sec-ch-ua-mobile': '?0',
-        'sec-ch-ua-platform': '"Windows"',
-    }
-
-    # Формируем URL для поиска
-    search_url = f"{url}?page=1&limit=10"
-    if validator_address:
-        search_url += f"&search={validator_address.lower()}"
-
-    for attempt in range(max_retries):
-        try:
-            # Используем impersonate для обхода Cloudflare
-            response = requests.get(
-                search_url,
-                headers=headers,
-                impersonate="chrome120",
-                timeout=30
-            )
-
-            if response.status_code == 200:
-                try:
-                    data = response.json()
-                    return {
-                        "success": True,
-                        "data": data,
-                        "status_code": response.status_code
-                    }
-                except json.JSONDecodeError:
-                    # Если JSON невалиден, пробуем еще раз
-                    time.sleep(2)
-                    continue
-
-            elif response.status_code in [403, 429, 503]:
-                # Cloudflare блокировка, пробуем другой браузерный профиль
-                time.sleep(3)
-                continue
-
-            else:
-                return {
-                    "success": False,
-                    "error": f"HTTP Error: {response.status_code}",
-                    "status_code": response.status_code
-                }
-
-        except requests.RequestsError as e:
-            if attempt < max_retries - 1:
-                time.sleep(3)
-                continue
-            return {
-                "success": False,
-                "error": f"Request error: {str(e)}",
-                "status_code": 0
-            }
-        except Exception as e:
-            if attempt < max_retries - 1:
-                time.sleep(3)
-                continue
-            return {
-                "success": False,
-                "error": f"Unexpected error: {str(e)}",
-                "status_code": 0
-            }
-
-    return {
-        "success": False,
-        "error": "All retries failed",
-        "status_code": 0
-    }
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print(json.dumps({"success": False, "error": "URL parameter required"}))
-        sys.exit(1)
-
-    url = sys.argv[1]
-    validator_address = sys.argv[2] if len(sys.argv) > 2 else None
-
-    result = bypass_cloudflare(url, validator_address)
-    print(json.dumps(result))
-EOF
-
-    chmod +x "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py"
+u = sys.argv[1]
+headers = {
+  "accept": "application/json, text/plain, */*",
+  "origin": "https://dev.dashtec.xyz",
+  "referer": "https://dev.dashtec.xyz/",
 }
-
-# Функция для выполнения запроса с обходом Cloudflare
-cloudflare_request() {
-    local url=$1
-    local validator_address=$2
-
-    # Создаем скрипт если он не существует
-    if [ ! -f "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" ]; then
-        create_cloudflare_bypass_script
-    fi
-
-    # Проверяем установлены ли зависимости
-    if ! python3 -c "import curl_cffi" 2>/dev/null; then
-        install_python_dependencies
-    fi
-
-    echo -e "${YELLOW}$(t "cloudflare_bypass")${RESET}"
-
-    # Запускаем Python скрипт
-    local result
-    if [ -n "$validator_address" ]; then
-        result=$(python3 "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "$url" "$validator_address" 2>/dev/null)
-    else
-        result=$(python3 "$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "$url" 2>/dev/null)
-    fi
-
-    if [ $? -eq 0 ] && [ -n "$result" ]; then
-        echo "$result"
-        return 0
-    else
-        return 1
-    fi
+try:
+    r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
+    ct = (r.headers.get("content-type") or "").lower()
+    txt = r.text
+    if "application/json" in ct:
+        sys.stdout.write(txt)
+    else:
+        i, j = txt.find("{"), txt.rfind("}")
+        if i != -1 and j != -1 and j > i:
+            sys.stdout.write(txt[i:j+1])
+        else:
+            sys.stdout.write(txt)
+except Exception as e:
+    sys.stdout.write("")
+    sys.stderr.write(f"{e}")
+PY
 }
 
 # Функция загрузки RPC URL с обработкой ошибок
@@ -575,111 +450,66 @@ send_telegram_notification() {
 }
 
 # Функция для проверки очереди валидаторов (пакетная обработка)
-check_validator_queue() {
+# ========= Queue check via curl_cffi (batch) =========
+check_validator_queue(){
     local validator_addresses=("$@")
-    local results=()
-    local found_count=0
-    local not_found_count=0
-
+    local results=(); local found_count=0; local not_found_count=0
     echo -e "${YELLOW}$(t "fetching_queue")${RESET}"
     echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${RESET}"
+    local temp_file; temp_file=$(mktemp)
 
-    # Создаем временный файл для результатов
-    local temp_file=$(mktemp)
-
-    # Функция для проверки одного валидатора
-    check_single_validator() {
-        local validator_address=$1
-        local temp_file=$2
-
+    check_single_validator(){
+        local validator_address=$1; local temp_file=$2
         local search_address_lower=${validator_address,,}
-
-        # Используем Python скрипт для обхода Cloudflare
-        local response_data=$(cloudflare_request "$QUEUE_URL" "$search_address_lower")
-        local exit_code=$?
-
-        if [ $exit_code -ne 0 ] || [ -z "$response_data" ]; then
-            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"
-            return 1
+        local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
+        local response_data; response_data="$(cffi_http_get "$search_url")"
+        if [ -z "$response_data" ]; then
+            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"; return 1
         fi
-
-        # Парсим JSON ответ от Python скрипта
-        local success=$(echo "$response_data" | jq -r '.success')
-        local error_msg=$(echo "$response_data" | jq -r '.error // empty')
-
-        if [ "$success" != "true" ]; then
-            echo "$validator_address|ERROR|$error_msg" >> "$temp_file"
-            return 1
+        if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
+            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"; return 1
         fi
-
-        local api_data=$(echo "$response_data" | jq -r '.data')
-
-        if ! jq -e . >/dev/null 2>&1 <<<"$api_data"; then
-            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
-            return 1
-        fi
-
-        local validator_info=$(echo "$api_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
-        local filtered_count=$(echo "$api_data" | jq -r '.filteredCount // 0')
-
+        local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+        local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
         if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
-            local position=$(echo "$validator_info" | jq -r '.position')
-            local withdrawer=$(echo "$validator_info" | jq -r '.withdrawerAddress')
-            local queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
-            local tx_hash=$(echo "$validator_info" | jq -r '.transactionHash')
-
+            local position withdrawer queued_at tx_hash
+            position=$(echo "$validator_info" | jq -r '.position')
+            withdrawer=$(echo "$validator_info" | jq -r '.withdrawerAddress')
+            queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
+            tx_hash=$(echo "$validator_info" | jq -r '.transactionHash')
             echo "$validator_address|FOUND|$position|$withdrawer|$queued_at|$tx_hash" >> "$temp_file"
         else
             echo "$validator_address|NOT_FOUND||" >> "$temp_file"
         fi
     }
 
-    # Запускаем проверку всех валидаторов в фоне
     local pids=()
     for validator_address in "${validator_addresses[@]}"; do
         check_single_validator "$validator_address" "$temp_file" &
         pids+=($!)
     done
+    for pid in "${pids[@]}"; do wait "$pid" 2>/dev/null || true; done
 
-    # Ждем завершения всех фоновых процессов
-    for pid in "${pids[@]}"; do
-        wait "$pid" 2>/dev/null
-    done
-
-    # Читаем и обрабатываем результаты
     while IFS='|' read -r address status position withdrawer queued_at tx_hash; do
         case "$status" in
-            "FOUND")
-                results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash")
-                found_count=$((found_count + 1))
-                ;;
-            "NOT_FOUND")
-                results+=("NOT_FOUND|$address")
-                not_found_count=$((not_found_count + 1))
-                ;;
-            "ERROR")
-                results+=("ERROR|$address|$position") # position содержит сообщение об ошибке
-                not_found_count=$((not_found_count + 1))
-                ;;
+            FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash"); found_count=$((found_count+1));;
+            NOT_FOUND) results+=("NOT_FOUND|$address"); not_found_count=$((not_found_count+1));;
+            ERROR) results+=("ERROR|$address|$position"); not_found_count=$((not_found_count+1));;
         esac
     done < "$temp_file"
-
-    # Удаляем временный файл
     rm -f "$temp_file"
 
-    # Выводим общий результат
     echo -e "\n${CYAN}=== Queue Check Results ===${RESET}"
     echo -e "Found in queue: ${GREEN}$found_count${RESET}"
     echo -e "Not found: ${RED}$not_found_count${RESET}"
     echo -e "Total checked: ${BOLD}${#validator_addresses[@]}${RESET}"
 
-    # Выводим детальную информацию для найденных валидаторов
     if [ $found_count -gt 0 ]; then
         echo -e "\n${GREEN}Validators found in queue:${RESET}"
         for result in "${results[@]}"; do
-            IFS='|' read -r status address position withdrawer queued_at tx_hash <<< "$result"
+            IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
             if [ "$status" == "FOUND" ]; then
-                local formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
+                local formatted_date; formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
                 echo -e "  ${CYAN}• ${address}${RESET}"
                 echo -e "    ${BOLD}Position:${RESET} $position"
                 echo -e "    ${BOLD}Withdrawer:${RESET} $withdrawer"
@@ -689,11 +519,10 @@ check_validator_queue() {
         done
     fi
 
-    # Выводим не найденные валидаторы
     if [ $not_found_count -gt 0 ]; then
         echo -e "\n${RED}Validators not found in queue:${RESET}"
         for result in "${results[@]}"; do
-            IFS='|' read -r status address error_msg <<< "$result"
+            IFS='|' read -r status address error_msg <<<"$result"
             if [ "$status" == "NOT_FOUND" ]; then
                 echo -e "  ${RED}• ${address}${RESET}"
             elif [ "$status" == "ERROR" ]; then
@@ -702,12 +531,7 @@ check_validator_queue() {
         done
     fi
 
-    # Возвращаем код успеха, если хотя бы один валидатор найден
-    if [ $found_count -gt 0 ]; then
-        return 0
-    else
-        return 1
-    fi
+    if [ $found_count -gt 0 ]; then return 0; else return 1; fi
 }
 
 # Вспомогательная функция для проверки одного валидатора (для обратной совместимости)
@@ -716,30 +540,20 @@ check_single_validator_queue() {
     check_validator_queue "$validator_address"
 }
 
-create_monitor_script() {
-    local validator_addresses=$1
-    local addresses=()
-
-    # Разделяем адреса по запятой
-    IFS=',' read -ra addresses <<< "$validator_addresses"
-
+create_monitor_script(){
+    local validator_addresses=$1; local addresses=()
+    IFS=',' read -ra addresses <<<"$validator_addresses"
     for validator_address in "${addresses[@]}"; do
-        validator_address=$(echo "$validator_address" | xargs) # Удаляем лишние пробелы
-
+        validator_address=$(echo "$validator_address" | xargs)
         local normalized_address=${validator_address,,}
         local script_name="monitor_${normalized_address:2}.sh"
         local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
         local position_file="$MONITOR_DIR/last_position_${normalized_address:2}.txt"
-
-        # Проверяем, не существует ли уже монитор
         if [ -f "$MONITOR_DIR/$script_name" ]; then
-            echo -e "${YELLOW}$(t "notification_exists")${RESET}"
-            continue
+            echo -e "${YELLOW}$(t "notification_exists")${RESET}"; continue
         fi
-
         mkdir -p "$MONITOR_DIR"
 
-        # Создаем начальное сообщение о создании монитора
         local start_message="🎯 *Queue Monitoring Started*
 
 🔹 *Address:* \`$validator_address\`
@@ -747,270 +561,158 @@ create_monitor_script() {
 📋 *Check frequency:* Hourly
 🔔 *Notifications:* Position changes"
 
-        # Отправляем начальное уведомление
-        if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-            curl -s --connect-timeout 10 --max-time 30 \
-                -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
-                -d chat_id="$TELEGRAM_CHAT_ID" \
-                -d text="$start_message" \
-                -d parse_mode="Markdown" > /dev/null 2>&1
+        if [ -n "${TELEGRAM_BOT_TOKEN-}" ] && [ -n "${TELEGRAM_CHAT_ID-}" ]; then
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" -d text="$start_message" -d parse_mode="Markdown" >/dev/null 2>&1
         fi
 
-        # Создаем скрипт мониторинга
-        cat > "$MONITOR_DIR/$script_name" <<EOF
-#!/bin/bash
-
-# Set safe environment
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+        cat > "$MONITOR_DIR/$script_name" <<'EOF'
+#!/usr/bin/env bash
 set -euo pipefail
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
-# Configuration
-VALIDATOR_ADDRESS="$validator_address"
-QUEUE_URL="$QUEUE_URL"
-MONITOR_DIR="$MONITOR_DIR"
-LAST_POSITION_FILE="$position_file"
-LOG_FILE="$log_file"
-TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
-TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
-PYTHON_SCRIPT_DIR="$PYTHON_SCRIPT_DIR"
+VALIDATOR_ADDRESS="__ADDR__"
+QUEUE_URL="__QURL__"
+MONITOR_DIR="__MDIR__"
+LAST_POSITION_FILE="__POSFILE__"
+LOG_FILE="__LOGFILE__"
+TELEGRAM_BOT_TOKEN="__TBOT__"
+TELEGRAM_CHAT_ID="__TCHAT__"
 
-# Timeout settings (in seconds)
 CURL_CONNECT_TIMEOUT=15
 CURL_MAX_TIME=45
 API_RETRY_DELAY=30
 MAX_RETRIES=2
 
-mkdir -p "\$MONITOR_DIR"
+mkdir -p "$MONITOR_DIR"
+log_message(){ echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"; }
 
-# Функция для логирования
-log_message() {
-    echo "[\$(date '+%Y-%m-%d %H:%M:%S')] \$1" >> "\$LOG_FILE"
-}
+# Ensure curl_cffi
+python3 - <<'PY' >/dev/null 2>&1 || exit 1
+try:
+    import pkgutil
+    assert pkgutil.find_loader("curl_cffi")
+except Exception:
+    raise SystemExit(1)
+print("OK")
+PY
 
-send_telegram() {
-    local message="\$1"
-
-    if [ -z "\$TELEGRAM_BOT_TOKEN" ] || [ -z "\$TELEGRAM_CHAT_ID" ]; then
-        log_message "TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set, skipping notification"
+send_telegram(){
+    local message="$1"
+    if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+        log_message "No Telegram tokens"
         return 1
     fi
+    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+        -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null
+}
 
-    local result=\$(curl -s --connect-timeout \$CURL_CONNECT_TIMEOUT --max-time \$CURL_MAX_TIME \\
-        -w "%{http_code}" \\
-        -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
-        -d chat_id="\$TELEGRAM_CHAT_ID" \\
-        -d text="\$message" \\
-        -d parse_mode="Markdown" 2>/dev/null)
-
-    local http_code=\${result: -3}
-    local response=\${result%???}
-
-    if [ "\$http_code" -eq 200 ]; then
-        log_message "Telegram notification sent successfully"
-        return 0
+format_date(){
+    local iso_date="$1"
+    if [[ "$iso_date" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}) ]]; then
+        echo "${BASH_REMATCH[3]}.${BASH_REMATCH[2]}.${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]} UTC"
     else
-        log_message "Failed to send Telegram notification (HTTP \$http_code): \$response"
-        return 1
+        echo "$iso_date"
     fi
 }
 
-format_date() {
-    local iso_date="\$1"
-    if [[ "\$iso_date" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}) ]]; then
-        echo "\${BASH_REMATCH[3]}.\${BASH_REMATCH[2]}.\${BASH_REMATCH[1]} \${BASH_REMATCH[4]}:\${BASH_REMATCH[5]} UTC"
-    else
-        echo "\$iso_date"
-    fi
+cffi_http_get(){
+  local url="$1"
+  python3 - "$url" <<'PY'
+import sys
+from curl_cffi import requests
+u = sys.argv[1]
+headers = {"accept":"application/json, text/plain, */*","origin":"https://dev.dashtec.xyz","referer":"https://dev.dashtec.xyz/"}
+r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
+ct = (r.headers.get("content-type") or "").lower()
+txt = r.text
+if "application/json" in ct:
+    print(txt)
+else:
+    i, j = txt.find("{"), txt.rfind("}")
+    print(txt[i:j+1] if i!=-1 and j!=-1 and j>i else txt)
+PY
 }
 
-# Функция для обхода Cloudflare с использованием Python скрипта
-cloudflare_request() {
-    local url="\$1"
-    local validator_address="\$2"
-
-    log_message "Using Cloudflare bypass for: \$url"
-
-    local result
-    if [ -n "\$validator_address" ]; then
-        result=\$(python3 "\$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "\$url" "\$validator_address" 2>/dev/null)
-    else
-        result=\$(python3 "\$PYTHON_SCRIPT_DIR/cloudflare_bypass.py" "\$url" 2>/dev/null)
-    fi
-
-    if [ \$? -eq 0 ] && [ -n "\$result" ]; then
-        echo "\$result"
-        return 0
-    else
-        log_message "Cloudflare bypass failed"
-        return 1
-    fi
-}
-
-monitor_position() {
-    log_message "Starting monitor_position for \$VALIDATOR_ADDRESS"
-
+monitor_position(){
+    log_message "Start monitor_position for $VALIDATOR_ADDRESS"
     local last_position=""
-    if [[ -f "\$LAST_POSITION_FILE" ]]; then
-        last_position=\$(cat "\$LAST_POSITION_FILE")
-        log_message "Last known position: \$last_position"
-    fi
+    [[ -f "$LAST_POSITION_FILE" ]] && last_position=$(cat "$LAST_POSITION_FILE")
 
-    # Используем поиск по конкретному адресу через API с обходом Cloudflare
-    local response_data=\$(cloudflare_request "\$QUEUE_URL" "\$VALIDATOR_ADDRESS")
+    local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
+    log_message "GET $search_url"
+    local response_data; response_data="$(cffi_http_get "$search_url")"
+    if [ -z "$response_data" ]; then log_message "Empty response"; return 1; fi
+    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then log_message "Invalid JSON"; return 1; fi
 
-    if [ \$? -ne 0 ] || [ -z "\$response_data" ]; then
-        log_message "Error: Failed to fetch queue data after retries"
-        return 1
-    fi
+    local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+    local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
 
-    # Парсим JSON ответ от Python скрипта
-    local success=\$(echo "\$response_data" | jq -r '.success')
-    local error_msg=\$(echo "\$response_data" | jq -r '.error // empty')
+    if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
+        local current_position queued_at withdrawer_address transaction_hash
+        current_position=$(echo "$validator_info" | jq -r '.position')
+        queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
+        withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
+        transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
 
-    if [ "\$success" != "true" ]; then
-        log_message "Error: \$error_msg"
-        return 1
-    fi
-
-    local api_data=\$(echo "\$response_data" | jq -r '.data')
-
-    if ! echo "\$api_data" | jq -e . >/dev/null 2>&1; then
-        log_message "Error: Invalid JSON data received"
-        return 1
-    fi
-
-    # Проверяем наличие валидатора в ответе
-    local validator_info=\$(echo "\$api_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"\${VALIDATOR_ADDRESS,,}\")")
-    local filtered_count=\$(echo "\$api_data" | jq -r '.filteredCount // 0')
-
-    log_message "Filtered count: \$filtered_count"
-
-    if [[ -n "\$validator_info" && "\$filtered_count" -gt 0 ]]; then
-        local current_position=\$(echo "\$validator_info" | jq -r '.position')
-        local queued_at=\$(format_date "\$(echo "\$validator_info" | jq -r '.queuedAt')")
-        local withdrawer_address=\$(echo "\$validator_info" | jq -r '.withdrawerAddress')
-        local transaction_hash=\$(echo "\$validator_info" | jq -r '.transactionHash')
-
-        log_message "Validator found at position: \$current_position"
-
-        if [[ "\$last_position" != "\$current_position" ]]; then
+        if [[ "$last_position" != "$current_position" ]]; then
             local message
-            if [[ -n "\$last_position" ]]; then
-                message="📊 *Validator Position Update*
-
-🔹 *Address:* \$VALIDATOR_ADDRESS
-🔄 *Change:* \$last_position → \$current_position
-📅 *Queued since:* \$queued_at
-🏦 *Withdrawer:* \$withdrawer_address
-🔗 *Transaction:* \$transaction_hash
-⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
+            if [[ -n "$last_position" ]]; then
+                message="📊 *Validator Position Update*\n\n🔹 *Address:* $VALIDATOR_ADDRESS\n🔄 *Change:* $last_position → $current_position\n📅 *Queued since:* $queued_at\n🏦 *Withdrawer:* $withdrawer_address\n🔗 *Transaction:* $transaction_hash\n⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
-                message="🎉 *New Validator in Queue*
-
-🔹 *Address:* \$VALIDATOR_ADDRESS
-📌 *Initial Position:* \$current_position
-📅 *Queued since:* \$queued_at
-🏦 *Withdrawer:* \$withdrawer_address
-🔗 *Transaction:* \$transaction_hash
-⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
+                message="🎉 *New Validator in Queue*\n\n🔹 *Address:* $VALIDATOR_ADDRESS\n📌 *Initial Position:* $current_position\n📅 *Queued since:* $queued_at\n🏦 *Withdrawer:* $withdrawer_address\n🔗 *Transaction:* $transaction_hash\n⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
-
-            if send_telegram "\$message"; then
-                log_message "Notification sent successfully"
-            else
-                log_message "Failed to send notification"
-            fi
-
-            echo "\$current_position" > "\$LAST_POSITION_FILE"
-            log_message "Saved new position: \$current_position"
+            send_telegram "$message" && log_message "Notification sent"
+            echo "$current_position" > "$LAST_POSITION_FILE"
+            log_message "Saved new position: $current_position"
         else
-            log_message "Position unchanged: \$current_position"
+            log_message "Position unchanged: $current_position"
         fi
     else
         log_message "Validator not found in queue"
-
-        if [[ -n "\$last_position" ]]; then
-            local message="❌ *Validator Removed from Queue*
-
-🔹 *Address:* \$VALIDATOR_ADDRESS
-⌛ *Last Position:* \$last_position
-⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
-
-            if send_telegram "\$message"; then
-                log_message "Removal notification sent"
-            else
-                log_message "Failed to send removal notification"
-            fi
-
-            # Удаляем файл последней позиции
-            rm -f "\$LAST_POSITION_FILE"
-            log_message "Removed position file"
-
-            # Удаляем сам скрипт мониторинга
-            rm -f "\$0"
-            log_message "Removed monitor script"
-
-            # Удаляем задание из cron
-            (crontab -l | grep -v "\$0" | crontab - 2>/dev/null) || true
-            log_message "Removed from crontab"
-
-            # Удаляем лог-файл
-            rm -f "\$LOG_FILE"
+        if [[ -n "$last_position" ]]; then
+            local message="❌ *Validator Removed from Queue*\n\n🔹 *Address:* $VALIDATOR_ADDRESS\n⌛ *Last Position:* $last_position\n⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+            send_telegram "$message" && log_message "Removal notification sent"
+            rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
+            rm -f "$0"; log_message "Removed monitor script"
+            (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
+            rm -f "$LOG_FILE"
         fi
     fi
-
     return 0
 }
 
-# Основная функция
-main() {
+main(){
     log_message "===== Starting monitor cycle ====="
-
-    # Устанавливаем таймаут для всей функции мониторинга
-    local timeout_pid
-    (
-        sleep 300
-        log_message "ERROR: Script timed out after 5 minutes"
-        kill -TERM \$\$ 2>/dev/null
-    ) &
-    timeout_pid=\$!
-
-    # Вызываем функцию мониторинга
-    monitor_position
-    local exit_code=\$?
-
-    # Убиваем процесс таймаута
-    kill \$timeout_pid 2>/dev/null
-
-    if [ \$exit_code -ne 0 ]; then
-        log_message "ERROR: Script failed with exit code: \$exit_code"
-    fi
-
+    ( sleep 300; log_message "ERROR: Script timed out after 5 minutes"; kill -TERM $$ 2>/dev/null ) & TO_PID=$!
+    monitor_position; local ec=$?
+    kill "$TO_PID" 2>/dev/null || true
+    [[ $ec -ne 0 ]] && log_message "ERROR: exit $ec"
     log_message "===== Monitor cycle completed ====="
-    return \$exit_code
+    return $ec
 }
-
-# Запускаем основную функцию
-main >> "\$LOG_FILE" 2>&1
+main >> "$LOG_FILE" 2>&1
 EOF
+        # substitute placeholders
+        sed -i "s|__ADDR__|$validator_address|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__QURL__|$QUEUE_URL|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__MDIR__|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__POSFILE__|$position_file|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__LOGFILE__|$log_file|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__TBOT__|${TELEGRAM_BOT_TOKEN-}|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__TCHAT__|${TELEGRAM_CHAT_ID-}|g" "$MONITOR_DIR/$script_name"
 
-        # Делаем скрипт исполняемым
         chmod +x "$MONITOR_DIR/$script_name"
-
-        # Добавляем в cron с таймаутом
-        if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
+        if ! crontab -l 2>/dev/null | grep -q "$MONITOR_DIR/$script_name"; then
             (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
         fi
-
         echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
         echo -e "${YELLOW}Note: Initial notification sent. Script includes safety timeouts.${RESET}"
-
-        # Запускаем скрипт сразу для тестирования
         echo -e "${CYAN}Running initial test...${RESET}"
-        timeout 60 "$MONITOR_DIR/$script_name" > /dev/null 2>&1 &
-
+        timeout 60 "$MONITOR_DIR/$script_name" >/dev/null 2>&1 || true
     done
 }
+
 
 # Функция для отображения списка активных мониторингов
 list_monitor_scripts() {
