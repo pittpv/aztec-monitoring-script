@@ -529,24 +529,6 @@ check_single_validator_queue() {
     check_validator_queue "$validator_address"
 }
 
-# Добавляем простую функцию проверки очереди (если еще не добавлена)
-check_validator_queue_simple() {
-    local validator_address=$1
-    local search_address_lower=${validator_address,,}
-    local search_url="${QUEUE_URL}?page=1&limit=1&search=${search_address_lower}"
-
-    local response_data=$(curl -s --connect-timeout 10 --max-time 30 "$search_url")
-
-    if [ $? -eq 0 ] && [ -n "$response_data" ]; then
-        local filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
-        if [ "$filtered_count" -gt 0 ]; then
-            return 0  # Найден в очереди
-        fi
-    fi
-
-    return 1  # Не найден
-}
-
 create_monitor_script() {
     local validator_addresses=$1
     local addresses=()
@@ -556,18 +538,6 @@ create_monitor_script() {
 
     for validator_address in "${addresses[@]}"; do
         validator_address=$(echo "$validator_address" | xargs) # Удаляем лишние пробелы
-
-#        # Проверка формата адреса
-#        if [[ ! "$validator_address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
-#            echo -e "${RED}Invalid address format: $validator_address${RESET}"
-#            continue
-#        fi
-#
-#        # Проверяем, есть ли валидатор хотя бы в очереди
-#        if ! check_validator_queue_simple "$validator_address"; then
-#            echo -e "${RED}Validator $validator_address not found in queue. Cannot create monitor.${RESET}"
-#            continue
-#        fi
 
         local normalized_address=${validator_address,,}
         local script_name="monitor_${normalized_address:2}.sh"
