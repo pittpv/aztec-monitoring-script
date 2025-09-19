@@ -539,6 +539,18 @@ create_monitor_script() {
     for validator_address in "${addresses[@]}"; do
         validator_address=$(echo "$validator_address" | xargs) # Удаляем лишние пробелы
 
+#        # Проверка формата адреса
+#        if [[ ! "$validator_address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+#            echo -e "${RED}Invalid address format: $validator_address${RESET}"
+#            continue
+#        fi
+#
+#        # Проверяем, есть ли валидатор хотя бы в очереди
+#        if ! check_validator_queue_simple "$validator_address"; then
+#            echo -e "${RED}Validator $validator_address not found in queue. Cannot create monitor.${RESET}"
+#            continue
+#        fi
+
         local normalized_address=${validator_address,,}
         local script_name="monitor_${normalized_address:2}.sh"
         local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
