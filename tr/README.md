@@ -1,4 +1,4 @@
-# Aztec Node Kurulum ve İzleme Betiği
+# Aztec Node Kurulum ve İzleme Betiği (yeni testnet)
 
 **Açıklama Dilleri:**
 - [🇷🇺 Rusça Versiyon](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Rusça açıklama")
