@@ -826,6 +826,22 @@ EOF
     done
 }
 
+# Функция для отображения списка активных мониторингов
+list_monitor_scripts() {
+    local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
+
+    if [ ${#scripts[@]} -eq 0 ]; then
+        echo -e "${YELLOW}$(t "no_notifications")${RESET}"
+        return
+    fi
+
+    echo -e "${BOLD}$(t "active_monitors")${RESET}"
+    for script in "${scripts[@]}"; do
+        local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
+        echo -e "  ${CYAN}$address${RESET}"
+    done
+}
+
 # Функция для получения списка валидаторов через GSE контракт
 get_validators_via_gse() {
     echo -e "${YELLOW}$(t "getting_validator_count")${RESET}"

@@ -128,5 +128,10 @@
         "VERSION": "2.0.1",
         "UPDATE_DATE": "19.09.2025",
         "CHANGES": ["The function for searching for a validator in the queue and setting up queue monitoring with notifications in Telegram has been restored. Option 9 in main menu. Reinstallation of the monitoring agent is not required."]
+    },
+    {
+        "VERSION": "2.0.2",
+        "UPDATE_DATE": "19.09.2025",
+        "CHANGES": ["FIX for the function for searching for a validator in the queue"]
     }
 ]
