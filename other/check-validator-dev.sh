@@ -699,11 +699,16 @@ monitor_position() {
 
     if [[ -n "\$validator_info" && "\$filtered_count" -gt 0 ]]; then
         local current_position=\$(echo "\$validator_info" | jq -r '.position')
-        local queued_at=\$(format_date "\$(echo "\$validator_info" | jq -r '.queuedAt')")
-        local withdrawer_address=\$(echo "\$validator_info" | jq -r '.withdrawerAddress')
-        local transaction_hash=\$(echo "\$validator_info" | jq -r '.transactionHash')
+        local queued_at=\$(echo "\$validator_info" | jq -r '.queuedAt')
+        local withdrawer_address=\$(echo "\$validator_info" | jq -r '.withdrawerAddress // empty')
+        local transaction_hash=\$(echo "\$validator_info" | jq -r '.transactionHash // empty')
+
+        # Форматируем дату
+        local formatted_date=\$(format_date "\$queued_at")
 
         log_message "Validator found at position: \$current_position"
+        log_message "Withdrawer address: \$withdrawer_address"
+        log_message "Transaction hash: \$transaction_hash"
 
         if [[ "\$last_position" != "\$current_position" ]]; then
             local message
@@ -712,20 +717,29 @@ monitor_position() {
 
 🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
 🔄 *Change:* \$last_position → \$current_position
-📅 *Queued since:* \$queued_at
-🏦 *Withdrawer:* \`\$withdrawer_address\`
-🔗 *Transaction:* \`\$transaction_hash\`
-⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
+📅 *Queued since:* \$formatted_date"
             else
                 message="🎉 *New Validator in Queue* 🎉
 
 🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
 📌 *Initial Position:* \$current_position
-📅 *Queued since:* \$queued_at
-🏦 *Withdrawer:* \`\$withdrawer_address\`
-🔗 *Transaction:* \`\$transaction_hash\`
-⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
+📅 *Queued since:* \$formatted_date"
             fi
+
+            # Добавляем опциональные поля, если они есть
+            if [[ -n "\$withdrawer_address" ]]; then
+                message="\$message
+🏦 *Withdrawer:* \`\$withdrawer_address\`"
+            fi
+
+            if [[ -n "\$transaction_hash" ]]; then
+                message="\$message
+🔗 *Transaction:* \`\$transaction_hash\`"
+            fi
+
+            # Добавляем время проверки
+            message="\$message
+⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
 
             if send_telegram "\$message"; then
                 log_message "Notification sent successfully"
