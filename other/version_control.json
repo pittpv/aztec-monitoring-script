@@ -133,5 +133,10 @@
         "VERSION": "2.0.2",
         "UPDATE_DATE": "19.09.2025",
         "CHANGES": ["FIX validator search function in the queue"]
+    },
+    {
+        "VERSION": "2.0.3",
+        "UPDATE_DATE": "19.09.2025",
+        "CHANGES": ["FIX in translations"]
     }
 ]

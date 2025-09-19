@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.0.2"
+SCRIPT_VERSION="2.0.3"
 
 function show_logo() {
     echo -e " "
@@ -96,10 +96,10 @@ init_languages() {
   TRANSLATIONS["en,gov_no_changes"]="✅ No changes detected."
   TRANSLATIONS["en,token_prompt"]="Enter Telegram Bot Token:"
   TRANSLATIONS["en,chatid_prompt"]="Enter Telegram Chat ID:"
-  TRANSLATIONS["en,agent_added"]="✅ Agent added to cron and will run every minute."
-  TRANSLATIONS["en,agent_exists"]="ℹ️ Agent already exists in cron."
-  TRANSLATIONS["en,removing_agent"]="🗑 Removing agent and cron task..."
-  TRANSLATIONS["en,agent_removed"]="✅ Agent and cron task removed."
+  TRANSLATIONS["en,agent_added"]="✅ Agent added to systemd and will run every minute."
+  TRANSLATIONS["en,agent_exists"]="ℹ️ Agent already exists in systemd."
+  TRANSLATIONS["en,removing_agent"]="🗑 Removing agent and systemd task..."
+  TRANSLATIONS["en,agent_removed"]="✅ Agent and systemd task removed."
   TRANSLATIONS["en,goodbye"]="👋 Goodbye."
   TRANSLATIONS["en,invalid_choice"]="❌ Invalid choice. Try again."
   TRANSLATIONS["en,searching"]="Searching..."
@@ -132,7 +132,7 @@ init_languages() {
   TRANSLATIONS["en,return_main_menu"]="Returning to the main menu..."
   TRANSLATIONS["en,current_script_version"]="📌 Current script version:"
   TRANSLATIONS["en,new_version_avialable"]="🚀 New version available:"
-  TRANSLATIONS["en,new_version_update"]="Please update your script and cron agent"
+  TRANSLATIONS["en,new_version_update"]="Please update your script"
   TRANSLATIONS["en,version_up_to_date"]="✅ You are using the latest version"
   TRANSLATIONS["en,agent_log_cleaned"]="✅ Log file cleaned."
   TRANSLATIONS["en,agent_container_not_found"]="❌ Aztec Container Not Found"
@@ -320,10 +320,10 @@ init_languages() {
   TRANSLATIONS["ru,gov_no_changes"]="✅ Изменений не обнаружено."
   TRANSLATIONS["ru,token_prompt"]="Введите Telegram Bot Token:"
   TRANSLATIONS["ru,chatid_prompt"]="Введите Telegram Chat ID:"
-  TRANSLATIONS["ru,agent_added"]="✅ Агент добавлен в cron и будет выполняться каждую минуту."
-  TRANSLATIONS["ru,agent_exists"]="ℹ️ Агент уже есть в cron."
-  TRANSLATIONS["ru,removing_agent"]="🗑 Удаление агента и cron-задачи..."
-  TRANSLATIONS["ru,agent_removed"]="✅ Агент и cron-задача удалены."
+  TRANSLATIONS["ru,agent_added"]="✅ Агент добавлен в systemd и будет выполняться каждую минуту."
+  TRANSLATIONS["ru,agent_exists"]="ℹ️ Агент уже есть в systemd."
+  TRANSLATIONS["ru,removing_agent"]="🗑 Удаление агента и systemd-задачи..."
+  TRANSLATIONS["ru,agent_removed"]="✅ Агент и systemd-задача удалены."
   TRANSLATIONS["ru,goodbye"]="👋 Выход."
   TRANSLATIONS["ru,invalid_choice"]="❌ Неверный выбор. Попробуйте снова."
   TRANSLATIONS["ru,searching"]="Поиск..."
@@ -356,7 +356,7 @@ init_languages() {
   TRANSLATIONS["ru,return_main_menu"]="Возврат в главное меню..."
   TRANSLATIONS["ru,current_script_version"]="📌 Текущая версия скрипта:"
   TRANSLATIONS["ru,new_version_avialable"]="🚀 Доступна новая версия:"
-  TRANSLATIONS["ru,new_version_update"]="Пожалуйста, обновите скрипт и cron-агента"
+  TRANSLATIONS["ru,new_version_update"]="Пожалуйста, обновите скрипт"
   TRANSLATIONS["ru,version_up_to_date"]="✅ Установлена актуальная версия"
   TRANSLATIONS["ru,agent_log_cleaned"]="✅ Лог-файл очищен."
   TRANSLATIONS["ru,agent_container_not_found"]="❌ Контейнер Aztec не найден"
@@ -544,10 +544,10 @@ init_languages() {
   TRANSLATIONS["tr,gov_no_changes"]="✅ Değişiklik tespit edilmedi."
   TRANSLATIONS["tr,token_prompt"]="Telegram Bot Token'ını girin:"
   TRANSLATIONS["tr,chatid_prompt"]="Telegram Chat ID'yi girin:"
-  TRANSLATIONS["tr,agent_added"]="✅ Aracı cron'a eklendi ve her dakika çalışacak."
-  TRANSLATIONS["tr,agent_exists"]="ℹ️ Aracı zaten cron'da mevcut."
-  TRANSLATIONS["tr,removing_agent"]="🗑 Aracı ve cron görevi kaldırılıyor..."
-  TRANSLATIONS["tr,agent_removed"]="✅ Aracı ve cron görevi kaldırıldı."
+  TRANSLATIONS["tr,agent_added"]="✅ Aracı systemd'a eklendi ve her dakika çalışacak."
+  TRANSLATIONS["tr,agent_exists"]="ℹ️ Aracı zaten systemd'da mevcut."
+  TRANSLATIONS["tr,removing_agent"]="🗑 Aracı ve systemd görevi kaldırılıyor..."
+  TRANSLATIONS["tr,agent_removed"]="✅ Aracı ve systemd görevi kaldırıldı."
   TRANSLATIONS["tr,goodbye"]="👋 Güle güle."
   TRANSLATIONS["tr,invalid_choice"]="❌ Geçersiz seçim. Tekrar deneyin."
   TRANSLATIONS["tr,searching"]="Aranıyor..."
@@ -580,7 +580,7 @@ init_languages() {
   TRANSLATIONS["tr,return_main_menu"]="Ana menüye dönülüyor..."
   TRANSLATIONS["tr,current_script_version"]="📌 Mevcut betik versiyonu:"
   TRANSLATIONS["tr,new_version_avialable"]="🚀 Yeni versiyon mevcut:"
-  TRANSLATIONS["tr,new_version_update"]="Lütfen betiğinizi ve cron aracısını güncelleyin"
+  TRANSLATIONS["tr,new_version_update"]="Lütfen betiğinizi güncelleyin"
   TRANSLATIONS["tr,version_up_to_date"]="✅ En son versiyonu kullanıyorsunuz"
   TRANSLATIONS["tr,agent_log_cleaned"]="✅ Log dosyası temizlendi."
   TRANSLATIONS["tr,agent_container_not_found"]="❌ Aztec Konteyneri Bulunamadı"
@@ -720,7 +720,7 @@ init_languages() {
 CONTRACT_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
 FUNCTION_SIG="getPendingBlockNumber()"
 
-REQUIRED_TOOLS=("cast" "curl" "crontab" "grep" "sed" "jq" "bc")
+REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc")
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 
@@ -733,7 +733,6 @@ check_dependencies() {
   declare -A tool_names=(
     ["cast"]="foundry"
     ["curl"]="curl"
-    ["crontab"]="cron"
     ["grep"]="grep"
     ["sed"]="sed"
     ["jq"]="jq"
@@ -781,11 +780,6 @@ check_dependencies() {
           curl)
             echo -e "\n${CYAN}$(t "installing_curl")${NC}"
             sudo apt-get install -y curl || brew install curl
-            ;;
-
-          crontab)
-            echo -e "\n${CYAN}$(t "installing_cron")${NC}"
-            sudo apt-get install -y cron || brew install cronie
             ;;
 
           grep|sed)
@@ -1894,7 +1888,7 @@ remove_cron_agent() {
   echo -e "\n${GREEN}$(t "agent_removed")${NC}"
 }
 
-# === Remove cron task and agent ===
+# === Remove systemd task and agent ===
 remove_systemd_agent() {
   echo -e "\n${BLUE}$(t "removing_systemd_agent")${NC}"
   systemctl stop aztec-agent.timer
