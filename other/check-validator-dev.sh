@@ -529,6 +529,143 @@ check_single_validator_queue() {
     check_validator_queue "$validator_address"
 }
 
+create_monitor_script() {
+    local validator_addresses=$1
+    local addresses=()
+
+    # Разделяем адреса по запятой
+    IFS=',' read -ra addresses <<< "$validator_addresses"
+
+    for validator_address in "${addresses[@]}"; do
+        validator_address=$(echo "$validator_address" | xargs) # Удаляем лишние пробелы
+
+        local normalized_address=${validator_address,,}
+        local script_name="monitor_${normalized_address:2}.sh"
+        local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
+        local position_file="$MONITOR_DIR/last_position_${normalized_address:2}.txt"
+
+        # Проверяем, не существует ли уже монитор
+        if [ -f "$MONITOR_DIR/$script_name" ]; then
+            echo -e "${YELLOW}$(t "notification_exists")${RESET}"
+            continue
+        fi
+
+        mkdir -p "$MONITOR_DIR"
+
+        # Создаем начальное сообщение о создании монитора
+        local start_message="🎯 *Validator Queue Monitoring Started* 🎯
+
+🔹 *Address:* \`$validator_address\`
+⏰ *Monitoring started at:* $(date '+%d.%m.%Y %H:%M UTC')
+📋 *Check frequency:* Hourly
+🔔 *Notifications:* Position changes"
+
+        # Отправляем начальное уведомление
+        if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            curl -s --connect-timeout 10 --max-time 30 \
+                -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" \
+                -d text="$start_message" \
+                -d parse_mode="Markdown" > /dev/null 2>&1
+        fi
+
+        # Создаем скрипт мониторинга
+        cat > "$MONITOR_DIR/$script_name" <<EOF
+#!/bin/bash
+
+# Set safe environment
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+set -euo pipefail
+
+# Configuration
+VALIDATOR_ADDRESS="$validator_address"
+QUEUE_URL="$QUEUE_URL"
+MONITOR_DIR="$MONITOR_DIR"
+LAST_POSITION_FILE="$position_file"
+LOG_FILE="$log_file"
+TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
+TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
+
+# Timeout settings (in seconds)
+CURL_CONNECT_TIMEOUT=15
+CURL_MAX_TIME=45
+API_RETRY_DELAY=30
+MAX_RETRIES=2
+
+mkdir -p "\$MONITOR_DIR"
+
+# Функция для логирования
+log_message() {
+    echo "[\$(date '+%Y-%m-%d %H:%M:%S')] \$1" >> "\$LOG_FILE"
+}
+
+send_telegram() {
+    local message="\$1"
+
+    if [ -z "\$TELEGRAM_BOT_TOKEN" ] || [ -z "\$TELEGRAM_CHAT_ID" ]; then
+        log_message "TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set, skipping notification"
+        return 1
+    fi
+
+    local result=\$(curl -s --connect-timeout \$CURL_CONNECT_TIMEOUT --max-time \$CURL_MAX_TIME \\
+        -w "%{http_code}" \\
+        -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
+        -d chat_id="\$TELEGRAM_CHAT_ID" \\
+        -d text="\$message" \\
+        -d parse_mode="Markdown" 2>/dev/null)
+
+    local http_code=\${result: -3}
+    local response=\${result%???}
+
+    if [ "\$http_code" -eq 200 ]; then
+        log_message "Telegram notification sent successfully"
+        return 0
+    else
+        log_message "Failed to send Telegram notification (HTTP \$http_code): \$response"
+        return 1
+    fi
+}
+
+format_date() {
+    local iso_date="\$1"
+    if [[ "\$iso_date" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}) ]]; then
+        echo "\${BASH_REMATCH[3]}.\${BASH_REMATCH[2]}.\${BASH_REMATCH[1]} \${BASH_REMATCH[4]}:\${BASH_REMATCH[5]} UTC"
+    else
+        echo "\$iso_date"
+    fi
+}
+
+safe_curl_request() {
+    local url="\$1"
+    local retry_count=0
+
+    while [ \$retry_count -lt \$MAX_RETRIES ]; do
+        log_message "CURL attempt \$((retry_count + 1)) for URL: \$url"
+
+        local response=\$(curl -s --connect-timeout \$CURL_CONNECT_TIMEOUT --max-time \$CURL_MAX_TIME \\
+                          -H "Cache-Control: no-cache" \\
+                          -H "Pragma: no-cache" \\
+                          -w "HTTP_CODE:%{http_code}" \\
+                          "\$url" 2>/dev/null)
+
+        local http_code=\$(echo "\$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+        local clean_response=\$(echo "\$response" | sed 's/HTTP_CODE:[0-9]*//')
+
+        if [ "\$http_code" -eq 200 ] && [ -n "\$clean_response" ]; then
+            log_message "CURL success (HTTP \$http_code)"
+            echo "\$clean_response"
+            return 0
+        fi
+
+        retry_count=\$((retry_count + 1))
+        log_message "CURL attempt \$retry_count failed (HTTP \$http_code), retrying in \$API_RETRY_DELAY seconds..."
+        sleep \$API_RETRY_DELAY
+    done
+
+    log_message "All CURL attempts failed for URL: \$url"
+    return 1
+}
+
 monitor_position() {
     log_message "Starting monitor_position for \$VALIDATOR_ADDRESS"
 
@@ -562,16 +699,11 @@ monitor_position() {
 
     if [[ -n "\$validator_info" && "\$filtered_count" -gt 0 ]]; then
         local current_position=\$(echo "\$validator_info" | jq -r '.position')
-        local queued_at=\$(echo "\$validator_info" | jq -r '.queuedAt')
-        local withdrawer_address=\$(echo "\$validator_info" | jq -r '.withdrawerAddress // empty')
-        local transaction_hash=\$(echo "\$validator_info" | jq -r '.transactionHash // empty')
-
-        # Форматируем дату
-        local formatted_date=\$(format_date "\$queued_at")
+        local queued_at=\$(format_date "\$(echo "\$validator_info" | jq -r '.queuedAt')")
+        local withdrawer_address=\$(echo "\$validator_info" | jq -r '.withdrawerAddress')
+        local transaction_hash=\$(echo "\$validator_info" | jq -r '.transactionHash')
 
         log_message "Validator found at position: \$current_position"
-        log_message "Withdrawer address: \$withdrawer_address"
-        log_message "Transaction hash: \$transaction_hash"
 
         if [[ "\$last_position" != "\$current_position" ]]; then
             local message
@@ -580,29 +712,20 @@ monitor_position() {
 
 🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
 🔄 *Change:* \$last_position → \$current_position
-📅 *Queued since:* \$formatted_date"
+📅 *Queued since:* \$queued_at
+🏦 *Withdrawer:* \`\$withdrawer_address\`
+🔗 *Transaction:* \`\$transaction_hash\`
+⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue* 🎉
 
 🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
 📌 *Initial Position:* \$current_position
-📅 *Queued since:* \$formatted_date"
-            fi
-
-            # Добавляем опциональные поля, если они есть
-            if [[ -n "\$withdrawer_address" ]]; then
-                message="\$message
-🏦 *Withdrawer:* \`\$withdrawer_address\`"
-            fi
-
-            if [[ -n "\$transaction_hash" ]]; then
-                message="\$message
-🔗 *Transaction:* \`\$transaction_hash\`"
-            fi
-
-            # Добавляем время проверки
-            message="\$message
+📅 *Queued since:* \$queued_at
+🏦 *Withdrawer:* \`\$withdrawer_address\`
+🔗 *Transaction:* \`\$transaction_hash\`
 ⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
+            fi
 
             if send_telegram "\$message"; then
                 log_message "Notification sent successfully"
@@ -649,6 +772,56 @@ monitor_position() {
     fi
 
     return 0
+}
+
+# Основная функция
+main() {
+    log_message "===== Starting monitor cycle ====="
+
+    # Устанавливаем таймаут для всей функции мониторинга
+    local timeout_pid
+    (
+        sleep 300
+        log_message "ERROR: Script timed out after 5 minutes"
+        kill -TERM \$\$ 2>/dev/null
+    ) &
+    timeout_pid=\$!
+
+    # Вызываем функцию мониторинга
+    monitor_position
+    local exit_code=\$?
+
+    # Убиваем процесс таймаута
+    kill \$timeout_pid 2>/dev/null
+
+    if [ \$exit_code -ne 0 ]; then
+        log_message "ERROR: Script failed with exit code: \$exit_code"
+    fi
+
+    log_message "===== Monitor cycle completed ====="
+    return \$exit_code
+}
+
+# Запускаем основную функцию
+main >> "\$LOG_FILE" 2>&1
+EOF
+
+        # Делаем скрипт исполняемым
+        chmod +x "$MONITOR_DIR/$script_name"
+
+        # Добавляем в cron с таймаутом
+        if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
+            (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
+        fi
+
+        echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
+        echo -e "${YELLOW}Note: Initial notification sent. Script includes safety timeouts.${RESET}"
+
+        # Запускаем скрипт сразу для тестирования
+        echo -e "${CYAN}Running initial test...${RESET}"
+        timeout 60 "$MONITOR_DIR/$script_name" > /dev/null 2>&1 &
+
+    done
 }
 
 # Функция для отображения списка активных мониторингов
