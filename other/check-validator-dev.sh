@@ -651,7 +651,7 @@ safe_curl_request() {
         local http_code=\$(echo "\$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
         local clean_response=\$(echo "\$response" | sed 's/HTTP_CODE:[0-9]*//')
 
-        #log_message "\$clean_response"
+        log_message "\$clean_response"
 
         if [ "\$http_code" -eq 200 ] && [ -n "\$clean_response" ]; then
             log_message "CURL success (HTTP \$http_code)"
@@ -701,45 +701,33 @@ monitor_position() {
 
     if [[ -n "\$validator_info" && "\$filtered_count" -gt 0 ]]; then
         local current_position=\$(echo "\$validator_info" | jq -r '.position')
-        local queued_at=\$(echo "\$validator_info" | jq -r '.queuedAt')
+        local queued_at=\$(format_date "\$(echo "\$validator_info" | jq -r '.queuedAt')")
         local withdrawer_address=\$(echo "\$validator_info" | jq -r '.withdrawerAddress')
         local transaction_hash=\$(echo "\$validator_info" | jq -r '.transactionHash')
 
-        # Экранируем вывод в логах
         log_message "Validator found at position: \$current_position"
-        log_message "Withdrawer address: '\$withdrawer_address'"
-        log_message "Transaction hash: '\$transaction_hash'"
 
         if [[ "\$last_position" != "\$current_position" ]]; then
             local message
             if [[ -n "\$last_position" ]]; then
                 message="📊 *Validator Position Update* 📊
 
-🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
+🔹 *Address:* \$VALIDATOR_ADDRESS
 🔄 *Change:* \$last_position → \$current_position
-📅 *Queued since:* \$(format_date "\$queued_at")"
+📅 *Queued since:* \$queued_at
+🏦 *Withdrawer:* \$withdrawer_address
+🔗 *Transaction:* \$transaction_hash
+⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue*
 
-🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
+🔹 *Address:* \$VALIDATOR_ADDRESS
 📌 *Initial Position:* \$current_position
-📅 *Queued since:* \$(format_date "\$queued_at")"
-            fi
-
-            # Добавляем опциональные поля
-            if [[ -n "\$withdrawer_address" && "\$withdrawer_address" != "null" ]]; then
-                message="\$message
-🏦 *Withdrawer:* \`\$withdrawer_address\`"
-            fi
-
-            if [[ -n "\$transaction_hash" && "\$transaction_hash" != "null" ]]; then
-                message="\$message
-🔗 *Transaction:* \`\$transaction_hash\`"
-            fi
-
-            # Добавляем время проверки
-            message="\$message
+📅 *Queued since:* \$queued_at
+🏦 *Withdrawer:* \$withdrawer_address
+🔗 *Transaction:* \$transaction_hash
 ⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
+            fi
 
             if send_telegram "\$message"; then
                 log_message "Notification sent successfully"
