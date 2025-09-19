@@ -1386,7 +1386,7 @@ while true; do
                 echo -e "${YELLOW}$(t "processing_address" "$clean_address")${RESET}"
 
                 # Проверяем, есть ли валидатор хотя бы в очереди
-                if check_validator_queue_simple "$clean_address"; then
+                if check_validator_queue "$clean_address"; then
                     create_monitor_script "$clean_address"
                 else
                     echo -e "${RED}Validator $clean_address not found in queue. Cannot create monitor.${RESET}"
