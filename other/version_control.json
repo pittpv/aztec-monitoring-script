@@ -143,5 +143,10 @@
         "VERSION": "2.0.4",
         "UPDATE_DATE": "19.09.2025",
         "CHANGES": ["FIX for Cloudflare captcha (Invalid JSON response). Restored the functionality of the queue search function and the launch of monitoring the validator's position in the queue with Telegram notifications. Use option 9"]
+    },
+    {
+        "VERSION": "2.0.5",
+        "UPDATE_DATE": "19.09.2025",
+        "CHANGES": ["New required components: Python & curl_cffi","Last FIX for Cloudflare captcha (Invalid JSON response). Restored the functionality of the queue search function and the launch of monitoring the validator's position in the queue with Telegram notifications. Use option 9"]
     }
 ]

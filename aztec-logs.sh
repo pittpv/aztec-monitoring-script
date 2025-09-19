@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.0.4"
+SCRIPT_VERSION="2.0.5"
 
 function show_logo() {
     echo -e " "
@@ -266,6 +266,19 @@ init_languages() {
   TRANSLATIONS["en,agent_systemd_removed"]="Agent removed successfully"
   #version module
   TRANSLATIONS["en,update_changes"]="Changes in the update"
+  TRANSLATIONS["en,installed"]="installed"
+  TRANSLATIONS["en,not_installed"]="not installed"
+  TRANSLATIONS["en,curl_cffi_not_installed"]="The Python package curl_cffi is not installed."
+  TRANSLATIONS["en,install_curl_cffi_prompt"]="Do you want to install curl_cffi now? (Y/n)"
+  TRANSLATIONS["en,installing_curl_cffi"]="Installing curl_cffi..."
+  TRANSLATIONS["en,curl_cffi_optional"]="curl_cffi installation skipped (optional)."
+
+  TRANSLATIONS["en,installing_foundry"]="Installing Foundry..."
+  TRANSLATIONS["en,installing_curl"]="Installing curl..."
+  TRANSLATIONS["en,installing_utils"]="Installing utilities (grep, sed)..."
+  TRANSLATIONS["en,installing_jq"]="Installing jq..."
+  TRANSLATIONS["en,installing_bc"]="Installing bc..."
+  TRANSLATIONS["en,installing_python3"]="Installing Python3..."
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -490,6 +503,19 @@ init_languages() {
   TRANSLATIONS["ru,agent_systemd_removed"]="Агент успешно удалён"
   #version module
   TRANSLATIONS["ru,update_changes"]="Изменения в обновлении"
+  TRANSLATIONS["ru,installed"]="установлен"
+  TRANSLATIONS["ru,not_installed"]="не установлен"
+  TRANSLATIONS["ru,curl_cffi_not_installed"]="Python-пакет curl_cffi не установлен."
+  TRANSLATIONS["ru,install_curl_cffi_prompt"]="Хотите установить curl_cffi сейчас? (Y/n)"
+  TRANSLATIONS["ru,installing_curl_cffi"]="Устанавливается curl_cffi..."
+  TRANSLATIONS["ru,curl_cffi_optional"]="Установка curl_cffi пропущена (необязательно)."
+
+  TRANSLATIONS["ru,installing_foundry"]="Устанавливается Foundry..."
+  TRANSLATIONS["ru,installing_curl"]="Устанавливается curl..."
+  TRANSLATIONS["ru,installing_utils"]="Устанавливаются утилиты (grep, sed)..."
+  TRANSLATIONS["ru,installing_jq"]="Устанавливается jq..."
+  TRANSLATIONS["ru,installing_bc"]="Устанавливается bc..."
+  TRANSLATIONS["ru,installing_python3"]="Устанавливается Python3..."
 
   # Turkish translations
   TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
@@ -714,13 +740,25 @@ init_languages() {
   TRANSLATIONS["tr,agent_systemd_removed"]="Aracı başarıyla kaldırıldı"
   #version module
   TRANSLATIONS["tr,update_changes"]="Güncellemedeki değişiklikler"
+  TRANSLATIONS["tr,installed"]="kuruldu"
+  TRANSLATIONS["tr,not_installed"]="kurulu değil"
+  TRANSLATIONS["tr,install_curl_cffi_prompt"]="curl_cffi şimdi yüklensin mi? (Y/n)"
+  TRANSLATIONS["tr,installing_curl_cffi"]="curl_cffi yükleniyor..."
+  TRANSLATIONS["tr,curl_cffi_optional"]="curl_cffi kurulumu atlandı (isteğe bağlı)."
+
+  TRANSLATIONS["tr,installing_foundry"]="Foundry yükleniyor..."
+  TRANSLATIONS["tr,installing_curl"]="curl yükleniyor..."
+  TRANSLATIONS["tr,installing_utils"]="Araçlar yükleniyor (grep, sed)..."
+  TRANSLATIONS["tr,installing_jq"]="jq yükleniyor..."
+  TRANSLATIONS["tr,installing_bc"]="bc yükleniyor..."
+  TRANSLATIONS["tr,installing_python3"]="Python3 yükleniyor..."
 }
 
 # === Configuration ===
 CONTRACT_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
 FUNCTION_SIG="getPendingBlockNumber()"
 
-REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc")
+REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 
@@ -737,11 +775,12 @@ check_dependencies() {
     ["sed"]="sed"
     ["jq"]="jq"
     ["bc"]="bc"
+    ["python3"]="python3"
   )
 
+  # Проверяем основные утилиты
   for tool in "${REQUIRED_TOOLS[@]}"; do
     if ! command -v "$tool" &>/dev/null; then
-      # Используем отображаемое имя из массива или оригинальное имя, если нет соответствия
       display_name=${tool_names[$tool]:-$tool}
       echo -e "${RED}❌ $display_name $(t "not_installed")${NC}"
       missing+=("$tool")
@@ -751,11 +790,31 @@ check_dependencies() {
     fi
   done
 
+  # Отдельная проверка для curl_cffi
+  if command -v python3 &>/dev/null; then
+    if python3 -c "import curl_cffi" 2>/dev/null; then
+      echo -e "${GREEN}✅ curl_cffi $(t "installed")${NC}"
+    else
+      echo -e "${YELLOW}⚠️  curl_cffi $(t "not_installed")${NC}"
+      # Добавляем python3 в missing только если нужно установить curl_cffi
+      if [[ ! " ${missing[@]} " =~ " python3 " ]]; then
+        missing+=("python3_curl_cffi")
+      fi
+    fi
+  else
+    # python3 не установлен, это уже обрабатывается выше
+    echo -e "${YELLOW}⚠️  curl_cffi $(t "not_installed") (requires python3)${NC}"
+  fi
+
   if [ ${#missing[@]} -gt 0 ]; then
     # Преобразуем имена для отображения в списке отсутствующих инструментов
     missing_display=()
     for tool in "${missing[@]}"; do
-      missing_display+=("${tool_names[$tool]:-$tool}")
+      if [ "$tool" == "python3_curl_cffi" ]; then
+        missing_display+=("curl_cffi")
+      else
+        missing_display+=("${tool_names[$tool]:-$tool}")
+      fi
     done
 
     echo -e "\n${YELLOW}$(t "missing_tools") ${missing_display[*]}${NC}"
@@ -796,11 +855,41 @@ check_dependencies() {
             echo -e "\n${CYAN}$(t "installing_bc")${NC}"
             sudo apt-get install -y bc || brew install bc
             ;;
+
+          python3)
+            echo -e "\n${CYAN}$(t "installing_python3")${NC}"
+            sudo apt-get install -y python3 python3-pip || brew install python3
+            # Устанавливаем curl_cffi после установки python3
+            echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
+            python3 -m pip install --quiet --upgrade curl_cffi
+            ;;
+
+          python3_curl_cffi)
+            # Устанавливаем только curl_cffi, так как python3 уже установлен
+            echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
+            python3 -m pip install --quiet --upgrade curl_cffi
+            ;;
         esac
       done
     else
       echo -e "\n${RED}$(t "missing_required")${NC}"
       exit 1
+    fi
+  fi
+
+  # Дополнительная проверка curl_cffi на случай, если пользователь пропустил установку
+  if command -v python3 &>/dev/null; then
+    if ! python3 -c "import curl_cffi" 2>/dev/null; then
+      echo -e "\n${YELLOW}$(t "curl_cffi_not_installed")${NC}"
+      read -p "$(t "install_curl_cffi_prompt") " confirm
+      confirm=${confirm:-Y}
+
+      if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
+        python3 -m pip install --quiet --upgrade curl_cffi
+      else
+        echo -e "\n${YELLOW}$(t "curl_cffi_optional")${NC}"
+      fi
     fi
   fi
 
