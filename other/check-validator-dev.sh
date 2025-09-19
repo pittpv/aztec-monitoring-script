@@ -529,6 +529,24 @@ check_single_validator_queue() {
     check_validator_queue "$validator_address"
 }
 
+# Добавляем простую функцию проверки очереди (если еще не добавлена)
+check_validator_queue_simple() {
+    local validator_address=$1
+    local search_address_lower=${validator_address,,}
+    local search_url="${QUEUE_URL}?page=1&limit=1&search=${search_address_lower}"
+
+    local response_data=$(curl -s --connect-timeout 10 --max-time 30 "$search_url")
+
+    if [ $? -eq 0 ] && [ -n "$response_data" ]; then
+        local filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+        if [ "$filtered_count" -gt 0 ]; then
+            return 0  # Найден в очереди
+        fi
+    fi
+
+    return 1  # Не найден
+}
+
 create_monitor_script() {
     local validator_addresses=$1
     local addresses=()
