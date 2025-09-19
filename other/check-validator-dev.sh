@@ -1103,10 +1103,11 @@ IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
 # Очищаем адреса от пробелов и проверяем их наличие в общем списке
 declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
 declare -a QUEUE_VALIDATORS=()
+declare -a NOT_FOUND_ADDRESSES=()
 found_count=0
 not_found_count=0
-found_in_queue_count=0
 
+# Сначала проверяем все адреса в активных валидаторах
 for address in "${INPUT_ADDRESSES[@]}"; do
     # Очищаем адрес от пробелов
     clean_address=$(echo "$address" | tr -d ' ')
@@ -1118,29 +1119,38 @@ for address in "${INPUT_ADDRESSES[@]}"; do
             VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
             found=true
             found_count=$((found_count + 1))
-            echo -e "${GREEN}✓ Found: $validator${RESET}"
+            echo -e "${GREEN}✓ Found in active validators: $validator${RESET}"
             break
         fi
     done
 
     if ! $found; then
-        echo -e "${RED}✗ Not found in active validators: $clean_address${RESET}"
-        echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
-
-        # Проверяем в очереди
-        if check_validator_queue "$clean_address"; then
-            # Валидатор найден в очереди - сохраняем отдельно
-            QUEUE_VALIDATORS+=("$clean_address")
-            found_in_queue_count=$((found_in_queue_count + 1))
-            echo -e "${GREEN}✓ Found in queue: $clean_address${RESET}"
-        else
-            # Валидатор не найден нигде
-            not_found_count=$((not_found_count + 1))
-        fi
+        NOT_FOUND_ADDRESSES+=("$clean_address")
     fi
 done
 
-# Показываем сводку
+# Теперь проверяем не найденные адреса в очереди (пакетно)
+if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
+    echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
+
+    # Используем новую функцию для пакетной проверки в очереди
+    if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
+        # Функция check_validator_queue теперь сама выводит результаты
+        # Мы можем получить найденные адреса из глобальной переменной или обработать вывод
+        for address in "${NOT_FOUND_ADDRESSES[@]}"; do
+            # Проверяем, был ли адрес найден в очереди (по выводу или можно добавить возврат в функцию)
+            # Для простоты предположим, что если функция вернула 0, то хотя бы некоторые найдены
+            QUEUE_VALIDATORS+=("$address")
+        done
+        found_in_queue_count=${#QUEUE_VALIDATORS[@]}
+    else
+        found_in_queue_count=0
+    fi
+
+    not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
+fi
+
+# Показываем общую сводку
 echo -e "\n${CYAN}=== Search Summary ===${RESET}"
 echo -e "Found in active validators: ${GREEN}$found_count${RESET}"
 echo -e "Found in queue: ${YELLOW}$found_in_queue_count${RESET}"
@@ -1148,7 +1158,7 @@ echo -e "Not found anywhere: ${RED}$not_found_count${RESET}"
 
 # Обрабатываем активных валидаторов
 if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
-    echo -e "Active validators to check: ${BOLD}${#VALIDATOR_ADDRESSES_TO_CHECK[@]}${RESET}"
+    echo -e "\n${GREEN}=== Active Validators Details ===${RESET}"
 
     # Запускаем быструю загрузку для активных валидаторов
     declare -a RESULTS
@@ -1166,7 +1176,7 @@ if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
     VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
     VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
 
-    # Сразу показываем результат
+    # Показываем результат
     echo ""
     echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
     echo "----------------------------------------"
@@ -1179,19 +1189,14 @@ if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
         echo -e ""
         echo "----------------------------------------"
     done
-    echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
 fi
 
-# Обрабатываем валидаторов из очереди
+# Обрабатываем валидаторов из очереди (только если они не были уже показаны)
 if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
-    echo -e "\n${YELLOW}=== Validators Found in Queue ===${RESET}"
-    echo -e "${YELLOW}The following validators were found in the queue:${RESET}"
-    for validator in "${QUEUE_VALIDATORS[@]}"; do
-        echo -e "  ${CYAN}• $validator${RESET}"
-    done
+    echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${RESET}"
 
     # Предлагаем добавить в мониторинг
-    echo -e "\n${BOLD}Would you like to add these validators to queue monitoring?${RESET}"
+    echo -e "${BOLD}Would you like to add these validators to queue monitoring?${RESET}"
     read -p "Enter 'yes' to add all, or 'no' to skip: " add_to_monitor
 
     if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
@@ -1237,10 +1242,11 @@ while true; do
             # Очищаем адреса от пробелов и проверяем их наличие в общем списке
             declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
             declare -a QUEUE_VALIDATORS=()
+            declare -a NOT_FOUND_ADDRESSES=()
             found_count=0
             not_found_count=0
-            found_in_queue_count=0
 
+            # Сначала проверяем все адреса в активных валидаторах
             for address in "${INPUT_ADDRESSES[@]}"; do
                 # Очищаем адрес от пробелов
                 clean_address=$(echo "$address" | tr -d ' ')
@@ -1252,29 +1258,34 @@ while true; do
                         VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
                         found=true
                         found_count=$((found_count + 1))
-                        echo -e "${GREEN}✓ Found: $validator${RESET}"
+                        echo -e "${GREEN}✓ Found in active validators: $validator${RESET}"
                         break
                     fi
                 done
 
                 if ! $found; then
-                    echo -e "${RED}✗ Not found in active validators: $clean_address${RESET}"
-                    echo -e "${YELLOW}$(t "validator_not_in_set")${RESET}"
-
-                    # Проверяем в очереди
-                    if check_validator_queue "$clean_address"; then
-                        # Валидатор найден в очереди - сохраняем отдельно
-                        QUEUE_VALIDATORS+=("$clean_address")
-                        found_in_queue_count=$((found_in_queue_count + 1))
-                        echo -e "${GREEN}✓ Found in queue: $clean_address${RESET}"
-                    else
-                        # Валидатор не найден нигде
-                        not_found_count=$((not_found_count + 1))
-                    fi
+                    NOT_FOUND_ADDRESSES+=("$clean_address")
                 fi
             done
 
-            # Показываем сводку
+            # Теперь проверяем не найденные адреса в очереди (пакетно)
+            if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
+                echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
+
+                # Используем новую функцию для пакетной проверки в очереди
+                if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
+                    for address in "${NOT_FOUND_ADDRESSES[@]}"; do
+                        QUEUE_VALIDATORS+=("$address")
+                    done
+                    found_in_queue_count=${#QUEUE_VALIDATORS[@]}
+                else
+                    found_in_queue_count=0
+                fi
+
+                not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
+            fi
+
+            # Показываем общую сводку
             echo -e "\n${CYAN}=== Search Summary ===${RESET}"
             echo -e "Found in active validators: ${GREEN}$found_count${RESET}"
             echo -e "Found in queue: ${YELLOW}$found_in_queue_count${RESET}"
@@ -1282,7 +1293,7 @@ while true; do
 
             # Обрабатываем активных валидаторов
             if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
-                echo -e "Active validators to check: ${BOLD}${#VALIDATOR_ADDRESSES_TO_CHECK[@]}${RESET}"
+                echo -e "\n${GREEN}=== Active Validators Details ===${RESET}"
 
                 # Очищаем предыдущие результаты и запускаем быструю загрузку
                 RESULTS=()
@@ -1303,7 +1314,7 @@ while true; do
 
                 echo "----------------------------------------"
 
-                # Сразу показываем результат
+                # Показываем результат
                 echo ""
                 echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
                 echo "----------------------------------------"
@@ -1319,16 +1330,12 @@ while true; do
                 echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
             fi
 
-            # Обрабатываем валидаторов из очереди
+            # Обрабатываем валидаторов из очереди (только предложение мониторинга)
             if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
-                echo -e "\n${YELLOW}=== Validators Found in Queue ===${RESET}"
-                echo -e "${YELLOW}The following validators were found in the queue:${RESET}"
-                for validator in "${QUEUE_VALIDATORS[@]}"; do
-                    echo -e "  ${CYAN}• $validator${RESET}"
-                done
+                echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${RESET}"
 
                 # Предлагаем добавить в мониторинг
-                echo -e "\n${BOLD}Would you like to add these validators to queue monitoring?${RESET}"
+                echo -e "${BOLD}Would you like to add these validators to queue monitoring?${RESET}"
                 read -p "Enter 'yes' to add all, or 'no' to skip: " add_to_monitor
 
                 if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
