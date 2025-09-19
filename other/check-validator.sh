@@ -217,7 +217,7 @@ init_languages "$1"
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
 ROLLUP_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
 GSE_ADDRESS="0x67788e5083646ccedeeb07e7bc35ab0d511fc8b9"
-QUEUE_URL="https://dashtec.xyz/api/validators/queue"
+QUEUE_URL="https://dev.dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
 # Функция загрузки RPC URL с обработкой ошибок
@@ -398,64 +398,135 @@ send_telegram_notification() {
         -d parse_mode="Markdown" > /dev/null
 }
 
-# Функция для проверки очереди валидаторов
+# Функция для проверки очереди валидаторов (пакетная обработка)
 check_validator_queue() {
-    local validator_address=$1
+    local validator_addresses=("$@")
+    local results=()
+    local found_count=0
+    local not_found_count=0
+
     echo -e "${YELLOW}$(t "fetching_queue")${RESET}"
+    echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${RESET}"
 
-    # Получаем первую страницу для получения информации о пагинации
-    first_page_data=$(curl -s "${QUEUE_URL?page=1&limit=100}")
-    if [ $? -ne 0 ] || [ -z "$first_page_data" ]; then
-        echo -e "${RED}Error fetching validator queue data${RESET}"
-        return 1
-    fi
+    # Создаем временный файл для результатов
+    local temp_file=$(mktemp)
 
-    # Проверяем валидность JSON
-    if ! jq -e . >/dev/null 2>&1 <<<"$first_page_data"; then
-        echo -e "${RED}Invalid JSON data received from queue API${RESET}"
-        return 1
-    fi
+    # Функция для проверки одного валидатора
+    check_single_validator() {
+        local validator_address=$1
+        local temp_file=$2
 
-    # Получаем общее количество страниц
-    total_pages=$(echo "$first_page_data" | jq -r '.pagination.totalPages // 1')
-    if [ -z "$total_pages" ] || [ "$total_pages" -lt 1 ]; then
-        total_pages=1
-    fi
+        local search_address_lower=${validator_address,,}
+        local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
 
-    # Нормализуем адрес для поиска (нижний регистр)
-    search_address_lower=${validator_address,,}
-    found=false
+        local response_data=$(curl -s --connect-timeout 10 --max-time 30 "$search_url")
+        local exit_code=$?
 
-    # Проверяем все страницы
-    for ((page=1; page<=total_pages; page++)); do
-        echo -e "${YELLOW}$(t "fetching_page" "$page" "$total_pages")${RESET}"
-
-        # Получаем данные текульной страницы
-        page_data=$(curl -s "${QUEUE_URL?page=${page}&limit=100}")
-        if [ $? -ne 0 ] || [ -z "$page_data" ]; then
-            echo -e "${RED}Error fetching page ${page}${RESET}"
-            continue
+        if [ $exit_code -ne 0 ] || [ -z "$response_data" ]; then
+            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"
+            return 1
         fi
 
-        # Проверяем наличие валидатора на текущей странице
-        validator_info=$(echo "$page_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
-
-        if [ -n "$validator_info" ]; then
-            echo -e "\n${GREEN}$(t "validator_in_queue")${RESET}"
-            echo -e "  ${BOLD}$(t "address"):${RESET} $(echo "$validator_info" | jq -r '.address')"
-            echo -e "  ${BOLD}$(t "position"):${RESET} $(echo "$validator_info" | jq -r '.position')"
-            echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $(echo "$validator_info" | jq -r '.withdrawerAddress')"
-            echo -e "  ${BOLD}$(t "queued_at"):${RESET} $(echo "$validator_info" | jq -r '.queuedAt')"
-            found=true
-            break
+        if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
+            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
+            return 1
         fi
+
+        local validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+        local filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+
+        if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
+            local position=$(echo "$validator_info" | jq -r '.position')
+            local withdrawer=$(echo "$validator_info" | jq -r '.withdrawerAddress')
+            local queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
+            local tx_hash=$(echo "$validator_info" | jq -r '.transactionHash')
+
+            echo "$validator_address|FOUND|$position|$withdrawer|$queued_at|$tx_hash" >> "$temp_file"
+        else
+            echo "$validator_address|NOT_FOUND||" >> "$temp_file"
+        fi
+    }
+
+    # Запускаем проверку всех валидаторов в фоне
+    local pids=()
+    for validator_address in "${validator_addresses[@]}"; do
+        check_single_validator "$validator_address" "$temp_file" &
+        pids+=($!)
     done
 
-    if ! $found; then
-        echo -e "\n${RED}$(t "not_in_queue")${RESET}"
+    # Ждем завершения всех фоновых процессов
+    for pid in "${pids[@]}"; do
+        wait "$pid" 2>/dev/null
+    done
+
+    # Читаем и обрабатываем результаты
+    while IFS='|' read -r address status position withdrawer queued_at tx_hash; do
+        case "$status" in
+            "FOUND")
+                results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash")
+                found_count=$((found_count + 1))
+                ;;
+            "NOT_FOUND")
+                results+=("NOT_FOUND|$address")
+                not_found_count=$((not_found_count + 1))
+                ;;
+            "ERROR")
+                results+=("ERROR|$address|$position") # position содержит сообщение об ошибке
+                not_found_count=$((not_found_count + 1))
+                ;;
+        esac
+    done < "$temp_file"
+
+    # Удаляем временный файл
+    rm -f "$temp_file"
+
+    # Выводим общий результат
+    echo -e "\n${CYAN}=== Queue Check Results ===${RESET}"
+    echo -e "Found in queue: ${GREEN}$found_count${RESET}"
+    echo -e "Not found: ${RED}$not_found_count${RESET}"
+    echo -e "Total checked: ${BOLD}${#validator_addresses[@]}${RESET}"
+
+    # Выводим детальную информацию для найденных валидаторов
+    if [ $found_count -gt 0 ]; then
+        echo -e "\n${GREEN}Validators found in queue:${RESET}"
+        for result in "${results[@]}"; do
+            IFS='|' read -r status address position withdrawer queued_at tx_hash <<< "$result"
+            if [ "$status" == "FOUND" ]; then
+                local formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
+                echo -e "  ${CYAN}• ${address}${RESET}"
+                echo -e "    ${BOLD}Position:${RESET} $position"
+                echo -e "    ${BOLD}Withdrawer:${RESET} $withdrawer"
+                echo -e "    ${BOLD}Queued at:${RESET} $formatted_date"
+                echo -e "    ${BOLD}Tx Hash:${RESET} $tx_hash"
+            fi
+        done
+    fi
+
+    # Выводим не найденные валидаторы
+    if [ $not_found_count -gt 0 ]; then
+        echo -e "\n${RED}Validators not found in queue:${RESET}"
+        for result in "${results[@]}"; do
+            IFS='|' read -r status address error_msg <<< "$result"
+            if [ "$status" == "NOT_FOUND" ]; then
+                echo -e "  ${RED}• ${address}${RESET}"
+            elif [ "$status" == "ERROR" ]; then
+                echo -e "  ${RED}• ${address} (Error: ${error_msg})${RESET}"
+            fi
+        done
+    fi
+
+    # Возвращаем код успеха, если хотя бы один валидатор найден
+    if [ $found_count -gt 0 ]; then
+        return 0
+    else
         return 1
     fi
-    return 0
+}
+
+# Вспомогательная функция для проверки одного валидатора (для обратной совместимости)
+check_single_validator_queue() {
+    local validator_address=$1
+    check_validator_queue "$validator_address"
 }
 
 create_monitor_script() {
@@ -467,16 +538,13 @@ create_monitor_script() {
 
     for validator_address in "${addresses[@]}"; do
         validator_address=$(echo "$validator_address" | xargs) # Удаляем лишние пробелы
-        if [[ ! "$validator_address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
-            echo -e "${RED}Invalid address format: $validator_address${RESET}"
-            continue
-        fi
 
         local normalized_address=${validator_address,,}
         local script_name="monitor_${normalized_address:2}.sh"
         local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
         local position_file="$MONITOR_DIR/last_position_${normalized_address:2}.txt"
 
+        # Проверяем, не существует ли уже монитор
         if [ -f "$MONITOR_DIR/$script_name" ]; then
             echo -e "${YELLOW}$(t "notification_exists")${RESET}"
             continue
@@ -484,7 +552,25 @@ create_monitor_script() {
 
         mkdir -p "$MONITOR_DIR"
 
-        cat > "$MONITOR_DIR/$script_name" <<'EOF'
+        # Создаем начальное сообщение о создании монитора
+        local start_message="🎯 *Queue Monitoring Started*
+
+🔹 *Address:* \`$validator_address\`
+⏰ *Monitoring started at:* $(date '+%d.%m.%Y %H:%M UTC')
+📋 *Check frequency:* Hourly
+🔔 *Notifications:* Position changes"
+
+        # Отправляем начальное уведомление
+        if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            curl -s --connect-timeout 10 --max-time 30 \
+                -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" \
+                -d text="$start_message" \
+                -d parse_mode="Markdown" > /dev/null 2>&1
+        fi
+
+        # Создаем скрипт мониторинга
+        cat > "$MONITOR_DIR/$script_name" <<EOF
 #!/bin/bash
 
 # Set safe environment
@@ -492,179 +578,251 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 set -euo pipefail
 
 # Configuration
-VALIDATOR_ADDRESS="VALIDATOR_ADDRESS_PLACEHOLDER"
-QUEUE_URL="QUEUE_URL_PLACEHOLDER"
-MONITOR_DIR="MONITOR_DIR_PLACEHOLDER"
-LAST_POSITION_FILE="LAST_POSITION_FILE_PLACEHOLDER"
-LOG_FILE="LOG_FILE_PLACEHOLDER"
-TELEGRAM_BOT_TOKEN="TELEGRAM_BOT_TOKEN_PLACEHOLDER"
-TELEGRAM_CHAT_ID="TELEGRAM_CHAT_ID_PLACEHOLDER"
+VALIDATOR_ADDRESS="$validator_address"
+QUEUE_URL="$QUEUE_URL"
+MONITOR_DIR="$MONITOR_DIR"
+LAST_POSITION_FILE="$position_file"
+LOG_FILE="$log_file"
+TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
+TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 
-mkdir -p "$MONITOR_DIR"
+# Timeout settings (in seconds)
+CURL_CONNECT_TIMEOUT=15
+CURL_MAX_TIME=45
+API_RETRY_DELAY=30
+MAX_RETRIES=2
+
+mkdir -p "\$MONITOR_DIR"
+
+# Функция для логирования
+log_message() {
+    echo "[\$(date '+%Y-%m-%d %H:%M:%S')] \$1" >> "\$LOG_FILE"
+}
 
 send_telegram() {
-    local message="$1"
+    local message="\$1"
 
-    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
-        -d chat_id="$TELEGRAM_CHAT_ID" \
-        -d text="$message" \
-        -d parse_mode="Markdown" \
-        -w "\n%{http_code}" > /dev/null 2>&1
+    if [ -z "\$TELEGRAM_BOT_TOKEN" ] || [ -z "\$TELEGRAM_CHAT_ID" ]; then
+        log_message "TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set, skipping notification"
+        return 1
+    fi
+
+    local result=\$(curl -s --connect-timeout \$CURL_CONNECT_TIMEOUT --max-time \$CURL_MAX_TIME \\
+        -w "%{http_code}" \\
+        -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
+        -d chat_id="\$TELEGRAM_CHAT_ID" \\
+        -d text="\$message" \\
+        -d parse_mode="Markdown" 2>/dev/null)
+
+    local http_code=\${result: -3}
+    local response=\${result%???}
+
+    if [ "\$http_code" -eq 200 ]; then
+        log_message "Telegram notification sent successfully"
+        return 0
+    else
+        log_message "Failed to send Telegram notification (HTTP \$http_code): \$response"
+        return 1
+    fi
 }
 
 format_date() {
-    local iso_date="$1"
-    if [[ "$iso_date" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}) ]]; then
-        echo "${BASH_REMATCH[3]}.${BASH_REMATCH[2]}.${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]} UTC"
+    local iso_date="\$1"
+    if [[ "\$iso_date" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}) ]]; then
+        echo "\${BASH_REMATCH[3]}.\${BASH_REMATCH[2]}.\${BASH_REMATCH[1]} \${BASH_REMATCH[4]}:\${BASH_REMATCH[5]} UTC"
     else
-        echo "$iso_date"
+        echo "\$iso_date"
     fi
+}
+
+safe_curl_request() {
+    local url="\$1"
+    local retry_count=0
+
+    while [ \$retry_count -lt \$MAX_RETRIES ]; do
+        log_message "CURL attempt \$((retry_count + 1)) for URL: \$url"
+
+        local response=\$(curl -s --connect-timeout \$CURL_CONNECT_TIMEOUT --max-time \$CURL_MAX_TIME \\
+                          -H "Cache-Control: no-cache" \\
+                          -H "Pragma: no-cache" \\
+                          -w "HTTP_CODE:%{http_code}" \\
+                          "\$url" 2>/dev/null)
+
+        local http_code=\$(echo "\$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
+        local clean_response=\$(echo "\$response" | sed 's/HTTP_CODE:[0-9]*//')
+
+        log_message "CLEAN JSON response: \$clean_response"
+
+        if [ "\$http_code" -eq 200 ] && [ -n "\$clean_response" ]; then
+            log_message "CURL success (HTTP \$http_code)"
+            echo "\$clean_response"
+            return 0
+        fi
+
+        retry_count=\$((retry_count + 1))
+        log_message "CURL attempt \$retry_count failed (HTTP \$http_code), retrying in \$API_RETRY_DELAY seconds..."
+        sleep \$API_RETRY_DELAY
+    done
+
+    log_message "All CURL attempts failed for URL: \$url"
+    return 1
 }
 
 monitor_position() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting monitor_position" >> "$LOG_FILE"
+    log_message "Starting monitor_position for \$VALIDATOR_ADDRESS"
 
     local last_position=""
-    if [[ -f "$LAST_POSITION_FILE" ]]; then
-        last_position=$(cat "$LAST_POSITION_FILE")
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Last known position: $last_position" >> "$LOG_FILE"
+    if [[ -f "\$LAST_POSITION_FILE" ]]; then
+        last_position=\$(cat "\$LAST_POSITION_FILE")
+        log_message "Last known position: \$last_position"
     fi
 
-    # Get first page to check pagination
-    local first_page_data=$(curl -s "${QUEUE_URL?page=1&limit=100}")
-    if [[ $? -ne 0 || -z "$first_page_data" ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching first page data" >> "$LOG_FILE"
+    # Используем поиск по конкретному адресу через API
+    local search_url="\${QUEUE_URL}?page=1&limit=10&search=\${VALIDATOR_ADDRESS,,}"
+    log_message "Fetching data from: \$search_url"
+
+    local response_data=\$(safe_curl_request "\$search_url")
+
+    if [ \$? -ne 0 ] || [ -z "\$response_data" ]; then
+        log_message "Error: Failed to fetch queue data after retries"
         return 1
     fi
 
-    if ! jq -e . >/dev/null 2>&1 <<<"$first_page_data"; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Invalid first page data received" >> "$LOG_FILE"
+    if ! echo "\$response_data" | jq -e . >/dev/null 2>&1; then
+        log_message "Error: Invalid JSON data received"
         return 1
     fi
 
-    local total_pages=$(echo "$first_page_data" | jq -r '.pagination.totalPages // 1')
-    if [[ -z "$total_pages" || "$total_pages" -lt 1 ]]; then
-        total_pages=1
-    fi
+    # Проверяем наличие валидатора в ответе
+    local validator_info=\$(echo "\$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"\${VALIDATOR_ADDRESS,,}\")")
+    local filtered_count=\$(echo "\$response_data" | jq -r '.filteredCount // 0')
 
-    local validator_found=false
-    local current_position=""
+    log_message "Filtered count: \$filtered_count"
 
-    # Check all pages
-    for ((page=1; page<=total_pages; page++)); do
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Checking page $page of $total_pages" >> "$LOG_FILE"
+    if [[ -n "\$validator_info" && "\$filtered_count" -gt 0 ]]; then
+        local current_position=\$(echo "\$validator_info" | jq -r '.position')
+        local queued_at=\$(format_date "\$(echo "\$validator_info" | jq -r '.queuedAt')")
+        local withdrawer_address=\$(echo "\$validator_info" | jq -r '.withdrawerAddress')
+        local transaction_hash=\$(echo "\$validator_info" | jq -r '.transactionHash')
 
-        local page_data=$(curl -s "${QUEUE_URL?page=${page}&limit=100}")
-        if [[ $? -ne 0 || -z "$page_data" ]]; then
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Error fetching page $page" >> "$LOG_FILE"
-            continue
-        fi
+        log_message "Validator found at position: \$current_position"
 
-        local validator_info=$(echo "$page_data" | jq -r ".validatorsInQueue[]? | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
-
-        if [[ -n "$validator_info" ]]; then
-            validator_found=true
-            current_position=$(echo "$validator_info" | jq -r '.position')
-            local queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
-
-            echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator found on page $page at position $current_position" >> "$LOG_FILE"
-            break
-        fi
-    done
-
-    if [[ "$validator_found" == true ]]; then
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator at position $current_position" >> "$LOG_FILE"
-
-        if [[ "$last_position" != "$current_position" ]]; then
+        if [[ "\$last_position" != "\$current_position" ]]; then
             local message
-            if [[ -n "$last_position" ]]; then
-                message="📊 *Validator Position Update* 📊
+            if [[ -n "\$last_position" ]]; then
+                message="📊 *Validator Position Update*
 
-🔹 *Address:* \`$VALIDATOR_ADDRESS\`
-🔄 *Change:* $last_position → $current_position
-📅 *Queued since:* $queued_at
-⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+🔹 *Address:* \$VALIDATOR_ADDRESS
+🔄 *Change:* \$last_position → \$current_position
+📅 *Queued since:* \$queued_at
+🏦 *Withdrawer:* \$withdrawer_address
+🔗 *Transaction:* \$transaction_hash
+⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
             else
-                message="🎉 *New Validator in Queue* 🎉
+                message="🎉 *New Validator in Queue*
 
-🔹 *Address:* \`$VALIDATOR_ADDRESS\`
-📌 *Initial Position:* $current_position
-📅 *Queued since:* $queued_at
-⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+🔹 *Address:* \$VALIDATOR_ADDRESS
+📌 *Initial Position:* \$current_position
+📅 *Queued since:* \$queued_at
+🏦 *Withdrawer:* \$withdrawer_address
+🔗 *Transaction:* \$transaction_hash
+⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
             fi
 
-            if send_telegram "$message"; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Notification sent" >> "$LOG_FILE"
+            if send_telegram "\$message"; then
+                log_message "Notification sent successfully"
+            else
+                log_message "Failed to send notification"
             fi
 
-            echo "$current_position" > "$LAST_POSITION_FILE"
+            echo "\$current_position" > "\$LAST_POSITION_FILE"
+            log_message "Saved new position: \$current_position"
+        else
+            log_message "Position unchanged: \$current_position"
         fi
     else
-        echo "[$(date '+%Y-%m-%d %H:%M:%S')] Validator not in queue" >> "$LOG_FILE"
+        log_message "Validator not found in queue"
 
-        if [[ -n "$last_position" ]]; then
-            local message="❌ *Validator Removed from Queue* ❌
+        if [[ -n "\$last_position" ]]; then
+            local message="❌ *Validator Removed from Queue*
 
-🔹 *Address:* \`$VALIDATOR_ADDRESS\`
-⌛ *Last Position:* $last_position
-⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+🔹 *Address:* \$VALIDATOR_ADDRESS
+⌛ *Last Position:* \$last_position
+⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
 
-            if send_telegram "$message"; then
-                echo "[$(date '+%Y-%m-%d %H:%M:%S')] Removal notification sent" >> "$LOG_FILE"
+            if send_telegram "\$message"; then
+                log_message "Removal notification sent"
+            else
+                log_message "Failed to send removal notification"
             fi
 
             # Удаляем файл последней позиции
-            rm -f "$LAST_POSITION_FILE"
+            rm -f "\$LAST_POSITION_FILE"
+            log_message "Removed position file"
 
             # Удаляем сам скрипт мониторинга
-            rm -f "$0"
+            rm -f "\$0"
+            log_message "Removed monitor script"
 
             # Удаляем задание из cron
-            crontab -l | grep -v "$0" | crontab -
+            (crontab -l | grep -v "\$0" | crontab - 2>/dev/null) || true
+            log_message "Removed from crontab"
 
             # Удаляем лог-файл
-            rm -f "$LOG_FILE"
+            rm -f "\$LOG_FILE"
         fi
     fi
+
+    return 0
 }
 
-{
+# Основная функция
+main() {
+    log_message "===== Starting monitor cycle ====="
+
+    # Устанавливаем таймаут для всей функции мониторинга
+    local timeout_pid
+    (
+        sleep 300
+        log_message "ERROR: Script timed out after 5 minutes"
+        kill -TERM \$\$ 2>/dev/null
+    ) &
+    timeout_pid=\$!
+
+    # Вызываем функцию мониторинга
     monitor_position
-} >> "$LOG_FILE" 2>&1
+    local exit_code=\$?
+
+    # Убиваем процесс таймаута
+    kill \$timeout_pid 2>/dev/null
+
+    if [ \$exit_code -ne 0 ]; then
+        log_message "ERROR: Script failed with exit code: \$exit_code"
+    fi
+
+    log_message "===== Monitor cycle completed ====="
+    return \$exit_code
+}
+
+# Запускаем основную функцию
+main >> "\$LOG_FILE" 2>&1
 EOF
 
-        # Заменяем плейсхолдеры
-        sed -i "s|VALIDATOR_ADDRESS_PLACEHOLDER|$validator_address|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|QUEUE_URL_PLACEHOLDER|$QUEUE_URL|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|MONITOR_DIR_PLACEHOLDER|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|LAST_POSITION_FILE_PLACEHOLDER|$position_file|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|LOG_FILE_PLACEHOLDER|$log_file|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|TELEGRAM_BOT_TOKEN_PLACEHOLDER|$TELEGRAM_BOT_TOKEN|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|TELEGRAM_CHAT_ID_PLACEHOLDER|$TELEGRAM_CHAT_ID|g" "$MONITOR_DIR/$script_name"
-
+        # Делаем скрипт исполняемым
         chmod +x "$MONITOR_DIR/$script_name"
 
+        # Добавляем в cron с таймаутом
         if ! crontab -l | grep -q "$MONITOR_DIR/$script_name"; then
-            (crontab -l 2>/dev/null; echo "0 * * * * $MONITOR_DIR/$script_name") | crontab -
+            (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
         fi
 
-        echo -e "${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
-    done
-}
+        echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${RESET}"
+        echo -e "${YELLOW}Note: Initial notification sent. Script includes safety timeouts.${RESET}"
 
-# Функция для отображения списка активных мониторингов
-list_monitor_scripts() {
-    local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
+        # Запускаем скрипт сразу для тестирования
+        echo -e "${CYAN}Running initial test...${RESET}"
+        timeout 60 "$MONITOR_DIR/$script_name" > /dev/null 2>&1 &
 
-    if [ ${#scripts[@]} -eq 0 ]; then
-        echo -e "${YELLOW}$(t "no_notifications")${RESET}"
-        return
-    fi
-
-    echo -e "${BOLD}$(t "active_monitors")${RESET}"
-    for script in "${scripts[@]}"; do
-        local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
-        echo -e "  ${CYAN}$address${RESET}"
     done
 }
 
@@ -919,9 +1077,12 @@ IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
 
 # Очищаем адреса от пробелов и проверяем их наличие в общем списке
 declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
+declare -a QUEUE_VALIDATORS=()
+declare -a NOT_FOUND_ADDRESSES=()
 found_count=0
 not_found_count=0
 
+# Сначала проверяем все адреса в активных валидаторах
 for address in "${INPUT_ADDRESSES[@]}"; do
     # Очищаем адрес от пробелов
     clean_address=$(echo "$address" | tr -d ' ')
@@ -933,58 +1094,110 @@ for address in "${INPUT_ADDRESSES[@]}"; do
             VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
             found=true
             found_count=$((found_count + 1))
-            echo -e "${GREEN}✓ Found: $validator${RESET}"
+            echo -e "${GREEN}✓ Found in active validators: $validator${RESET}"
             break
         fi
     done
 
     if ! $found; then
-        echo -e "${RED}✗ Not found: $clean_address${RESET}"
-        not_found_count=$((not_found_count + 1))
+        NOT_FOUND_ADDRESSES+=("$clean_address")
     fi
 done
 
-if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
-    echo -e "${RED}No valid addresses to check. Exiting.${RESET}"
-    exit 1
+# Теперь проверяем не найденные адреса в очереди (пакетно)
+if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
+    echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
+
+    # Используем новую функцию для пакетной проверки в очереди
+    if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
+        # Функция check_validator_queue теперь сама выводит результаты
+        # Мы можем получить найденные адреса из глобальной переменной или обработать вывод
+        for address in "${NOT_FOUND_ADDRESSES[@]}"; do
+            # Проверяем, был ли адрес найден в очереди (по выводу или можно добавить возврат в функцию)
+            # Для простоты предположим, что если функция вернула 0, то хотя бы некоторые найдены
+            QUEUE_VALIDATORS+=("$address")
+        done
+        found_in_queue_count=${#QUEUE_VALIDATORS[@]}
+    else
+        found_in_queue_count=0
+    fi
+
+    not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
 fi
 
-# Запускаем быструю загрузку сразу
-declare -a RESULTS
+# Показываем общую сводку
+echo -e "\n${CYAN}=== Search Summary ===${RESET}"
+echo -e "Found in active validators: ${GREEN}$found_count${RESET}"
+echo -e "Found in queue: ${YELLOW}$found_in_queue_count${RESET}"
+echo -e "Not found anywhere: ${RED}$not_found_count${RESET}"
 
-# Временно заменяем массив для обработки только выбранных валидаторов
-ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
-ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
-VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
-VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
+# Обрабатываем активных валидаторов
+if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
+    echo -e "\n${GREEN}=== Active Validators Details ===${RESET}"
 
-# Запускаем быструю загрузку
-fast_load_validators
+    # Запускаем быструю загрузку для активных валидаторов
+    declare -a RESULTS
 
-# Восстанавливаем оригинальный массив
-VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
-VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
+    # Временно заменяем массив для обработки только выбранных валидаторов
+    ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
+    ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
+    VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
+    VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
 
-# Сразу показываем результат
-echo ""
-echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
-echo "----------------------------------------"
-for line in "${RESULTS[@]}"; do
-    IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
-    echo -e "${BOLD}$(t "address"):${RESET} $validator"
-    echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
-    echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
-    echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
-    echo -e ""
+    # Запускаем быструю загрузку
+    fast_load_validators
+
+    # Восстанавливаем оригинальный массив
+    VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
+    VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
+
+    # Показываем результат
+    echo ""
+    echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
     echo "----------------------------------------"
-done
-echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
+    for line in "${RESULTS[@]}"; do
+        IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
+        echo -e "${BOLD}$(t "address"):${RESET} $validator"
+        echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
+        echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+        echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
+        echo -e ""
+        echo "----------------------------------------"
+    done
+fi
 
+# Обрабатываем валидаторов из очереди (только если они не были уже показаны)
+if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
+    echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${RESET}"
+
+    # Предлагаем добавить в мониторинг
+    echo -e "${BOLD}Would you like to add these validators to queue monitoring?${RESET}"
+    read -p "Enter 'yes' to add all, or 'no' to skip: " add_to_monitor
+
+    if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
+        # Создаем мониторы для всех валидаторов из очереди
+        for validator in "${QUEUE_VALIDATORS[@]}"; do
+            echo -e "\n${YELLOW}$(t "processing_address" "$validator")${RESET}"
+            create_monitor_script "$validator"
+        done
+        echo -e "${GREEN}All queue validators added to monitoring.${RESET}"
+    else
+        echo -e "${YELLOW}Skipping queue monitoring setup.${RESET}"
+    fi
+fi
+
+if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_VALIDATORS[@]} -eq 0 ]]; then
+    echo -e "${RED}No valid addresses to check.${RESET}"
+fi
+
+# Главное меню
 while true; do
     echo ""
     echo -e "${BOLD}Select an action:${RESET}"
     echo -e "${CYAN}1. Check another set of validators${RESET}"
     echo -e "${CYAN}2. Set up queue position notification for validator${RESET}"
+    echo -e "${CYAN}3. Check validator in queue${RESET}"
+    echo -e "${CYAN}4. List active monitors${RESET}"
     echo -e "${RED}0. Exit${RESET}"
     read -p "$(t "enter_option") " choice
 
@@ -1003,9 +1216,12 @@ while true; do
 
             # Очищаем адреса от пробелов и проверяем их наличие в общем списке
             declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
+            declare -a QUEUE_VALIDATORS=()
+            declare -a NOT_FOUND_ADDRESSES=()
             found_count=0
             not_found_count=0
 
+            # Сначала проверяем все адреса в активных валидаторах
             for address in "${INPUT_ADDRESSES[@]}"; do
                 # Очищаем адрес от пробелов
                 clean_address=$(echo "$address" | tr -d ' ')
@@ -1017,55 +1233,101 @@ while true; do
                         VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
                         found=true
                         found_count=$((found_count + 1))
-                        echo -e "${GREEN}✓ Found: $validator${RESET}"
+                        echo -e "${GREEN}✓ Found in active validators: $validator${RESET}"
                         break
                     fi
                 done
 
                 if ! $found; then
-                    echo -e "${RED}✗ Not found: $clean_address${RESET}"
-                    not_found_count=$((not_found_count + 1))
+                    NOT_FOUND_ADDRESSES+=("$clean_address")
                 fi
             done
 
-            if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 ]]; then
-                echo -e "${RED}No valid addresses to check.${RESET}"
-                continue
+            # Теперь проверяем не найденные адреса в очереди (пакетно)
+            if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
+                echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
+
+                # Используем новую функцию для пакетной проверки в очереди
+                if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
+                    for address in "${NOT_FOUND_ADDRESSES[@]}"; do
+                        QUEUE_VALIDATORS+=("$address")
+                    done
+                    found_in_queue_count=${#QUEUE_VALIDATORS[@]}
+                else
+                    found_in_queue_count=0
+                fi
+
+                not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
             fi
 
-            # Очищаем предыдущие результаты и запускаем быструю загрузку
-            RESULTS=()
-            echo -e "${BOLD}Checking ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} validators...${RESET}"
+            # Показываем общую сводку
+            echo -e "\n${CYAN}=== Search Summary ===${RESET}"
+            echo -e "Found in active validators: ${GREEN}$found_count${RESET}"
+            echo -e "Found in queue: ${YELLOW}$found_in_queue_count${RESET}"
+            echo -e "Not found anywhere: ${RED}$not_found_count${RESET}"
 
-            # Временно заменяем массив для обработки только выбранных валидаторов
-            ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
-            ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
-            VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
-            VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
+            # Обрабатываем активных валидаторов
+            if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
+                echo -e "\n${GREEN}=== Active Validators Details ===${RESET}"
 
-            # Запускаем быструю загрузку
-            fast_load_validators
+                # Очищаем предыдущие результаты и запускаем быструю загрузку
+                RESULTS=()
+                echo -e "${BOLD}Checking ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} validators...${RESET}"
 
-            # Восстанавливаем оригинальный массив
-            VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
-            VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
+                # Временно заменяем массив для обработки только выбранных валидаторов
+                ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
+                ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
+                VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
+                VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
 
-            echo "----------------------------------------"
+                # Запускаем быструю загрузку
+                fast_load_validators
 
-            # Сразу показываем результат
-            echo ""
-            echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
-            echo "----------------------------------------"
-            for line in "${RESULTS[@]}"; do
-                IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
-                echo -e "${BOLD}$(t "address"):${RESET} $validator"
-                echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
-                echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
-                echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
-                echo -e ""
+                # Восстанавливаем оригинальный массив
+                VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
+                VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
+
                 echo "----------------------------------------"
-            done
-            echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
+
+                # Показываем результат
+                echo ""
+                echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
+                echo "----------------------------------------"
+                for line in "${RESULTS[@]}"; do
+                    IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
+                    echo -e "${BOLD}$(t "address"):${RESET} $validator"
+                    echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
+                    echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+                    echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
+                    echo -e ""
+                    echo "----------------------------------------"
+                done
+                echo -e "\n${GREEN}${BOLD}Check completed.${RESET}"
+            fi
+
+            # Обрабатываем валидаторов из очереди (только предложение мониторинга)
+            if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
+                echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${RESET}"
+
+                # Предлагаем добавить в мониторинг
+                echo -e "${BOLD}Would you like to add these validators to queue monitoring?${RESET}"
+                read -p "Enter 'yes' to add all, or 'no' to skip: " add_to_monitor
+
+                if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
+                    # Создаем мониторы для всех валидаторов из очереди
+                    for validator in "${QUEUE_VALIDATORS[@]}"; do
+                        echo -e "${YELLOW}$(t "processing_address" "$validator")${RESET}"
+                        create_monitor_script "$validator"
+                    done
+                    echo -e "${GREEN}All queue validators added to monitoring.${RESET}"
+                else
+                    echo -e "${YELLOW}Skipping queue monitoring setup.${RESET}"
+                fi
+            fi
+
+            if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_VALIDATORS[@]} -eq 0 ]]; then
+                echo -e "${RED}No valid addresses to check.${RESET}"
+            fi
             ;;
         2)
             echo -e "\n${BOLD}$(t "queue_notification_title")${RESET}"
@@ -1078,8 +1340,23 @@ while true; do
             for address in "${ADDRESSES_TO_MONITOR[@]}"; do
                 clean_address=$(echo "$address" | tr -d ' ')
                 echo -e "${YELLOW}$(t "processing_address" "$clean_address")${RESET}"
-                create_monitor_script "$clean_address"
+
+                # Проверяем, есть ли валидатор хотя бы в очереди
+                if check_validator_queue "$clean_address"; then
+                    create_monitor_script "$clean_address"
+                else
+                    echo -e "${RED}Validator $clean_address not found in queue. Cannot create monitor.${RESET}"
+                fi
             done
+            ;;
+        3)
+            # Новая опция: проверить валидатора в очереди
+            read -p "$(t "enter_address") " validator_address
+            check_validator_queue "$validator_address"
+            ;;
+        4)
+            # Новая опция: показать активные мониторы
+            list_monitor_scripts
             ;;
         0)
             echo -e "\n${CYAN}$(t "exiting")${RESET}"
