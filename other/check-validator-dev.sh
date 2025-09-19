@@ -651,7 +651,7 @@ safe_curl_request() {
         local http_code=\$(echo "\$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
         local clean_response=\$(echo "\$response" | sed 's/HTTP_CODE:[0-9]*//')
 
-        log_message "\$clean_response"
+        log_message "CLEAN JSON response: \$clean_response"
 
         if [ "\$http_code" -eq 200 ] && [ -n "\$clean_response" ]; then
             log_message "CURL success (HTTP \$http_code)"
