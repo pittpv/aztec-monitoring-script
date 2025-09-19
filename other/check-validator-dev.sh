@@ -553,7 +553,7 @@ create_monitor_script() {
         mkdir -p "$MONITOR_DIR"
 
         # Создаем начальное сообщение о создании монитора
-        local start_message="🎯 *Validator Queue Monitoring Started* 🎯
+        local start_message="🎯 *Queue Monitoring Started*
 
 🔹 *Address:* \`$validator_address\`
 ⏰ *Monitoring started at:* $(date '+%d.%m.%Y %H:%M UTC')
@@ -651,6 +651,8 @@ safe_curl_request() {
         local http_code=\$(echo "\$response" | grep -o 'HTTP_CODE:[0-9]*' | cut -d: -f2)
         local clean_response=\$(echo "\$response" | sed 's/HTTP_CODE:[0-9]*//')
 
+        log_message "\$clean_response"
+
         if [ "\$http_code" -eq 200 ] && [ -n "\$clean_response" ]; then
             log_message "CURL success (HTTP \$http_code)"
             echo "\$clean_response"
@@ -717,7 +719,7 @@ monitor_position() {
 🔗 *Transaction:* \`\$transaction_hash\`
 ⏳ *Checked at:* \$(date '+%d.%m.%Y %H:%M UTC')"
             else
-                message="🎉 *New Validator in Queue* 🎉
+                message="🎉 *New Validator in Queue*
 
 🔹 *Address:* \`\$VALIDATOR_ADDRESS\`
 📌 *Initial Position:* \$current_position
