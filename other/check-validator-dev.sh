@@ -419,21 +419,55 @@ check_validator_queue() {
         local search_address_lower=${validator_address,,}
         local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
 
-        local response_data=$(curl -s --connect-timeout 10 --max-time 30 "$search_url")
+        # Эмулируем браузер Chrome с правильными заголовками
+        local response_data=$(curl -s \
+            --connect-timeout 10 \
+            --max-time 30 \
+            -H "accept: application/json" \
+            -H "origin: https://dev.dashtec.xyz" \
+            -H "referer: https://dev.dashtec.xyz/" \
+            -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" \
+            -H "sec-ch-ua: \"Google Chrome\";v=\"131\", \"Chromium\";v=\"131\", \"Not_A Brand\";v=\"24\"" \
+            -H "sec-ch-ua-mobile: ?0" \
+            -H "sec-ch-ua-platform: \"Windows\"" \
+            -H "sec-fetch-site: same-origin" \
+            -H "sec-fetch-mode: cors" \
+            -H "sec-fetch-dest: empty" \
+            -H "accept-language: en-US,en;q=0.9" \
+            "$search_url")
+
         local exit_code=$?
 
         if [ $exit_code -ne 0 ] || [ -z "$response_data" ]; then
-            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"
+            echo "$validator_address|ERROR|Error fetching data (curl exit: $exit_code)" >> "$temp_file"
             return 1
         fi
 
-        if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
+        # Проверяем, не попали ли мы на страницу Cloudflare
+        if echo "$response_data" | grep -q "Cloudflare" || echo "$response_data" | grep -q "challenge-form"; then
+            echo "$validator_address|ERROR|Cloudflare protection detected" >> "$temp_file"
+            return 1
+        fi
+
+        # Пытаемся извлечь JSON из ответа (на случай, если есть обертка)
+        local json_data="$response_data"
+        if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
+            # Пытаемся найти JSON в тексте ответа
+            local json_start=$(echo "$response_data" | grep -b -o '{' | head -1 | cut -d: -f1)
+            local json_end=$(echo "$response_data" | grep -b -o '}' | tail -1 | cut -d: -f1)
+
+            if [ -n "$json_start" ] && [ -n "$json_end" ] && [ "$json_start" -lt "$json_end" ]; then
+                json_data=$(echo "$response_data" | cut -c $((json_start+1))-$((json_end+1)))
+            fi
+        fi
+
+        if ! echo "$json_data" | jq -e . >/dev/null 2>&1; then
             echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
             return 1
         fi
 
-        local validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
-        local filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+        local validator_info=$(echo "$json_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+        local filtered_count=$(echo "$json_data" | jq -r '.filteredCount // 0')
 
         if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
             local position=$(echo "$validator_info" | jq -r '.position')
@@ -447,11 +481,30 @@ check_validator_queue() {
         fi
     }
 
-    # Запускаем проверку всех валидаторов в фоне
+    # Ограничиваем количество параллельных запросов для избежания блокировки
+    local max_parallel=3
+    local current_parallel=0
     local pids=()
+
     for validator_address in "${validator_addresses[@]}"; do
+        # Ждем, если достигли максимума параллельных запросов
+        while [ $current_parallel -ge $max_parallel ]; do
+            sleep 0.5
+            # Проверяем завершенные процессы
+            for i in "${!pids[@]}"; do
+                if ! kill -0 "${pids[i]}" 2>/dev/null; then
+                    unset "pids[i]"
+                    current_parallel=$((current_parallel - 1))
+                fi
+            done
+        done
+
         check_single_validator "$validator_address" "$temp_file" &
         pids+=($!)
+        current_parallel=$((current_parallel + 1))
+
+        # Небольшая задержка между запросами
+        sleep 0.2
     done
 
     # Ждем завершения всех фоновых процессов
@@ -823,6 +876,22 @@ EOF
         echo -e "${CYAN}Running initial test...${RESET}"
         timeout 60 "$MONITOR_DIR/$script_name" > /dev/null 2>&1 &
 
+    done
+}
+
+# Функция для отображения списка активных мониторингов
+list_monitor_scripts() {
+    local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
+
+    if [ ${#scripts[@]} -eq 0 ]; then
+        echo -e "${YELLOW}$(t "no_notifications")${RESET}"
+        return
+    fi
+
+    echo -e "${BOLD}$(t "active_monitors")${RESET}"
+    for script in "${scripts[@]}"; do
+        local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
+        echo -e "  ${CYAN}$address${RESET}"
     done
 }
 
