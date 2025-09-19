@@ -1,4 +1,4 @@
-# Aztec Node Install & Monitoring script
+# Aztec Node Install & Monitoring script (new testnet)
 
 **Description in:**
 - [🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Русская версия описания")
@@ -35,32 +35,42 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 17-09-2025
-- Full support for the new network and testnet.
-- New node installation script.
-    - Automatic creation of YML key files for web3signer.
-    - Installation and launch of web3signer.
-    - Automatic creation of keystore.json key schema.
-    - Support for multi-validator mode (up to 10 per node).
-    - Ability to assign one common publisher address for all validators or have each use its own address (same as attester).
-    - All previous features (automatic installation of required software, port checks, ability to assign custom ports, validations).
-- New monitoring agent script for the node (option 2).
-    - New Telegram notifications with slot-by-slot statistics including all status types (✅ attestation, ❌ attestation, ⛏️ Block mined, 📤 Block proposed, ⚠️ Block missed).
-    - Support for multi-validator mode (statistics for all validators that joined the committee), as well as single-validator mode.
-    - DEBUG mode – allows receiving highly detailed monitoring logs. Log is written to /root/aztec-monitor-agent/agent.log. To enable, set DEBUG=true in /root/.env-aztec-agent (default is false).
-    - Checks run exactly on a systemd timer every 37 seconds (approximate duration of one slot) – you won’t miss any status!
-    - All previous features (sync control, critical error detection, quick log view, automatic updates, downgrade function, container management, and more).
-- New script for searching and verifying validators directly in Rollup and GSE contracts (option 9).
-    - Fast validator search and status check.
-    - Supports checking multiple validators in a single request.
-    - Exact number of active validators in the network.
-    - Always up-to-date information.
-- Updated script version control function. Now short descriptions of new versions and updates are shown.
-- Added new errors detected by the critical error control module, with details on how to fix them and Telegram notifications.
-- Minor improvements to other features
+## 📌 Latest Updates 19-09-2025
+- The function for searching and setting up validator monitoring in the queue (in option 9) works.
+  - Added Cloudflare bypass  
+- Added missing translations  
+- New required components: Python and curl_cffi.
+  - The script will suggest installing the missing components
+
+Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone who tested.
+
 
 <details>
 <summary>📅 Version History</summary>
+
+### 17-09-2025
+- Full support for the new network and testnet.
+- New node installation script.
+  - Automatic creation of YML key files for web3signer.
+  - Installation and launch of web3signer.
+  - Automatic creation of keystore.json key schema.
+  - Support for multi-validator mode (up to 10 per node).
+  - Ability to assign one common publisher address for all validators or have each use its own address (same as attester).
+  - All previous features (automatic installation of required software, port checks, ability to assign custom ports, validations).
+- New monitoring agent script for the node (option 2).
+  - New Telegram notifications with slot-by-slot statistics including all status types (✅ attestation, ❌ attestation, ⛏️ Block mined, 📤 Block proposed, ⚠️ Block missed).
+  - Support for multi-validator mode (statistics for all validators that joined the committee), as well as single-validator mode.
+  - DEBUG mode – allows receiving highly detailed monitoring logs. Log is written to /root/aztec-monitor-agent/agent.log. To enable, set DEBUG=true in /root/.env-aztec-agent (default is false).
+  - Checks run exactly on a systemd timer every 37 seconds (approximate duration of one slot) – you won’t miss any status!
+  - All previous features (sync control, critical error detection, quick log view, automatic updates, downgrade function, container management, and more).
+- New script for searching and verifying validators directly in Rollup and GSE contracts (option 9).
+  - Fast validator search and status check.
+  - Supports checking multiple validators in a single request.
+  - Exact number of active validators in the network.
+  - Always up-to-date information.
+- Updated script version control function. Now short descriptions of new versions and updates are shown.
+- Added new errors detected by the critical error control module, with details on how to fix them and Telegram notifications.
+- Minor improvements to other features
 
 ### 21-08-2025
 - Updated PeerID search function (restored function operation + new features)
@@ -177,6 +187,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 ### 29-05-2025
 - Log file cleanup when reaching 1 MB, initial report is preserved.
 </details>
+
 
 ---
 

@@ -35,7 +35,20 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 16-09-2025
+## 📌 Son Güncellemeler 19-09-2025
+- Kuyruktaki doğrulayıcı izlemeyi arama ve kurma işlevi (9. seçenek) çalışıyor.
+  - Cloudflare atlatma eklendi
+- Eksik çeviriler eklendi
+- Yeni gerekli bileşenler: Python ve curl\_cffi.
+  - Betik, eksik bileşenleri yüklemeyi önerecek
+
+Çözüme dair ipucu için `@xtoun` (Discord)’a ve test eden herkese çok teşekkürler.
+
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 17-09-2025
 - Yeni ağ ve testnet için tam destek.
 - Yeni düğüm kurulum betiği.
   - Web3signer için YML anahtar dosyalarının otomatik oluşturulması.
@@ -58,9 +71,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 - Güncellenmiş betik sürüm kontrol işlevi. Artık yeni sürümler ve güncellemeler hakkında kısa açıklamalar gösteriliyor.
 - Kritik hata kontrol modülü tarafından tespit edilen yeni hatalar eklendi, düzeltme yönergeleri ve Telegram bildirimleri ile birlikte.
 - Diğer özelliklere yönelik küçük iyileştirmeler
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 21-08-2025
 - PeerID arama işlevi güncellendi (işlev geri yüklendi + yeni özellikler)
@@ -176,6 +186,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 ### 29-05-2025
 - 1 MB'a ulaşıldığında günlük dosyası temizleme, ilk rapor korunur.
 </details>
+
 
 ---
 
