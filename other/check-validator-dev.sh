@@ -721,7 +721,7 @@ monitor_position() {
             else
                 message="🎉 *New Validator in Queue*
 
-🔹 *Address:* \$VALIDATOR_ADDRESS
+🔹 *Address:* \\`\$VALIDATOR_ADDRESS\\`
 📌 *Initial Position:* \$current_position
 📅 *Queued since:* \$queued_at
 🏦 *Withdrawer:* \$withdrawer_address
