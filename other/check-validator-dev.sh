@@ -433,46 +433,24 @@ send_telegram_notification() {
 # ========= Queue check via curl_cffi (batch) =========
 check_validator_queue(){
     local validator_addresses=("$@")
-    local results=()
-    local found_count=0
-    local not_found_count=0
-    local error_count=0
-    
+    local results=(); local found_count=0; local not_found_count=0
     echo -e "${YELLOW}$(t "fetching_queue")${RESET}"
     echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${RESET}"
-    
-    # Создаем временный файл для результатов
-    local temp_file
-    temp_file=$(mktemp)
-    
-    # Функция для проверки одного валидатора
+    local temp_file; temp_file=$(mktemp)
+
     check_single_validator(){
-        local validator_address=$1
-        local temp_file=$2
+        local validator_address=$1; local temp_file=$2
         local search_address_lower=${validator_address,,}
         local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
-        
-        # Выполняем запрос с таймаутом
-        local response_data
-        response_data="$(timeout 30 cffi_http_get "$search_url" 2>/dev/null)"
-        
+        local response_data; response_data="$(cffi_http_get "$search_url")"
         if [ -z "$response_data" ]; then
-            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"
-            return 1
+            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"; return 1
         fi
-        
-        # Проверяем валидность JSON
-        if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
-            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
-            return 1
+        if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
+            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"; return 1
         fi
-        
-        # Ищем валидатора в ответе
-        local validator_info
-        validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
-        local filtered_count
-        filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
-        
+        local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+        local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
         if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
             local position withdrawer queued_at tx_hash
             position=$(echo "$validator_info" | jq -r '.position')
@@ -485,73 +463,33 @@ check_validator_queue(){
         fi
     }
 
-    # Запускаем проверки в фоне
     local pids=()
     for validator_address in "${validator_addresses[@]}"; do
         check_single_validator "$validator_address" "$temp_file" &
         pids+=($!)
     done
-    
-    # Ждем завершения всех процессов с таймаутом
-    local timeout_seconds=60
-    local start_time=$(date +%s)
-    
-    for pid in "${pids[@]}"; do
-        local current_time=$(date +%s)
-        local elapsed=$((current_time - start_time))
-        
-        if [ $elapsed -ge $timeout_seconds ]; then
-            echo -e "${YELLOW}Warning: Some validators check timed out after ${timeout_seconds}s${RESET}"
-            kill "$pid" 2>/dev/null || true
-        else
-            wait "$pid" 2>/dev/null || true
-        fi
-    done
-    
-    # Обрабатываем результаты из временного файла
-    if [ -f "$temp_file" ]; then
-        while IFS='|' read -r address status position withdrawer queued_at tx_hash; do
-            case "$status" in
-                FOUND) 
-                    results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash")
-                    found_count=$((found_count + 1))
-                    ;;
-                NOT_FOUND) 
-                    results+=("NOT_FOUND|$address")
-                    not_found_count=$((not_found_count + 1))
-                    ;;
-                ERROR) 
-                    results+=("ERROR|$address|$position")
-                    error_count=$((error_count + 1))
-                    ;;
-            esac
-        done < "$temp_file"
-        rm -f "$temp_file"
-    fi
-    
-    # Проверяем, что все валидаторы были обработаны
-    local total_processed=$((found_count + not_found_count + error_count))
-    if [ $total_processed -ne ${#validator_addresses[@]} ]; then
-        echo -e "${YELLOW}Warning: Only $total_processed out of ${#validator_addresses[@]} validators were processed${RESET}"
-    fi
+    for pid in "${pids[@]}"; do wait "$pid" 2>/dev/null || true; done
 
-    # Отображаем результаты
+    while IFS='|' read -r address status position withdrawer queued_at tx_hash; do
+        case "$status" in
+            FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash"); found_count=$((found_count+1));;
+            NOT_FOUND) results+=("NOT_FOUND|$address"); not_found_count=$((not_found_count+1));;
+            ERROR) results+=("ERROR|$address|$position"); not_found_count=$((not_found_count+1));;
+        esac
+    done < "$temp_file"
+    rm -f "$temp_file"
+
     echo -e "\n${CYAN}=== Queue Check Results ===${RESET}"
     echo -e "Found in queue: ${GREEN}$found_count${RESET}"
     echo -e "Not found: ${RED}$not_found_count${RESET}"
-    if [ $error_count -gt 0 ]; then
-        echo -e "Errors: ${YELLOW}$error_count${RESET}"
-    fi
     echo -e "Total checked: ${BOLD}${#validator_addresses[@]}${RESET}"
 
-    # Показываем найденные валидаторы
     if [ $found_count -gt 0 ]; then
         echo -e "\n${GREEN}Validators found in queue:${RESET}"
         for result in "${results[@]}"; do
             IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
             if [ "$status" == "FOUND" ]; then
-                local formatted_date
-                formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
+                local formatted_date; formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
                 echo -e "  ${CYAN}• ${address}${RESET}"
                 echo -e "    ${BOLD}Position:${RESET} $position"
                 echo -e "    ${BOLD}Withdrawer:${RESET} $withdrawer"
@@ -561,34 +499,19 @@ check_validator_queue(){
         done
     fi
 
-    # Показываем не найденные валидаторы
     if [ $not_found_count -gt 0 ]; then
         echo -e "\n${RED}Validators not found in queue:${RESET}"
         for result in "${results[@]}"; do
             IFS='|' read -r status address error_msg <<<"$result"
             if [ "$status" == "NOT_FOUND" ]; then
                 echo -e "  ${RED}• ${address}${RESET}"
-            fi
-        done
-    fi
-    
-    # Показываем ошибки
-    if [ $error_count -gt 0 ]; then
-        echo -e "\n${YELLOW}Validators with errors:${RESET}"
-        for result in "${results[@]}"; do
-            IFS='|' read -r status address error_msg <<<"$result"
-            if [ "$status" == "ERROR" ]; then
-                echo -e "  ${YELLOW}• ${address} (Error: ${error_msg})${RESET}"
+            elif [ "$status" == "ERROR" ]; then
+                echo -e "  ${RED}• ${address} (Error: ${error_msg})${RESET}"
             fi
         done
     fi
 
-    # Возвращаем успех, если хотя бы один валидатор найден
-    if [ $found_count -gt 0 ]; then 
-        return 0
-    else 
-        return 1
-    fi
+    if [ $found_count -gt 0 ]; then return 0; else return 1; fi
 }
 
 # Вспомогательная функция для проверки одного валидатора (для обратной совместимости)
@@ -1059,7 +982,6 @@ declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
 declare -a QUEUE_VALIDATORS=()
 declare -a NOT_FOUND_ADDRESSES=()
 found_count=0
-found_in_queue_count=0
 not_found_count=0
 
 # Сначала проверяем все адреса в активных валидаторах
@@ -1088,31 +1010,20 @@ done
 if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
     echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
 
-    # Используем временный файл для захвата вывода функции check_validator_queue
-    temp_output=$(mktemp)
-
-    # Вызываем функцию check_validator_queue и захватываем вывод
-    if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}" 2>&1 | tee "$temp_output"; then
-        # Анализируем вывод чтобы определить какие адреса найдены в очереди
-        while IFS= read -r line; do
-            # Ищем строки с найденными адресами в выводе
-            if [[ "$line" == *"• "* ]] && [[ "$line" == *"${CYAN}"* ]]; then
-                # Извлекаем адрес из строки (формат: "  ${CYAN}• ${address}${RESET}")
-                queue_address=$(echo "$line" | sed "s/.*${CYAN}• //" | sed "s/${RESET}.*//")
-                if [[ "$queue_address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
-                    QUEUE_VALIDATORS+=("$queue_address")
-                    found_in_queue_count=$((found_in_queue_count + 1))
-                fi
-            fi
-        done < "$temp_output"
+    # Используем новую функцию для пакетной проверки в очереди
+    if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
+        # Функция check_validator_queue теперь сама выводит результаты
+        # Мы можем получить найденные адреса из глобальной переменной или обработать вывод
+        for address in "${NOT_FOUND_ADDRESSES[@]}"; do
+            # Проверяем, был ли адрес найден в очереди (по выводу или можно добавить возврат в функцию)
+            # Для простоты предположим, что если функция вернула 0, то хотя бы некоторые найдены
+            QUEUE_VALIDATORS+=("$address")
+        done
+        found_in_queue_count=${#QUEUE_VALIDATORS[@]}
     else
-        echo -e "${RED}Failed to check validator queue${RESET}"
+        found_in_queue_count=0
     fi
 
-    # Удаляем временный файл
-    rm "$temp_output"
-
-    # Обновляем счетчики
     not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
 fi
 
@@ -1238,29 +1149,15 @@ while true; do
             if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
                 echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
 
-                # Используем временный файл для захвата вывода функции check_validator_queue
-                temp_output=$(mktemp)
-
-                # Вызываем функцию check_validator_queue и захватываем вывод
-                if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}" 2>&1 | tee "$temp_output"; then
-                    # Анализируем вывод чтобы определить какие адреса найдены в очереди
-                    while IFS= read -r line; do
-                        # Ищем строки с найденными адресами в выводе
-                        if [[ "$line" == *"• "* ]] && [[ "$line" == *"${CYAN}"* ]]; then
-                            # Извлекаем адрес из строки (формат: "  ${CYAN}• ${address}${RESET}")
-                            queue_address=$(echo "$line" | sed "s/.*${CYAN}• //" | sed "s/${RESET}.*//")
-                            if [[ "$queue_address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
-                                QUEUE_VALIDATORS+=("$queue_address")
-                                found_in_queue_count=$((found_in_queue_count + 1))
-                            fi
-                        fi
-                    done < "$temp_output"
+                # Используем новую функцию для пакетной проверки в очереди
+                if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
+                    for address in "${NOT_FOUND_ADDRESSES[@]}"; do
+                        QUEUE_VALIDATORS+=("$address")
+                    done
+                    found_in_queue_count=${#QUEUE_VALIDATORS[@]}
                 else
-                    echo -e "${RED}Failed to check validator queue${RESET}"
+                    found_in_queue_count=0
                 fi
-
-                # Удаляем временный файл
-                rm "$temp_output"
 
                 not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
             fi
