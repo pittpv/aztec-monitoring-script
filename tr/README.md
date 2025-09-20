@@ -35,12 +35,14 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 19-09-2025
+## 📌 Son Güncellemeler 20-09-2025
 - Kuyruktaki doğrulayıcı izlemeyi arama ve kurma işlevi (9. seçenek) çalışıyor.
   - Cloudflare atlatma eklendi
 - Eksik çeviriler eklendi
 - Yeni gerekli bileşenler: Python ve curl\_cffi.
   - Betik, eksik bileşenleri yüklemeyi önerecek
+- **curl_cffi** kurulumu için düzeltme. Bazı kullanıcılar curl_cffi kurulumunda şu sorunla karşılaştı: `/usr/bin/python3: No module named pip` veya `error: externally-managed-environment`
+- Kritik hata kontrol modülü tarafından tespit edilmesi için yeni hatalar eklendi
 
 Çözüme dair ipucu için `@xtoun` (Discord)’a ve test eden herkese çok teşekkürler.
 

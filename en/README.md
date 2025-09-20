@@ -35,12 +35,14 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 19-09-2025
+## 📌 Latest Updates 20-09-2025
 - The function for searching and setting up validator monitoring in the queue (in option 9) works.
   - Added Cloudflare bypass  
 - Added missing translations  
 - New required components: Python and curl_cffi.
   - The script will suggest installing the missing components
+- Fix for **curl_cffi** installation. Some users encountered the following issue when installing curl_cffi: `/usr/bin/python3: No module named pip` or `error: externally-managed-environment`
+- Added new errors detected by the critical error control module
 
 Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone who tested.
 
