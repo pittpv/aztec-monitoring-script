@@ -1011,49 +1011,30 @@ done
 if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
     echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
 
-    # Используем новую функцию для пакетной проверки в очереди
-    # Создаем временный массив для найденных в очереди адресов
-    declare -a FOUND_IN_QUEUE=()
+    # Используем временный файл для захвата вывода функции check_validator_queue
+    temp_output=$(mktemp)
 
-    # Проверяем каждый адрес в очереди
-    for address in "${NOT_FOUND_ADDRESSES[@]}"; do
-        if check_validator_queue "$address"; then
-            FOUND_IN_QUEUE+=("$address")
-            QUEUE_VALIDATORS+=("$address")
-            found_in_queue_count=$((found_in_queue_count + 1))
-            echo -e "${YELLOW}✓ Found in queue: $address${RESET}"
-        else
-            echo -e "${RED}✗ Not found in queue: $address${RESET}"
-        fi
-    done
-
-    # Обновляем список не найденных адресов
-    NOT_FOUND_ADDRESSES=()
-    for address in "${INPUT_ADDRESSES[@]}"; do
-        clean_address=$(echo "$address" | tr -d ' ')
-        found_in_active=false
-        found_in_queue=false
-
-        for validator in "${VALIDATOR_ADDRESSES_TO_CHECK[@]}"; do
-            if [[ "${validator,,}" == "${clean_address,,}" ]]; then
-                found_in_active=true
-                break
+    # Вызываем функцию check_validator_queue и захватываем вывод
+    if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}" 2>&1 | tee "$temp_output"; then
+        # Анализируем вывод чтобы определить какие адреса найдены в очереди
+        while IFS= read -r line; do
+            # Ищем строки с найденными адресами в выводе
+            if [[ "$line" == *"✓ Found in queue:"* ]]; then
+                # Извлекаем адрес из строки
+                queue_address=$(echo "$line" | sed 's/.*✓ Found in queue: //')
+                QUEUE_VALIDATORS+=("$queue_address")
+                found_in_queue_count=$((found_in_queue_count + 1))
             fi
-        done
+        done < "$temp_output"
+    else
+        echo -e "${RED}Failed to check validator queue${RESET}"
+    fi
 
-        for queue_validator in "${FOUND_IN_QUEUE[@]}"; do
-            if [[ "${queue_validator,,}" == "${clean_address,,}" ]]; then
-                found_in_queue=true
-                break
-            fi
-        done
+    # Удаляем временный файл
+    rm "$temp_output"
 
-        if ! $found_in_active && ! $found_in_queue; then
-            NOT_FOUND_ADDRESSES+=("$clean_address")
-        fi
-    done
-
-    not_found_count=${#NOT_FOUND_ADDRESSES[@]}
+    # Обновляем счетчики
+    not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
 fi
 
 # Показываем общую сводку
