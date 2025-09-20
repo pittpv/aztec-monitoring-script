@@ -381,6 +381,12 @@ cast_call_with_fallback() {
 # Глобальная переменная для отслеживания использования резервного RPC
 USING_BACKUP_RPC=false
 
+# Глобальная переменная для хранения количества найденных в очереди валидаторов
+QUEUE_FOUND_COUNT=0
+
+# Глобальный массив для хранения адресов валидаторов, найденных в очереди
+declare -a QUEUE_FOUND_ADDRESSES=()
+
 load_rpc_config
 
 declare -A STATUS_MAP=(
@@ -511,6 +517,18 @@ check_validator_queue(){
         done
     fi
 
+    # Устанавливаем глобальные переменные с результатами поиска
+    QUEUE_FOUND_COUNT=$found_count
+    QUEUE_FOUND_ADDRESSES=()
+    
+    # Заполняем массив найденными адресами
+    for result in "${results[@]}"; do
+        IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
+        if [ "$status" == "FOUND" ]; then
+            QUEUE_FOUND_ADDRESSES+=("$address")
+        fi
+    done
+    
     if [ $found_count -gt 0 ]; then return 0; else return 1; fi
 }
 
@@ -1007,22 +1025,14 @@ for address in "${INPUT_ADDRESSES[@]}"; do
 done
 
 # Теперь проверяем не найденные адреса в очереди (пакетно)
+found_in_queue_count=0
 if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
     echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
 
     # Используем новую функцию для пакетной проверки в очереди
-    if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
-        # Функция check_validator_queue теперь сама выводит результаты
-        # Мы можем получить найденные адреса из глобальной переменной или обработать вывод
-        for address in "${NOT_FOUND_ADDRESSES[@]}"; do
-            # Проверяем, был ли адрес найден в очереди (по выводу или можно добавить возврат в функцию)
-            # Для простоты предположим, что если функция вернула 0, то хотя бы некоторые найдены
-            QUEUE_VALIDATORS+=("$address")
-        done
-        found_in_queue_count=${#QUEUE_VALIDATORS[@]}
-    else
-        found_in_queue_count=0
-    fi
+    check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"
+    # Функция устанавливает глобальную переменную QUEUE_FOUND_COUNT
+    found_in_queue_count=$QUEUE_FOUND_COUNT
 
     not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
 fi
@@ -1069,7 +1079,7 @@ if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
 fi
 
 # Обрабатываем валидаторов из очереди (только если они не были уже показаны)
-if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
+if [[ ${#QUEUE_FOUND_ADDRESSES[@]} -gt 0 ]]; then
     echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${RESET}"
 
     # Предлагаем добавить в мониторинг
@@ -1078,7 +1088,7 @@ if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
 
     if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
         # Создаем мониторы для всех валидаторов из очереди
-        for validator in "${QUEUE_VALIDATORS[@]}"; do
+        for validator in "${QUEUE_FOUND_ADDRESSES[@]}"; do
             echo -e "\n${YELLOW}$(t "processing_address" "$validator")${RESET}"
             create_monitor_script "$validator"
         done
@@ -1088,7 +1098,7 @@ if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
     fi
 fi
 
-if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_VALIDATORS[@]} -eq 0 ]]; then
+if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_FOUND_ADDRESSES[@]} -eq 0 ]]; then
     echo -e "${RED}No valid addresses to check.${RESET}"
 fi
 
@@ -1118,7 +1128,6 @@ while true; do
 
             # Очищаем адреса от пробелов и проверяем их наличие в общем списке
             declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
-            declare -a QUEUE_VALIDATORS=()
             declare -a NOT_FOUND_ADDRESSES=()
             found_count=0
             not_found_count=0
@@ -1146,18 +1155,14 @@ while true; do
             done
 
             # Теперь проверяем не найденные адреса в очереди (пакетно)
+            found_in_queue_count=0
             if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
                 echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
 
                 # Используем новую функцию для пакетной проверки в очереди
-                if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
-                    for address in "${NOT_FOUND_ADDRESSES[@]}"; do
-                        QUEUE_VALIDATORS+=("$address")
-                    done
-                    found_in_queue_count=${#QUEUE_VALIDATORS[@]}
-                else
-                    found_in_queue_count=0
-                fi
+                check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"
+                # Функция устанавливает глобальную переменную QUEUE_FOUND_COUNT
+                found_in_queue_count=$QUEUE_FOUND_COUNT
 
                 not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
             fi
@@ -1208,7 +1213,7 @@ while true; do
             fi
 
             # Обрабатываем валидаторов из очереди (только предложение мониторинга)
-            if [[ ${#QUEUE_VALIDATORS[@]} -gt 0 ]]; then
+            if [[ ${#QUEUE_FOUND_ADDRESSES[@]} -gt 0 ]]; then
                 echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${RESET}"
 
                 # Предлагаем добавить в мониторинг
@@ -1217,7 +1222,7 @@ while true; do
 
                 if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
                     # Создаем мониторы для всех валидаторов из очереди
-                    for validator in "${QUEUE_VALIDATORS[@]}"; do
+                    for validator in "${QUEUE_FOUND_ADDRESSES[@]}"; do
                         echo -e "${YELLOW}$(t "processing_address" "$validator")${RESET}"
                         create_monitor_script "$validator"
                     done
@@ -1227,7 +1232,7 @@ while true; do
                 fi
             fi
 
-            if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_VALIDATORS[@]} -eq 0 ]]; then
+            if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_FOUND_ADDRESSES[@]} -eq 0 ]]; then
                 echo -e "${RED}No valid addresses to check.${RESET}"
             fi
             ;;
