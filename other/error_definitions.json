@@ -18,5 +18,15 @@
     "pattern": "ERROR: sequencer Error in running promise: Error: Failed to find an available publisher",
     "message": "Failed to find an available publisher",
     "solution": "Put private key for publisher in keystore.json"
+  },
+  {
+    "pattern": "ERROR: world-state:database Call SYNC_BLOCK failed: Error: Can't synch block: block state does not match world state",
+    "message": "Can't sync block: block state does not match world state",
+    "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data"
+  },
+  {
+    "pattern": "ERROR: world-state:database Call SYNC_BLOCK failed: Error: Can't sync block: block state does not match world state",
+    "message": "Can't sync block: block state does not match world state",
+    "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data"
   }
 ]

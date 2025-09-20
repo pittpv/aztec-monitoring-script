@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.0.5"
+SCRIPT_VERSION="2.0.6"
 
 function show_logo() {
     echo -e " "
@@ -858,16 +858,24 @@ check_dependencies() {
 
           python3)
             echo -e "\n${CYAN}$(t "installing_python3")${NC}"
-            sudo apt-get install -y python3 python3-pip || brew install python3
-            # Устанавливаем curl_cffi после установки python3
+            # Устанавливаем python3 и pip отдельно
+            if command -v apt-get &>/dev/null; then
+              sudo apt-get install -y python3 python3-pip
+            elif command -v brew &>/dev/null; then
+              brew install python3
+            fi
+
+            # Устанавливаем curl_cffi с обходом externally-managed-environment
             echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-            python3 -m pip install --quiet --upgrade curl_cffi
+            python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+            python3 -m pip install --quiet curl_cffi
             ;;
 
           python3_curl_cffi)
-            # Устанавливаем только curl_cffi, так как python3 уже установлен
+            # Устанавливаем только curl_cffi с обходом externally-managed-environment
             echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-            python3 -m pip install --quiet --upgrade curl_cffi
+            python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+            python3 -m pip install --quiet curl_cffi
             ;;
         esac
       done
@@ -886,7 +894,8 @@ check_dependencies() {
 
       if [[ "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-        python3 -m pip install --quiet --upgrade curl_cffi
+        python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+        python3 -m pip install --quiet curl_cffi
       else
         echo -e "\n${YELLOW}$(t "curl_cffi_optional")${NC}"
       fi
@@ -1139,7 +1148,6 @@ check_aztec_container_logs() {
         echo "$latest_log_line"
     fi
 }
-
 
 # === View Aztec container logs ===
 view_container_logs() {

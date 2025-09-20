@@ -127,7 +127,7 @@
     {
         "VERSION": "2.0.1",
         "UPDATE_DATE": "19.09.2025",
-        "CHANGES": ["The function for searching for a validator in the queue and setting up queue monitoring with notifications in Telegram has been restored. Option 9 in main menu. Reinstallation of the monitoring agent is not required."]
+        "CHANGES": ["The function for searching for a validator in the queue and setting up queue monitoring with notifications in Telegram has been restored. Option 9 in main menu. Reinstallation of the monitoring agent is not required"]
     },
     {
         "VERSION": "2.0.2",
@@ -148,5 +148,10 @@
         "VERSION": "2.0.5",
         "UPDATE_DATE": "19.09.2025",
         "CHANGES": ["New required components: Python & curl_cffi","Last FIX for Cloudflare captcha (Invalid JSON response). Restored the functionality of the queue search function and the launch of monitoring the validator's position in the queue with Telegram notifications. Use option 9"]
+    },
+    {
+        "VERSION": "2.0.6",
+        "UPDATE_DATE": "20.09.2025",
+        "CHANGES": ["Fix for curl_cffi installation. Some users encountered the following issue when installing curl_cffi: /usr/bin/python3: No module named pip or error: externally-managed-environment", "Added new errors detected by the critical error control module"]
     }
 ]
