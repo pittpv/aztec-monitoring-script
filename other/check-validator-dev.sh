@@ -640,21 +640,21 @@ monitor_position(){
             if [[ -n "$last_position" ]]; then
                 message="📊 *Validator Position Update*
 
-                🔹 *Address:* $VALIDATOR_ADDRESS
-                🔄 *Change:* $last_position → $current_position
-                📅 *Queued since:* $queued_at
-                🏦 *Withdrawer:* $withdrawer_address
-                🔗 *Transaction:* $transaction_hash
-                ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+🔹 *Address:* $VALIDATOR_ADDRESS
+🔄 *Change:* $last_position → $current_position
+📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* $withdrawer_address
+🔗 *Transaction:* $transaction_hash
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue*
 
-                🔹 *Address:* $VALIDATOR_ADDRESS
-                📌 *Initial Position:* $current_position
-                📅 *Queued since:* $queued_at
-                🏦 *Withdrawer:* $withdrawer_address
-                🔗 *Transaction:* $transaction_hash
-                ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+🔹 *Address:* $VALIDATOR_ADDRESS
+📌 *Initial Position:* $current_position
+📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* $withdrawer_address
+🔗 *Transaction:* $transaction_hash
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
             send_telegram "$message" && log_message "Notification sent"
             echo "$current_position" > "$LAST_POSITION_FILE"
@@ -667,12 +667,12 @@ monitor_position(){
         if [[ -n "$last_position" ]]; then
             local message="❌ *Validator Removed from Queue*
 
-            🔹 *Address:* $VALIDATOR_ADDRESS
-            ⌛ *Last Position:* $last_position
-            ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
-            send_telegram "$message" && log_message "Removal notification sent"
-            rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
-            rm -f "$0"; log_message "Removed monitor script"
+🔹 *Address:* $VALIDATOR_ADDRESS
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+send_telegram "$message" && log_message "Removal notification sent"
+rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
+rm -f "$0"; log_message "Removed monitor script"
             (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
             rm -f "$LOG_FILE"
         fi
@@ -982,6 +982,7 @@ declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
 declare -a QUEUE_VALIDATORS=()
 declare -a NOT_FOUND_ADDRESSES=()
 found_count=0
+found_in_queue_count=0
 not_found_count=0
 
 # Сначала проверяем все адреса в активных валидаторах
@@ -1011,20 +1012,48 @@ if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
     echo -e "\n${YELLOW}$(t "validator_not_in_set")${RESET}"
 
     # Используем новую функцию для пакетной проверки в очереди
-    if check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"; then
-        # Функция check_validator_queue теперь сама выводит результаты
-        # Мы можем получить найденные адреса из глобальной переменной или обработать вывод
-        for address in "${NOT_FOUND_ADDRESSES[@]}"; do
-            # Проверяем, был ли адрес найден в очереди (по выводу или можно добавить возврат в функцию)
-            # Для простоты предположим, что если функция вернула 0, то хотя бы некоторые найдены
-            QUEUE_VALIDATORS+=("$address")
-        done
-        found_in_queue_count=${#QUEUE_VALIDATORS[@]}
-    else
-        found_in_queue_count=0
-    fi
+    # Создаем временный массив для найденных в очереди адресов
+    declare -a FOUND_IN_QUEUE=()
 
-    not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
+    # Проверяем каждый адрес в очереди
+    for address in "${NOT_FOUND_ADDRESSES[@]}"; do
+        if check_validator_queue "$address"; then
+            FOUND_IN_QUEUE+=("$address")
+            QUEUE_VALIDATORS+=("$address")
+            found_in_queue_count=$((found_in_queue_count + 1))
+            echo -e "${YELLOW}✓ Found in queue: $address${RESET}"
+        else
+            echo -e "${RED}✗ Not found in queue: $address${RESET}"
+        fi
+    done
+
+    # Обновляем список не найденных адресов
+    NOT_FOUND_ADDRESSES=()
+    for address in "${INPUT_ADDRESSES[@]}"; do
+        clean_address=$(echo "$address" | tr -d ' ')
+        found_in_active=false
+        found_in_queue=false
+
+        for validator in "${VALIDATOR_ADDRESSES_TO_CHECK[@]}"; do
+            if [[ "${validator,,}" == "${clean_address,,}" ]]; then
+                found_in_active=true
+                break
+            fi
+        done
+
+        for queue_validator in "${FOUND_IN_QUEUE[@]}"; do
+            if [[ "${queue_validator,,}" == "${clean_address,,}" ]]; then
+                found_in_queue=true
+                break
+            fi
+        done
+
+        if ! $found_in_active && ! $found_in_queue; then
+            NOT_FOUND_ADDRESSES+=("$clean_address")
+        fi
+    done
+
+    not_found_count=${#NOT_FOUND_ADDRESSES[@]}
 fi
 
 # Показываем общую сводку
