@@ -58,6 +58,8 @@ Do you want to run multiple validators?
 
     ![Выбор количества валидаторов](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/3.jpg)
 
+### Для режима мультивалидатора
+
 Далее необходимо ввести данные валидаторов. Для каждого валидатора введите данные в строгом формате:
 `приватный_ключ_с_0x,адрес_валидатора`
 
@@ -66,7 +68,17 @@ Do you want to run multiple validators?
 
 ![Ввод данных валидатора](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
+### Для режима одного валидатора
+
+Введите поотдельности приватный ключ и eth адрес валидатора.
+
+### Aztec L2 адрес для feeRecipient
+
 После этого скрипт запросит **Aztec L2 адрес**, который вы можете создать на официальном сайте: https://app.obsidion.xyz/.
+
+Если по каким-то причинам вы не можете создать Aztec L2 адрес, то вставьте любой приватный ключ от eth кошелька, он по длине такой же, как и Aztec L2 адрес. 
+
+При желании потом сможете заменить на реальный L2 адрес.
 
 ![Ввод L2 адреса](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 

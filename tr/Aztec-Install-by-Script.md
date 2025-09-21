@@ -58,6 +58,8 @@ Do you want to run multiple validators?
 
     ![Doğrulayıcı sayısını seçme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/3.jpg)
 
+### Çoklu doğrulayıcı modu için
+
 Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı için verileri kesin biçimde girin:
 `0x_ile_özel_anahtar,doğrulayıcı_adresi`
 
@@ -66,7 +68,17 @@ Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı 
 
 ![Doğrulayıcı verilerini girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
+### Tek doğrulayıcı modu için
+
+Özel anahtarı ve doğrulayıcının eth adresini ayrı ayrı girin.
+
+### feeRecipient için Aztec L2 adresi
+
 Bundan sonra, betik resmi web sitesinde oluşturabileceğiniz **Aztec L2 adresinizi** isteyecektir: https://app.obsidion.xyz/.
+
+Herhangi bir nedenle Aztec L2 adresi oluşturamıyorsanız, eth cüzdanından herhangi bir özel anahtarı girin; uzunluğu Aztec L2 adresi ile aynıdır.
+
+İsterseniz bunu daha sonra gerçek bir L2 adresiyle değiştirebilirsiniz.
 
 ![L2 adresini girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 

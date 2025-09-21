@@ -58,6 +58,8 @@ Do you want to run multiple validators?
 
     ![Choosing the number of validators](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/3.jpg)
 
+### For multivalidator mode
+
 Next, you need to enter the validator data. For each validator, enter the data in the strict format:
 `private_key_with_0x,validator_address`
 
@@ -66,7 +68,17 @@ Example:
 
 ![Entering validator data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
+### For single validator mode
+
+Enter the private key and the validator's eth address separately.
+
+### Aztec L2 address for feeRecipient
+
 After this, the script will request your **Aztec L2 address**, which you can create on the official website: https://app.obsidion.xyz/.
+
+If for some reason you cannot create an Aztec L2 address, then insert any private key from an eth wallet, it has the same length as the Aztec L2 address.
+
+If you wish, you can later replace it with a real L2 address.
 
 ![Entering L2 address](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 
