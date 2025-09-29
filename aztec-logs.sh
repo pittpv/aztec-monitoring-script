@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.0.6"
+SCRIPT_VERSION="2.0.7"
 
 function show_logo() {
     echo -e " "

@@ -153,5 +153,10 @@
         "VERSION": "2.0.6",
         "UPDATE_DATE": "20.09.2025",
         "CHANGES": ["Fix for curl_cffi installation. Some users encountered the following issue when installing curl_cffi: /usr/bin/python3: No module named pip or error: externally-managed-environment", "Added new errors detected by the critical error control module"]
+    },
+    {
+        "VERSION": "2.0.7",
+        "UPDATE_DATE": "29.09.2025",
+        "CHANGES": ["Fix for Option 9 (Search for validator and check status). Added batch loading of addresses from GSE contracts"]
     }
 ]
