@@ -830,7 +830,7 @@ get_validators_via_gse() {
         "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
         "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
         --rpc-url "$RPC_URL")
-    #local exit_code=$?
+    local exit_code=$?
 
     # Отладочный вывод
      echo -e "${GRAY}Exit code: $exit_code${RESET}"
