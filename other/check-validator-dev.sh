@@ -520,7 +520,7 @@ check_validator_queue(){
     # Устанавливаем глобальные переменные с результатами поиска
     QUEUE_FOUND_COUNT=$found_count
     QUEUE_FOUND_ADDRESSES=()
-    
+
     # Заполняем массив найденными адресами
     for result in "${results[@]}"; do
         IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
@@ -528,7 +528,7 @@ check_validator_queue(){
             QUEUE_FOUND_ADDRESSES+=("$address")
         fi
     done
-    
+
     if [ $found_count -gt 0 ]; then return 0; else return 1; fi
 }
 
@@ -751,7 +751,7 @@ get_validators_via_gse() {
     echo -e "${YELLOW}$(t "getting_validator_count")${RESET}"
 
     # Отладочный вывод команды
-    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
 
     VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$RPC_URL" | cast to-dec)
 
@@ -769,7 +769,8 @@ get_validators_via_gse() {
     echo -e "${GREEN}Validator count: $VALIDATOR_COUNT${RESET}"
 
     echo -e "${YELLOW}$(t "getting_current_slot")${RESET}"
-    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    # Отладочный вывод
+     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
 
     SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$RPC_URL" | cast to-dec)
 
@@ -786,7 +787,8 @@ get_validators_via_gse() {
     echo -e "${GREEN}Current slot: $SLOT${RESET}"
 
     echo -e "${YELLOW}$(t "deriving_timestamp")${RESET}"
-    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    # Отладочный вывод
+     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
 
     TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$RPC_URL" | cast to-dec)
 
@@ -812,14 +814,16 @@ get_validators_via_gse() {
     INDICES_STR=$(printf "%s," "${INDICES[@]}")
     INDICES_STR="${INDICES_STR%,}"  # Убираем последнюю запятую
 
-    # echo -e "${GRAY}Indices array: [${INDICES_STR}]${RESET}"
-    # echo -e "${GRAY}Number of indices: ${#INDICES[@]}${RESET}"
+    # Отладочный вывод
+     echo -e "${GRAY}Indices array: [${INDICES_STR}]${RESET}"
+     echo -e "${GRAY}Number of indices: ${#INDICES[@]}${RESET}"
 
     echo -e "${YELLOW}$(t "querying_attesters")${RESET}"
 
     # Формируем команду для отладки
-    # GSE_COMMAND="cast call \"$GSE_ADDRESS\" \"getAttestersFromIndicesAtTime(address,uint256,uint256[])\" \"$ROLLUP_ADDRESS\" \"$TIMESTAMP\" \"[$INDICES_STR]\" --rpc-url \"$RPC_URL\""
-    # echo -e "${GRAY}Command: $GSE_COMMAND${RESET}"
+    # Отладочный вывод
+     GSE_COMMAND="cast call \"$GSE_ADDRESS\" \"getAttestersFromIndicesAtTime(address,uint256,uint256[])\" \"$ROLLUP_ADDRESS\" \"$TIMESTAMP\" \"[$INDICES_STR]\" --rpc-url \"$RPC_URL\""
+     echo -e "${GRAY}Command: $GSE_COMMAND${RESET}"
 
     # Вызываем GSE контракт для получения списка валидаторов
     VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
@@ -828,9 +832,10 @@ get_validators_via_gse() {
         --rpc-url "$RPC_URL")
     local exit_code=$?
 
-    # echo -e "${GRAY}Exit code: $exit_code${RESET}"
-    # echo -e "${GRAY}Raw response length: ${#VALIDATORS_RESPONSE} characters${RESET}"
-    # echo -e "${GRAY}First 200 chars: '${VALIDATORS_RESPONSE:0:200}...'${RESET}"
+    # Отладочный вывод
+     echo -e "${GRAY}Exit code: $exit_code${RESET}"
+     echo -e "${GRAY}Raw response length: ${#VALIDATORS_RESPONSE} characters${RESET}"
+     echo -e "${GRAY}First 200 chars: '${VALIDATORS_RESPONSE:0:200}...'${RESET}"
 
     if [ $exit_code -ne 0 ]; then
         echo -e "${RED}Error: GSE contract call failed with exit code $exit_code${RESET}"
@@ -849,7 +854,8 @@ get_validators_via_gse() {
     # 00000000000000000000000000000000000000000000000000000000000000b8 - длина массива (184 элемента)
     # затем идут элементы массива (каждый по 32 bytes)
 
-    # echo -e "${YELLOW}Parsing ABI-encoded dynamic array...${RESET}"
+    # Отладочный вывод
+     echo -e "${YELLOW}Parsing ABI-encoded dynamic array...${RESET}"
 
     # Убираем префикс 0x
     RESPONSE_WITHOUT_PREFIX=${VALIDATORS_RESPONSE#0x}
@@ -862,8 +868,9 @@ get_validators_via_gse() {
     OFFSET=$(printf "%d" "0x$OFFSET_HEX")
     ARRAY_LENGTH=$(printf "%d" "0x$ARRAY_LENGTH_HEX")
 
-    # echo -e "${GRAY}Offset: $OFFSET (0x$OFFSET_HEX)${RESET}"
-    # echo -e "${GRAY}Array length: $ARRAY_LENGTH (0x$ARRAY_LENGTH_HEX)${RESET}"
+    # Отладочный вывод
+     echo -e "${GRAY}Offset: $OFFSET (0x$OFFSET_HEX)${RESET}"
+     echo -e "${GRAY}Array length: $ARRAY_LENGTH (0x$ARRAY_LENGTH_HEX)${RESET}"
 
     if [ $ARRAY_LENGTH -eq 0 ]; then
         echo -e "${RED}Error: Empty validator array${RESET}"
@@ -904,7 +911,8 @@ get_validators_via_gse() {
     fi
 
     # Выводим статистику
-    # echo -e "${GRAY}Expected: $VALIDATOR_COUNT, Found: ${#VALIDATOR_ADDRESSES[@]}${RESET}"
+    # Отладочный вывод
+     echo -e "${GRAY}Expected: $VALIDATOR_COUNT, Found: ${#VALIDATOR_ADDRESSES[@]}${RESET}"
 
     # Выводим первые несколько адреса для проверки
     # if [ ${#VALIDATOR_ADDRESSES[@]} -le 5 ]; then
