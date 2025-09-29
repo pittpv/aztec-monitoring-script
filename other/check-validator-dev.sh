@@ -751,7 +751,7 @@ get_validators_via_gse() {
     echo -e "${YELLOW}$(t "getting_validator_count")${RESET}"
 
     # Отладочный вывод команды
-     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
 
     VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$RPC_URL" | cast to-dec)
 
@@ -770,7 +770,7 @@ get_validators_via_gse() {
 
     echo -e "${YELLOW}$(t "getting_current_slot")${RESET}"
     # Отладочный вывод
-     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
 
     SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$RPC_URL" | cast to-dec)
 
@@ -788,7 +788,7 @@ get_validators_via_gse() {
 
     echo -e "${YELLOW}$(t "deriving_timestamp")${RESET}"
     # Отладочный вывод
-     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
 
     TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$RPC_URL" | cast to-dec)
 
@@ -810,98 +810,108 @@ get_validators_via_gse() {
         INDICES+=("$i")
     done
 
-    # Преобразуем массив в строку для передачи в cast call
-    INDICES_STR=$(printf "%s," "${INDICES[@]}")
-    INDICES_STR="${INDICES_STR%,}"  # Убираем последнюю запятую
-
-    # Отладочный вывод
-     echo -e "${GRAY}Indices array: [${INDICES_STR}]${RESET}"
-     echo -e "${GRAY}Number of indices: ${#INDICES[@]}${RESET}"
-
     echo -e "${YELLOW}$(t "querying_attesters")${RESET}"
+    echo -e "${GRAY}Total indices: ${#INDICES[@]}, batch size: 100${RESET}"
 
-    # Формируем команду для отладки
-    # Отладочный вывод
-     GSE_COMMAND="cast call \"$GSE_ADDRESS\" \"getAttestersFromIndicesAtTime(address,uint256,uint256[])\" \"$ROLLUP_ADDRESS\" \"$TIMESTAMP\" \"[$INDICES_STR]\" --rpc-url \"$RPC_URL\""
-     echo -e "${GRAY}Command: $GSE_COMMAND${RESET}"
+    # Инициализируем массив для всех адресов
+    ALL_VALIDATOR_ADDRESSES=()
+    BATCH_SIZE=100
+    TOTAL_BATCHES=$(( (VALIDATOR_COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
 
-    # Вызываем GSE контракт для получения списка валидаторов
-    VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
-        "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
-        "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
-        --rpc-url "$RPC_URL")
-    local exit_code=$?
-
-    # Отладочный вывод
-     echo -e "${GRAY}Exit code: $exit_code${RESET}"
-     echo -e "${GRAY}Raw response length: ${#VALIDATORS_RESPONSE} characters${RESET}"
-     echo -e "${GRAY}First 200 chars: '${VALIDATORS_RESPONSE:0:200}...'${RESET}"
-
-    if [ $exit_code -ne 0 ]; then
-        echo -e "${RED}Error: GSE contract call failed with exit code $exit_code${RESET}"
-        return 1
-    fi
-
-    if [ -z "$VALIDATORS_RESPONSE" ]; then
-        echo -e "${RED}Error: Empty response from GSE contract${RESET}"
-        return 1
-    fi
-
-    # Парсим ABI-encoded динамический массив
-    # Формат:
-    # 0x - префикс
-    # 0000000000000000000000000000000000000000000000000000000000000020 - смещение данных массива (32 bytes)
-    # 00000000000000000000000000000000000000000000000000000000000000b8 - длина массива (184 элемента)
-    # затем идут элементы массива (каждый по 32 bytes)
-
-    # Отладочный вывод
-     echo -e "${YELLOW}Parsing ABI-encoded dynamic array...${RESET}"
-
-    # Убираем префикс 0x
-    RESPONSE_WITHOUT_PREFIX=${VALIDATORS_RESPONSE#0x}
-
-    # Извлекаем длину массива (первые 64 символа после смещения)
-    OFFSET_HEX=${RESPONSE_WITHOUT_PREFIX:0:64}
-    ARRAY_LENGTH_HEX=${RESPONSE_WITHOUT_PREFIX:64:64}
-
-    # Конвертируем hex в decimal
-    OFFSET=$(printf "%d" "0x$OFFSET_HEX")
-    ARRAY_LENGTH=$(printf "%d" "0x$ARRAY_LENGTH_HEX")
-
-    # Отладочный вывод
-     echo -e "${GRAY}Offset: $OFFSET (0x$OFFSET_HEX)${RESET}"
-     echo -e "${GRAY}Array length: $ARRAY_LENGTH (0x$ARRAY_LENGTH_HEX)${RESET}"
-
-    if [ $ARRAY_LENGTH -eq 0 ]; then
-        echo -e "${RED}Error: Empty validator array${RESET}"
-        return 1
-    fi
-
-    if [ $ARRAY_LENGTH -ne $VALIDATOR_COUNT ]; then
-        echo -e "${YELLOW}Warning: Array length ($ARRAY_LENGTH) doesn't match validator count ($VALIDATOR_COUNT)${RESET}"
-    fi
-
-    # Извлекаем адреса из массива
-    VALIDATOR_ADDRESSES=()
-    START_POS=$((64 + 64))  # Пропускаем offset и length (по 64 символа каждый)
-
-    for ((i=0; i<ARRAY_LENGTH; i++)); do
-        # Каждый адрес занимает 64 символа (32 bytes), но нам нужны только последние 40 символов (20 bytes)
-        ADDR_HEX=${RESPONSE_WITHOUT_PREFIX:$START_POS:64}
-        ADDR="0x${ADDR_HEX:24:40}"  # Берем последние 20 bytes (40 символов)
-
-        # Проверяем валидность адреса
-        if [[ "$ADDR" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
-            VALIDATOR_ADDRESSES+=("$ADDR")
-            # if [ $i -lt 3 ]; then  # Показываем первые 3 адреса для отладки
-            #     echo -e "${GRAY}Address $((i+1)): $ADDR${RESET}"
-            # fi
-        else
-            echo -e "${YELLOW}Warning: Invalid address format at position $i: '$ADDR'${RESET}"
+    # Обрабатываем индексы партиями
+    for ((BATCH_START=0; BATCH_START<VALIDATOR_COUNT; BATCH_START+=BATCH_SIZE)); do
+        BATCH_END=$((BATCH_START + BATCH_SIZE - 1))
+        if [ $BATCH_END -ge $VALIDATOR_COUNT ]; then
+            BATCH_END=$((VALIDATOR_COUNT - 1))
         fi
 
-        START_POS=$((START_POS + 64))
+        CURRENT_BATCH=$((BATCH_START / BATCH_SIZE + 1))
+        BATCH_INDICES=("${INDICES[@]:$BATCH_START:$BATCH_SIZE}")
+        BATCH_COUNT=${#BATCH_INDICES[@]}
+
+        echo -e "${GRAY}Processing batch $CURRENT_BATCH/$TOTAL_BATCHES (indices $BATCH_START-$BATCH_END, $BATCH_COUNT addresses)${RESET}"
+
+        # Преобразуем массив в строку для передачи в cast call
+        INDICES_STR=$(printf "%s," "${BATCH_INDICES[@]}")
+        INDICES_STR="${INDICES_STR%,}"  # Убираем последнюю запятую
+
+        # Формируем команду для отладки
+        GSE_COMMAND="cast call \"$GSE_ADDRESS\" \"getAttestersFromIndicesAtTime(address,uint256,uint256[])\" \"$ROLLUP_ADDRESS\" \"$TIMESTAMP\" \"[$INDICES_STR]\" --rpc-url \"$RPC_URL\""
+        echo -e "${GRAY}Command: $GSE_COMMAND${RESET}"
+
+        # Вызываем GSE контракт для получения списка валидаторов
+        VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
+            "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
+            "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
+            --rpc-url "$RPC_URL")
+        local exit_code=$?
+
+        # Отладочный вывод
+        echo -e "${GRAY}Exit code: $exit_code${RESET}"
+        echo -e "${GRAY}Raw response length: ${#VALIDATORS_RESPONSE} characters${RESET}"
+
+        if [ $exit_code -ne 0 ]; then
+            echo -e "${RED}Error: GSE contract call failed for batch $CURRENT_BATCH with exit code $exit_code${RESET}"
+            return 1
+        fi
+
+        if [ -z "$VALIDATORS_RESPONSE" ]; then
+            echo -e "${RED}Error: Empty response from GSE contract for batch $CURRENT_BATCH${RESET}"
+            return 1
+        fi
+
+        # Парсим ABI-encoded динамический массив
+        # Убираем префикс 0x
+        RESPONSE_WITHOUT_PREFIX=${VALIDATORS_RESPONSE#0x}
+
+        # Извлекаем длину массива (первые 64 символа после смещения)
+        OFFSET_HEX=${RESPONSE_WITHOUT_PREFIX:0:64}
+        ARRAY_LENGTH_HEX=${RESPONSE_WITHOUT_PREFIX:64:64}
+
+        # Конвертируем hex в decimal
+        OFFSET=$(printf "%d" "0x$OFFSET_HEX")
+        ARRAY_LENGTH=$(printf "%d" "0x$ARRAY_LENGTH_HEX")
+
+        # Отладочный вывод
+        echo -e "${GRAY}Batch $CURRENT_BATCH - Array length: $ARRAY_LENGTH${RESET}"
+
+        if [ $ARRAY_LENGTH -eq 0 ]; then
+            echo -e "${YELLOW}Warning: Empty validator array in batch $CURRENT_BATCH${RESET}"
+            continue
+        fi
+
+        if [ $ARRAY_LENGTH -ne $BATCH_COUNT ]; then
+            echo -e "${YELLOW}Warning: Batch array length ($ARRAY_LENGTH) doesn't match batch count ($BATCH_COUNT)${RESET}"
+        fi
+
+        # Извлекаем адреса из массива
+        START_POS=$((64 + 64))  # Пропускаем offset и length (по 64 символа каждый)
+
+        for ((i=0; i<ARRAY_LENGTH; i++)); do
+            # Каждый адрес занимает 64 символа (32 bytes), но нам нужны только последние 40 символов (20 bytes)
+            ADDR_HEX=${RESPONSE_WITHOUT_PREFIX:$START_POS:64}
+            ADDR="0x${ADDR_HEX:24:40}"  # Берем последние 20 bytes (40 символов)
+
+            # Проверяем валидность адреса
+            if [[ "$ADDR" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+                ALL_VALIDATOR_ADDRESSES+=("$ADDR")
+            else
+                echo -e "${YELLOW}Warning: Invalid address format at batch position $i: '$ADDR'${RESET}"
+            fi
+
+            START_POS=$((START_POS + 64))
+        done
+
+        echo -e "${GREEN}Batch $CURRENT_BATCH processed: ${#ALL_VALIDATOR_ADDRESSES[@]} total addresses so far${RESET}"
+
+        # Небольшая задержка между батчами чтобы не перегружать RPC
+        if [ $CURRENT_BATCH -lt $TOTAL_BATCHES ]; then
+            sleep 1
+        fi
     done
+
+    # Сохраняем результаты в глобальный массив
+    VALIDATOR_ADDRESSES=("${ALL_VALIDATOR_ADDRESSES[@]}")
 
     echo -e "${GREEN}$(t "found_validators") ${#VALIDATOR_ADDRESSES[@]}${RESET}"
 
@@ -911,15 +921,7 @@ get_validators_via_gse() {
     fi
 
     # Выводим статистику
-    # Отладочный вывод
-     echo -e "${GRAY}Expected: $VALIDATOR_COUNT, Found: ${#VALIDATOR_ADDRESSES[@]}${RESET}"
-
-    # Выводим первые несколько адреса для проверки
-    # if [ ${#VALIDATOR_ADDRESSES[@]} -le 5 ]; then
-    #     echo -e "${GRAY}Validator addresses: ${VALIDATOR_ADDRESSES[*]}${RESET}"
-    # else
-    #     echo -e "${GRAY}First 5 validator addresses: ${VALIDATOR_ADDRESSES[*]:0:5}...${RESET}"
-    # fi
+    echo -e "${GRAY}Expected: $VALIDATOR_COUNT, Found: ${#VALIDATOR_ADDRESSES[@]}${RESET}"
 
     return 0
 }
