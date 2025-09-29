@@ -815,7 +815,7 @@ get_validators_via_gse() {
 
     # Инициализируем массив для всех адресов
     ALL_VALIDATOR_ADDRESSES=()
-    BATCH_SIZE=3000
+    BATCH_SIZE=5000
     TOTAL_BATCHES=$(( (VALIDATOR_COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
 
     # Обрабатываем индексы партиями
