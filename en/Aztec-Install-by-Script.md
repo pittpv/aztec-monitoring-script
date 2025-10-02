@@ -104,7 +104,8 @@ For the final node setup, the script will request data to generate the `docker-c
 The script will offer to install **Watchtower** — a service for automatically updating your node's containers. To configure Telegram notifications about the update process, you will need:
 
 1.  **Telegram Token:** Obtain it from [BotFather](https://t.me/BotFather) by creating a new bot.
-2.  **Chat ID:** Find out your chat ID, for example, using the [@myidbot](https://t.me/myidbot).
+2.  Be sure to **go to your created bot** and send the command `/start` in the chat.
+3.  **Chat ID:** Find out your chat ID, for example, using the [@myidbot](https://t.me/myidbot).
 
 Enter the requested data when the corresponding prompts appear.
 

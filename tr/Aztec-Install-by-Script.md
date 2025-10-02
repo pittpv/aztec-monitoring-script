@@ -104,7 +104,8 @@ Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak 
 Betik, düğüm konteynerlerinizi otomatik olarak güncellemek için bir servis olan **Watchtower**'ı kurmayı teklif edecektir. Güncelleme süreci hakkında Telegram bildirimlerini yapılandırmak için şunlara ihtiyacınız olacak:
 
 1.  **Telegram Token:** [BotFather](https://t.me/BotFather)'dan yeni bir bot oluşturarak alın.
-2.  **Chat ID:** Chat ID'nizi öğrenin, örneğin [@myidbot](https://t.me/myidbot) kullanarak.
+2.  **Oluşturduğunuz bota gidin** ve sohbette `/start` komutunu gönderin.
+3.  **Chat ID:** Chat ID'nizi öğrenin, örneğin [@myidbot](https://t.me/myidbot) kullanarak.
 
 İlgili istemler göründüğünde istenen verileri girin.
 
