@@ -66,6 +66,10 @@ Do you want to run multiple validators?
 Пример:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
 
+⚠️ Если вы планируете использовать **один адрес** для списывания sepolia eth за транзакции **всех** валидаторов, тогда внесите данные этого адреса первыми. После ввода данных всех валидаторв скрипт уточнит, надо ли использовать первый адрес как publisher-адрес для всех валидаторов (`Use first address as publisher for all validators?`) - выберите **`y`**.
+
+Если же sepolia eth есть на всех адресах, то можно выбрать **`n`** 
+
 ![Ввод данных валидатора](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
 ### Для режима одного валидатора

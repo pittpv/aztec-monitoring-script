@@ -66,6 +66,10 @@ Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı 
 Örnek:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
 
+⚠️ Eğer **tüm** validatörlerin işlemleri için Sepolia ETH ödemek amacıyla **tek bir adres** kullanmayı planlıyorsanız, önce o adresin verilerini girin. Tüm validatörlerin verilerini girdikten sonra script, ilk adresin tüm validatörler için publisher adresi olarak kullanılıp kullanılmayacağını soracaktır (`Use first address as publisher for all validators?`) - **`y`** seçin.
+
+Eğer tüm adreslerde Sepolia ETH varsa, **`n`** seçebilirsiniz.
+
 ![Doğrulayıcı verilerini girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
 ### Tek doğrulayıcı modu için
