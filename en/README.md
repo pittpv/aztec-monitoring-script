@@ -35,20 +35,32 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 20-09-2025
-- The function for searching and setting up validator monitoring in the queue (in option 9) works.
-  - Added Cloudflare bypass  
-- Added missing translations  
-- New required components: Python and curl_cffi.
-  - The script will suggest installing the missing components
-- Fix for **curl_cffi** installation. Some users encountered the following issue when installing curl_cffi: `/usr/bin/python3: No module named pip` or `error: externally-managed-environment`
-- Added new errors detected by the critical error control module
+## 📌 Latest Updates 04-10-2025
+⚠️ Please Delete old monitoring agent (use option 3) and Install new agent (use option 2)
 
-Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone who tested.
+- New slot statistics notification system
+  - Now statistics are updated directly in the message as live slots. Only one message instead of 25 messages
+  - Support for multiple validators. Each validator has its own message with statuses
+  - Fallback support. If an error occurs while updating the first message, the script will send a new message.
+- Update in the installation script, new method of determining the IP address.
+  - When installing a node on a server with a virtual machine, the IP address for P2P_IP was detected as local, which prevented the node from working correctly. If you have a VPN configured, specify the real IP address for P2P_IP manually.
+- Update of the error file for detection by the critical error monitoring module
+  - Added an error case when the node does not receive BLOB data from BEACON RPC
 
 
 <details>
 <summary>📅 Version History</summary>
+
+### 20-09-2025
+- The function for searching and setting up validator monitoring in the queue (in option 9) works.
+    - Added Cloudflare bypass
+- Added missing translations
+- New required components: Python and curl_cffi.
+    - The script will suggest installing the missing components
+- Fix for **curl_cffi** installation. Some users encountered the following issue when installing curl_cffi: `/usr/bin/python3: No module named pip` or `error: externally-managed-environment`
+- Added new errors detected by the critical error control module
+
+Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone who tested.
 
 ### 17-09-2025
 - Full support for the new network and testnet.

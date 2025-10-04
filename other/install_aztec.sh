@@ -710,7 +710,7 @@ EOF
 
 echo -e "${GREEN}Created keystore.json configuration${NC}"
 
-DEFAULT_IP=$(hostname -I | awk '{print $1}')
+DEFAULT_IP=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me)
 
 echo -e "\n${GREEN}$(t "creating_env")${NC}"
 read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL

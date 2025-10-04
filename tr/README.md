@@ -35,20 +35,32 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 20-09-2025
-- Kuyruktaki doğrulayıcı izlemeyi arama ve kurma işlevi (9. seçenek) çalışıyor.
-  - Cloudflare atlatma eklendi
-- Eksik çeviriler eklendi
-- Yeni gerekli bileşenler: Python ve curl\_cffi.
-  - Betik, eksik bileşenleri yüklemeyi önerecek
-- **curl_cffi** kurulumu için düzeltme. Bazı kullanıcılar curl_cffi kurulumunda şu sorunla karşılaştı: `/usr/bin/python3: No module named pip` veya `error: externally-managed-environment`
-- Kritik hata kontrol modülü tarafından tespit edilmesi için yeni hatalar eklendi
+## 📌 Son Güncellemeler 04-10-2025
+⚠️ Lütfen eski izleme aracını silin (seçenek 3'ü kullanın) ve yeni aracı yükleyin (seçenek 2'yi kullanın)
 
-Çözüme dair ipucu için `@xtoun` (Discord)’a ve test eden herkese çok teşekkürler.
+- Yeni slot istatistik bildirim sistemi
+  - Artık istatistikler doğrudan mesaj içinde canlı slotlar olarak güncelleniyor. 25 mesaj yerine yalnızca bir mesaj
+  - Birden fazla doğrulayıcı desteği. Her doğrulayıcı için kendi durum mesajı
+  - Geri dönüş (fallback) desteği. İlk mesaj güncellenirken bir hata oluşursa, betik yeni bir mesaj gönderecek.
+- Kurulum betiğinde güncelleme, IP adresini belirlemenin yeni yöntemi.
+  - Sanal makineye sahip bir sunucuda düğüm kurulurken P2P_IP için IP adresi yerel olarak algılanıyordu, bu da düğümün düzgün çalışmasını engelliyordu. Eğer VPN yapılandırıldıysa, P2P_IP için gerçek IP adresini manuel olarak belirtin.
+- Kritik hata izleme modülü tarafından algılanacak hata dosyasında güncelleme
+  - Düğüm BEACON RPC’den BLOB verilerini almadığında eklenen hata durumu
 
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 20-09-2025
+- Kuyruktaki doğrulayıcı izlemeyi arama ve kurma işlevi (9. seçenek) çalışıyor.
+    - Cloudflare atlatma eklendi
+- Eksik çeviriler eklendi
+- Yeni gerekli bileşenler: Python ve curl\_cffi.
+    - Betik, eksik bileşenleri yüklemeyi önerecek
+- **curl_cffi** kurulumu için düzeltme. Bazı kullanıcılar curl_cffi kurulumunda şu sorunla karşılaştı: `/usr/bin/python3: No module named pip` veya `error: externally-managed-environment`
+- Kritik hata kontrol modülü tarafından tespit edilmesi için yeni hatalar eklendi
+
+Çözüme dair ipucu için `@xtoun` (Discord)’a ve test eden herkese çok teşekkürler.
 
 ### 17-09-2025
 - Yeni ağ ve testnet için tam destek.

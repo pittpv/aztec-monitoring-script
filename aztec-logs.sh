@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.0.7"
+SCRIPT_VERSION="2.1.0"
 
 function show_logo() {
     echo -e " "
@@ -198,6 +198,14 @@ init_languages() {
   TRANSLATIONS["en,validators_prompt"]="Enter your validator addresses (comma separated, without spaces):"
   TRANSLATIONS["en,validators_format"]="Example: 0x123...,0x456...,0x789..."
   TRANSLATIONS["en,validators_empty"]="Error: Validators list cannot be empty"
+  TRANSLATIONS["en,status_legend"]="Status Legend:"
+  TRANSLATIONS["en,status_empty"]="⬜️ Empty slot"
+  TRANSLATIONS["en,status_attestation_sent"]="🟩 Attestation sent"
+  TRANSLATIONS["en,status_attestation_missed"]="🟥 Attestation missed"
+  TRANSLATIONS["en,status_block_mined"]="🟦 Block mined"
+  TRANSLATIONS["en,status_block_missed"]="🟨 Block missed"
+  TRANSLATIONS["en,status_block_proposed"]="🟪 Block proposed"
+  TRANSLATIONS["en,current_slot"]="Current slot: %s"
   TRANSLATIONS["en,agent_notifications_full_info"]="ℹ️ Notifications will be sent for issues, committee, slot stats"
   TRANSLATIONS["en,attestation_status"]="ℹ️ Slot stats"
   #find peerID
@@ -435,6 +443,14 @@ init_languages() {
   TRANSLATIONS["ru,validators_prompt"]="Введите адреса валидаторов (через запятую, без пробелов):"
   TRANSLATIONS["ru,validators_format"]="Пример: 0x123...,0x456...,0x789..."
   TRANSLATIONS["ru,validators_empty"]="Ошибка: Список валидаторов не может быть пустым"
+  TRANSLATIONS["ru,status_legend"]="Легенда статусов:"
+  TRANSLATIONS["ru,status_empty"]="⬜️ Пустой слот"
+  TRANSLATIONS["ru,status_attestation_sent"]="🟩 Аттестация отправлена"
+  TRANSLATIONS["ru,status_attestation_missed"]="🟥 Аттестация пропущена"
+  TRANSLATIONS["ru,status_block_mined"]="🟦 Блок добыт"
+  TRANSLATIONS["ru,status_block_missed"]="🟨 Блок пропущен"
+  TRANSLATIONS["ru,status_block_proposed"]="🟪 Блок предложен"
+  TRANSLATIONS["ru,current_slot"]="Текущий слот: %s"
   TRANSLATIONS["ru,agent_notifications_full_info"]="ℹ️ Уведомления будут отправляться при проблемах, выборе в комитет, статистике слотов"
   TRANSLATIONS["ru,attestation_status"]="ℹ️ Статистика слота"
   #peerID
@@ -672,6 +688,14 @@ init_languages() {
   TRANSLATIONS["tr,validators_prompt"]="Validator adreslerinizi girin (virgülle ayırarak, boşluk olmadan):"
   TRANSLATIONS["tr,validators_format"]="Örnek: 0x123...,0x456...,0x789..."
   TRANSLATIONS["tr,validators_empty"]="Hata: Validator listesi boş olamaz"
+  TRANSLATIONS["tr,status_legend"]="Durum Açıklaması:"
+  TRANSLATIONS["tr,status_empty"]="⬜️ Boş slot"
+  TRANSLATIONS["tr,status_attestation_sent"]="🟩 Doğrulama gönderildi"
+  TRANSLATIONS["tr,status_attestation_missed"]="🟥 Doğrulama kaçırıldı"
+  TRANSLATIONS["tr,status_block_mined"]="🟦 Blok çıkarıldı"
+  TRANSLATIONS["tr,status_block_missed"]="🟨 Blok kaçırıldı"
+  TRANSLATIONS["tr,status_block_proposed"]="🟪 Blok önerildi"
+  TRANSLATIONS["tr,current_slot"]="Mevcut slot: %s"
   TRANSLATIONS["tr,agent_notifications_full_info"]="ℹ️ Sorunlar, komite ve slot istatistikleri için bildirimler gönderilecektir"
   TRANSLATIONS["tr,attestation_status"]="ℹ️ Slot istatistik"
   #peerID
@@ -1482,6 +1506,14 @@ t() {
     "validators_format") echo "$(t "validators_format")" ;;
     "validators_empty") echo "$(t "validators_empty")" ;;
     "attestation_status") echo "$(t "attestation_status")" ;;
+    "status_legend") echo "$(t "status_legend")" ;;
+    "status_empty") echo "$(t "status_empty")" ;;
+    "status_attestation_sent") echo "$(t "status_attestation_sent")" ;;
+    "status_attestation_missed") echo "$(t "status_attestation_missed")" ;;
+    "status_block_mined") echo "$(t "status_block_mined")" ;;
+    "status_block_missed") echo "$(t "status_block_missed")" ;;
+    "status_block_proposed") echo "$(t "status_block_proposed")" ;;
+    "current_slot") printf "$(t "current_slot")" "\$value1" ;;
     *) echo "\$key" ;;
   esac
 }
@@ -1546,6 +1578,42 @@ send_telegram_message() {
     -d chat_id="\$TELEGRAM_CHAT_ID" \\
     -d text="\$message" \\
     -d parse_mode="Markdown" >/dev/null
+}
+
+# === Helper: send Telegram message and return message_id ===
+send_telegram_message_get_id() {
+  local message="\$1"
+  local resp
+  resp=\$(curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/sendMessage" \\
+    -d chat_id="\$TELEGRAM_CHAT_ID" \\
+    -d text="\$message" \\
+    -d parse_mode="Markdown")
+  echo "\$resp" | jq -r '.result.message_id'
+}
+
+# === Helper: edit Telegram message by message_id ===
+edit_telegram_message() {
+  local message_id="\$1"
+  local text="\$2"
+  curl -s -X POST "https://api.telegram.org/bot\$TELEGRAM_BOT_TOKEN/editMessageText" \\
+    -d chat_id="\$TELEGRAM_CHAT_ID" \\
+    -d message_id="\$message_id" \\
+    -d text="\$text" \\
+    -d parse_mode="Markdown" >/dev/null
+}
+
+# === Helper: build a 32-slot board (8 per line) ===
+build_slots_board() {
+  # expects 32 items passed as args (each is an emoji)
+  local slots=("\$@")
+  local out=""
+  for i in {0..31}; do
+    out+="\${slots[\$i]}"
+    if [ \$(((i+1)%8)) -eq 0 ]; then
+      out+="%0A"
+    fi
+  done
+  echo "\$out"
 }
 
 # === Получаем свой публичный IP для включения в уведомления ===
@@ -1728,34 +1796,47 @@ check_committee() {
   last_epoch_file="$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
   if [ ! -f "\$last_epoch_file" ] || ! grep -q "\$epoch" "\$last_epoch_file"; then
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-    validator_list=\$(IFS=\$'\n' ; echo "\${found_validators[*]}")
-    committee_message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
-    committee_message+="%0A\$(t "found_validators" "\$validator_list")%0A"
-    committee_message+="%0A\$(t "server_info" "\$ip")%0A"
-    committee_message+="\$(t "time_info" "\$current_time")"
-
-    debug_log "Sending committee message: \$committee_message"
-    send_telegram_message "\$committee_message"
     echo "\$epoch" > "\$last_epoch_file"
-    log "Committee selection notification sent for epoch \$epoch: found validators \${found_validators[*]}"
+    # Для каждого валидатора создаём отдельное сообщение и отдельное состояние из 32 слотов
+    for idx in "\${!committee_validators[@]}"; do
+      v_lower="\${committee_validators[\$idx]}"
+      v_link="\${found_validators[\$idx]}"
+      epoch_state_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_slots_state"
+      epoch_msg_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_message_id"
+      # initialize 32 empty slots
+      slots_arr=()
+      for i in {0..31}; do slots_arr+=("⬜️"); done
+      board=\$(build_slots_board "\${slots_arr[@]}")
+      committee_message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
+      committee_message+="%0A\$(t "found_validators" "\$v_link")%0A"
+      committee_message+="%0A\$(t "current_slot" "0")%0A"
+      committee_message+="%0ASlots:%0A\${board}%0A"
+      committee_message+="%0A\$(t "status_legend")%0A"
+      committee_message+="\$(t "status_empty")%0A"
+      committee_message+="\$(t "status_attestation_sent")%0A"
+      committee_message+="\$(t "status_attestation_missed")%0A"
+      committee_message+="\$(t "status_block_mined")%0A"
+      committee_message+="\$(t "status_block_missed")%0A"
+      committee_message+="\$(t "status_block_proposed")%0A"
+      committee_message+="%0A\$(t "server_info" "\$ip")%0A"
+      committee_message+="\$(t "time_info" "\$current_time")"
 
-    # Очищаем файл слотов при смене эпохи
-    last_slot_file="$AGENT_SCRIPT_PATH/aztec_last_committee_slot"
-    > "\$last_slot_file"
-    debug_log "Cleared slot file for new epoch \$epoch"
+      debug_log "Sending committee message for validator \$v_lower: \$committee_message"
+      message_id=\$(send_telegram_message_get_id "\$committee_message")
+      if [ -n "\$message_id" ] && [ "\$message_id" != "null" ]; then
+        echo "\$message_id" > "\$epoch_msg_file"
+      fi
+      printf "%s " "\${slots_arr[@]}" > "\$epoch_state_file"
+      # Очистим файл учета слотов для этого валидатора
+      : > "$AGENT_SCRIPT_PATH/aztec_last_committee_slot_\${v_lower}"
+    done
+    log "Committee selection notification sent for epoch \$epoch: found validators \${found_validators[*]}"
   else
     debug_log "Already notified for epoch \$epoch"
   fi
 
-  # === Уведомление о статусах аттестаций (каждый слот) ===
-  last_slot_file="$AGENT_SCRIPT_PATH/aztec_last_committee_slot"
+  # === Уведомление о статусах аттестаций (обновление отдельных сообщений по каждому валидатору) ===
   last_slot_key="\${epoch}_\${slot}"
-
-  # Пропускаем если уже отправляли для этого слота
-  if [ -f "\$last_slot_file" ] && grep -q "\$last_slot_key" "\$last_slot_file"; then
-    debug_log "Already processed slot \$last_slot_key"
-    return
-  fi
 
   # Проверяем, что слот принадлежит текущей эпохе (очищенной при смене эпохи)
   current_epoch=\$(cat "\$last_epoch_file" 2>/dev/null)
@@ -1764,50 +1845,90 @@ check_committee() {
     return
   fi
 
-  echo "\$last_slot_key" >> "\$last_slot_file"
-  debug_log "Added slot to file: \$last_slot_key"
-
   activity_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -a "Updating L2 slot \$slot observed activity" | tail -n 1)
-  attestation_info=""
-
   if [ -n "\$activity_line" ]; then
     debug_log "Activity line found: \$activity_line"
     activity_json=\$(echo "\$activity_line" | sed 's/.*observed activity //')
-    if [ -n "\$activity_json" ]; then
-      attestation_info="%0A"
-      for validator_lower in "\${committee_validators[@]}"; do
-        status=\$(echo "\$activity_json" | jq -r ".\"\$validator_lower\"")
+
+    # Обрабатываем каждого валидатора отдельно
+    for idx in "\${!committee_validators[@]}"; do
+      v_lower="\${committee_validators[\$idx]}"
+      v_link="\${found_validators[\$idx]}"
+
+      last_slot_file="$AGENT_SCRIPT_PATH/aztec_last_committee_slot_\${v_lower}"
+      # Пропускаем если уже обработали этот слот для данного валидатора
+      if [ -f "\$last_slot_file" ] && grep -q "\$last_slot_key" "\$last_slot_file"; then
+        debug_log "Already processed slot \$last_slot_key for \$v_lower"
+        continue
+      fi
+
+      epoch_state_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_slots_state"
+      epoch_msg_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_message_id"
+      if [ ! -f "\$epoch_state_file" ]; then
+        slots_arr=()
+        for i in {0..31}; do slots_arr+=("⬜️"); done
+        printf "%s " "\${slots_arr[@]}" > "\$epoch_state_file"
+      fi
+      read -ra slots_arr < "\$epoch_state_file"
+
+      slot_idx=\$((slot % 32))
+      slot_icon=""
+      if [ -n "\$activity_json" ]; then
+        status=\$(echo "\$activity_json" | jq -r ".\"\$v_lower\"")
         if [ "\$status" != "null" ] && [ -n "\$status" ]; then
           case "\$status" in
-            attestation-sent)   status_text="✅ attestation" ;;
-            attestation-missed) status_text="❌ attestation" ;;
-            block-mined)        status_text="⛏️ Block mined" ;;
-            block-proposed)     status_text="📤 Block proposed" ;;
-            block-missed)       status_text="⚠️ Block missed" ;;
-            *)                  status_text="\$status" ;;
+            block-proposed) slot_icon="🟪" ;;
+            block-mined)    slot_icon="🟦" ;;
+            block-missed)   slot_icon="🟨" ;;
+            attestation-missed) slot_icon="🟥" ;;
+            attestation-sent)   slot_icon="🟩" ;;
           esac
-          validator_link="[\$validator_lower](https://dashtec.xyz/validators/\$validator_lower)"
-          attestation_info+="\$validator_link → \$status_text%0A"
-          debug_log "Validator \$validator_lower status: \$status"
         fi
-      done
-    fi
+      fi
+
+      if [ -n "\$slot_icon" ]; then
+        slots_arr[\$slot_idx]="\$slot_icon"
+        printf "%s " "\${slots_arr[@]}" > "\$epoch_state_file"
+
+        board=\$(build_slots_board "\${slots_arr[@]}")
+        current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+        updated_message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
+        updated_message+="%0A\$(t "found_validators" "\$v_link")%0A"
+        updated_message+="%0A\$(t "current_slot" "\$slot")%0A"
+        updated_message+="%0ASlots:%0A\${board}%0A"
+        updated_message+="%0A\$(t "status_legend")%0A"
+        updated_message+="\$(t "status_empty")%0A"
+        updated_message+="\$(t "status_attestation_sent")%0A"
+        updated_message+="\$(t "status_attestation_missed")%0A"
+        updated_message+="\$(t "status_block_mined")%0A"
+        updated_message+="\$(t "status_block_missed")%0A"
+        updated_message+="\$(t "status_block_proposed")%0A"
+        updated_message+="%0A\$(t "server_info" "\$ip")%0A"
+        updated_message+="\$(t "time_info" "\$current_time")"
+
+        if [ -f "\$epoch_msg_file" ]; then
+          message_id=\$(cat "\$epoch_msg_file")
+          if [ -n "\$message_id" ]; then
+            debug_log "Editing committee message (id=\$message_id) for epoch \$epoch, slot \$slot, validator \$v_lower"
+            edit_telegram_message "\$message_id" "\$updated_message"
+          else
+            debug_log "Message id missing; sending a fallback message"
+            send_telegram_message "\$updated_message"
+          fi
+        else
+          debug_log "Message id file not found; sending a fallback message"
+          send_telegram_message "\$updated_message"
+        fi
+
+        echo "\$last_slot_key" >> "\$last_slot_file"
+        debug_log "Updated slot \$slot_idx for epoch \$epoch with icon \$slot_icon for \$v_lower"
+        log "Updated committee stats for epoch \$epoch, slot \$slot, validator \$v_lower"
+      else
+        debug_log "No mapped status for slot \$slot for \$v_lower"
+      fi
+    done
   else
     debug_log "No activity line found for slot \$slot"
-  fi
-
-  if [ -n "\$attestation_info" ] && [ "\$attestation_info" != "%0A" ]; then
-    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-    attestation_message="\$(t "attestation_status")%0A\$(t "epoch_info" "\$epoch"), \$(t "slot_info" "\$slot")%0A"
-    attestation_message+="\$attestation_info"
-    attestation_message+="%0A\$(t "server_info" "\$ip")%0A"
-    attestation_message+="\$(t "time_info" "\$current_time")"
-
-    debug_log "Sending attestation message: \$attestation_message"
-    send_telegram_message "\$attestation_message"
-    log "Attestation status notification sent for epoch \$epoch, slot \$slot"
-  else
-    debug_log "No attestation info to send"
   fi
 }
 

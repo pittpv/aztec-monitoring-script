@@ -28,5 +28,10 @@
     "pattern": "ERROR: world-state:database Call SYNC_BLOCK failed: Error: Can't sync block: block state does not match world state",
     "message": "Can't sync block: block state does not match world state",
     "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data"
+  },
+  {
+    "pattern": "WARN: node:blob-sink:client Failed to fetch blobs",
+    "message": "Failed to fetch blobs from BEACON. Sync wıll not complete!",
+    "solution": "1. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
   }
 ]
