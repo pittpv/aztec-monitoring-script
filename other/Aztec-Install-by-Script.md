@@ -95,7 +95,7 @@ Do you want to run multiple validators?
 *   **`ETHEREUM_RPC_URL`** — ваш RPC-адрес для Ethereum L1.
 *   **`CONSENSUS_BEACON_URL`** — ваш RPC-адрес для Beacon Chain.
 *   **`COINBASE`** — адрес eth кошелька. Введите адрес вашего валидатора.
-*   **`P2P_IP`** — этот параметр скрипт определит автоматически.
+*   **`P2P_IP`** — этот параметр скрипт определит автоматически. **Если вы используете VPN на сервере**, то после завершения установки ноды необходимо ввести реальный ip-адрес **вручную** в файле `.env` в папке `/root/aztec`
 
     ![Ввод RPC и других данных](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 

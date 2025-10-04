@@ -96,6 +96,7 @@ Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak 
 *   **`CONSENSUS_BEACON_URL`** — Beacon Chain için RPC URL'niz.
 *   **`COINBASE`** — Ethereum cüzdan adresiniz. Doğrulayıcınızın adresini girin.
 *   **`P2P_IP`** — Bu parametre betik tarafından otomatik olarak belirlenecektir.
+    **Sunucuda VPN kullanıyorsanız**, node kurulumunu tamamladıktan sonra gerçek IP adresini `/root/aztec` klasöründeki `.env` dosyasına **manuel olarak** girmelisiniz.
 
     ![RPC ve diğer verileri girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 

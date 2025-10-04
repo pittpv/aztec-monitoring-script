@@ -95,7 +95,7 @@ For the final node setup, the script will request data to generate the `docker-c
 *   **`ETHEREUM_RPC_URL`** — Your RPC URL for Ethereum L1.
 *   **`CONSENSUS_BEACON_URL`** — Your RPC URL for the Beacon Chain.
 *   **`COINBASE`** — The Ethereum wallet address. Enter the address of your validator.
-*   **`P2P_IP`** — This parameter will be determined automatically by the script.
+*   **`P2P_IP`** — This parameter will be determined automatically by the script. **If you are using a VPN on the server**, after completing the node installation, you must enter the real IP address **manually** in the `.env` file in the `/root/aztec` folder
 
     ![Entering RPC and other data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
