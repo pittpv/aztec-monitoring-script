@@ -80,7 +80,7 @@ Enter the private key and the validator's eth address separately.
 
 After this, the script will request your **Aztec L2 address**, which you can create on the official website: https://app.obsidion.xyz/.
 
-If for some reason you cannot create an Aztec L2 address, then insert any private key from an eth wallet, it has the same length as the Aztec L2 address.
+If for some reason you cannot create an Aztec L2 address, then insert any private key with 0x from an eth wallet, it has the same length as the Aztec L2 address.
 
 If you wish, you can later replace it with a real L2 address.
 

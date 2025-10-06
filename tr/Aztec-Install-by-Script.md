@@ -80,7 +80,7 @@ Eğer tüm adreslerde Sepolia ETH varsa, **`n`** seçebilirsiniz.
 
 Bundan sonra, betik resmi web sitesinde oluşturabileceğiniz **Aztec L2 adresinizi** isteyecektir: https://app.obsidion.xyz/.
 
-Herhangi bir nedenle Aztec L2 adresi oluşturamıyorsanız, eth cüzdanından herhangi bir özel anahtarı girin; uzunluğu Aztec L2 adresi ile aynıdır.
+Herhangi bir nedenden dolayı bir Aztec L2 adresi oluşturamıyorsanız, bir eth cüzdanından 0x ile herhangi bir özel anahtar ekleyin, Aztec L2 adresiyle aynı uzunluğa sahip olur.
 
 İsterseniz bunu daha sonra gerçek bir L2 adresiyle değiştirebilirsiniz.
 
