@@ -181,7 +181,7 @@ init_languages() {
   TRANSLATIONS["en,checking_aztec_version"]="Checking Aztec version..."
   TRANSLATIONS["en,aztec_version_failed"]="Failed to retrieve aztec version."
   TRANSLATIONS["en,aztec_node_version"]="Aztec Node version:"
-  TRANSLATIONS["en,critical_error_found"]="Critical error detected"
+  TRANSLATIONS["en,critical_error_found"]="⛔️ Critical error detected"
   TRANSLATIONS["en,error_prefix"]="ERROR:"
   TRANSLATIONS["en,solution_prefix"]="Solution:"
   TRANSLATIONS["en,notifications_prompt"]="Do you want to receive additional notifications?"
@@ -426,7 +426,7 @@ init_languages() {
   TRANSLATIONS["ru,checking_aztec_version"]="Проверка версии Aztec..."
   TRANSLATIONS["ru,aztec_version_failed"]="Не удалось получить версию aztec."
   TRANSLATIONS["ru,aztec_node_version"]="Версия ноды Aztec:"
-  TRANSLATIONS["ru,critical_error_found"]="Найдена критическая ошибка"
+  TRANSLATIONS["ru,critical_error_found"]="⛔️ Найдена критическая ошибка"
   TRANSLATIONS["ru,error_prefix"]="ОШИБКА:"
   TRANSLATIONS["ru,solution_prefix"]="Решение:"
   TRANSLATIONS["ru,notifications_prompt"]="Хотите получать дополнительные уведомления?"
@@ -671,7 +671,7 @@ init_languages() {
   TRANSLATIONS["tr,checking_aztec_version"]="Aztec sürümü kontrol ediliyor..."
   TRANSLATIONS["tr,aztec_version_failed"]="Aztec sürümü alınamadı."
   TRANSLATIONS["tr,aztec_node_version"]="Aztec Node sürümü:"
-  TRANSLATIONS["tr,critical_error_found"]="Kritik hata tespit edildi"
+  TRANSLATIONS["tr,critical_error_found"]="⛔️ Kritik hata tespit edildi"
   TRANSLATIONS["tr,error_prefix"]="HATA:"
   TRANSLATIONS["tr,solution_prefix"]="Çözüm:"
   TRANSLATIONS["tr,notifications_prompt"]="Ek bildirim almak istiyor musunuz?"
@@ -1652,7 +1652,7 @@ check_critical_errors() {
     if echo "\$clean_logs" | grep -q "\$pattern"; then
       log "Critical error detected: \$pattern"
       current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-      full_message="\$(t "critical_error_found")%0A\$(t "server_info" "\$ip")%0A\$(t "error_prefix") \$message%0A\$(t "solution_prefix")%0A\$solution%0A\$(t "time_info" "\$current_time")"
+      full_message="\$(t "critical_error_found")%0A\$(t "server_info" "\$ip")%0A\$(t "error_prefix")%0A\$message%0A\$(t "solution_prefix")%0A\$solution%0A\$(t "time_info" "\$current_time")"
       send_telegram_message "\$full_message"
       exit 1
     fi
