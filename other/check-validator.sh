@@ -215,7 +215,7 @@ t() {
 init_languages "$1"
 
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
-ROLLUP_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
+ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
 GSE_ADDRESS="0x67788e5083646ccedeeb07e7bc35ab0d511fc8b9"
 QUEUE_URL="https://dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
