@@ -33,5 +33,10 @@
     "pattern": "WARN: node:blob-sink:client Failed to fetch blobs",
     "message": "Failed to fetch blobs from BEACON. Sync wıll not complete!",
     "solution": "1. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
+  },
+  {
+    "pattern": "ERROR: cli Error in command execution",
+    "message": "Cli Error in command execution - Your node cannot start!",
+    "solution": "Please check & copy error log. Send it to Aztec help channel in Discord"
   }
 ]

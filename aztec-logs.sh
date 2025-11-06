@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.1.0"
+SCRIPT_VERSION="2.1.1"
 
 function show_logo() {
     echo -e " "
@@ -779,7 +779,7 @@ init_languages() {
 }
 
 # === Configuration ===
-CONTRACT_ADDRESS="0x29fa27e173f058d0f5f618f5abad2757747f673f"
+CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
 FUNCTION_SIG="getPendingBlockNumber()"
 
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")

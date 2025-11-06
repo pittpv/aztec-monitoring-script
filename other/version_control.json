@@ -163,5 +163,10 @@
         "VERSION": "2.1.0",
         "UPDATE_DATE": "04.10.2025",
         "CHANGES": ["Please update script, then delete old monitoring agent (use option 3) and Install new agent (use option 2)", "New slot statistics notification system: stats are updated directly in the message as live slots", "Update in the Aztec node installation script: resolved issue with P2P_IP on a server with a virtual machine", "Update of the error file: Added an error case when the node does not receive BLOB data from BEACON RPC"]
+    },
+    {
+      "VERSION": "2.1.1",
+      "UPDATE_DATE": "06.11.2025",
+      "CHANGES": ["New rollup contract"]
     }
 ]
