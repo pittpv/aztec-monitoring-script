@@ -593,8 +593,13 @@ echo -e "\n${GREEN}$(t "creating_folder")${NC}"
 mkdir -p "$HOME/aztec"
 cd "$HOME/aztec"
 
+# Ask for Ethereum address for coinbase (will receive fees)
+echo -e "\n${YELLOW}$(t "enter_coinbase")${NC}"
+read -p "Ethereum address: " COINBASE_ADDRESS
+COINBASE_ADDRESS=$(echo "$COINBASE_ADDRESS" | tr -d ' ')
+
 # Ask for Aztec L2 Address for feeRecipient
-echo -e "\n${YELLOW}Enter Aztec L2 Address to use as feeRecipient for all validators:${NC}"
+echo -e "\n${YELLOW}$(t "enter_fee_recipient")${NC}"
 read -p "Aztec L2 Address: " FEE_RECIPIENT_ADDRESS
 FEE_RECIPIENT_ADDRESS=$(echo "$FEE_RECIPIENT_ADDRESS" | tr -d ' ')
 
@@ -616,7 +621,7 @@ aztec validator-keys new \
   --mnemonic "$MNEMONIC" \
   --count "$WALLET_COUNT" \
   --file keystore.json \
-  --coinbase "$FEE_RECIPIENT_ADDRESS" \
+  --coinbase "$COINBASE_ADDRESS" \
   --remote-signer http://127.0.0.1:10500 \
   --data-dir "$HOME/aztec/config"
 
@@ -633,6 +638,13 @@ echo
 
 if [ -f "$HOME/aztec/config/keystore.json" ]; then
     echo -e "\n${GREEN}$(t "keystore_generated")${NC}"
+
+    # Extract the first validator's Ethereum address from keystore for COINBASE
+    FIRST_VALIDATOR_ADDRESS=$(jq -r '.validators[0].attester' "$HOME/aztec/config/keystore.json" 2>/dev/null)
+    if [ -n "$FIRST_VALIDATOR_ADDRESS" ] && [ "$FIRST_VALIDATOR_ADDRESS" != "null" ]; then
+        COINBASE_ADDRESS="$FIRST_VALIDATOR_ADDRESS"
+        echo -e "${GREEN}Using first validator's address as coinbase: $COINBASE_ADDRESS${NC}"
+    fi
 else
     echo -e "\n${RED}$(t "keystore_timeout")${NC}"
     exit 1
@@ -644,8 +656,7 @@ mkdir -p "$HOME/aztec/keys"
 
 # Extract private keys from keystore.json and create YML files
 for i in $(seq 0 $((WALLET_COUNT - 1))); do
-    # Extract private key for each validator (this is a simplified approach)
-    # In a real scenario, you might need to parse the keystore.json properly
+    # Extract private key for each validator from publisher field
     PRIVATE_KEY=$(jq -r ".validators[${i}].publisher" "$HOME/aztec/config/keystore.json" 2>/dev/null || echo "")
 
     if [ -n "$PRIVATE_KEY" ] && [ "$PRIVATE_KEY" != "null" ]; then
@@ -683,7 +694,7 @@ read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
 cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
 CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
-COINBASE=${FEE_RECIPIENT_ADDRESS}
+COINBASE=${COINBASE_ADDRESS}
 P2P_IP=${DEFAULT_IP}
 MNEMONIC=${MNEMONIC}
 WALLET_COUNT=${WALLET_COUNT}
