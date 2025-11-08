@@ -99,12 +99,6 @@ init_languages() {
   TRANSLATIONS["en,multiple_validators_prompt"]="Do you want to run multiple validators? (y/n) "
   TRANSLATIONS["en,ufw_not_installed"]="⚠️ ufw is not installed"
   TRANSLATIONS["en,ufw_not_active"]="⚠️ ufw is not active"
-  TRANSLATIONS["en,enter_mnemonic"]="Enter mnemonic phrase: "
-  TRANSLATIONS["en,enter_wallet_count"]="Enter number of wallets to generate: "
-  TRANSLATIONS["en,generating_keystore"]="🔐 Generating keystore.json..."
-  TRANSLATIONS["en,waiting_keystore"]="⏳ Waiting for keystore.json generation..."
-  TRANSLATIONS["en,keystore_generated"]="✅ keystore.json successfully generated"
-  TRANSLATIONS["en,keystore_timeout"]="❌ keystore.json generation timeout"
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -177,12 +171,6 @@ init_languages() {
   TRANSLATIONS["ru,multiple_validators_prompt"]="Вы хотите запустить несколько валидаторов? (y/n)"
   TRANSLATIONS["ru,ufw_not_installed"]="⚠️ ufw не установлен"
   TRANSLATIONS["ru,ufw_not_active"]="⚠️ ufw не активен"
-  TRANSLATIONS["ru,enter_mnemonic"]="Введите мнемоническую фразу: "
-  TRANSLATIONS["ru,enter_wallet_count"]="Введите количество кошельков для генерации: "
-  TRANSLATIONS["ru,generating_keystore"]="🔐 Генерация keystore.json..."
-  TRANSLATIONS["ru,waiting_keystore"]="⏳ Ожидание генерации keystore.json..."
-  TRANSLATIONS["ru,keystore_generated"]="✅ keystore.json успешно сгенерирован"
-  TRANSLATIONS["ru,keystore_timeout"]="❌ Таймаут генерации keystore.json"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -255,12 +243,6 @@ init_languages() {
   TRANSLATIONS["tr,multiple_validators_prompt"]="Birden fazla validator çalıştırmak istiyor musunuz? (y/n) "
   TRANSLATIONS["tr,ufw_not_installed"]="⚠️ ufw yüklü değil"
   TRANSLATIONS["tr,ufw_not_active"]="⚠️ ufw aktif değil"
-  TRANSLATIONS["tr,enter_mnemonic"]="Mnemonic ifadeyi girin: "
-  TRANSLATIONS["tr,enter_wallet_count"]="Oluşturulacak cüzdan sayısını girin: "
-  TRANSLATIONS["tr,generating_keystore"]="🔐 keystore.json oluşturuluyor..."
-  TRANSLATIONS["tr,waiting_keystore"]="⏳ keystore.json oluşturulması bekleniyor..."
-  TRANSLATIONS["tr,keystore_generated"]="✅ keystore.json başarıyla oluşturuldu"
-  TRANSLATIONS["tr,keystore_timeout"]="❌ keystore.json oluşturma zaman aşımı"
 }
 
 # Colors
@@ -593,116 +575,159 @@ echo -e "\n${GREEN}$(t "creating_folder")${NC}"
 mkdir -p "$HOME/aztec"
 cd "$HOME/aztec"
 
-# Ask for Ethereum address for coinbase (will receive fees)
-echo -e "\n${YELLOW}$(t "enter_coinbase")${NC}"
-read -p "Ethereum address: " COINBASE_ADDRESS
-COINBASE_ADDRESS=$(echo "$COINBASE_ADDRESS" | tr -d ' ')
+# Ask if user wants to run single or multiple validators
+echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
+read -p "$(t "multiple_validators_prompt")" -n 1 -r
+echo
+
+# Initialize arrays for keys and addresses
+VALIDATOR_PRIVATE_KEYS_ARRAY=()
+VALIDATOR_ADDRESSES_ARRAY=()
+USE_FIRST_AS_PUBLISHER=false
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
+
+    # Get multiple validator key-address pairs
+    echo -e "${YELLOW}Enter validator private keys and addresses (up to 10, format: private_key,address):${NC}"
+    for i in {1..10}; do
+        read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_PAIR
+        if [ -z "$KEY_ADDRESS_PAIR" ]; then
+            break
+        fi
+
+        # Split the input into private key and address
+        IFS=',' read -r PRIVATE_KEY ADDRESS <<< "$KEY_ADDRESS_PAIR"
+
+        # Remove any spaces and ensure private key starts with 0x
+        PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+        if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+            PRIVATE_KEY="0x$PRIVATE_KEY"
+        fi
+
+        # Remove any spaces from address
+        ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+        VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+        VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+
+        echo -e "${GREEN}Added validator $i${NC}"
+    done
+
+    # Ask if user wants to use first address as publisher for all validators
+    echo ""
+    read -p "Use first address as publisher for all validators? (y/n) " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        USE_FIRST_AS_PUBLISHER=true
+        echo -e "${GREEN}Using first address as publisher for all validators${NC}"
+    else
+        echo -e "${GREEN}Each validator will use their own address as publisher${NC}"
+    fi
+
+else
+    echo -e "\n${GREEN}$(t "single_validator_mode")${NC}"
+
+    # Get single validator key-address pair
+    read -p "$(t "enter_validator_key") " PRIVATE_KEY
+    read -p "Enter validator address: " ADDRESS
+
+    # Remove any spaces and ensure private key starts with 0x
+    PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+    if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+        PRIVATE_KEY="0x$PRIVATE_KEY"
+    fi
+
+    # Remove any spaces from address
+    ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+    VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+    VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+    USE_FIRST_AS_PUBLISHER=true  # For single validator, always use own address
+fi
 
 # Ask for Aztec L2 Address for feeRecipient
-echo -e "\n${YELLOW}$(t "enter_fee_recipient")${NC}"
+echo -e "\n${YELLOW}Enter Aztec L2 Address to use as feeRecipient for all validators:${NC}"
 read -p "Aztec L2 Address: " FEE_RECIPIENT_ADDRESS
 FEE_RECIPIENT_ADDRESS=$(echo "$FEE_RECIPIENT_ADDRESS" | tr -d ' ')
 
-# Ask for mnemonic and wallet count
-echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
-read -p "$(t "enter_mnemonic") " MNEMONIC
-read -p "$(t "enter_wallet_count") " WALLET_COUNT
-
-# Create config directory
-echo -e "\n${GREEN}Creating config directory...${NC}"
-mkdir -p "$HOME/aztec/config"
-
-# Generate keystore.json using aztec command
-echo -e "\n${GREEN}$(t "generating_keystore")${NC}"
-cd "$HOME/aztec/config"
-
-aztec validator-keys new \
-  --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
-  --mnemonic "$MNEMONIC" \
-  --count "$WALLET_COUNT" \
-  --file keystore.json \
-  --coinbase "$COINBASE_ADDRESS" \
-  --remote-signer http://127.0.0.1:10500 \
-  --data-dir "$HOME/aztec/config"
-
-# Wait for keystore.json to be generated
-echo -e "\n${YELLOW}$(t "waiting_keystore")${NC}"
-TIMEOUT=60
-COUNTER=0
-while [ ! -f "$HOME/aztec/config/keystore.json" ] && [ $COUNTER -lt $TIMEOUT ]; do
-    sleep 1
-    COUNTER=$((COUNTER + 1))
-    echo -n "."
-done
-echo
-
-if [ -f "$HOME/aztec/config/keystore.json" ]; then
-    echo -e "\n${GREEN}$(t "keystore_generated")${NC}"
-
-    # Extract the first validator's Ethereum address from keystore for COINBASE
-    FIRST_VALIDATOR_ADDRESS=$(jq -r '.validators[0].attester' "$HOME/aztec/config/keystore.json" 2>/dev/null)
-    if [ -n "$FIRST_VALIDATOR_ADDRESS" ] && [ "$FIRST_VALIDATOR_ADDRESS" != "null" ]; then
-        COINBASE_ADDRESS="$FIRST_VALIDATOR_ADDRESS"
-        echo -e "${GREEN}Using first validator's address as coinbase: $COINBASE_ADDRESS${NC}"
-    fi
-else
-    echo -e "\n${RED}$(t "keystore_timeout")${NC}"
-    exit 1
-fi
-
-# Extract private keys from keystore and create YML files
-echo -e "\n${GREEN}Creating key files from keystore...${NC}"
+# Create keys directory and YML files
+echo -e "\n${GREEN}Creating key files...${NC}"
 mkdir -p "$HOME/aztec/keys"
 
-# Extract private keys from keystore.json and create YML files
-for i in $(seq 0 $((WALLET_COUNT - 1))); do
-    # Extract private key for each validator from publisher field
-    PRIVATE_KEY=$(jq -r ".validators[${i}].publisher" "$HOME/aztec/config/keystore.json" 2>/dev/null || echo "")
-
-    if [ -n "$PRIVATE_KEY" ] && [ "$PRIVATE_KEY" != "null" ]; then
-        KEY_FILE="$HOME/aztec/keys/validator_$((i+1)).yml"
-        cat > "$KEY_FILE" <<EOF
+for i in "${!VALIDATOR_PRIVATE_KEYS_ARRAY[@]}"; do
+    KEY_FILE="$HOME/aztec/keys/validator_$((i+1)).yml"
+    cat > "$KEY_FILE" <<EOF
 type: "file-raw"
 keyType: "SECP256K1"
-privateKey: "${PRIVATE_KEY}"
+privateKey: "${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
 EOF
-        echo -e "${GREEN}Created key file: $KEY_FILE${NC}"
-    fi
+    echo -e "${GREEN}Created key file: $KEY_FILE${NC}"
 done
 
-# If we couldn't extract from keystore, create default key files based on wallet count
-if [ ! -f "$HOME/aztec/keys/validator_1.yml" ]; then
-    echo -e "${YELLOW}Creating default key files based on wallet count...${NC}"
-    for i in $(seq 1 $WALLET_COUNT); do
-        KEY_FILE="$HOME/aztec/keys/validator_${i}.yml"
-        cat > "$KEY_FILE" <<EOF
-type: "file-raw"
-keyType: "SECP256K1"
-privateKey: "0x000000000000000000000000000000000000000000000000000000000000000${i}"
+# Create config directory and keystore.json
+echo -e "\n${GREEN}Creating keystore configuration...${NC}"
+mkdir -p "$HOME/aztec/config"
+
+# Prepare validators array for keystore.json
+VALIDATORS_JSON_ARRAY=()
+for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+    address="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
+
+    if [ "$USE_FIRST_AS_PUBLISHER" = true ] && [ $i -gt 0 ]; then
+        # Use first private key as publisher for all other validators
+        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[0]}"
+    else
+        # Use own private key as publisher
+        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
+    fi
+
+    VALIDATOR_JSON=$(cat <<EOF
+    {
+      "attester": "$address",
+      "publisher": "$publisher",
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
+    }
 EOF
-        echo -e "${GREEN}Created default key file: $KEY_FILE${NC}"
-    done
-fi
+    )
+    VALIDATORS_JSON_ARRAY+=("$VALIDATOR_JSON")
+done
+
+# Join validators array with commas
+VALIDATORS_JSON_STRING=$(IFS=,; echo "${VALIDATORS_JSON_ARRAY[*]}")
+
+# Create keystore.json
+cat > "$HOME/aztec/config/keystore.json" <<EOF
+{
+  "schemaVersion": 1,
+  "remoteSigner": "http://127.0.0.1:10500",
+  "slasher": "${VALIDATOR_ADDRESSES_ARRAY[0]}",
+  "validators": [
+    $VALIDATORS_JSON_STRING
+  ]
+}
+EOF
+
+echo -e "${GREEN}Created keystore.json configuration${NC}"
 
 DEFAULT_IP=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me)
 
 echo -e "\n${GREEN}$(t "creating_env")${NC}"
 read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
 read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
+read -p "COINBASE: " COINBASE
 
-# Create .env file with new variables
+# Create .env file without VALIDATOR_PRIVATE_KEYS
 cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
 CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
-COINBASE=${COINBASE_ADDRESS}
+COINBASE=${COINBASE}
 P2P_IP=${DEFAULT_IP}
-MNEMONIC=${MNEMONIC}
-WALLET_COUNT=${WALLET_COUNT}
 EOF
 
 echo -e "\n${GREEN}$(t "creating_compose")${NC}"
 
-# Создаем docker-compose.yml
+# Создаем docker-compose.yml без VALIDATOR_PRIVATE_KEYS и с KEY_STORE_DIRECTORY
 cat > docker-compose.yml <<EOF
 services:
   aztec-node:

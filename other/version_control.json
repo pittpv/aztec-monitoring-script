@@ -168,5 +168,10 @@
       "VERSION": "2.1.1",
       "UPDATE_DATE": "06.11.2025",
       "CHANGES": ["New rollup contract"]
+    },
+    {
+      "VERSION": "2.2.0",
+      "UPDATE_DATE": "08.11.2025",
+      "CHANGES": ["Generate BLS keys from mnemonic for you old sequencer - support multi addresses from one mnemonic", "Staking approve function", "Stake function"]
     }
 ]
