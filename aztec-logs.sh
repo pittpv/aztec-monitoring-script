@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.2.0"
+SCRIPT_VERSION="2.2.1"
 
 function show_logo() {
     echo -e " "
@@ -3012,12 +3012,14 @@ stake_validators() {
     local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
 
     if [ ! -f "$KEYSTORE_FILE" ]; then
-        echo -e "${RED}❌ $(t "file_not_found" "keystore.json" "$KEYSTORE_FILE")${NC}"
+        printf "${RED}❌ $(t "file_not_found")${NC}\n" \
+         "keystore.json" "$KEYSTORE_FILE"
         return 1
     fi
 
     if [ ! -f "$BLS_PK_FILE" ]; then
-        echo -e "${RED}❌ $(t "file_not_found" "bls-filtered-pk.json" "$BLS_PK_FILE")${NC}"
+        printf "${RED}❌ $(t "file_not_found")${NC}\n" \
+         "bls-filtered-pk.json" "$BLS_PK_FILE"
         return 1
     fi
 
@@ -3064,17 +3066,20 @@ stake_validators() {
 
         # Проверяем что все данные получены
         if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ]; then
-            echo -e "${RED}❌ $(t "staking_failed_private_key" $((i+1)))${NC}"
+            printf "${RED}❌ $(t "staking_failed_private_key")${NC}\n" \
+            "$((i+1))"
             continue
         fi
 
         if [ -z "$ETH_ATTESTER_ADDRESS" ] || [ "$ETH_ATTESTER_ADDRESS" = "null" ]; then
-            echo -e "${RED}❌ $(t "staking_failed_eth_address" $((i+1)))${NC}"
+            printf "${RED}❌ $(t "staking_failed_eth_address")${NC}\n" \
+            "$((i+1))"
             continue
         fi
 
         if [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ]; then
-            echo -e "${RED}❌ $(t "staking_failed_bls_key" $((i+1)))${NC}"
+            printf "${RED}❌ $(t "staking_failed_bls_key")${NC}\n" \
+            "$((i+1))"
             continue
         fi
 
@@ -3087,7 +3092,7 @@ stake_validators() {
         local success=false
         for rpc_url in "${rpc_providers[@]}"; do
             printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" \
-			 "$rpc_url"
+			      "$rpc_url"
 			 echo ""
 
             # Формируем команду
@@ -3127,7 +3132,7 @@ stake_validators() {
                     # Выполняем команду
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success")${NC}\n" \
-						 "$((i+1))" "$rpc_url"
+						            "$((i+1))" "$rpc_url"
 						 echo ""
 
                         success=true
@@ -3140,7 +3145,8 @@ stake_validators() {
                     fi
                     ;;
                 [sS])
-                    echo -e "${YELLOW}⏭️ $(t "staking_skipped_validator" $((i+1)))${NC}"
+                    printf "${YELLOW}⏭️ $(t "staking_skipped_validator")${NC}\n" \
+                     "$((i+1))"
                     success=true  # Помечаем как "успех" чтобы перейти к следующему
                     break
                     ;;
