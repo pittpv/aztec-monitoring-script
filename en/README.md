@@ -35,21 +35,32 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 04-10-2025
-⚠️ Please Delete old monitoring agent (use option 3) and Install new agent (use option 2)
-
-- New slot statistics notification system
-  - Now statistics are updated directly in the message as live slots. Only one message instead of 25 messages
-  - Support for multiple validators. Each validator has its own message with statuses
-  - Fallback support. If an error occurs while updating the first message, the script will send a new message.
-- Update in the installation script, new method of determining the IP address.
-  - When installing a node on a server with a virtual machine, the IP address for P2P_IP was detected as local, which prevented the node from working correctly. If you have a VPN configured, specify the real IP address for P2P_IP manually.
-- Update of the error file for detection by the critical error monitoring module
-  - Added an error case when the node does not receive BLOB data from BEACON RPC
-
+## 📌 Latest Updates 08-11-2025
+* Full support for the new contract
+  * monitoring
+  * node installation
+  * validator check and search
+  * validator queue monitoring
+* Generation of BLS keys from a mnemonic phrase for your old sequencer (requires node installation via this script)
+  * support for multiple addresses from one mnemonic
+  * automatic filtering and removal of unnecessary keys
+* Stake approve function (requires node installation via this script)
+* Staking function — adding a validator (requires node installation via this script)
 
 <details>
 <summary>📅 Version History</summary>
+
+### 04-10-2025
+⚠️ Please Delete old monitoring agent (use option 3) and Install new agent (use option 2)
+
+- New slot statistics notification system
+    - Now statistics are updated directly in the message as live slots. Only one message instead of 25 messages
+    - Support for multiple validators. Each validator has its own message with statuses
+    - Fallback support. If an error occurs while updating the first message, the script will send a new message.
+- Update in the installation script, new method of determining the IP address.
+    - When installing a node on a server with a virtual machine, the IP address for P2P_IP was detected as local, which prevented the node from working correctly. If you have a VPN configured, specify the real IP address for P2P_IP manually.
+- Update of the error file for detection by the critical error monitoring module
+    - Added an error case when the node does not receive BLOB data from BEACON RPC
 
 ### 20-09-2025
 - The function for searching and setting up validator monitoring in the queue (in option 9) works.
@@ -251,6 +262,9 @@ Main menu:
 15. Update Aztec node
 16. Downgrade Aztec node
 17. Check Aztec version
+18. Generate BLS keys from mnemonic
+19. Approve
+20. Stake
 
 0. 🚪 Exit
 

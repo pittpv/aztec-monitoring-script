@@ -35,21 +35,32 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 04-10-2025
-⚠️ Lütfen eski izleme aracını silin (seçenek 3'ü kullanın) ve yeni aracı yükleyin (seçenek 2'yi kullanın)
-
-- Yeni slot istatistik bildirim sistemi
-  - Artık istatistikler doğrudan mesaj içinde canlı slotlar olarak güncelleniyor. 25 mesaj yerine yalnızca bir mesaj
-  - Birden fazla doğrulayıcı desteği. Her doğrulayıcı için kendi durum mesajı
-  - Geri dönüş (fallback) desteği. İlk mesaj güncellenirken bir hata oluşursa, betik yeni bir mesaj gönderecek.
-- Kurulum betiğinde güncelleme, IP adresini belirlemenin yeni yöntemi.
-  - Sanal makineye sahip bir sunucuda düğüm kurulurken P2P_IP için IP adresi yerel olarak algılanıyordu, bu da düğümün düzgün çalışmasını engelliyordu. Eğer VPN yapılandırıldıysa, P2P_IP için gerçek IP adresini manuel olarak belirtin.
-- Kritik hata izleme modülü tarafından algılanacak hata dosyasında güncelleme
-  - Düğüm BEACON RPC’den BLOB verilerini almadığında eklenen hata durumu
-
+## 📌 Son Güncellemeler 08-11-2025
+* Yeni sözleşme için tam destek
+  * izleme
+  * node kurulumu
+  * doğrulayıcı kontrolü ve arama
+  * doğrulayıcı kuyruğunun izlenmesi
+* Eski sıralaıcınız için mnemonic ifadeden BLS anahtarları oluşturma (bu betik aracılığıyla node kurulumu gereklidir)
+  * tek bir mnemonic’ten birden fazla adres desteği
+  * gereksiz anahtarların otomatik filtrelenmesi ve silinmesi
+* Stake onaylama fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
+* Stake etme — doğrulayıcı ekleme fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 04-10-2025
+⚠️ Lütfen eski izleme aracını silin (seçenek 3'ü kullanın) ve yeni aracı yükleyin (seçenek 2'yi kullanın)
+
+- Yeni slot istatistik bildirim sistemi
+    - Artık istatistikler doğrudan mesaj içinde canlı slotlar olarak güncelleniyor. 25 mesaj yerine yalnızca bir mesaj
+    - Birden fazla doğrulayıcı desteği. Her doğrulayıcı için kendi durum mesajı
+    - Geri dönüş (fallback) desteği. İlk mesaj güncellenirken bir hata oluşursa, betik yeni bir mesaj gönderecek.
+- Kurulum betiğinde güncelleme, IP adresini belirlemenin yeni yöntemi.
+    - Sanal makineye sahip bir sunucuda düğüm kurulurken P2P_IP için IP adresi yerel olarak algılanıyordu, bu da düğümün düzgün çalışmasını engelliyordu. Eğer VPN yapılandırıldıysa, P2P_IP için gerçek IP adresini manuel olarak belirtin.
+- Kritik hata izleme modülü tarafından algılanacak hata dosyasında güncelleme
+    - Düğüm BEACON RPC’den BLOB verilerini almadığında eklenen hata durumu
 
 ### 20-09-2025
 - Kuyruktaki doğrulayıcı izlemeyi arama ve kurma işlevi (9. seçenek) çalışıyor.
@@ -250,6 +261,9 @@ Ana menü:
 15. Aztec düğümünü güncelle
 16. Aztec düğümünü eski sürüme düşür
 17. Aztek sürümünü kontrol edin
+18. Anımsatıcı ifadeden BLS anahtarları oluştur
+19. Approve
+20. Stake
 
 0. 🚪 Çıkış
 
