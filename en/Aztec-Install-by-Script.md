@@ -78,7 +78,7 @@ Enter the private key and the validator's eth address separately.
 
 ### Aztec L2 address for feeRecipient
 
-After this, the script will request your **Aztec L2 address**, which you can create on the official website: https://app.obsidion.xyz/.
+After this, the script will request your **Aztec L2 address**, which you can create on the website: https://app.obsidion.xyz/ or extension https://azguardwallet.io/.
 
 If for some reason you cannot create an Aztec L2 address, then insert any private key with 0x from an eth wallet, it has the same length as the Aztec L2 address.
 
