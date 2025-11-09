@@ -140,6 +140,20 @@ init_languages() {
   TRANSLATIONS["en,staking_failed_single"]="Failed to stake validator with new operator method"
   TRANSLATIONS["en,staking_all_failed_single"]="All RPC providers failed for new operator staking"
   TRANSLATIONS["en,staking_skipped"]="Staking skipped"
+  TRANSLATIONS["en,bls_no_private_keys"]="No private keys provided"
+  TRANSLATIONS["en,bls_found_private_keys"]="Found private keys:"
+  TRANSLATIONS["en,bls_keys_saved_success"]="BLS keys successfully generated and saved"
+  TRANSLATIONS["en,bls_next_steps"]="Next steps:"
+  TRANSLATIONS["en,bls_send_eth_step"]="Send 0.2-0.5 Sepolia ETH to the address above"
+  TRANSLATIONS["en,bls_run_approve_step"]="Run option 19 (Approve) to approve stake spending"
+  TRANSLATIONS["en,bls_run_stake_step"]="Run option 20 (Stake) to complete validator staking"
+  TRANSLATIONS["en,staking_missing_new_operator_info"]="Missing new operator information in BLS file"
+  TRANSLATIONS["en,staking_found_validators_new_operator"]="Found validators for new operator method:"
+  TRANSLATIONS["en,staking_processing_new_operator"]="Processing validator %s/%s (new operator method)"
+  TRANSLATIONS["en,staking_success_new_operator"]="Successfully staked validator %s with new operator method using %s"
+  TRANSLATIONS["en,staking_failed_new_operator"]="Failed to stake validator %s with new operator method using %s"
+  TRANSLATIONS["en,staking_all_failed_new_operator"]="All RPC providers failed for validator %s with new operator method"
+  TRANSLATIONS["en,staking_completed_new_operator"]="New operator staking completed!"
   TRANSLATIONS["en,command_to_execute"]="Command to execute"
   TRANSLATIONS["en,trying_next_rpc"]="Trying next RPC provider..."
   TRANSLATIONS["en,continuing_next_validator"]="Continuing with next validator..."
@@ -465,6 +479,20 @@ init_languages() {
   TRANSLATIONS["ru,staking_failed_single"]="Не удалось выполнить стейкинг валидатора методом нового оператора"
   TRANSLATIONS["ru,staking_all_failed_single"]="Все RPC провайдеры не сработали для стейкинга новым оператором"
   TRANSLATIONS["ru,staking_skipped"]="Стейкинг пропущен"
+  TRANSLATIONS["ru,bls_no_private_keys"]="Приватные ключи не предоставлены"
+  TRANSLATIONS["ru,bls_found_private_keys"]="Найдено приватных ключей:"
+  TRANSLATIONS["ru,bls_keys_saved_success"]="BLS ключи успешно сгенерированы и сохранены"
+  TRANSLATIONS["ru,bls_next_steps"]="Следующие шаги:"
+  TRANSLATIONS["ru,bls_send_eth_step"]="Отправьте 0.2-0.5 Sepolia ETH на указанный выше адрес"
+  TRANSLATIONS["ru,bls_run_approve_step"]="Запустите опцию 19 (Approve) для подтверждения расходов стейкинга"
+  TRANSLATIONS["ru,bls_run_stake_step"]="Запустите опцию 20 (Stake) для завершения стейкинга валидатора"
+  TRANSLATIONS["ru,staking_missing_new_operator_info"]="Отсутствует информация о новом операторе в BLS файле"
+  TRANSLATIONS["ru,staking_found_validators_new_operator"]="Найдено валидаторов для метода нового оператора:"
+  TRANSLATIONS["ru,staking_processing_new_operator"]="Обработка валидатора %s/%s (метод нового оператора)"
+  TRANSLATIONS["ru,staking_success_new_operator"]="Успешный стейкинг валидатора %s методом нового оператора с использованием %s"
+  TRANSLATIONS["ru,staking_failed_new_operator"]="Не удалось выполнить стейкинг валидатора %s методом нового оператора с использованием %s"
+  TRANSLATIONS["ru,staking_all_failed_new_operator"]="Все RPC провайдеры не сработали для валидатора %s с методом нового оператора"
+  TRANSLATIONS["ru,staking_completed_new_operator"]="Стейкинг нового оператора завершен!"
   TRANSLATIONS["ru,command_to_execute"]="Команда для выполнения"
   TRANSLATIONS["ru,trying_next_rpc"]="Пробуем следующий RPC провайдер..."
   TRANSLATIONS["ru,continuing_next_validator"]="Переходим к следующему валидатору..."
@@ -790,6 +818,20 @@ init_languages() {
   TRANSLATIONS["tr,staking_failed_single"]="Yeni operatör yöntemiyle validatör stake edilemedi"
   TRANSLATIONS["tr,staking_all_failed_single"]="Yeni operatör staking için tüm RPC sağlayıcıları başarısız oldu"
   TRANSLATIONS["tr,staking_skipped"]="Staking atlandı"
+  TRANSLATIONS["tr,bls_no_private_keys"]="Özel anahtar sağlanmadı"
+  TRANSLATIONS["tr,bls_found_private_keys"]="Bulunan özel anahtarlar:"
+  TRANSLATIONS["tr,bls_keys_saved_success"]="BLS anahtarları başarıyla oluşturuldu ve kaydedildi"
+  TRANSLATIONS["tr,bls_next_steps"]="Sonraki adımlar:"
+  TRANSLATIONS["tr,bls_send_eth_step"]="Yukarıdaki adrese 0.2-0.5 Sepolia ETH gönderin"
+  TRANSLATIONS["tr,bls_run_approve_step"]="Stake harcamasını onaylamak için seçenek 19'u (Approve) çalıştırın"
+  TRANSLATIONS["tr,bls_run_stake_step"]="Validator staking'i tamamlamak için seçenek 20'yi (Stake) çalıştırın"
+  TRANSLATIONS["tr,staking_missing_new_operator_info"]="BLS dosyasında yeni operatör bilgisi eksik"
+  TRANSLATIONS["tr,staking_found_validators_new_operator"]="Yeni operatör yöntemi için validatörler bulundu:"
+  TRANSLATIONS["tr,staking_processing_new_operator"]="Validatör %s/%s işleniyor (yeni operatör yöntemi)"
+  TRANSLATIONS["tr,staking_success_new_operator"]="Validatör %s, yeni operatör yöntemiyle %s kullanılarak başarıyla stake edildi"
+  TRANSLATIONS["tr,staking_failed_new_operator"]="Validatör %s, yeni operatör yöntemiyle %s kullanılarak stake edilemedi"
+  TRANSLATIONS["tr,staking_all_failed_new_operator"]="Validatör %s için tüm RPC sağlayıcıları yeni operatör yöntemiyle başarısız oldu"
+  TRANSLATIONS["tr,staking_completed_new_operator"]="Yeni operatör staking tamamlandı!"
   TRANSLATIONS["tr,command_to_execute"]="Yürütülecek komut"
   TRANSLATIONS["tr,trying_next_rpc"]="Sonraki RPC sağlayıcı deneniyor..."
   TRANSLATIONS["tr,continuing_next_validator"]="Sonraki doğrulayıcıya devam ediliyor..."
@@ -3114,25 +3156,21 @@ generate_bls_existing_method() {
 generate_bls_new_operator_method() {
     echo -e "\n${BLUE}=== $(t "bls_new_operator_title") ===${NC}"
 
-    # Список RPC провайдеров
-    local rpc_providers=(
-        "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://1rpc.io/sepolia"
-        "https://sepolia.drpc.org"
-    )
+    # Запрос данных старого валидатора
+    echo -e "${CYAN}$(t "bls_old_validator_info")${NC}"
+    read -sp "$(t "bls_old_private_key_prompt") " PRIVATE_KEYS_INPUT && echo
 
-    # Используем глобальную переменную контракта
-    if [ -z "$CONTRACT_ADDRESS" ]; then
-        echo -e "${RED}❌ $(t "contract_not_set")${NC}"
+    # Обработка нескольких приватных ключей через запятую
+    local OLD_SEQUENCER_KEYS
+    IFS=',' read -ra OLD_SEQUENCER_KEYS <<< "$PRIVATE_KEYS_INPUT"
+
+    if [ ${#OLD_SEQUENCER_KEYS[@]} -eq 0 ]; then
+        echo -e "${RED}$(t "bls_no_private_keys")${NC}"
         return 1
     fi
 
-    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$CONTRACT_ADDRESS"
-    echo ""
+    echo -e "${GREEN}$(t "bls_found_private_keys") ${#OLD_SEQUENCER_KEYS[@]}${NC}"
 
-    # Запрос данных старого валидатора
-    echo -e "${CYAN}$(t "bls_old_validator_info")${NC}"
-    read -sp "$(t "bls_old_private_key_prompt") " PRIVATE_KEY_OF_OLD_SEQUENCER && echo
     read -p "$(t "bls_sepolia_rpc_prompt") " rpc_url
     echo -e "${GREEN}$(t "bls_starting_generation")${NC}"
 
@@ -3173,57 +3211,45 @@ generate_bls_new_operator_method() {
 
     # Сохраняем ключи в файл для совместимости с stake_validators
     local BLS_PK_FILE="$HOME/aztec/config/bls-filtered-pk.json"
-    cat > "$BLS_PK_FILE" << EOF
-{
-  "validators": [
+
+    # Создаем массив валидаторов для каждого приватного ключа
+    local VALIDATORS_JSON=""
+    for ((i=0; i<${#OLD_SEQUENCER_KEYS[@]}; i++)); do
+        if [ $i -gt 0 ]; then
+            VALIDATORS_JSON+=","
+        fi
+        VALIDATORS_JSON+=$(cat <<EOF
     {
       "attester": {
-        "eth": "$NEW_ETH_PRIVATE_KEY",
+        "eth": "${OLD_SEQUENCER_KEYS[$i]}",
         "bls": "$BLS_ATTESTER_PRIV_KEY"
       }
     }
-  ]
+EOF
+        )
+    done
+
+    cat > "$BLS_PK_FILE" << EOF
+{
+  "validators": [
+$VALIDATORS_JSON
+  ],
+  "new_operator_info": {
+    "eth_private_key": "$NEW_ETH_PRIVATE_KEY",
+    "bls_private_key": "$BLS_ATTESTER_PRIV_KEY",
+    "eth_address": "$ETH_ATTESTER_ADDRESS",
+    "rpc_url": "$rpc_url"
+  }
 }
 EOF
 
     echo -e "${YELLOW}$(t "bls_funding_required")${NC}"
     echo -e "   $ETH_ATTESTER_ADDRESS"
-    read -p "$(t "bls_funding_confirmation") " -r
-    echo ""
-
-    # Approve транзакция
-    echo -e "${BLUE}$(t "bls_approving_stake")${NC}"
-    if ! cast send 0x139d2a7a0881e16332d7D1F8DB383A4507E1Ea7A \
-        "approve(address,uint256)" \
-        "$CONTRACT_ADDRESS" \
-        200000ether \
-        --private-key "$PRIVATE_KEY_OF_OLD_SEQUENCER" \
-        --rpc-url "$rpc_url"; then
-
-        echo -e "${RED}$(t "bls_approve_failed")${NC}"
-        return 1
-    fi
-
-    echo ""
-
-    # Стейкинг нового валидатора
-    echo -e "${BLUE}$(t "bls_joining_testnet")${NC}"
-    if ! aztec add-l1-validator \
-        --l1-rpc-urls "$rpc_url" \
-        --network testnet \
-        --private-key "$PRIVATE_KEY_OF_OLD_SEQUENCER" \
-        --attester "$ETH_ATTESTER_ADDRESS" \
-        --withdrawer "$ETH_ATTESTER_ADDRESS" \
-        --bls-secret-key "$BLS_ATTESTER_PRIV_KEY" \
-        --rollup "$CONTRACT_ADDRESS"; then
-
-        echo -e "${RED}$(t "bls_staking_failed")${NC}"
-        return 1
-    fi
-
-    echo ""
-    echo -e "${GREEN}✅ $(t "bls_new_operator_success")${NC}"
-    echo -e "${YELLOW}$(t "bls_restart_node_notice")${NC}"
+    echo -e "${GREEN}✅ $(t "bls_keys_saved_success")${NC}"
+    echo -e "${YELLOW}$(t "bls_next_steps")${NC}"
+    echo -e "   1. $(t "bls_send_eth_step")"
+    echo -e "   2. $(t "bls_run_approve_step")"
+    echo -e "   3. $(t "bls_run_stake_step")"
 
     return 0
 }
@@ -3428,38 +3454,46 @@ stake_validators_old_format() {
 stake_validators_new_format() {
     local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
 
-    # Извлекаем приватный ключ и BLS ключ
-    local NEW_ETH_PRIVATE_KEY=$(jq -r '.validators[0].attester.eth' "$BLS_PK_FILE" 2>/dev/null)
-    local BLS_ATTESTER_PRIV_KEY=$(jq -r '.validators[0].attester.bls' "$BLS_PK_FILE" 2>/dev/null)
+    # Проверяем наличие информации о новом операторе
+    local NEW_OPERATOR_INFO=$(jq -e '.new_operator_info' "$BLS_PK_FILE" 2>/dev/null)
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ $(t "staking_missing_new_operator_info")${NC}"
+        return 1
+    fi
+
+    # Извлекаем информацию о новом операторе
+    local NEW_ETH_PRIVATE_KEY=$(jq -r '.new_operator_info.eth_private_key' "$BLS_PK_FILE" 2>/dev/null)
+    local BLS_ATTESTER_PRIV_KEY=$(jq -r '.new_operator_info.bls_private_key' "$BLS_PK_FILE" 2>/dev/null)
+    local ETH_ATTESTER_ADDRESS=$(jq -r '.new_operator_info.eth_address' "$BLS_PK_FILE" 2>/dev/null)
+    local RPC_URL=$(jq -r '.new_operator_info.rpc_url' "$BLS_PK_FILE" 2>/dev/null)
 
     if [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
-       [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ]; then
+       [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ] ||
+       [ -z "$ETH_ATTESTER_ADDRESS" ] || [ "$ETH_ATTESTER_ADDRESS" = "null" ]; then
         echo -e "${RED}❌ $(t "staking_invalid_bls_file")${NC}"
         return 1
     fi
 
-    # Генерируем адрес из приватного ключа
-    local ETH_ATTESTER_ADDRESS=$(cast wallet address "$NEW_ETH_PRIVATE_KEY" 2>/dev/null)
-    if [ -z "$ETH_ATTESTER_ADDRESS" ]; then
-        echo -e "${RED}❌ $(t "staking_failed_generate_address")${NC}"
+    # Получаем количество валидаторов из старого формата
+    local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
+    if [ -z "$VALIDATOR_COUNT" ] || [ "$VALIDATOR_COUNT" -eq 0 ]; then
+        echo -e "${RED}❌ $(t "staking_no_validators")${NC}"
         return 1
     fi
 
-    echo -e "${GREEN}$(t "staking_found_single_validator")${NC}"
+    echo -e "${GREEN}$(t "staking_found_validators_new_operator")${NC}" "$VALIDATOR_COUNT"
     echo -e "  $(t "eth_address"): $ETH_ATTESTER_ADDRESS"
     echo ""
 
-    # Запрос приватного ключа старого сиквенсера
-    echo -e "${CYAN}$(t "staking_old_sequencer_prompt")${NC}"
-    read -sp "$(t "staking_old_private_key_prompt") " PRIVATE_KEY_OF_OLD_SEQUENCER && echo
-    echo ""
-
-    # Список RPC провайдеров
-    local rpc_providers=(
-        "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://1rpc.io/sepolia"
-        "https://sepolia.drpc.org"
-    )
+    # Список RPC провайдеров (используем сохраненный или дефолтный список)
+    local rpc_providers=("$RPC_URL")
+    if [ -z "$RPC_URL" ] || [ "$RPC_URL" = "null" ]; then
+        rpc_providers=(
+            "https://ethereum-sepolia-rpc.publicnode.com"
+            "https://1rpc.io/sepolia"
+            "https://sepolia.drpc.org"
+        )
+    fi
 
     if [ -z "$CONTRACT_ADDRESS" ]; then
         echo -e "${RED}❌ $(t "contract_not_set")${NC}"
@@ -3469,14 +3503,33 @@ stake_validators_new_format() {
     printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$CONTRACT_ADDRESS"
     echo ""
 
-    # Цикл по RPC провайдерам
-    local success=false
-    for rpc_url in "${rpc_providers[@]}"; do
-        printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" "$rpc_url"
-        echo ""
+    # Цикл по всем валидаторам (приватным ключам)
+    for ((i=0; i<VALIDATOR_COUNT; i++)); do
+        printf "\n${BLUE}=== $(t "staking_processing_new_operator") ===${NC}\n" \
+		 "$((i+1))" "$VALIDATOR_COUNT"
+		 echo ""
 
-        # Формируем команду
-        local cmd="aztec add-l1-validator \\
+        # Получаем приватный ключ старого сиквенсера для текущего валидатора
+        local PRIVATE_KEY_OF_OLD_SEQUENCER=$(jq -r ".validators[$i].attester.eth" "$BLS_PK_FILE" 2>/dev/null)
+
+        if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ]; then
+            printf "${RED}❌ $(t "staking_failed_private_key")${NC}\n" "$((i+1))"
+            continue
+        fi
+
+        echo -e "${GREEN}✓ $(t "staking_data_loaded")${NC}"
+        echo -e "  $(t "eth_address"): $ETH_ATTESTER_ADDRESS"
+        echo -e "  $(t "private_key"): ${PRIVATE_KEY_OF_OLD_SEQUENCER:0:10}..."
+        echo -e "  $(t "bls_key"): ${BLS_ATTESTER_PRIV_KEY:0:20}..."
+
+        # Цикл по RPC провайдерам
+        local success=false
+        for rpc_url in "${rpc_providers[@]}"; do
+            printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" "$rpc_url"
+            echo ""
+
+            # Формируем команду
+            local cmd="aztec add-l1-validator \\
   --l1-rpc-urls \"$rpc_url\" \\
   --network testnet \\
   --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
@@ -3485,11 +3538,11 @@ stake_validators_new_format() {
   --bls-secret-key \"$BLS_ATTESTER_PRIV_KEY\" \\
   --rollup \"$CONTRACT_ADDRESS\""
 
-        # Безопасное отображение команды
-        local PRIVATE_KEY_PREVIEW="${PRIVATE_KEY_OF_OLD_SEQUENCER:0:7}..."
-        local BLS_KEY_PREVIEW="${BLS_ATTESTER_PRIV_KEY:0:7}..."
+            # Безопасное отображение команды
+            local PRIVATE_KEY_PREVIEW="${PRIVATE_KEY_OF_OLD_SEQUENCER:0:7}..."
+            local BLS_KEY_PREVIEW="${BLS_ATTESTER_PRIV_KEY:0:7}..."
 
-        local safe_cmd="aztec add-l1-validator \\
+            local safe_cmd="aztec add-l1-validator \\
   --l1-rpc-urls \"$rpc_url\" \\
   --network testnet \\
   --private-key \"$PRIVATE_KEY_PREVIEW\" \\
@@ -3498,46 +3551,56 @@ stake_validators_new_format() {
   --bls-secret-key \"$BLS_KEY_PREVIEW\" \\
   --rollup \"$CONTRACT_ADDRESS\""
 
-        echo -e "${CYAN}$(t "command_to_execute")${NC}"
-        echo -e "$safe_cmd"
+            echo -e "${CYAN}$(t "command_to_execute")${NC}"
+            echo -e "$safe_cmd"
 
-        # Запрос подтверждения
-        echo -e "\n${YELLOW}$(t "staking_command_prompt")${NC}"
-        read -p "$(t "staking_execute_prompt"): " confirm
+            # Запрос подтверждения
+            echo -e "\n${YELLOW}$(t "staking_command_prompt")${NC}"
+            read -p "$(t "staking_execute_prompt"): " confirm
 
-        case "$confirm" in
-            [yY])
-                echo -e "${GREEN}$(t "staking_executing")${NC}"
-                if eval "$cmd"; then
-                    echo -e "${GREEN}✅ $(t "staking_success_single")${NC}"
+            case "$confirm" in
+                [yY])
+                    echo -e "${GREEN}$(t "staking_executing")${NC}"
+                    if eval "$cmd"; then
+                        printf "${GREEN}✅ $(t "staking_success_new_operator")${NC}\n" \
+						            "$((i+1))" "$rpc_url"
+                        success=true
+                        break
+                    else
+                        printf "${RED}❌ $(t "staking_failed_new_operator")${NC}\n" \
+						 "$((i+1))" "$rpc_url"
+                        echo -e "${YELLOW}$(t "trying_next_rpc")${NC}"
+                    fi
+                    ;;
+                [sS])
+                    printf "${YELLOW}⏭️ $(t "staking_skipped_validator")${NC}\n" "$((i+1))"
                     success=true
                     break
-                else
-                    echo -e "${RED}❌ $(t "staking_failed_single")${NC}"
-                    echo -e "${YELLOW}$(t "trying_next_rpc")${NC}"
-                fi
-                ;;
-            [sS])
-                echo -e "${YELLOW}⏭️ $(t "staking_skipped")${NC}"
-                success=true
-                break
-                ;;
-            [qQ])
-                echo -e "${YELLOW}🛑 $(t "staking_cancelled")${NC}"
-                return 0
-                ;;
-            *)
-                echo -e "${YELLOW}⏭️ $(t "staking_skipped_rpc")${NC}"
-                ;;
-        esac
+                    ;;
+                [qQ])
+                    echo -e "${YELLOW}🛑 $(t "staking_cancelled")${NC}"
+                    return 0
+                    ;;
+                *)
+                    echo -e "${YELLOW}⏭️ $(t "staking_skipped_rpc")${NC}"
+                    ;;
+            esac
+        done
+
+        if [ "$success" = false ]; then
+            printf "${RED}❌ $(t "staking_all_failed_new_operator")${NC}\n" "$((i+1))"
+            echo -e "${YELLOW}$(t "continuing_next_validator")${NC}"
+        fi
+
+        # Небольшая пауза между валидаторами
+        if [ $i -lt $((VALIDATOR_COUNT-1)) ]; then
+            echo -e "\n${BLUE}--- $(t "waiting_before_next_validator") ---${NC}"
+            sleep 2
+        fi
     done
 
-    if [ "$success" = false ]; then
-        echo -e "${RED}❌ $(t "staking_all_failed_single")${NC}"
-        return 1
-    fi
-
-    echo -e "\n${GREEN}✅ $(t "staking_completed")${NC}"
+    echo -e "\n${GREEN}✅ $(t "staking_completed_new_operator")${NC}"
+    echo -e "${YELLOW}$(t "bls_restart_node_notice")${NC}"
     return 0
 }
 
