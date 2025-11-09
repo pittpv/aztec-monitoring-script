@@ -3268,15 +3268,15 @@ stake_validators() {
         return 1
     fi
 
-    # Проверяем структуру файла BLS ключей
-    local BLS_FILE_TYPE=$(jq -r 'if .validators then "array" else "object" end' "$BLS_PK_FILE" 2>/dev/null)
-
-    if [ "$BLS_FILE_TYPE" = "array" ]; then
-        # Старый формат - используем keystore.json для адресов
-        stake_validators_old_format
-    else
-        # Новый формат - адреса извлекаются из приватных ключей
+    # Простая и надежная проверка - ищем поле new_operator_info
+    if jq -e '.new_operator_info' "$BLS_PK_FILE" > /dev/null 2>&1; then
+        # Новый формат - есть информация о новом операторе
+        echo -e "${GREEN}🔍 Detected new operator method format${NC}"
         stake_validators_new_format
+    else
+        # Старый формат - нет информации о новом операторе
+        echo -e "${GREEN}🔍 Detected existing method format${NC}"
+        stake_validators_old_format
     fi
 }
 
