@@ -87,7 +87,7 @@ Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone
   - Support for multi-validator mode (statistics for all validators that joined the committee), as well as single-validator mode.
   - DEBUG mode – allows receiving highly detailed monitoring logs. Log is written to /root/aztec-monitor-agent/agent.log. To enable, set DEBUG=true in /root/.env-aztec-agent (default is false).
   - Checks run exactly on a systemd timer every 37 seconds (approximate duration of one slot) – you won’t miss any status!
-  - All previous features (sync control, critical error detection, quick log view, automatic updates, downgrade function, container management, and more).
+- All previous features (sync control, critical error detection, quick log view, automatic updates, downgrade function, container management, and more).
 - New script for searching and verifying validators directly in Rollup and GSE contracts (option 9).
   - Fast validator search and status check.
   - Supports checking multiple validators in a single request.

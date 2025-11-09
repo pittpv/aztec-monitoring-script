@@ -87,7 +87,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
   - Çoklu doğrulayıcı modu (komiteye katılan tüm doğrulayıcılar için istatistikler) ve tek doğrulayıcı modu desteği.
   - DEBUG modu – oldukça ayrıntılı izleme günlükleri almayı sağlar. Günlük /root/aztec-monitor-agent/agent.log dosyasına yazılır. Etkinleştirmek için /root/.env-aztec-agent içinde DEBUG=true yapın (varsayılan false).
   - Kontroller bir systemd zamanlayıcısı ile tam olarak her 37 saniyede bir (bir slotun yaklaşık süresi) çalışır – hiçbir durumu kaçırmazsınız!
-  - Tüm önceki özellikler (senkronizasyon kontrolü, kritik hata tespiti, hızlı günlük görüntüleme, otomatik güncellemeler, düşürme işlevi, konteyner yönetimi ve daha fazlası).
+- Tüm önceki özellikler (senkronizasyon kontrolü, kritik hata tespiti, hızlı günlük görüntüleme, otomatik güncellemeler, düşürme işlevi, konteyner yönetimi ve daha fazlası).
 - Rollup ve GSE sözleşmelerinde doğrudan doğrulayıcı arama ve doğrulama için yeni betik (seçenek 9).
   - Hızlı doğrulayıcı arama ve durum kontrolü.
   - Tek bir istekte birden çok doğrulayıcının kontrolünü destekler.
