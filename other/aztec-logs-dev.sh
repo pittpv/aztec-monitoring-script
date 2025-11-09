@@ -105,6 +105,41 @@ init_languages() {
   TRANSLATIONS["en,eth_address"]="ETH Address"
   TRANSLATIONS["en,private_key"]="Private Key"
   TRANSLATIONS["en,bls_key"]="BLS Key"
+  TRANSLATIONS["en,bls_method_existing"]="Use existing addresses (from keystore.json)"
+  TRANSLATIONS["en,bls_method_new_operator"]="Generate new operator address"
+  TRANSLATIONS["en,bls_method_prompt"]="Choose method [1-2]: "
+  TRANSLATIONS["en,bls_invalid_method"]="Invalid method selected"
+  TRANSLATIONS["en,bls_existing_method_title"]="Existing Address Method"
+  TRANSLATIONS["en,bls_new_operator_title"]="New Operator Address Method"
+  TRANSLATIONS["en,bls_old_validator_info"]="Please provide your old validator info:"
+  TRANSLATIONS["en,bls_old_private_key_prompt"]="Enter your OLD Sequencer Private Key (hidden): "
+  TRANSLATIONS["en,bls_sepolia_rpc_prompt"]="Enter your sepolia RPC URL: "
+  TRANSLATIONS["en,bls_starting_generation"]="Starting generation process..."
+  TRANSLATIONS["en,bls_ready_to_generate"]="BE READY to write down your private key both ETH and BLS and your ETH address."
+  TRANSLATIONS["en,bls_press_enter_to_generate"]="Press [Enter] to generate your new keys..."
+  TRANSLATIONS["en,bls_new_keys_generated"]="Good! Your new keys are below. SAVE THIS INFO SECURELY!"
+  TRANSLATIONS["en,bls_new_eth_private_key"]="NEW ETH Private Key"
+  TRANSLATIONS["en,bls_new_bls_private_key"]="NEW BLS Private Key"
+  TRANSLATIONS["en,bls_new_public_address"]="NEW Public Address"
+  TRANSLATIONS["en,bls_funding_required"]="You need to send 0.2 to 0.5 Sepolia ETH to this new address:"
+  TRANSLATIONS["en,bls_funding_confirmation"]="After the funding transaction is confirmed, press [Enter] to continue..."
+  TRANSLATIONS["en,bls_approving_stake"]="Approving STAKE spending..."
+  TRANSLATIONS["en,bls_approve_failed"]="Approve transaction failed"
+  TRANSLATIONS["en,bls_joining_testnet"]="Joining the testnet..."
+  TRANSLATIONS["en,bls_staking_failed"]="Staking failed"
+  TRANSLATIONS["en,bls_new_operator_success"]="All done! You have successfully joined the new testnet"
+  TRANSLATIONS["en,bls_restart_node_notice"]="Now rerun your node with your new private key and address"
+  TRANSLATIONS["en,bls_key_extraction_failed"]="Failed to extract keys from generated file"
+  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 18)"
+  TRANSLATIONS["en,staking_invalid_bls_file"]="Invalid BLS keys file format"
+  TRANSLATIONS["en,staking_failed_generate_address"]="Failed to generate address from private key"
+  TRANSLATIONS["en,staking_found_single_validator"]="Found single validator for new operator method"
+  TRANSLATIONS["en,staking_old_sequencer_prompt"]="For staking with new operator method, we need your old sequencer private key:"
+  TRANSLATIONS["en,staking_old_private_key_prompt"]="Enter OLD Sequencer Private Key (hidden): "
+  TRANSLATIONS["en,staking_success_single"]="Successfully staked validator with new operator method"
+  TRANSLATIONS["en,staking_failed_single"]="Failed to stake validator with new operator method"
+  TRANSLATIONS["en,staking_all_failed_single"]="All RPC providers failed for new operator staking"
+  TRANSLATIONS["en,staking_skipped"]="Staking skipped"
   TRANSLATIONS["en,command_to_execute"]="Command to execute"
   TRANSLATIONS["en,trying_next_rpc"]="Trying next RPC provider..."
   TRANSLATIONS["en,continuing_next_validator"]="Continuing with next validator..."
@@ -395,6 +430,41 @@ init_languages() {
   TRANSLATIONS["ru,eth_address"]="ETH Адрес"
   TRANSLATIONS["ru,private_key"]="Приватный ключ"
   TRANSLATIONS["ru,bls_key"]="BLS ключ"
+  TRANSLATIONS["ru,bls_method_existing"]="Использовать существующие адреса (из keystore.json)"
+  TRANSLATIONS["ru,bls_method_new_operator"]="Сгенерировать новый адрес оператора"
+  TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод [1-2]: "
+  TRANSLATIONS["ru,bls_invalid_method"]="Выбран неверный метод"
+  TRANSLATIONS["ru,bls_existing_method_title"]="Метод существующих адресов"
+  TRANSLATIONS["ru,bls_new_operator_title"]="Метод нового адреса оператора"
+  TRANSLATIONS["ru,bls_old_validator_info"]="Пожалуйста, предоставьте информацию о вашем старом валидаторе:"
+  TRANSLATIONS["ru,bls_old_private_key_prompt"]="Введите СТАРЫЙ приватный ключ Секвенсера (скрытый ввод): "
+  TRANSLATIONS["ru,bls_sepolia_rpc_prompt"]="Введите ваш Sepolia RPC URL: "
+  TRANSLATIONS["ru,bls_starting_generation"]="Запуск процесса генерации..."
+  TRANSLATIONS["ru,bls_ready_to_generate"]="БУДЬТЕ ГОТОВЫ записать ваш приватный ключ ETH и BLS, а также ваш ETH адрес."
+  TRANSLATIONS["ru,bls_press_enter_to_generate"]="Нажмите [Enter] для генерации новых ключей..."
+  TRANSLATIONS["ru,bls_new_keys_generated"]="Отлично! Ваши новые ключи ниже. СОХРАНИТЕ ЭТУ ИНФОРМАЦИЮ В БЕЗОПАСНОМ МЕСТЕ!"
+  TRANSLATIONS["ru,bls_new_eth_private_key"]="НОВЫЙ приватный ключ ETH"
+  TRANSLATIONS["ru,bls_new_bls_private_key"]="НОВЫЙ приватный ключ BLS"
+  TRANSLATIONS["ru,bls_new_public_address"]="НОВЫЙ публичный адрес"
+  TRANSLATIONS["ru,bls_funding_required"]="Вам нужно отправить от 0.2 до 0.5 Sepolia ETH на этот новый адрес:"
+  TRANSLATIONS["ru,bls_funding_confirmation"]="После подтверждения транзакции пополнения, нажмите [Enter] для продолжения..."
+  TRANSLATIONS["ru,bls_approving_stake"]="Подтверждение расходов STAKE..."
+  TRANSLATIONS["ru,bls_approve_failed"]="Транзакция подтверждения не удалась"
+  TRANSLATIONS["ru,bls_joining_testnet"]="Присоединение к тестовой сети..."
+  TRANSLATIONS["ru,bls_staking_failed"]="Стейкинг не удался"
+  TRANSLATIONS["ru,bls_new_operator_success"]="Все готово! Вы успешно присоединились к новой тестовой сети"
+  TRANSLATIONS["ru,bls_restart_node_notice"]="Теперь перезапустите вашу ноду с новым приватным ключом и адресом"
+  TRANSLATIONS["ru,bls_key_extraction_failed"]="Не удалось извлечь ключи из сгенерированного файла"
+  TRANSLATIONS["ru,staking_run_bls_generation_first"]="Пожалуйста, сначала запустите генерацию BLS ключей (опция 18)"
+  TRANSLATIONS["ru,staking_invalid_bls_file"]="Неверный формат файла BLS ключей"
+  TRANSLATIONS["ru,staking_failed_generate_address"]="Не удалось сгенерировать адрес из приватного ключа"
+  TRANSLATIONS["ru,staking_found_single_validator"]="Найден один валидатор для метода нового оператора"
+  TRANSLATIONS["ru,staking_old_sequencer_prompt"]="Для стейкинга методом нового оператора нам нужен ваш старый приватный ключ секвенсера:"
+  TRANSLATIONS["ru,staking_old_private_key_prompt"]="Введите СТАРЫЙ приватный ключ Секвенсера (скрытый ввод): "
+  TRANSLATIONS["ru,staking_success_single"]="Успешный стейкинг валидатора методом нового оператора"
+  TRANSLATIONS["ru,staking_failed_single"]="Не удалось выполнить стейкинг валидатора методом нового оператора"
+  TRANSLATIONS["ru,staking_all_failed_single"]="Все RPC провайдеры не сработали для стейкинга новым оператором"
+  TRANSLATIONS["ru,staking_skipped"]="Стейкинг пропущен"
   TRANSLATIONS["ru,command_to_execute"]="Команда для выполнения"
   TRANSLATIONS["ru,trying_next_rpc"]="Пробуем следующий RPC провайдер..."
   TRANSLATIONS["ru,continuing_next_validator"]="Переходим к следующему валидатору..."
@@ -685,6 +755,41 @@ init_languages() {
   TRANSLATIONS["tr,eth_address"]="ETH Adresi"
   TRANSLATIONS["tr,private_key"]="Özel Anahtar"
   TRANSLATIONS["tr,bls_key"]="BLS Anahtarı"
+  TRANSLATIONS["tr,bls_method_existing"]="Mevcut adresleri kullan (keystore.json'dan)"
+  TRANSLATIONS["tr,bls_method_new_operator"]="Yeni operatör adresi oluştur"
+  TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin [1-2]: "
+  TRANSLATIONS["tr,bls_invalid_method"]="Geçersiz yöntem seçildi"
+  TRANSLATIONS["tr,bls_existing_method_title"]="Mevcut Adres Yöntemi"
+  TRANSLATIONS["tr,bls_new_operator_title"]="Yeni Operatör Adresi Yöntemi"
+  TRANSLATIONS["tr,bls_old_validator_info"]="Lütfen eski validatör bilgilerinizi sağlayın:"
+  TRANSLATIONS["tr,bls_old_private_key_prompt"]="ESKİ Sequencer Özel Anahtarınızı girin (gizli): "
+  TRANSLATIONS["tr,bls_sepolia_rpc_prompt"]="Sepolia RPC URL'nizi girin: "
+  TRANSLATIONS["tr,bls_starting_generation"]="Oluşturma süreci başlatılıyor..."
+  TRANSLATIONS["tr,bls_ready_to_generate"]="Hem ETH hem de BLS özel anahtarınızı ve ETH adresinizi yazmaya HAZIR OLUN."
+  TRANSLATIONS["tr,bls_press_enter_to_generate"]="Yeni anahtarlarınızı oluşturmak için [Enter] tuşuna basın..."
+  TRANSLATIONS["tr,bls_new_keys_generated"]="Harika! Yeni anahtarlarınız aşağıdadır. BU BİLGİYİ GÜVENLİ BİR YERE KAYDEDİN!"
+  TRANSLATIONS["tr,bls_new_eth_private_key"]="YENİ ETH Özel Anahtarı"
+  TRANSLATIONS["tr,bls_new_bls_private_key"]="YENİ BLS Özel Anahtarı"
+  TRANSLATIONS["tr,bls_new_public_address"]="YENİ Genel Adres"
+  TRANSLATIONS["tr,bls_funding_required"]="Bu yeni adrese 0.2 ila 0.5 Sepolia ETH göndermeniz gerekiyor:"
+  TRANSLATIONS["tr,bls_funding_confirmation"]="Fonlama işlemi onaylandıktan sonra devam etmek için [Enter] tuşuna basın..."
+  TRANSLATIONS["tr,bls_approving_stake"]="STAKE harcaması onaylanıyor..."
+  TRANSLATIONS["tr,bls_approve_failed"]="Onay işlemi başarısız oldu"
+  TRANSLATIONS["tr,bls_joining_testnet"]="Test ağına katılıyor..."
+  TRANSLATIONS["tr,bls_staking_failed"]="Staking başarısız oldu"
+  TRANSLATIONS["tr,bls_new_operator_success"]="Hepsi tamam! Yeni test ağına başarıyla katıldınız"
+  TRANSLATIONS["tr,bls_restart_node_notice"]="Şimdi düğümünüzü yeni özel anahtarınız ve adresinizle yeniden çalıştırın"
+  TRANSLATIONS["tr,bls_key_extraction_failed"]="Oluşturulan dosyadan anahtarlar çıkarılamadı"
+  TRANSLATIONS["tr,staking_run_bls_generation_first"]="Lütfen önce BLS anahtarı oluşturmayı çalıştırın (seçenek 18)"
+  TRANSLATIONS["tr,staking_invalid_bls_file"]="Geçersiz BLS anahtar dosyası formatı"
+  TRANSLATIONS["tr,staking_failed_generate_address"]="Özel anahtardan adres oluşturulamadı"
+  TRANSLATIONS["tr,staking_found_single_validator"]="Yeni operatör yöntemi için tek validatör bulundu"
+  TRANSLATIONS["tr,staking_old_sequencer_prompt"]="Yeni operatör yöntemiyle staking için, eski sequencer özel anahtarınıza ihtiyacımız var:"
+  TRANSLATIONS["tr,staking_old_private_key_prompt"]="ESKİ Sequencer Özel Anahtarını girin (gizli): "
+  TRANSLATIONS["tr,staking_success_single"]="Yeni operatör yöntemiyle validatör başarıyla stake edildi"
+  TRANSLATIONS["tr,staking_failed_single"]="Yeni operatör yöntemiyle validatör stake edilemedi"
+  TRANSLATIONS["tr,staking_all_failed_single"]="Yeni operatör staking için tüm RPC sağlayıcıları başarısız oldu"
+  TRANSLATIONS["tr,staking_skipped"]="Staking atlandı"
   TRANSLATIONS["tr,command_to_execute"]="Yürütülecek komut"
   TRANSLATIONS["tr,trying_next_rpc"]="Sonraki RPC sağlayıcı deneniyor..."
   TRANSLATIONS["tr,continuing_next_validator"]="Sonraki doğrulayıcıya devam ediliyor..."
@@ -2816,14 +2921,38 @@ approve_with_all_keys() {
     done
 }
 
-# === Generate BLS keys from mnemonic ===
+# === Generate BLS keys with mode selection ===
 generate_bls_keys() {
     echo -e "\n${BLUE}=== BLS Keys Generation ===${NC}"
+
+    # Выбор способа генерации
+    echo -e "\n${CYAN}Select BLS generation method:${NC}"
+    echo -e "1) $(t "bls_method_existing")"
+    echo -e "2) $(t "bls_method_new_operator")"
+    read -p "$(t "bls_method_prompt") " GENERATION_METHOD
+
+    case $GENERATION_METHOD in
+        1)
+            generate_bls_existing_method
+            ;;
+        2)
+            generate_bls_new_operator_method
+            ;;
+        *)
+            echo -e "${RED}$(t "bls_invalid_method")${NC}"
+            return 1
+            ;;
+    esac
+}
+
+# === Existing method (original) ===
+generate_bls_existing_method() {
+    echo -e "\n${BLUE}=== $(t "bls_existing_method_title") ===${NC}"
 
     # 1. Запрос мнемонической фразы (скрытый ввод)
     echo -e "\n${CYAN}$(t "bls_mnemonic_prompt")${NC}"
     read -s -p "> " MNEMONIC
-    echo  # Переход на новую строку после скрытого ввода
+    echo
 
     if [ -z "$MNEMONIC" ]; then
         echo -e "${RED}Error: Mnemonic phrase cannot be empty${NC}"
@@ -2834,15 +2963,13 @@ generate_bls_keys() {
     echo -e "\n${CYAN}$(t "bls_wallet_count_prompt")${NC}"
     read -p "> " WALLET_COUNT
 
-    # Валидация числа
     if ! [[ "$WALLET_COUNT" =~ ^[1-9][0-9]*$ ]]; then
         echo -e "${RED}$(t "bls_invalid_number")${NC}"
         return 1
     fi
 
-    # 3. Получение feeRecipient из keystore.json (только первый)
+    # 3. Получение feeRecipient из keystore.json
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-
     if [ ! -f "$KEYSTORE_FILE" ]; then
         echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
         return 1
@@ -2862,13 +2989,12 @@ generate_bls_keys() {
     echo -e "\n${BLUE}$(t "bls_generating_keys")${NC}"
 
     local BLS_OUTPUT_FILE="$HOME/aztec/config/bls.json"
-    local BLS_FILTERED_FILE="$HOME/aztec/config/bls-filtered.json"
     local BLS_FILTERED_PK_FILE="$HOME/aztec/config/bls-filtered-pk.json"
 
     # Временный файл для результатов генерации
     local TEMP_OUTPUT=$(mktemp)
 
-    # Выполнение команды генерации и сохранение вывода (очищаем от \r)
+    # Выполнение команды генерации
     echo -e "${YELLOW}Running command: aztec validator-keys new...${NC}"
     if aztec validator-keys new \
         --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
@@ -2891,64 +3017,78 @@ generate_bls_keys() {
         return 1
     fi
 
-    # 6. Поиск совпадений и создание отфильтрованного файла
+    # 6. Поиск совпадений и создание приватных ключей
     echo -e "\n${BLUE}$(t "bls_searching_matches")${NC}"
-
-    # Создаем пустой файл для отфильтрованных результатов
-    echo "{" > "$BLS_FILTERED_FILE"
-    local FIRST_ENTRY=true
-    local MATCH_COUNT=0
 
     # Получаем все адреса из keystore.json в нижнем регистре
     local KEYSTORE_ADDRESSES=$(grep -o '"0x[0-9a-fA-F]\+"' "$KEYSTORE_FILE" | tr '[:upper:]' '[:lower:]' | tr -d '"')
+    local MATCH_COUNT=0
 
     # Создаем очищенную версию временного файла без \r
     local TEMP_CLEAN=$(mktemp)
     sed 's/\r//g' "$TEMP_OUTPUT" > "$TEMP_CLEAN"
 
-    # Простой и надежный парсинг - ищем пары accX + eth адрес + bls ключ
+    # Простой и надежный парсинг
     local CURRENT_ACC=""
     local CURRENT_ETH=""
     local CURRENT_BLS=""
+    local FIRST_ACCOUNT=true
 
     while IFS= read -r line; do
-        # Ищем начало аккаунта
         if [[ "$line" =~ ^(acc[0-9]+):$ ]]; then
             CURRENT_ACC="${BASH_REMATCH[1]}"
             CURRENT_ETH=""
             CURRENT_BLS=""
-
-        # Ищем eth адрес
         elif [[ "$line" =~ ^[[:space:]]+eth:[[:space:]]+(0x[0-9a-fA-F]+) ]]; then
-            CURRENT_ETH="${BASH_REMATCH[1],,}"  # Приводим к нижнему регистру
-
-        # Ищем BLS ключ
+            CURRENT_ETH="${BASH_REMATCH[1],,}"
         elif [[ "$line" =~ ^[[:space:]]+bls:[[:space:]]+(0x[0-9a-fA-F]+) ]]; then
             CURRENT_BLS="${BASH_REMATCH[1]}"
 
-            # Когда нашли все три компонента, проверяем совпадение
             if [[ -n "$CURRENT_ACC" && -n "$CURRENT_ETH" && -n "$CURRENT_BLS" ]]; then
                 # Проверяем совпадение адреса
                 if echo "$KEYSTORE_ADDRESSES" | grep -q "^${CURRENT_ETH}$"; then
                     ((MATCH_COUNT++))
 
-                    # Добавляем в отфильтрованный файл
-                    if [ "$FIRST_ENTRY" = true ]; then
-                        FIRST_ENTRY=false
-                    else
-                        echo "," >> "$BLS_FILTERED_FILE"
-                    fi
+                    # Извлекаем номер из acc (убираем "acc")
+                    local ACC_NUMBER=${CURRENT_ACC#acc}
+                    local ADDRESS_IDX=$((ACC_NUMBER - 1))
 
-                    # Сохраняем блок аккаунта
-                    echo "  \"$CURRENT_ACC\": {" >> "$BLS_FILTERED_FILE"
-                    echo "    \"attester\": {" >> "$BLS_FILTERED_FILE"
-                    echo "      \"eth\": \"$CURRENT_ETH\"," >> "$BLS_FILTERED_FILE"
-                    echo "      \"bls\": \"$CURRENT_BLS\"" >> "$BLS_FILTERED_FILE"
-                    echo "    }" >> "$BLS_FILTERED_FILE"
-                    echo "  }" >> "$BLS_FILTERED_FILE"
+                    echo -e "${YELLOW}Processing $CURRENT_ACC (address-index: $ADDRESS_IDX)...${NC}"
+
+                    if [ "$FIRST_ACCOUNT" = true ]; then
+                        # Для первого аккаунта используем команду new
+                        echo -e "${CYAN}Running: aztec validator-keys new (first account)${NC}"
+                        if aztec validator-keys new \
+                            --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
+                            --mnemonic "$MNEMONIC" \
+                            --address-index "$ADDRESS_IDX" \
+                            --file "bls-filtered-pk.json" \
+                            --data-dir "$HOME/aztec/config/"; then
+
+                            echo -e "${GREEN}✓ Successfully generated keys for $CURRENT_ACC${NC}"
+                            FIRST_ACCOUNT=false
+                        else
+                            echo -e "${RED}✗ Failed to generate keys for $CURRENT_ACC${NC}"
+                            rm -f "$TEMP_OUTPUT" "$TEMP_CLEAN"
+                            return 1
+                        fi
+                    else
+                        # Для последующих аккаунтов используем команду add
+                        echo -e "${CYAN}Running: aztec validator-keys add (additional account)${NC}"
+                        if aztec validator-keys add "$HOME/aztec/config/bls-filtered-pk.json" \
+                            --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
+                            --mnemonic "$MNEMONIC" \
+                            --address-index "$ADDRESS_IDX" ; then
+
+                            echo -e "${GREEN}✓ Successfully added keys for $CURRENT_ACC${NC}"
+                        else
+                            echo -e "${RED}✗ Failed to add keys for $CURRENT_ACC${NC}"
+                            rm -f "$TEMP_OUTPUT" "$TEMP_CLEAN"
+                            return 1
+                        fi
+                    fi
                 fi
 
-                # Сбрасываем для следующего аккаунта
                 CURRENT_ACC=""
                 CURRENT_ETH=""
                 CURRENT_BLS=""
@@ -2956,82 +3096,134 @@ generate_bls_keys() {
         fi
     done < "$TEMP_CLEAN"
 
-    echo "}" >> "$BLS_FILTERED_FILE"
-
     # Очистка временных файлов
-    rm -f "$TEMP_OUTPUT"
-    rm -f "$TEMP_CLEAN"
+    rm -f "$TEMP_OUTPUT" "$TEMP_CLEAN" "$BLS_OUTPUT_FILE"
 
-    # 7. Отчет о результатах
+    # Отчет о результатах
     if [ $MATCH_COUNT -gt 0 ]; then
         echo -e "${GREEN}$(printf "$(t "bls_matches_found")" "$MATCH_COUNT")${NC}"
-        echo -e "${GREEN}$(printf "$(t "bls_filtered_file_created")" "$BLS_FILTERED_FILE")${NC}"
-
-        # 8. Генерация приватных ключей для найденных аккаунтов
-        echo -e "\n${BLUE}Generating private keys for matched accounts...${NC}"
-
-        # Получаем список аккаунтов из отфильтрованного файла
-        local ACCOUNTS=$(jq -r 'keys[]' "$BLS_FILTERED_FILE" 2>/dev/null)
-        local FIRST_ACCOUNT=true
-
-        for acc in $ACCOUNTS; do
-            # Извлекаем номер из acc (убираем "acc")
-            local ACC_NUMBER=${acc#acc}
-
-            # Вычисляем address-index (номер аккаунта - 1)
-            local ADDRESS_IDX=$((ACC_NUMBER - 1))
-
-            echo -e "${YELLOW}Processing $acc (address-index: $ADDRESS_IDX)...${NC}"
-
-            if [ "$FIRST_ACCOUNT" = true ]; then
-                # Для первого аккаунта используем команду new
-                echo -e "${CYAN}Running: aztec validator-keys new (first account)${NC}"
-                if aztec validator-keys new \
-                    --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
-                    --mnemonic "$MNEMONIC" \
-                    --address-index "$ADDRESS_IDX" \
-                    --file "bls-filtered-pk.json" \
-                    --data-dir "$HOME/aztec/config/"; then
-
-                    echo -e "${GREEN}✓ Successfully generated keys for $acc${NC}"
-                    FIRST_ACCOUNT=false
-                else
-                    echo -e "${RED}✗ Failed to generate keys for $acc${NC}"
-                    return 1
-                fi
-            else
-                # Для последующих аккаунтов используем команду add
-                echo -e "${CYAN}Running: aztec validator-keys add (additional account)${NC}"
-                if aztec validator-keys add "$HOME/aztec/config/bls-filtered-pk.json" \
-                    --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
-                    --mnemonic "$MNEMONIC" \
-                    --address-index "$ADDRESS_IDX" ; then
-
-                    echo -e "${GREEN}✓ Successfully added keys for $acc${NC}"
-                else
-                    echo -e "${RED}✗ Failed to add keys for $acc${NC}"
-                    return 1
-                fi
-            fi
-
-            # Проверяем что файл создан/обновлен
-            if [ ! -f "$BLS_FILTERED_PK_FILE" ]; then
-                echo -e "${RED}✗ Private keys file was not created: $BLS_FILTERED_PK_FILE${NC}"
-                return 1
-            fi
-        done
-
-        # Финальный отчет
-        echo -e "\n${GREEN}✅ Successfully generated private keys for all $MATCH_COUNT matched accounts${NC}"
         echo -e "${GREEN}📁 Private keys saved to: $BLS_FILTERED_PK_FILE${NC}"
-		rm -f "$BLS_OUTPUT_FILE"
-		rm -f "$BLS_FILTERED_FILE"
-
+        return 0
     else
         echo -e "${RED}$(t "bls_no_matches")${NC}"
-        rm -f "$BLS_FILTERED_FILE"
         return 1
     fi
+}
+
+# === New operator method ===
+generate_bls_new_operator_method() {
+    echo -e "\n${BLUE}=== $(t "bls_new_operator_title") ===${NC}"
+
+    # Список RPC провайдеров
+    local rpc_providers=(
+        "https://ethereum-sepolia-rpc.publicnode.com"
+        "https://1rpc.io/sepolia"
+        "https://sepolia.drpc.org"
+    )
+
+    # Используем глобальную переменную контракта
+    if [ -z "$CONTRACT_ADDRESS" ]; then
+        echo -e "${RED}❌ $(t "contract_not_set")${NC}"
+        return 1
+    fi
+
+    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$CONTRACT_ADDRESS"
+    echo ""
+
+    # Запрос данных старого валидатора
+    echo -e "${CYAN}$(t "bls_old_validator_info")${NC}"
+    read -sp "$(t "bls_old_private_key_prompt") " PRIVATE_KEY_OF_OLD_SEQUENCER && echo
+    read -p "$(t "bls_sepolia_rpc_prompt") " rpc_url
+    echo -e "${GREEN}$(t "bls_starting_generation")${NC}"
+
+    # Удаляем старый файл и генерируем новые ключи
+    rm -f ~/.aztec/keystore/key1.json
+    echo -e "${YELLOW}$(t "bls_ready_to_generate")${NC}"
+    read -p "$(t "bls_press_enter_to_generate") " -r
+
+    # Генерация новых ключей
+    if ! aztec validator-keys new --fee-recipient 0x0000000000000000000000000000000000000000000000000000000000000000; then
+        echo -e "${RED}$(t "bls_generation_failed")${NC}"
+        return 1
+    fi
+
+    # Извлечение новых ключей
+    local KEYSTORE_FILE=~/.aztec/keystore/key1.json
+    if [ ! -f "$KEYSTORE_FILE" ]; then
+        echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
+        return 1
+    fi
+
+    local NEW_ETH_PRIVATE_KEY=$(jq -r '.validators[0].attester.eth' "$KEYSTORE_FILE" 2>/dev/null)
+    local BLS_ATTESTER_PRIV_KEY=$(jq -r '.validators[0].attester.bls' "$KEYSTORE_FILE" 2>/dev/null)
+    local ETH_ATTESTER_ADDRESS=$(cast wallet address "$NEW_ETH_PRIVATE_KEY" 2>/dev/null)
+
+    if [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
+       [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ]; then
+        echo -e "${RED}$(t "bls_key_extraction_failed")${NC}"
+        return 1
+    fi
+
+    # Показываем пользователю новые ключи
+    echo -e "${GREEN}$(t "bls_new_keys_generated")${NC}"
+    echo -e "   - $(t "bls_new_eth_private_key"): $NEW_ETH_PRIVATE_KEY"
+    echo -e "   - $(t "bls_new_bls_private_key"): $BLS_ATTESTER_PRIV_KEY"
+    echo -e "   - $(t "bls_new_public_address"): $ETH_ATTESTER_ADDRESS"
+    echo ""
+
+    # Сохраняем ключи в файл для совместимости с stake_validators
+    local BLS_PK_FILE="$HOME/aztec/config/bls-filtered-pk.json"
+    cat > "$BLS_PK_FILE" << EOF
+{
+  "validators": [
+    {
+      "attester": {
+        "eth": "$NEW_ETH_PRIVATE_KEY",
+        "bls": "$BLS_ATTESTER_PRIV_KEY"
+      }
+    }
+  ]
+}
+EOF
+
+    echo -e "${YELLOW}$(t "bls_funding_required")${NC}"
+    echo -e "   $ETH_ATTESTER_ADDRESS"
+    read -p "$(t "bls_funding_confirmation") " -r
+    echo ""
+
+    # Approve транзакция
+    echo -e "${BLUE}$(t "bls_approving_stake")${NC}"
+    if ! cast send 0x139d2a7a0881e16332d7D1F8DB383A4507E1Ea7A \
+        "approve(address,uint256)" \
+        "$CONTRACT_ADDRESS" \
+        200000ether \
+        --private-key "$PRIVATE_KEY_OF_OLD_SEQUENCER" \
+        --rpc-url "$rpc_url"; then
+
+        echo -e "${RED}$(t "bls_approve_failed")${NC}"
+        return 1
+    fi
+
+    echo ""
+
+    # Стейкинг нового валидатора
+    echo -e "${BLUE}$(t "bls_joining_testnet")${NC}"
+    if ! aztec add-l1-validator \
+        --l1-rpc-urls "$rpc_url" \
+        --network testnet \
+        --private-key "$PRIVATE_KEY_OF_OLD_SEQUENCER" \
+        --attester "$ETH_ATTESTER_ADDRESS" \
+        --withdrawer "$ETH_ATTESTER_ADDRESS" \
+        --bls-secret-key "$BLS_ATTESTER_PRIV_KEY" \
+        --rollup "$CONTRACT_ADDRESS"; then
+
+        echo -e "${RED}$(t "bls_staking_failed")${NC}"
+        return 1
+    fi
+
+    echo ""
+    echo -e "${GREEN}✅ $(t "bls_new_operator_success")${NC}"
+    echo -e "${YELLOW}$(t "bls_restart_node_notice")${NC}"
 
     return 0
 }
@@ -3044,9 +3236,31 @@ stake_validators() {
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
     local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
 
+    if [ ! -f "$BLS_PK_FILE" ]; then
+        printf "${RED}❌ $(t "file_not_found")${NC}\n" "bls-filtered-pk.json" "$BLS_PK_FILE"
+        echo -e "${YELLOW}$(t "staking_run_bls_generation_first")${NC}"
+        return 1
+    fi
+
+    # Проверяем структуру файла BLS ключей
+    local BLS_FILE_TYPE=$(jq -r 'if .validators then "array" else "object" end' "$BLS_PK_FILE" 2>/dev/null)
+
+    if [ "$BLS_FILE_TYPE" = "array" ]; then
+        # Старый формат - используем keystore.json для адресов
+        stake_validators_old_format
+    else
+        # Новый формат - адреса извлекаются из приватных ключей
+        stake_validators_new_format
+    fi
+}
+
+# === Old format (existing method) ===
+stake_validators_old_format() {
+    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
+
     if [ ! -f "$KEYSTORE_FILE" ]; then
-        printf "${RED}❌ $(t "file_not_found")${NC}\n" \
-         "keystore.json" "$KEYSTORE_FILE"
+        printf "${RED}❌ $(t "file_not_found")${NC}\n" "keystore.json" "$KEYSTORE_FILE"
         return 1
     fi
 
@@ -3056,16 +3270,15 @@ stake_validators() {
         return 1
     fi
 
-    # Получаем количество валидаторов
+    # Оригинальная логика для существующего метода
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
     if [ -z "$VALIDATOR_COUNT" ] || [ "$VALIDATOR_COUNT" -eq 0 ]; then
         echo -e "${RED}❌ $(t "staking_no_validators") $BLS_PK_FILE${NC}"
         return 1
     fi
 
-    printf  "${GREEN}$(t "staking_found_validators")${NC}\n" \
-	 "$VALIDATOR_COUNT"
-	 echo ""
+    printf "${GREEN}$(t "staking_found_validators")${NC}\n" "$VALIDATOR_COUNT"
+    echo ""
 
     # Список RPC провайдеров
     local rpc_providers=(
@@ -3206,6 +3419,123 @@ stake_validators() {
             sleep 2
         fi
     done
+
+    echo -e "\n${GREEN}✅ $(t "staking_completed")${NC}"
+    return 0
+}
+
+# === New format (new operator method) ===
+stake_validators_new_format() {
+    local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
+
+    # Извлекаем приватный ключ и BLS ключ
+    local NEW_ETH_PRIVATE_KEY=$(jq -r '.validators[0].attester.eth' "$BLS_PK_FILE" 2>/dev/null)
+    local BLS_ATTESTER_PRIV_KEY=$(jq -r '.validators[0].attester.bls' "$BLS_PK_FILE" 2>/dev/null)
+
+    if [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
+       [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ]; then
+        echo -e "${RED}❌ $(t "staking_invalid_bls_file")${NC}"
+        return 1
+    fi
+
+    # Генерируем адрес из приватного ключа
+    local ETH_ATTESTER_ADDRESS=$(cast wallet address "$NEW_ETH_PRIVATE_KEY" 2>/dev/null)
+    if [ -z "$ETH_ATTESTER_ADDRESS" ]; then
+        echo -e "${RED}❌ $(t "staking_failed_generate_address")${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}$(t "staking_found_single_validator")${NC}"
+    echo -e "  $(t "eth_address"): $ETH_ATTESTER_ADDRESS"
+    echo ""
+
+    # Запрос приватного ключа старого сиквенсера
+    echo -e "${CYAN}$(t "staking_old_sequencer_prompt")${NC}"
+    read -sp "$(t "staking_old_private_key_prompt") " PRIVATE_KEY_OF_OLD_SEQUENCER && echo
+    echo ""
+
+    # Список RPC провайдеров
+    local rpc_providers=(
+        "https://ethereum-sepolia-rpc.publicnode.com"
+        "https://1rpc.io/sepolia"
+        "https://sepolia.drpc.org"
+    )
+
+    if [ -z "$CONTRACT_ADDRESS" ]; then
+        echo -e "${RED}❌ $(t "contract_not_set")${NC}"
+        return 1
+    fi
+
+    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$CONTRACT_ADDRESS"
+    echo ""
+
+    # Цикл по RPC провайдерам
+    local success=false
+    for rpc_url in "${rpc_providers[@]}"; do
+        printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" "$rpc_url"
+        echo ""
+
+        # Формируем команду
+        local cmd="aztec add-l1-validator \\
+  --l1-rpc-urls \"$rpc_url\" \\
+  --network testnet \\
+  --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
+  --attester \"$ETH_ATTESTER_ADDRESS\" \\
+  --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
+  --bls-secret-key \"$BLS_ATTESTER_PRIV_KEY\" \\
+  --rollup \"$CONTRACT_ADDRESS\""
+
+        # Безопасное отображение команды
+        local PRIVATE_KEY_PREVIEW="${PRIVATE_KEY_OF_OLD_SEQUENCER:0:7}..."
+        local BLS_KEY_PREVIEW="${BLS_ATTESTER_PRIV_KEY:0:7}..."
+
+        local safe_cmd="aztec add-l1-validator \\
+  --l1-rpc-urls \"$rpc_url\" \\
+  --network testnet \\
+  --private-key \"$PRIVATE_KEY_PREVIEW\" \\
+  --attester \"$ETH_ATTESTER_ADDRESS\" \\
+  --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
+  --bls-secret-key \"$BLS_KEY_PREVIEW\" \\
+  --rollup \"$CONTRACT_ADDRESS\""
+
+        echo -e "${CYAN}$(t "command_to_execute")${NC}"
+        echo -e "$safe_cmd"
+
+        # Запрос подтверждения
+        echo -e "\n${YELLOW}$(t "staking_command_prompt")${NC}"
+        read -p "$(t "staking_execute_prompt"): " confirm
+
+        case "$confirm" in
+            [yY])
+                echo -e "${GREEN}$(t "staking_executing")${NC}"
+                if eval "$cmd"; then
+                    echo -e "${GREEN}✅ $(t "staking_success_single")${NC}"
+                    success=true
+                    break
+                else
+                    echo -e "${RED}❌ $(t "staking_failed_single")${NC}"
+                    echo -e "${YELLOW}$(t "trying_next_rpc")${NC}"
+                fi
+                ;;
+            [sS])
+                echo -e "${YELLOW}⏭️ $(t "staking_skipped")${NC}"
+                success=true
+                break
+                ;;
+            [qQ])
+                echo -e "${YELLOW}🛑 $(t "staking_cancelled")${NC}"
+                return 0
+                ;;
+            *)
+                echo -e "${YELLOW}⏭️ $(t "staking_skipped_rpc")${NC}"
+                ;;
+        esac
+    done
+
+    if [ "$success" = false ]; then
+        echo -e "${RED}❌ $(t "staking_all_failed_single")${NC}"
+        return 1
+    fi
 
     echo -e "\n${GREEN}✅ $(t "staking_completed")${NC}"
     return 0
