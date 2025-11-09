@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.2.1"
+SCRIPT_VERSION="2.2.2"
 
 function show_logo() {
     echo -e " "
@@ -1026,15 +1026,37 @@ check_dependencies() {
 
             # Устанавливаем curl_cffi с обходом externally-managed-environment
             echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-            python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
-            python3 -m pip install --quiet curl_cffi
+            # Сначала проверяем доступность pip
+            if python3 -m pip --version &>/dev/null; then
+              python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+              python3 -m pip install --quiet curl_cffi
+            else
+              # Если pip недоступен, устанавливаем через ensurepip
+              python3 -m ensurepip --user 2>/dev/null || true
+              python3 -m pip install --user --quiet curl_cffi 2>/dev/null || \
+              curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+              python3 get-pip.py --user && \
+              python3 -m pip install --user --quiet curl_cffi
+              rm -f get-pip.py
+            fi
             ;;
 
           python3_curl_cffi)
             # Устанавливаем только curl_cffi с обходом externally-managed-environment
             echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-            python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
-            python3 -m pip install --quiet curl_cffi
+            # Сначала проверяем доступность pip
+            if python3 -m pip --version &>/dev/null; then
+              python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+              python3 -m pip install --quiet curl_cffi
+            else
+              # Если pip недоступен, устанавливаем через ensurepip
+              python3 -m ensurepip --user 2>/dev/null || true
+              python3 -m pip install --user --quiet curl_cffi 2>/dev/null || \
+              curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+              python3 get-pip.py --user && \
+              python3 -m pip install --user --quiet curl_cffi
+              rm -f get-pip.py
+            fi
             ;;
         esac
       done
@@ -1053,8 +1075,19 @@ check_dependencies() {
 
       if [[ "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-        python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
-        python3 -m pip install --quiet curl_cffi
+        # Сначала проверяем доступность pip
+        if python3 -m pip --version &>/dev/null; then
+          python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+          python3 -m pip install --quiet curl_cffi
+        else
+          # Если pip недоступен, устанавливаем через ensurepip
+          python3 -m ensurepip --user 2>/dev/null || true
+          python3 -m pip install --user --quiet curl_cffi 2>/dev/null || \
+          curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+          python3 get-pip.py --user && \
+          python3 -m pip install --user --quiet curl_cffi
+          rm -f get-pip.py
+        fi
       else
         echo -e "\n${YELLOW}$(t "curl_cffi_optional")${NC}"
       fi
