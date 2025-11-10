@@ -35,11 +35,6 @@
     "solution": "1. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
   },
   {
-    "pattern": "ERROR: cli Error in command execution",
-    "message": "Cli Error in command execution - Your node cannot start!",
-    "solution": "Please check & copy error log. Send it to Aztec help channel in Discord"
-  },
-  {
     "pattern": "ERROR: cli KeystoreError: Duplicate attester address found",
     "message": "Cli Error in command execution - Duplicate attester address found",
     "solution": "Go to the key storage folder /root/aztec/config/ and delete the bls-filtered-pk.json file from there."
