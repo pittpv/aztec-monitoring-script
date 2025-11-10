@@ -3219,45 +3219,71 @@ generate_bls_new_operator_method() {
     read -p "$(t "bls_sepolia_rpc_prompt") " rpc_url
     echo -e "${GREEN}$(t "bls_starting_generation")${NC}"
 
-    # Удаляем старый файл и генерируем новые ключи
-    rm -f ~/.aztec/keystore/key1.json
+    # Создаем папку для временных файлов
+    local TEMP_DIR=$(mktemp -d)
+
+    # Массивы для хранения новых ключей
+    local NEW_ETH_PRIVATE_KEYS=()
+    local NEW_BLS_KEYS=()
+    local NEW_ETH_ADDRESSES=()
+
     echo -e "${YELLOW}$(t "bls_ready_to_generate")${NC}"
-    read -p "$(t "bls_press_enter_to_generate") " -r
 
-    # Генерация новых ключей
-    if ! aztec validator-keys new --fee-recipient 0x0000000000000000000000000000000000000000000000000000000000000000; then
-        echo -e "${RED}$(t "bls_generation_failed")${NC}"
-        return 1
-    fi
+    # Генерация отдельных ключей для каждого валидатора
+    for ((i=0; i<${#OLD_SEQUENCER_KEYS[@]}; i++)); do
+        echo -e "\n${BLUE}Generating keys for validator $((i+1))/${#OLD_SEQUENCER_KEYS[@]}...${NC}"
 
-    # Извлечение новых ключей
-    local KEYSTORE_FILE=~/.aztec/keystore/key1.json
-    if [ ! -f "$KEYSTORE_FILE" ]; then
-        echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
-        return 1
-    fi
+        # Удаляем старый файл и генерируем новые ключи
+        rm -f ~/.aztec/keystore/key1.json
+        read -p "$(t "bls_press_enter_to_generate") " -r
 
-    local NEW_ETH_PRIVATE_KEY=$(jq -r '.validators[0].attester.eth' "$KEYSTORE_FILE" 2>/dev/null)
-    local BLS_ATTESTER_PRIV_KEY=$(jq -r '.validators[0].attester.bls' "$KEYSTORE_FILE" 2>/dev/null)
-    local ETH_ATTESTER_ADDRESS=$(cast wallet address "$NEW_ETH_PRIVATE_KEY" 2>/dev/null)
+        # Генерация новых ключей
+        if ! aztec validator-keys new --fee-recipient 0x0000000000000000000000000000000000000000000000000000000000000000; then
+            echo -e "${RED}$(t "bls_generation_failed")${NC}"
+            rm -rf "$TEMP_DIR"
+            return 1
+        fi
 
-    if [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
-       [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ]; then
-        echo -e "${RED}$(t "bls_key_extraction_failed")${NC}"
-        return 1
-    fi
+        # Извлечение новых ключей
+        local KEYSTORE_FILE=~/.aztec/keystore/key1.json
+        if [ ! -f "$KEYSTORE_FILE" ]; then
+            echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
+            rm -rf "$TEMP_DIR"
+            return 1
+        fi
 
-    # Показываем пользователю новые ключи
-    echo -e "${GREEN}$(t "bls_new_keys_generated")${NC}"
-    echo -e "   - $(t "bls_new_eth_private_key"): $NEW_ETH_PRIVATE_KEY"
-    echo -e "   - $(t "bls_new_bls_private_key"): $BLS_ATTESTER_PRIV_KEY"
-    echo -e "   - $(t "bls_new_public_address"): $ETH_ATTESTER_ADDRESS"
+        local NEW_ETH_PRIVATE_KEY=$(jq -r '.validators[0].attester.eth' "$KEYSTORE_FILE" 2>/dev/null)
+        local BLS_ATTESTER_PRIV_KEY=$(jq -r '.validators[0].attester.bls' "$KEYSTORE_FILE" 2>/dev/null)
+        local ETH_ATTESTER_ADDRESS=$(cast wallet address "$NEW_ETH_PRIVATE_KEY" 2>/dev/null)
+
+        if [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
+           [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ]; then
+            echo -e "${RED}$(t "bls_key_extraction_failed")${NC}"
+            rm -rf "$TEMP_DIR"
+            return 1
+        fi
+
+        # Сохраняем ключи в массивы
+        NEW_ETH_PRIVATE_KEYS+=("$NEW_ETH_PRIVATE_KEY")
+        NEW_BLS_KEYS+=("$BLS_ATTESTER_PRIV_KEY")
+        NEW_ETH_ADDRESSES+=("$ETH_ATTESTER_ADDRESS")
+
+        # Показываем пользователю новые ключи
+        echo -e "${GREEN}✅ Keys generated for validator $((i+1))${NC}"
+        echo -e "   - $(t "bls_new_eth_private_key"): ${NEW_ETH_PRIVATE_KEY:0:20}..."
+        echo -e "   - $(t "bls_new_bls_private_key"): ${BLS_ATTESTER_PRIV_KEY:0:20}..."
+        echo -e "   - $(t "bls_new_public_address"): $ETH_ATTESTER_ADDRESS"
+
+        # Сохраняем копию файла для каждого валидатора
+        cp "$KEYSTORE_FILE" "$TEMP_DIR/keystore_validator_$((i+1)).json"
+    done
+
     echo ""
 
     # Сохраняем ключи в файл для совместимости с stake_validators
     local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
-    # Создаем массив валидаторов для каждого приватного ключа с адресами
+    # Создаем массив валидаторов с отдельными new_operator_info для каждого
     local VALIDATORS_JSON=""
     for ((i=0; i<${#OLD_SEQUENCER_KEYS[@]}; i++)); do
         if [ $i -gt 0 ]; then
@@ -3267,41 +3293,42 @@ generate_bls_new_operator_method() {
     {
       "attester": {
         "eth": "${OLD_SEQUENCER_KEYS[$i]}",
-        "bls": "$BLS_ATTESTER_PRIV_KEY",
+        "bls": "${NEW_BLS_KEYS[$i]}",
         "old_address": "${OLD_VALIDATOR_ADDRESSES[$i]}"
+      },
+      "new_operator_info": {
+        "eth_private_key": "${NEW_ETH_PRIVATE_KEYS[$i]}",
+        "bls_private_key": "${NEW_BLS_KEYS[$i]}",
+        "eth_address": "${NEW_ETH_ADDRESSES[$i]}",
+        "rpc_url": "$rpc_url"
       }
     }
 EOF
         )
     done
 
-    # Создаем массив старых адресов для удобства
-    local OLD_ADDRESSES_JSON=""
-    for ((i=0; i<${#OLD_VALIDATOR_ADDRESSES[@]}; i++)); do
-        if [ $i -gt 0 ]; then
-            OLD_ADDRESSES_JSON+=","
-        fi
-        OLD_ADDRESSES_JSON+="\"${OLD_VALIDATOR_ADDRESSES[$i]}\""
-    done
-
     cat > "$BLS_PK_FILE" << EOF
 {
   "validators": [
 $VALIDATORS_JSON
-  ],
-  "new_operator_info": {
-    "eth_private_key": "$NEW_ETH_PRIVATE_KEY",
-    "bls_private_key": "$BLS_ATTESTER_PRIV_KEY",
-    "eth_address": "$ETH_ATTESTER_ADDRESS",
-    "rpc_url": "$rpc_url"
-  }
+  ]
 }
 EOF
 
-    echo -e "${YELLOW}$(t "bls_funding_required")${NC}"
-    echo -e "   $ETH_ATTESTER_ADDRESS"
+    # Очищаем временную папку
+    rm -rf "$TEMP_DIR"
+
+    # Показываем сводную информацию
     echo -e "${GREEN}✅ $(t "bls_keys_saved_success")${NC}"
-    echo ""
+    echo -e "\n${BLUE}=== Summary of generated validators ===${NC}"
+    for ((i=0; i<${#OLD_SEQUENCER_KEYS[@]}; i++)); do
+        echo -e "${CYAN}Validator $((i+1)):${NC}"
+        echo -e "  Old address: ${OLD_VALIDATOR_ADDRESSES[$i]}"
+        echo -e "  New address: ${NEW_ETH_ADDRESSES[$i]}"
+        echo -e "  Funding required: ${NEW_ETH_ADDRESSES[$i]}"
+        echo ""
+    done
+
     echo -e "${YELLOW}$(t "bls_next_steps")${NC}"
     echo -e "   1. $(t "bls_send_eth_step")"
     echo -e "   2. $(t "bls_run_approve_step")"
@@ -3511,27 +3538,7 @@ stake_validators_new_format() {
     local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
 
-    # Проверяем наличие информации о новом операторе
-    local NEW_OPERATOR_INFO=$(jq -e '.new_operator_info' "$BLS_PK_FILE" 2>/dev/null)
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}❌ $(t "staking_missing_new_operator_info")${NC}"
-        return 1
-    fi
-
-    # Извлекаем информацию о новом операторе
-    local NEW_ETH_PRIVATE_KEY=$(jq -r '.new_operator_info.eth_private_key' "$BLS_PK_FILE" 2>/dev/null)
-    local BLS_ATTESTER_PRIV_KEY=$(jq -r '.new_operator_info.bls_private_key' "$BLS_PK_FILE" 2>/dev/null)
-    local ETH_ATTESTER_ADDRESS=$(jq -r '.new_operator_info.eth_address' "$BLS_PK_FILE" 2>/dev/null)
-    local RPC_URL=$(jq -r '.new_operator_info.rpc_url' "$BLS_PK_FILE" 2>/dev/null)
-
-    if [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
-       [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ] ||
-       [ -z "$ETH_ATTESTER_ADDRESS" ] || [ "$ETH_ATTESTER_ADDRESS" = "null" ]; then
-        echo -e "${RED}❌ $(t "staking_invalid_bls_file")${NC}"
-        return 1
-    fi
-
-    # Получаем количество валидаторов из старого формата
+    # Получаем количество валидаторов
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
     if [ -z "$VALIDATOR_COUNT" ] || [ "$VALIDATOR_COUNT" -eq 0 ]; then
         echo -e "${RED}❌ $(t "staking_no_validators")${NC}"
@@ -3539,22 +3546,11 @@ stake_validators_new_format() {
     fi
 
     echo -e "${GREEN}$(t "staking_found_validators_new_operator")${NC}" "$VALIDATOR_COUNT"
-    echo -e "  $(t "eth_address"): $ETH_ATTESTER_ADDRESS"
     echo ""
 
     # Создаем папку для ключей если не существует
     local KEYS_DIR="/root/aztec/keys"
     mkdir -p "$KEYS_DIR"
-
-    # Список RPC провайдеров (используем сохраненный или дефолтный список)
-    local rpc_providers=("$RPC_URL")
-    if [ -z "$RPC_URL" ] || [ "$RPC_URL" = "null" ]; then
-        rpc_providers=(
-            "https://ethereum-sepolia-rpc.publicnode.com"
-            "https://1rpc.io/sepolia"
-            "https://sepolia.drpc.org"
-        )
-    fi
 
     if [ -z "$CONTRACT_ADDRESS" ]; then
         echo -e "${RED}❌ $(t "contract_not_set")${NC}"
@@ -3571,25 +3567,44 @@ stake_validators_new_format() {
         echo -e "${YELLOW}📁 $(t "staking_keystore_backup_created")${NC}" "$KEYSTORE_BACKUP"
     fi
 
-    # Цикл по всем валидаторам (приватным ключам)
+    # Цикл по всем валидаторам
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
         printf "\n${BLUE}=== $(t "staking_processing_new_operator") ===${NC}\n" \
 		 "$((i+1))" "$VALIDATOR_COUNT"
 		 echo ""
 
-        # Получаем приватный ключ старого сиквенсера для текущего валидатора
+        # Получаем данные для текущего валидатора
         local PRIVATE_KEY_OF_OLD_SEQUENCER=$(jq -r ".validators[$i].attester.eth" "$BLS_PK_FILE" 2>/dev/null)
         local OLD_VALIDATOR_ADDRESS=$(jq -r ".validators[$i].attester.old_address" "$BLS_PK_FILE" 2>/dev/null)
+        local NEW_ETH_PRIVATE_KEY=$(jq -r ".validators[$i].new_operator_info.eth_private_key" "$BLS_PK_FILE" 2>/dev/null)
+        local BLS_ATTESTER_PRIV_KEY=$(jq -r ".validators[$i].new_operator_info.bls_private_key" "$BLS_PK_FILE" 2>/dev/null)
+        local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].new_operator_info.eth_address" "$BLS_PK_FILE" 2>/dev/null)
+        local RPC_URL=$(jq -r ".validators[$i].new_operator_info.rpc_url" "$BLS_PK_FILE" 2>/dev/null)
 
-        if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ]; then
+        # Проверяем что все данные получены
+        if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ] ||
+           [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
+           [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ] ||
+           [ -z "$ETH_ATTESTER_ADDRESS" ] || [ "$ETH_ATTESTER_ADDRESS" = "null" ]; then
             printf "${RED}❌ $(t "staking_failed_private_key")${NC}\n" "$((i+1))"
             continue
         fi
 
         echo -e "${GREEN}✓ $(t "staking_data_loaded")${NC}"
-        echo -e "  $(t "eth_address"): $ETH_ATTESTER_ADDRESS"
+        echo -e "  Old address: $OLD_VALIDATOR_ADDRESS"
+        echo -e "  New address: $ETH_ATTESTER_ADDRESS"
         echo -e "  $(t "private_key"): ${PRIVATE_KEY_OF_OLD_SEQUENCER:0:10}..."
         echo -e "  $(t "bls_key"): ${BLS_ATTESTER_PRIV_KEY:0:20}..."
+
+        # Список RPC провайдеров (используем сохраненный или дефолтный список)
+        local rpc_providers=("$RPC_URL")
+        if [ -z "$RPC_URL" ] || [ "$RPC_URL" = "null" ]; then
+            rpc_providers=(
+                "https://ethereum-sepolia-rpc.publicnode.com"
+                "https://1rpc.io/sepolia"
+                "https://sepolia.drpc.org"
+            )
+        fi
 
         # Цикл по RPC провайдерам
         local success=false
