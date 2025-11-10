@@ -279,7 +279,7 @@ init_languages() {
   TRANSLATIONS["en,checking_aztec_version"]="Checking Aztec version..."
   TRANSLATIONS["en,aztec_version_failed"]="Failed to retrieve aztec version."
   TRANSLATIONS["en,aztec_node_version"]="Aztec Node version:"
-  TRANSLATIONS["en,critical_error_found"]="Critical error detected"
+  TRANSLATIONS["en,critical_error_found"]="🚨 Critical error detected"
   TRANSLATIONS["en,error_prefix"]="ERROR:"
   TRANSLATIONS["en,solution_prefix"]="Solution:"
   TRANSLATIONS["en,notifications_prompt"]="Do you want to receive additional notifications?"
@@ -622,7 +622,7 @@ init_languages() {
   TRANSLATIONS["ru,checking_aztec_version"]="Проверка версии Aztec..."
   TRANSLATIONS["ru,aztec_version_failed"]="Не удалось получить версию aztec."
   TRANSLATIONS["ru,aztec_node_version"]="Версия ноды Aztec:"
-  TRANSLATIONS["ru,critical_error_found"]="Найдена критическая ошибка"
+  TRANSLATIONS["ru,critical_error_found"]="🚨 Найдена критическая ошибка"
   TRANSLATIONS["ru,error_prefix"]="ОШИБКА:"
   TRANSLATIONS["ru,solution_prefix"]="Решение:"
   TRANSLATIONS["ru,notifications_prompt"]="Хотите получать дополнительные уведомления?"
@@ -965,7 +965,7 @@ init_languages() {
   TRANSLATIONS["tr,checking_aztec_version"]="Aztec sürümü kontrol ediliyor..."
   TRANSLATIONS["tr,aztec_version_failed"]="Aztec sürümü alınamadı."
   TRANSLATIONS["tr,aztec_node_version"]="Aztec Node sürümü:"
-  TRANSLATIONS["tr,critical_error_found"]="Kritik hata tespit edildi"
+  TRANSLATIONS["tr,critical_error_found"]="🚨 Kritik hata tespit edildi"
   TRANSLATIONS["tr,error_prefix"]="HATA:"
   TRANSLATIONS["tr,solution_prefix"]="Çözüm:"
   TRANSLATIONS["tr,notifications_prompt"]="Ek bildirim almak istiyor musunuz?"
@@ -1992,7 +1992,7 @@ find_last_log_line() {
   local temp_file=\$(mktemp)
 
   # Получаем логи с ограничением по объему и сразу фильтруем нужные строки
-  docker logs "\$container_id" --tail 10000 2>&1 | \
+  docker logs "\$container_id" --tail 20000 2>&1 | \
     sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g' | \
     grep -E 'Sequencer sync check succeeded|Downloaded L2 block' | \
     tail -100 > "\$temp_file"
@@ -2082,7 +2082,7 @@ check_committee() {
   debug_log "Container ID: \$container_id"
 
   # --- Получаем данные о комитете ---
-  committee_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -a "Computing stats for slot" | tail -n 1)
+  committee_line=\$(docker logs "\$container_id" --tail 20000 2>&1 | grep -a "Computing stats for slot" | tail -n 1)
   [ -z "\$committee_line" ] && { debug_log "No committee line found in logs"; return; }
   debug_log "Committee line found: \$committee_line"
 
@@ -2172,7 +2172,7 @@ check_committee() {
     return
   fi
 
-  activity_line=\$(docker logs "\$container_id" --tail 10000 2>&1 | grep -a "Updating L2 slot \$slot observed activity" | tail -n 1)
+  activity_line=\$(docker logs "\$container_id" --tail 20000 2>&1 | grep -a "Updating L2 slot \$slot observed activity" | tail -n 1)
   if [ -n "\$activity_line" ]; then
     debug_log "Activity line found: \$activity_line"
     activity_json=\$(echo "\$activity_line" | sed 's/.*observed activity //')
