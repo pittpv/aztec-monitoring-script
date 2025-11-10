@@ -144,6 +144,12 @@ init_languages() {
   TRANSLATIONS["en,staking_failed_single"]="Failed to stake validator with new operator method"
   TRANSLATIONS["en,staking_all_failed_single"]="All RPC providers failed for new operator staking"
   TRANSLATIONS["en,staking_skipped"]="Staking skipped"
+  TRANSLATIONS["en,staking_keystore_backup_created"]="Keystore backup created:"
+  TRANSLATIONS["en,staking_updating_keystore"]="Updating keystore.json - replacing old validator address with new operator address"
+  TRANSLATIONS["en,staking_keystore_updated"]="Keystore updated successfully:"
+  TRANSLATIONS["en,staking_keystore_no_change"]="No changes made to keystore (address not found):"
+  TRANSLATIONS["en,staking_keystore_update_failed"]="Failed to update keystore.json"
+  TRANSLATIONS["en,staking_keystore_skip_update"]="Skipping keystore update (old address not available)"
   TRANSLATIONS["en,bls_no_private_keys"]="No private keys provided"
   TRANSLATIONS["en,bls_found_private_keys"]="Found private keys:"
   TRANSLATIONS["en,bls_keys_saved_success"]="BLS keys successfully generated and saved"
@@ -487,6 +493,12 @@ init_languages() {
   TRANSLATIONS["ru,staking_failed_single"]="Не удалось выполнить стейкинг валидатора методом нового оператора"
   TRANSLATIONS["ru,staking_all_failed_single"]="Все RPC провайдеры не сработали для стейкинга новым оператором"
   TRANSLATIONS["ru,staking_skipped"]="Стейкинг пропущен"
+  TRANSLATIONS["ru,staking_keystore_backup_created"]="Резервная копия keystore создана:"
+  TRANSLATIONS["ru,staking_updating_keystore"]="Обновление keystore.json - замена старого адреса валидатора на новый адрес оператора"
+  TRANSLATIONS["ru,staking_keystore_updated"]="Keystore успешно обновлен:"
+  TRANSLATIONS["ru,staking_keystore_no_change"]="Изменения в keystore не внесены (адрес не найден):"
+  TRANSLATIONS["ru,staking_keystore_update_failed"]="Не удалось обновить keystore.json"
+  TRANSLATIONS["ru,staking_keystore_skip_update"]="Пропуск обновления keystore (старый адрес недоступен)"
   TRANSLATIONS["ru,bls_no_private_keys"]="Приватные ключи не предоставлены"
   TRANSLATIONS["ru,bls_found_private_keys"]="Найдено приватных ключей:"
   TRANSLATIONS["ru,bls_keys_saved_success"]="BLS ключи успешно сгенерированы и сохранены"
@@ -830,6 +842,12 @@ init_languages() {
   TRANSLATIONS["tr,staking_failed_single"]="Yeni operatör yöntemiyle validatör stake edilemedi"
   TRANSLATIONS["tr,staking_all_failed_single"]="Yeni operatör staking için tüm RPC sağlayıcıları başarısız oldu"
   TRANSLATIONS["tr,staking_skipped"]="Staking atlandı"
+  TRANSLATIONS["tr,staking_keystore_backup_created"]="Keystore yedegi olusturuldu:"
+  TRANSLATIONS["tr,staking_updating_keystore"]="Keystore.json güncelleniyor - eski validatör adresi yeni operatör adresiyle değiştiriliyor"
+  TRANSLATIONS["tr,staking_keystore_updated"]="Keystore başarıyla güncellendi:"
+  TRANSLATIONS["tr,staking_keystore_no_change"]="Keystore'da değişiklik yapılmadı (adres bulunamadı):"
+  TRANSLATIONS["tr,staking_keystore_update_failed"]="Keystore.json güncellenemedi"
+  TRANSLATIONS["tr,staking_keystore_skip_update"]="Keystore güncellemesi atlandı (eski adres mevcut değil)"
   TRANSLATIONS["tr,bls_no_private_keys"]="Özel anahtar sağlanmadı"
   TRANSLATIONS["tr,bls_found_private_keys"]="Bulunan özel anahtarlar:"
   TRANSLATIONS["tr,bls_keys_saved_success"]="BLS anahtarları başarıyla oluşturuldu ve kaydedildi"
@@ -3184,6 +3202,20 @@ generate_bls_new_operator_method() {
 
     echo -e "${GREEN}$(t "bls_found_private_keys") ${#OLD_SEQUENCER_KEYS[@]}${NC}"
 
+    # Генерируем адреса для старых валидаторов
+    local OLD_VALIDATOR_ADDRESSES=()
+    echo -e "\n${BLUE}Generating addresses for old validators...${NC}"
+    for private_key in "${OLD_SEQUENCER_KEYS[@]}"; do
+        local old_address=$(cast wallet address "$private_key" 2>/dev/null)
+        if [ -n "$old_address" ]; then
+            OLD_VALIDATOR_ADDRESSES+=("$old_address")
+            echo -e "  ${GREEN}✓${NC} $old_address"
+        else
+            echo -e "  ${RED}✗${NC} Failed to generate address for key: ${private_key:0:10}..."
+            OLD_VALIDATOR_ADDRESSES+=("unknown")
+        fi
+    done
+
     read -p "$(t "bls_sepolia_rpc_prompt") " rpc_url
     echo -e "${GREEN}$(t "bls_starting_generation")${NC}"
 
@@ -3225,7 +3257,7 @@ generate_bls_new_operator_method() {
     # Сохраняем ключи в файл для совместимости с stake_validators
     local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
-    # Создаем массив валидаторов для каждого приватного ключа
+    # Создаем массив валидаторов для каждого приватного ключа с адресами
     local VALIDATORS_JSON=""
     for ((i=0; i<${#OLD_SEQUENCER_KEYS[@]}; i++)); do
         if [ $i -gt 0 ]; then
@@ -3235,11 +3267,21 @@ generate_bls_new_operator_method() {
     {
       "attester": {
         "eth": "${OLD_SEQUENCER_KEYS[$i]}",
-        "bls": "$BLS_ATTESTER_PRIV_KEY"
+        "bls": "$BLS_ATTESTER_PRIV_KEY",
+        "old_address": "${OLD_VALIDATOR_ADDRESSES[$i]}"
       }
     }
 EOF
         )
+    done
+
+    # Создаем массив старых адресов для удобства
+    local OLD_ADDRESSES_JSON=""
+    for ((i=0; i<${#OLD_VALIDATOR_ADDRESSES[@]}; i++)); do
+        if [ $i -gt 0 ]; then
+            OLD_ADDRESSES_JSON+=","
+        fi
+        OLD_ADDRESSES_JSON+="\"${OLD_VALIDATOR_ADDRESSES[$i]}\""
     done
 
     cat > "$BLS_PK_FILE" << EOF
@@ -3259,6 +3301,7 @@ EOF
     echo -e "${YELLOW}$(t "bls_funding_required")${NC}"
     echo -e "   $ETH_ATTESTER_ADDRESS"
     echo -e "${GREEN}✅ $(t "bls_keys_saved_success")${NC}"
+    echo ""
     echo -e "${YELLOW}$(t "bls_next_steps")${NC}"
     echo -e "   1. $(t "bls_send_eth_step")"
     echo -e "   2. $(t "bls_run_approve_step")"
@@ -3466,6 +3509,7 @@ stake_validators_old_format() {
 # === New format (new operator method) ===
 stake_validators_new_format() {
     local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
 
     # Проверяем наличие информации о новом операторе
     local NEW_OPERATOR_INFO=$(jq -e '.new_operator_info' "$BLS_PK_FILE" 2>/dev/null)
@@ -3520,6 +3564,13 @@ stake_validators_new_format() {
     printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$CONTRACT_ADDRESS"
     echo ""
 
+    # Создаем резервную копию keystore.json перед изменениями
+    local KEYSTORE_BACKUP="$KEYSTORE_FILE.backup.$(date +%Y%m%d_%H%M%S)"
+    if [ -f "$KEYSTORE_FILE" ]; then
+        cp "$KEYSTORE_FILE" "$KEYSTORE_BACKUP"
+        echo -e "${YELLOW}📁 $(t "staking_keystore_backup_created")${NC}" "$KEYSTORE_BACKUP"
+    fi
+
     # Цикл по всем валидаторам (приватным ключам)
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
         printf "\n${BLUE}=== $(t "staking_processing_new_operator") ===${NC}\n" \
@@ -3528,6 +3579,7 @@ stake_validators_new_format() {
 
         # Получаем приватный ключ старого сиквенсера для текущего валидатора
         local PRIVATE_KEY_OF_OLD_SEQUENCER=$(jq -r ".validators[$i].attester.eth" "$BLS_PK_FILE" 2>/dev/null)
+        local OLD_VALIDATOR_ADDRESS=$(jq -r ".validators[$i].attester.old_address" "$BLS_PK_FILE" 2>/dev/null)
 
         if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ]; then
             printf "${RED}❌ $(t "staking_failed_private_key")${NC}\n" "$((i+1))"
@@ -3594,6 +3646,35 @@ EOF
                             echo -e "${GREEN}📁 $(t "staking_yml_file_created")${NC}" "$YML_FILE"
                         else
                             echo -e "${RED}⚠️ $(t "staking_yml_file_failed")${NC}" "$YML_FILE"
+                        fi
+
+                        # Заменяем старый адрес валидатора на новый в keystore.json
+                        if [ -f "$KEYSTORE_FILE" ] && [ "$OLD_VALIDATOR_ADDRESS" != "null" ] && [ -n "$OLD_VALIDATOR_ADDRESS" ]; then
+                            echo -e "${BLUE}🔄 $(t "staking_updating_keystore")${NC}"
+
+                            # Создаем временный файл для обновленного keystore
+                            local TEMP_KEYSTORE=$(mktemp)
+
+                            # Заменяем старый адрес на новый в keystore.json
+                            if jq --arg old_addr "$OLD_VALIDATOR_ADDRESS" \
+                                  --arg new_addr "$ETH_ATTESTER_ADDRESS" \
+                                  'walk(if type == "object" and .attester == $old_addr then .attester = $new_addr else . end)' \
+                                  "$KEYSTORE_FILE" > "$TEMP_KEYSTORE"; then
+
+                                # Проверяем, что замена произошла
+                                if grep -q "$ETH_ATTESTER_ADDRESS" "$TEMP_KEYSTORE"; then
+                                    mv "$TEMP_KEYSTORE" "$KEYSTORE_FILE"
+                                    echo -e "${GREEN}✅ $(t "staking_keystore_updated")${NC}" "$OLD_VALIDATOR_ADDRESS → $ETH_ATTESTER_ADDRESS"
+                                else
+                                    echo -e "${YELLOW}⚠️ $(t "staking_keystore_no_change")${NC}" "$OLD_VALIDATOR_ADDRESS"
+                                    rm -f "$TEMP_KEYSTORE"
+                                fi
+                            else
+                                echo -e "${RED}❌ $(t "staking_keystore_update_failed")${NC}"
+                                rm -f "$TEMP_KEYSTORE"
+                            fi
+                        else
+                            echo -e "${YELLOW}⚠️ $(t "staking_keystore_skip_update")${NC}"
                         fi
 
                         success=true
