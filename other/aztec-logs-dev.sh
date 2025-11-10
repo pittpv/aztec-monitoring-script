@@ -127,6 +127,10 @@ init_languages() {
   TRANSLATIONS["en,bls_approve_failed"]="Approve transaction failed"
   TRANSLATIONS["en,bls_joining_testnet"]="Joining the testnet..."
   TRANSLATIONS["en,bls_staking_failed"]="Staking failed"
+  TRANSLATIONS["en,staking_yml_file_created"]="YML key file created:"
+  TRANSLATIONS["en,staking_yml_file_failed"]="Failed to create YML key file:"
+  TRANSLATIONS["en,staking_total_yml_files_created"]="Total YML key files created:"
+  TRANSLATIONS["en,staking_yml_files_location"]="Key files location:"
   TRANSLATIONS["en,bls_new_operator_success"]="All done! You have successfully joined the new testnet"
   TRANSLATIONS["en,bls_restart_node_notice"]="Now rerun your node with your new private key and address"
   TRANSLATIONS["en,bls_key_extraction_failed"]="Failed to extract keys from generated file"
@@ -466,6 +470,10 @@ init_languages() {
   TRANSLATIONS["ru,bls_approve_failed"]="Транзакция подтверждения не удалась"
   TRANSLATIONS["ru,bls_joining_testnet"]="Присоединение к тестовой сети..."
   TRANSLATIONS["ru,bls_staking_failed"]="Стейкинг не удался"
+  TRANSLATIONS["ru,staking_yml_file_created"]="YML файл с ключами создан:"
+  TRANSLATIONS["ru,staking_yml_file_failed"]="Не удалось создать YML файл с ключами:"
+  TRANSLATIONS["ru,staking_total_yml_files_created"]="Всего создано YML файлов с ключами:"
+  TRANSLATIONS["ru,staking_yml_files_location"]="Расположение файлов с ключами:"
   TRANSLATIONS["ru,bls_new_operator_success"]="Все готово! Вы успешно присоединились к новой тестовой сети"
   TRANSLATIONS["ru,bls_restart_node_notice"]="Теперь перезапустите вашу ноду с новым приватным ключом и адресом"
   TRANSLATIONS["ru,bls_key_extraction_failed"]="Не удалось извлечь ключи из сгенерированного файла"
@@ -805,6 +813,10 @@ init_languages() {
   TRANSLATIONS["tr,bls_approve_failed"]="Onay işlemi başarısız oldu"
   TRANSLATIONS["tr,bls_joining_testnet"]="Test ağına katılıyor..."
   TRANSLATIONS["tr,bls_staking_failed"]="Staking başarısız oldu"
+  TRANSLATIONS["tr,staking_yml_file_created"]="YML anahtar dosyası oluşturuldu:"
+  TRANSLATIONS["tr,staking_yml_file_failed"]="YML anahtar dosyası oluşturulamadı:"
+  TRANSLATIONS["tr,staking_total_yml_files_created"]="Toplam oluşturulan YML anahtar dosyası:"
+  TRANSLATIONS["tr,staking_yml_files_location"]="Anahtar dosyalarının konumu:"
   TRANSLATIONS["tr,bls_new_operator_success"]="Hepsi tamam! Yeni test ağına başarıyla katıldınız"
   TRANSLATIONS["tr,bls_restart_node_notice"]="Şimdi düğümünüzü yeni özel anahtarınız ve adresinizle yeniden çalıştırın"
   TRANSLATIONS["tr,bls_key_extraction_failed"]="Oluşturulan dosyadan anahtarlar çıkarılamadı"
@@ -2378,6 +2390,7 @@ EnvironmentFile=$env_file
 ExecStart=$AGENT_SCRIPT_PATH/agent.sh
 User=root
 WorkingDirectory=$AGENT_SCRIPT_PATH
+LimitNOFILE=65535
 
 [Install]
 WantedBy=multi-user.target
@@ -3030,8 +3043,8 @@ generate_bls_existing_method() {
     # 4. Генерация BLS ключей
     echo -e "\n${BLUE}$(t "bls_generating_keys")${NC}"
 
-    local BLS_OUTPUT_FILE="$HOME/aztec/config/bls.json"
-    local BLS_FILTERED_PK_FILE="$HOME/aztec/config/bls-filtered-pk.json"
+    local BLS_OUTPUT_FILE="$HOME/aztec/bls.json"
+    local BLS_FILTERED_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
     # Временный файл для результатов генерации
     local TEMP_OUTPUT=$(mktemp)
@@ -3043,7 +3056,7 @@ generate_bls_existing_method() {
         --mnemonic "$MNEMONIC" \
         --count "$WALLET_COUNT" \
         --file "bls.json" \
-        --data-dir "$HOME/aztec/config/" 2>&1 | tee "$TEMP_OUTPUT"; then
+        --data-dir "$HOME/aztec/" 2>&1 | tee "$TEMP_OUTPUT"; then
 
         echo -e "${GREEN}$(t "bls_generation_success")${NC}"
     else
@@ -3105,7 +3118,7 @@ generate_bls_existing_method() {
                             --mnemonic "$MNEMONIC" \
                             --address-index "$ADDRESS_IDX" \
                             --file "bls-filtered-pk.json" \
-                            --data-dir "$HOME/aztec/config/"; then
+                            --data-dir "$HOME/aztec/"; then
 
                             echo -e "${GREEN}✓ Successfully generated keys for $CURRENT_ACC${NC}"
                             FIRST_ACCOUNT=false
@@ -3117,7 +3130,7 @@ generate_bls_existing_method() {
                     else
                         # Для последующих аккаунтов используем команду add
                         echo -e "${CYAN}Running: aztec validator-keys add (additional account)${NC}"
-                        if aztec validator-keys add "$HOME/aztec/config/bls-filtered-pk.json" \
+                        if aztec validator-keys add "$HOME/aztec/bls-filtered-pk.json" \
                             --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
                             --mnemonic "$MNEMONIC" \
                             --address-index "$ADDRESS_IDX" ; then
@@ -3210,7 +3223,7 @@ generate_bls_new_operator_method() {
     echo ""
 
     # Сохраняем ключи в файл для совместимости с stake_validators
-    local BLS_PK_FILE="$HOME/aztec/config/bls-filtered-pk.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
     # Создаем массив валидаторов для каждого приватного ключа
     local VALIDATORS_JSON=""
@@ -3260,7 +3273,7 @@ stake_validators() {
 
     # Проверяем существование необходимых файлов
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-    local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
+    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
 
     if [ ! -f "$BLS_PK_FILE" ]; then
         printf "${RED}❌ $(t "file_not_found")${NC}\n" "bls-filtered-pk.json" "$BLS_PK_FILE"
@@ -3283,7 +3296,7 @@ stake_validators() {
 # === Old format (existing method) ===
 stake_validators_old_format() {
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-    local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
+    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
 
     if [ ! -f "$KEYSTORE_FILE" ]; then
         printf "${RED}❌ $(t "file_not_found")${NC}\n" "keystore.json" "$KEYSTORE_FILE"
@@ -3452,7 +3465,7 @@ stake_validators_old_format() {
 
 # === New format (new operator method) ===
 stake_validators_new_format() {
-    local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
+    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
 
     # Проверяем наличие информации о новом операторе
     local NEW_OPERATOR_INFO=$(jq -e '.new_operator_info' "$BLS_PK_FILE" 2>/dev/null)
@@ -3484,6 +3497,10 @@ stake_validators_new_format() {
     echo -e "${GREEN}$(t "staking_found_validators_new_operator")${NC}" "$VALIDATOR_COUNT"
     echo -e "  $(t "eth_address"): $ETH_ATTESTER_ADDRESS"
     echo ""
+
+    # Создаем папку для ключей если не существует
+    local KEYS_DIR="/root/aztec/keys"
+    mkdir -p "$KEYS_DIR"
 
     # Список RPC провайдеров (используем сохраненный или дефолтный список)
     local rpc_providers=("$RPC_URL")
@@ -3564,6 +3581,21 @@ stake_validators_new_format() {
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success_new_operator")${NC}\n" \
 						            "$((i+1))" "$rpc_url"
+
+                        # Создаем YML файл для успешно застейканного валидатора
+                        local YML_FILE="$KEYS_DIR/new_validator_$((i+1)).yml"
+                        cat > "$YML_FILE" << EOF
+type: "file-raw"
+keyType: "SECP256K1"
+privateKey: "$NEW_ETH_PRIVATE_KEY"
+EOF
+
+                        if [ -f "$YML_FILE" ]; then
+                            echo -e "${GREEN}📁 $(t "staking_yml_file_created")${NC}" "$YML_FILE"
+                        else
+                            echo -e "${RED}⚠️ $(t "staking_yml_file_failed")${NC}" "$YML_FILE"
+                        fi
+
                         success=true
                         break
                     else
@@ -3601,6 +3633,14 @@ stake_validators_new_format() {
 
     echo -e "\n${GREEN}✅ $(t "staking_completed_new_operator")${NC}"
     echo -e "${YELLOW}$(t "bls_restart_node_notice")${NC}"
+
+    # Показываем итоговую информацию о созданных файлах
+    local CREATED_FILES=$(find "$KEYS_DIR" -name "new_validator_*.yml" | wc -l)
+    if [ "$CREATED_FILES" -gt 0 ]; then
+        echo -e "${GREEN}📂 $(t "staking_total_yml_files_created")${NC}" "$CREATED_FILES"
+        echo -e "${CYAN}$(t "staking_yml_files_location")${NC}" "$KEYS_DIR"
+    fi
+
     return 0
 }
 

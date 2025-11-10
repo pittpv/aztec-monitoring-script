@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.2.2"
+SCRIPT_VERSION="2.2.3"
 
 function show_logo() {
     echo -e " "
@@ -2861,9 +2861,9 @@ generate_bls_keys() {
     # 4. Генерация BLS ключей
     echo -e "\n${BLUE}$(t "bls_generating_keys")${NC}"
 
-    local BLS_OUTPUT_FILE="$HOME/aztec/config/bls.json"
-    local BLS_FILTERED_FILE="$HOME/aztec/config/bls-filtered.json"
-    local BLS_FILTERED_PK_FILE="$HOME/aztec/config/bls-filtered-pk.json"
+    local BLS_OUTPUT_FILE="$HOME/aztec/bls.json"
+    local BLS_FILTERED_FILE="$HOME/aztec/bls-filtered.json"
+    local BLS_FILTERED_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
     # Временный файл для результатов генерации
     local TEMP_OUTPUT=$(mktemp)
@@ -2875,7 +2875,7 @@ generate_bls_keys() {
         --mnemonic "$MNEMONIC" \
         --count "$WALLET_COUNT" \
         --file "bls.json" \
-        --data-dir "$HOME/aztec/config/" 2>&1 | tee "$TEMP_OUTPUT"; then
+        --data-dir "$HOME/aztec/" 2>&1 | tee "$TEMP_OUTPUT"; then
 
         echo -e "${GREEN}$(t "bls_generation_success")${NC}"
     else
@@ -2991,7 +2991,7 @@ generate_bls_keys() {
                     --mnemonic "$MNEMONIC" \
                     --address-index "$ADDRESS_IDX" \
                     --file "bls-filtered-pk.json" \
-                    --data-dir "$HOME/aztec/config/"; then
+                    --data-dir "$HOME/aztec/"; then
 
                     echo -e "${GREEN}✓ Successfully generated keys for $acc${NC}"
                     FIRST_ACCOUNT=false
@@ -3002,7 +3002,7 @@ generate_bls_keys() {
             else
                 # Для последующих аккаунтов используем команду add
                 echo -e "${CYAN}Running: aztec validator-keys add (additional account)${NC}"
-                if aztec validator-keys add "$HOME/aztec/config/bls-filtered-pk.json" \
+                if aztec validator-keys add "$HOME/aztec/bls-filtered-pk.json" \
                     --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
                     --mnemonic "$MNEMONIC" \
                     --address-index "$ADDRESS_IDX" ; then
@@ -3042,7 +3042,7 @@ stake_validators() {
 
     # Проверяем существование необходимых файлов
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-    local BLS_PK_FILE="/root/aztec/config/bls-filtered-pk.json"
+    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
 
     if [ ! -f "$KEYSTORE_FILE" ]; then
         printf "${RED}❌ $(t "file_not_found")${NC}\n" \

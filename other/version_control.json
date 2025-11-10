@@ -183,5 +183,10 @@
     "VERSION": "2.2.2",
     "UPDATE_DATE": "09.11.2025",
     "CHANGES": ["Small fix for pip & curl_cffi install"]
+  },
+  {
+    "VERSION": "2.2.3",
+    "UPDATE_DATE": "10.11.2025",
+    "CHANGES": ["Fix - Changed location for temporary JSON keystore files."]
   }
 ]
