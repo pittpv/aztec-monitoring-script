@@ -121,7 +121,7 @@ init_languages() {
   TRANSLATIONS["en,bls_new_eth_private_key"]="NEW ETH Private Key"
   TRANSLATIONS["en,bls_new_bls_private_key"]="NEW BLS Private Key"
   TRANSLATIONS["en,bls_new_public_address"]="NEW Public Address"
-  TRANSLATIONS["en,bls_funding_required"]="You need to send 0.2 to 0.5 Sepolia ETH to this new address:"
+  TRANSLATIONS["en,bls_funding_required"]="You need to send 0.1 to 0.3 Sepolia ETH to this new address:"
   TRANSLATIONS["en,bls_funding_confirmation"]="After the funding transaction is confirmed, press [Enter] to continue..."
   TRANSLATIONS["en,bls_approving_stake"]="Approving STAKE spending..."
   TRANSLATIONS["en,bls_approve_failed"]="Approve transaction failed"
@@ -837,7 +837,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_new_eth_private_key"]="YENİ ETH Özel Anahtarı"
   TRANSLATIONS["tr,bls_new_bls_private_key"]="YENİ BLS Özel Anahtarı"
   TRANSLATIONS["tr,bls_new_public_address"]="YENİ Genel Adres"
-  TRANSLATIONS["tr,bls_funding_required"]="Bu yeni adrese 0.2 ila 0.5 Sepolia ETH göndermeniz gerekiyor:"
+  TRANSLATIONS["tr,bls_funding_required"]="Bu yeni adrese 0.1 ila 0.3 Sepolia ETH göndermeniz gerekiyor:"
   TRANSLATIONS["tr,bls_funding_confirmation"]="Fonlama işlemi onaylandıktan sonra devam etmek için [Enter] tuşuna basın..."
   TRANSLATIONS["tr,bls_approving_stake"]="STAKE harcaması onaylanıyor..."
   TRANSLATIONS["tr,bls_approve_failed"]="Onay işlemi başarısız oldu"
@@ -3323,8 +3323,10 @@ generate_bls_new_operator_method() {
 
     echo -e "${GREEN}Found ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} validators in keystore.json${NC}"
 
-    read -p "$(t "bls_sepolia_rpc_prompt") " rpc_url
+    # Используем стандартный RPC URL вместо запроса у пользователя
+    local RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
     echo -e "${GREEN}$(t "bls_starting_generation")${NC}"
+    echo -e "${CYAN}Using default RPC: $RPC_URL${NC}"
 
     # Создаем папку для временных файлов
     local TEMP_DIR=$(mktemp -d)
@@ -3428,7 +3430,7 @@ generate_bls_new_operator_method() {
         "eth_private_key": "${NEW_ETH_PRIVATE_KEYS_MAP[$keystore_address]}",
         "bls_private_key": "${NEW_BLS_KEYS_MAP[$keystore_address]}",
         "eth_address": "${NEW_ETH_ADDRESSES_MAP[$keystore_address]}",
-        "rpc_url": "$rpc_url"
+        "rpc_url": "$RPC_URL"
       }
     }
 EOF
