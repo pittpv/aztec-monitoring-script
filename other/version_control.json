@@ -187,6 +187,6 @@
   {
     "VERSION": "2.2.3",
     "UPDATE_DATE": "10.11.2025",
-    "CHANGES": ["Fix - Changed location for temporary JSON keystore files."]
+    "CHANGES": ["Fix - Changed location for temporary JSON keystore files"]
   }
 ]
