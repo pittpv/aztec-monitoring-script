@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.2.2"
+SCRIPT_VERSION="2.2.3"
 
 function show_logo() {
     echo -e " "
@@ -67,7 +67,7 @@ init_languages() {
   TRANSLATIONS["en,option19"]="19. Approve"
   TRANSLATIONS["en,option20"]="20. Stake"
   TRANSLATIONS["en,option0"]="0. Exit"
-  TRANSLATIONS["en,bls_mnemonic_prompt"]="Enter mnemonic phrase (hidden input):"
+  TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
   TRANSLATIONS["en,bls_invalid_number"]="Invalid number. Please enter a positive integer."
   TRANSLATIONS["en,bls_keystore_not_found"]="❌ keystore.json not found at /root/aztec/config/keystore.json"
@@ -112,7 +112,7 @@ init_languages() {
   TRANSLATIONS["en,bls_existing_method_title"]="Existing Address Method"
   TRANSLATIONS["en,bls_new_operator_title"]="New Operator Address Method"
   TRANSLATIONS["en,bls_old_validator_info"]="Please provide your old validator info:"
-  TRANSLATIONS["en,bls_old_private_key_prompt"]="Enter one or more OLD private keys of Sequencers, separated by commas and without spaces (hidden input): "
+  TRANSLATIONS["en,bls_old_private_key_prompt"]="Copy and paste one or more OLD private keys, separated by commas without spaces, and press Enter (the input is hidden, but pasted): "
   TRANSLATIONS["en,bls_sepolia_rpc_prompt"]="Enter your sepolia RPC URL: "
   TRANSLATIONS["en,bls_starting_generation"]="Starting generation process..."
   TRANSLATIONS["en,bls_ready_to_generate"]="BE READY to write down your private key both ETH and BLS and your ETH address."
@@ -391,6 +391,15 @@ init_languages() {
   TRANSLATIONS["en,installing_jq"]="Installing jq..."
   TRANSLATIONS["en,installing_bc"]="Installing bc..."
   TRANSLATIONS["en,installing_python3"]="Installing Python3..."
+  # Web3signer restart translations
+  TRANSLATIONS["en,bls_restarting_web3signer"]="Restarting web3signer to load new key"
+  TRANSLATIONS["en,bls_web3signer_restarted"]="Web3signer successfully restarted"
+  TRANSLATIONS["en,bls_web3signer_running"]="Web3signer is running after restart"
+  TRANSLATIONS["en,bls_web3signer_not_running"]="Web3signer is not running after restart"
+  TRANSLATIONS["en,bls_web3signer_restart_failed"]="Failed to restart web3signer"
+  TRANSLATIONS["en,bls_final_web3signer_restart"]="Performing final web3signer restart to load all keys"
+  TRANSLATIONS["en,bls_final_web3signer_restarted"]="Final web3signer restart completed"
+  TRANSLATIONS["en,bls_final_web3signer_restart_failed"]="Final web3signer restart failed"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -416,7 +425,7 @@ init_languages() {
   TRANSLATIONS["ru,option19"]="19. Аппрув"
   TRANSLATIONS["ru,option20"]="20. Стейк"
   TRANSLATIONS["ru,option0"]="0. Выход"
-  TRANSLATIONS["ru,bls_mnemonic_prompt"]="Введите мнемоническую фразу (ввод скрыт):"
+  TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
   TRANSLATIONS["ru,bls_invalid_number"]="Неверное число. Введите положительное целое число."
   TRANSLATIONS["ru,bls_keystore_not_found"]="❌ Файл keystore.json не найден в /root/aztec/config/keystore.json"
@@ -461,7 +470,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_existing_method_title"]="Метод существующих адресов"
   TRANSLATIONS["ru,bls_new_operator_title"]="Метод нового адреса оператора"
   TRANSLATIONS["ru,bls_old_validator_info"]="Пожалуйста, предоставьте информацию о вашем старом валидаторе:"
-  TRANSLATIONS["ru,bls_old_private_key_prompt"]="Введите один или несколько через запятую без пробелов СТАРЫХ приватных ключей Секвенсеров (скрытый ввод): "
+  TRANSLATIONS["ru,bls_old_private_key_prompt"]="Скопируйте и вставьте один или несколько СТАРЫХ приватных ключей через запятую без пробелов и нажмите Enter (ввод скрыт, но вставлен): "
   TRANSLATIONS["ru,bls_sepolia_rpc_prompt"]="Введите ваш Sepolia RPC URL: "
   TRANSLATIONS["ru,bls_starting_generation"]="Запуск процесса генерации..."
   TRANSLATIONS["ru,bls_ready_to_generate"]="БУДЬТЕ ГОТОВЫ записать ваш приватный ключ ETH и BLS, а также ваш ETH адрес."
@@ -741,6 +750,15 @@ init_languages() {
   TRANSLATIONS["ru,installing_bc"]="Устанавливается bc..."
   TRANSLATIONS["ru,installing_python3"]="Устанавливается Python3..."
 
+  TRANSLATIONS["ru,bls_restarting_web3signer"]="Перезапускаем web3signer для загрузки нового ключа"
+  TRANSLATIONS["ru,bls_web3signer_restarted"]="Web3signer успешно перезапущен"
+  TRANSLATIONS["ru,bls_web3signer_running"]="Web3signer работает после перезапуска"
+  TRANSLATIONS["ru,bls_web3signer_not_running"]="Web3signer не запущен после перезапуска"
+  TRANSLATIONS["ru,bls_web3signer_restart_failed"]="Не удалось перезапустить web3signer"
+  TRANSLATIONS["ru,bls_final_web3signer_restart"]="Выполняем финальный перезапуск web3signer для загрузки всех ключей"
+  TRANSLATIONS["ru,bls_final_web3signer_restarted"]="Финальный перезапуск web3signer завершен"
+  TRANSLATIONS["ru,bls_final_web3signer_restart_failed"]="Финальный перезапуск web3signer не удался"
+
   # Turkish translations
   TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
   TRANSLATIONS["tr,title"]="========= Ana Menü ========="
@@ -765,7 +783,7 @@ init_languages() {
   TRANSLATIONS["tr,option19"]="19. Approve"
   TRANSLATIONS["tr,option20"]="20. Stake"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
-  TRANSLATIONS["tr,bls_mnemonic_prompt"]="Anımsatıcı ifadeyi girin (gizli giriş):"
+  TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
   TRANSLATIONS["tr,bls_invalid_number"]="Geçersiz sayı. Lütfen pozitif bir tam sayı girin."
   TRANSLATIONS["tr,bls_keystore_not_found"]="❌ /root/aztec/config/keystore.json konumunda keystore.json bulunamadı"
@@ -810,7 +828,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_existing_method_title"]="Mevcut Adres Yöntemi"
   TRANSLATIONS["tr,bls_new_operator_title"]="Yeni Operatör Adresi Yöntemi"
   TRANSLATIONS["tr,bls_old_validator_info"]="Lütfen eski validatör bilgilerinizi sağlayın:"
-  TRANSLATIONS["tr,bls_old_private_key_prompt"]="Sıralayıcıların bir veya daha fazla ESKİ özel anahtarını virgülle ayrılmış ve boşluk bırakmadan girin (gizli giriş): "
+  TRANSLATIONS["tr,bls_old_private_key_prompt"]="Bir veya daha fazla ESKİ özel anahtarı, aralarında boşluk olmadan virgülle ayırarak kopyalayıp yapıştırın ve Enter'a basın (giriş gizlidir, ancak yapıştırılır): "
   TRANSLATIONS["tr,bls_sepolia_rpc_prompt"]="Sepolia RPC URL'nizi girin: "
   TRANSLATIONS["tr,bls_starting_generation"]="Oluşturma süreci başlatılıyor..."
   TRANSLATIONS["tr,bls_ready_to_generate"]="Hem ETH hem de BLS özel anahtarınızı ve ETH adresinizi yazmaya HAZIR OLUN."
@@ -1088,6 +1106,15 @@ init_languages() {
   TRANSLATIONS["tr,installing_jq"]="jq yükleniyor..."
   TRANSLATIONS["tr,installing_bc"]="bc yükleniyor..."
   TRANSLATIONS["tr,installing_python3"]="Python3 yükleniyor..."
+
+  TRANSLATIONS["tr,bls_restarting_web3signer"]="Yeni anahtarı yüklemek için web3signer yeniden başlatılıyor"
+  TRANSLATIONS["tr,bls_web3signer_restarted"]="Web3signer başarıyla yeniden başlatıldı"
+  TRANSLATIONS["tr,bls_web3signer_running"]="Web3signer yeniden başlatıldıktan sonra çalışıyor"
+  TRANSLATIONS["tr,bls_web3signer_not_running"]="Web3signer yeniden başlatıldıktan sonra çalışmıyor"
+  TRANSLATIONS["tr,bls_web3signer_restart_failed"]="Web3signer yeniden başlatılamadı"
+  TRANSLATIONS["tr,bls_final_web3signer_restart"]="Tüm anahtarları yüklemek için son web3signer yeniden başlatma işlemi yapılıyor"
+  TRANSLATIONS["tr,bls_final_web3signer_restarted"]="Son web3signer yeniden başlatma işlemi tamamlandı"
+  TRANSLATIONS["tr,bls_final_web3signer_restart_failed"]="Son web3signer yeniden başlatma işlemi başarısız oldu"
 }
 
 # === Configuration ===
@@ -2966,6 +2993,7 @@ approve_with_all_keys() {
 
     # Execute command for each private key sequentially
     for key_file in $key_files; do
+	    echo ""
         echo "Processing key file: $key_file"
 
         # Extract private key from YML file
@@ -3018,7 +3046,7 @@ generate_bls_keys() {
     esac
 }
 
-# === Existing method (original) ===
+# === Исправленная версия функции ===
 generate_bls_existing_method() {
     echo -e "\n${BLUE}=== $(t "bls_existing_method_title") ===${NC}"
 
@@ -3063,122 +3091,180 @@ generate_bls_existing_method() {
 
     local BLS_OUTPUT_FILE="$HOME/aztec/bls.json"
     local BLS_FILTERED_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
-
-    # Временный файл для результатов генерации
-    local TEMP_OUTPUT=$(mktemp)
+    local BLS_ETHWALLET_FILE="$HOME/aztec/bls-ethwallet.json"
 
     # Выполнение команды генерации
-    echo -e "${YELLOW}Running command: aztec validator-keys new...${NC}"
+    echo -e "${YELLOW}Running command: aztec validator-keys new... Wait until process will not finished${NC}"
+
     if aztec validator-keys new \
         --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
         --mnemonic "$MNEMONIC" \
         --count "$WALLET_COUNT" \
         --file "bls.json" \
-        --data-dir "$HOME/aztec/" 2>&1 | tee "$TEMP_OUTPUT"; then
+        --data-dir "$HOME/aztec/"; then
 
         echo -e "${GREEN}$(t "bls_generation_success")${NC}"
     else
         echo -e "${RED}$(t "bls_generation_failed")${NC}"
-        rm -f "$TEMP_OUTPUT"
         return 1
     fi
 
     # 5. Проверка существования сгенерированного файла
     if [ ! -f "$BLS_OUTPUT_FILE" ]; then
         echo -e "${RED}$(t "bls_file_not_found")${NC}"
-        rm -f "$TEMP_OUTPUT"
         return 1
     fi
 
-    # 6. Поиск совпадений и создание приватных ключей
+    echo -e "${GREEN}✅ Generated BLS file: $BLS_OUTPUT_FILE${NC}"
+
+    # 6. Получаем порядок адресов из keystore.json
     echo -e "\n${BLUE}$(t "bls_searching_matches")${NC}"
 
-    # Получаем все адреса из keystore.json в нижнем регистре
-    local KEYSTORE_ADDRESSES=$(grep -o '"0x[0-9a-fA-F]\+"' "$KEYSTORE_FILE" | tr '[:upper:]' '[:lower:]' | tr -d '"')
+    # Извлекаем адреса валидаторов из keystore.json в правильном порядке
+    local KEYSTORE_VALIDATOR_ADDRESSES=()
+    while IFS= read -r line; do
+        if [[ "$line" =~ \"attester\"[[:space:]]*:[[:space:]]*\"(0x[0-9a-fA-F]+)\" ]]; then
+            KEYSTORE_VALIDATOR_ADDRESSES+=("${BASH_REMATCH[1],,}")
+        fi
+    done < <(jq -c '.validators[]' "$KEYSTORE_FILE" 2>/dev/null)
+
+    if [ ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} -eq 0 ]; then
+        echo -e "${RED}No validator addresses found in keystore.json${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Found ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} validators in keystore.json${NC}"
+
+    # 7. Создаем bls-ethwallet.json с добавленными eth адресами
+    echo -e "\n${BLUE}=== Creating temp bls-ethwallet.json with ETH addresses ===${NC}"
+
+    # Временный файл для преобразованного JSON
+    local TEMP_ETHWALLET=$(mktemp)
+
+    # Читаем исходный bls.json и добавляем eth адреса
+    if jq '.validators[]' "$BLS_OUTPUT_FILE" > /dev/null 2>&1; then
+        # Создаем новый JSON с добавленными адресами
+        local VALIDATORS_WITH_ADDRESSES=()
+
+        while IFS= read -r validator; do
+            local PRIVATE_KEY=$(echo "$validator" | jq -r '.attester.eth')
+            local BLS_KEY=$(echo "$validator" | jq -r '.attester.bls')
+
+            # Генерируем eth адрес из приватного ключа
+            local ETH_ADDRESS=$(cast wallet address --private-key "$PRIVATE_KEY" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+
+            if [ -n "$ETH_ADDRESS" ]; then
+                # Создаем новый объект валидатора с добавленным адресом
+                local NEW_VALIDATOR=$(jq -n \
+                    --arg priv "$PRIVATE_KEY" \
+                    --arg bls "$BLS_KEY" \
+                    --arg addr "$ETH_ADDRESS" \
+                    '{
+                        "attester": {
+                            "eth": $priv,
+                            "bls": $bls,
+                            "address": $addr
+                        },
+                        "feeRecipient": "'"$FEE_RECIPIENT_ADDRESS"'"
+                    }')
+                VALIDATORS_WITH_ADDRESSES+=("$NEW_VALIDATOR")
+            else
+                echo -e "${RED}Error: Failed to generate address for private key${NC}"
+            fi
+        done < <(jq -c '.validators[]' "$BLS_OUTPUT_FILE")
+
+        # Собираем финальный JSON
+        if [ ${#VALIDATORS_WITH_ADDRESSES[@]} -gt 0 ]; then
+            printf '{\n  "schemaVersion": 1,\n  "validators": [\n' > "$TEMP_ETHWALLET"
+            for i in "${!VALIDATORS_WITH_ADDRESSES[@]}"; do
+                if [ $i -gt 0 ]; then
+                    printf ",\n" >> "$TEMP_ETHWALLET"
+                fi
+                jq -c . <<< "${VALIDATORS_WITH_ADDRESSES[$i]}" >> "$TEMP_ETHWALLET"
+            done
+            printf '\n  ]\n}' >> "$TEMP_ETHWALLET"
+
+            mv "$TEMP_ETHWALLET" "$BLS_ETHWALLET_FILE"
+            echo -e "${GREEN}✅ Created temp bls-ethwallet.json with ${#VALIDATORS_WITH_ADDRESSES[@]} validators${NC}"
+        else
+            echo -e "${RED}Error: No validators processed${NC}"
+            rm -f "$TEMP_ETHWALLET"
+            return 1
+        fi
+    else
+        echo -e "${RED}Error: Invalid JSON format in $BLS_OUTPUT_FILE${NC}"
+        return 1
+    fi
+
+    # 8. Создаем bls-filtered-pk.json в порядке keystore.json
+    echo -e "\n${BLUE}=== Creating final bls-filtered-pk.json in keystore.json order ===${NC}"
+
+    local VALIDATORS_JSON=""
     local MATCH_COUNT=0
 
-    # Создаем очищенную версию временного файла без \r
-    local TEMP_CLEAN=$(mktemp)
-    sed 's/\r//g' "$TEMP_OUTPUT" > "$TEMP_CLEAN"
+    # Создаем ассоциативный массив для быстрого поиска по адресам
+    declare -A ADDRESS_TO_KEYS
 
-    # Простой и надежный парсинг
-    local CURRENT_ACC=""
-    local CURRENT_ETH=""
-    local CURRENT_BLS=""
-    local FIRST_ACCOUNT=true
+    # Заполняем массив данными из bls-ethwallet.json
+    while IFS= read -r validator; do
+        local ETH_ADDRESS=$(echo "$validator" | jq -r '.attester.address' | tr '[:upper:]' '[:lower:]')
+        local PRIVATE_KEY=$(echo "$validator" | jq -r '.attester.eth')
+        local BLS_KEY=$(echo "$validator" | jq -r '.attester.bls')
 
-    while IFS= read -r line; do
-        if [[ "$line" =~ ^(acc[0-9]+):$ ]]; then
-            CURRENT_ACC="${BASH_REMATCH[1]}"
-            CURRENT_ETH=""
-            CURRENT_BLS=""
-        elif [[ "$line" =~ ^[[:space:]]+eth:[[:space:]]+(0x[0-9a-fA-F]+) ]]; then
-            CURRENT_ETH="${BASH_REMATCH[1],,}"
-        elif [[ "$line" =~ ^[[:space:]]+bls:[[:space:]]+(0x[0-9a-fA-F]+) ]]; then
-            CURRENT_BLS="${BASH_REMATCH[1]}"
-
-            if [[ -n "$CURRENT_ACC" && -n "$CURRENT_ETH" && -n "$CURRENT_BLS" ]]; then
-                # Проверяем совпадение адреса
-                if echo "$KEYSTORE_ADDRESSES" | grep -q "^${CURRENT_ETH}$"; then
-                    ((MATCH_COUNT++))
-
-                    # Извлекаем номер из acc (убираем "acc")
-                    local ACC_NUMBER=${CURRENT_ACC#acc}
-                    local ADDRESS_IDX=$((ACC_NUMBER - 1))
-
-                    echo -e "${YELLOW}Processing $CURRENT_ACC (address-index: $ADDRESS_IDX)...${NC}"
-
-                    if [ "$FIRST_ACCOUNT" = true ]; then
-                        # Для первого аккаунта используем команду new
-                        echo -e "${CYAN}Running: aztec validator-keys new (first account)${NC}"
-                        if aztec validator-keys new \
-                            --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
-                            --mnemonic "$MNEMONIC" \
-                            --address-index "$ADDRESS_IDX" \
-                            --file "bls-filtered-pk.json" \
-                            --data-dir "$HOME/aztec/"; then
-
-                            echo -e "${GREEN}✓ Successfully generated keys for $CURRENT_ACC${NC}"
-                            FIRST_ACCOUNT=false
-                        else
-                            echo -e "${RED}✗ Failed to generate keys for $CURRENT_ACC${NC}"
-                            rm -f "$TEMP_OUTPUT" "$TEMP_CLEAN"
-                            return 1
-                        fi
-                    else
-                        # Для последующих аккаунтов используем команду add
-                        echo -e "${CYAN}Running: aztec validator-keys add (additional account)${NC}"
-                        if aztec validator-keys add "$HOME/aztec/bls-filtered-pk.json" \
-                            --fee-recipient "$FEE_RECIPIENT_ADDRESS" \
-                            --mnemonic "$MNEMONIC" \
-                            --address-index "$ADDRESS_IDX" ; then
-
-                            echo -e "${GREEN}✓ Successfully added keys for $CURRENT_ACC${NC}"
-                        else
-                            echo -e "${RED}✗ Failed to add keys for $CURRENT_ACC${NC}"
-                            rm -f "$TEMP_OUTPUT" "$TEMP_CLEAN"
-                            return 1
-                        fi
-                    fi
-                fi
-
-                CURRENT_ACC=""
-                CURRENT_ETH=""
-                CURRENT_BLS=""
-            fi
+        if [ -n "$ETH_ADDRESS" ] && [ "$ETH_ADDRESS" != "null" ]; then
+            ADDRESS_TO_KEYS["$ETH_ADDRESS"]="$PRIVATE_KEY|$BLS_KEY"
         fi
-    done < "$TEMP_CLEAN"
+    done < <(jq -c '.validators[]' "$BLS_ETHWALLET_FILE")
 
-    # Очистка временных файлов
-    rm -f "$TEMP_OUTPUT" "$TEMP_CLEAN" "$BLS_OUTPUT_FILE"
+    # Теперь создаем финальный файл в порядке keystore.json
+    for keystore_address in "${KEYSTORE_VALIDATOR_ADDRESSES[@]}"; do
+        if [ -n "${ADDRESS_TO_KEYS[$keystore_address]}" ]; then
+            ((MATCH_COUNT++))
 
-    # Отчет о результатах
+            # Разбираем данные из массива
+            IFS='|' read -r PRIVATE_KEY BLS_KEY <<< "${ADDRESS_TO_KEYS[$keystore_address]}"
+
+            # Добавляем в JSON (сохраняем порядок keystore.json)
+            if [ -n "$VALIDATORS_JSON" ]; then
+                VALIDATORS_JSON+=","
+            fi
+            VALIDATORS_JSON+=$(cat <<EOF
+    {
+      "attester": {
+        "eth": "$PRIVATE_KEY",
+        "bls": "$BLS_KEY"
+      }
+    }
+EOF
+            )
+        else
+            echo -e "${YELLOW}⚠️ No matching keys found for address: $keystore_address${NC}"
+        fi
+    done
+
+    # 9. Создаем итоговый файл
     if [ $MATCH_COUNT -gt 0 ]; then
+        cat > "$BLS_FILTERED_PK_FILE" << EOF
+{
+  "validators": [
+$VALIDATORS_JSON
+  ]
+}
+EOF
+        echo -e "${GREEN}✅ BLS keys file created with validators in keystore.json order${NC}"
+
+        # Очистка временных файлов
+        rm -f "$BLS_OUTPUT_FILE" "$BLS_ETHWALLET_FILE"
+
         echo -e "${GREEN}$(printf "$(t "bls_matches_found")" "$MATCH_COUNT")${NC}"
         echo -e "${GREEN}📁 Private keys saved to: $BLS_FILTERED_PK_FILE${NC}"
+
         return 0
     else
         echo -e "${RED}$(t "bls_no_matches")${NC}"
+
+        # Очистка временных файлов
+        rm -f "$BLS_OUTPUT_FILE" "$BLS_ETHWALLET_FILE"
         return 1
     fi
 }
@@ -3206,7 +3292,7 @@ generate_bls_new_operator_method() {
     local OLD_VALIDATOR_ADDRESSES=()
     echo -e "\n${BLUE}Generating addresses for old validators...${NC}"
     for private_key in "${OLD_SEQUENCER_KEYS[@]}"; do
-        local old_address=$(cast wallet address "$private_key" 2>/dev/null)
+        local old_address=$(cast wallet address --private-key "$private_key" 2>/dev/null | tr '[:upper:]' '[:lower:]')
         if [ -n "$old_address" ]; then
             OLD_VALIDATOR_ADDRESSES+=("$old_address")
             echo -e "  ${GREEN}✓${NC} $old_address"
@@ -3216,16 +3302,45 @@ generate_bls_new_operator_method() {
         fi
     done
 
+    # Получаем порядок адресов из keystore.json
+    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    if [ ! -f "$KEYSTORE_FILE" ]; then
+        echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
+        return 1
+    fi
+
+    local KEYSTORE_VALIDATOR_ADDRESSES=()
+    while IFS= read -r line; do
+        if [[ "$line" =~ \"attester\"[[:space:]]*:[[:space:]]*\"(0x[0-9a-fA-F]+)\" ]]; then
+            KEYSTORE_VALIDATOR_ADDRESSES+=("${BASH_REMATCH[1],,}")
+        fi
+    done < <(jq -c '.validators[]' "$KEYSTORE_FILE" 2>/dev/null)
+
+    if [ ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} -eq 0 ]; then
+        echo -e "${RED}No validator addresses found in keystore.json${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Found ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} validators in keystore.json${NC}"
+
     read -p "$(t "bls_sepolia_rpc_prompt") " rpc_url
     echo -e "${GREEN}$(t "bls_starting_generation")${NC}"
 
     # Создаем папку для временных файлов
     local TEMP_DIR=$(mktemp -d)
 
-    # Массивы для хранения новых ключей
-    local NEW_ETH_PRIVATE_KEYS=()
-    local NEW_BLS_KEYS=()
-    local NEW_ETH_ADDRESSES=()
+    # Ассоциативные массивы для хранения ключей по адресам
+    declare -A OLD_PRIVATE_KEYS_MAP
+    declare -A NEW_ETH_PRIVATE_KEYS_MAP
+    declare -A NEW_BLS_KEYS_MAP
+    declare -A NEW_ETH_ADDRESSES_MAP
+
+    # Заполняем маппинг старых приватных ключей по адресам
+    for ((i=0; i<${#OLD_VALIDATOR_ADDRESSES[@]}; i++)); do
+        if [ "${OLD_VALIDATOR_ADDRESSES[$i]}" != "unknown" ]; then
+            OLD_PRIVATE_KEYS_MAP["${OLD_VALIDATOR_ADDRESSES[$i]}"]="${OLD_SEQUENCER_KEYS[$i]}"
+        fi
+    done
 
     echo -e "${YELLOW}$(t "bls_ready_to_generate")${NC}"
 
@@ -3254,7 +3369,7 @@ generate_bls_new_operator_method() {
 
         local NEW_ETH_PRIVATE_KEY=$(jq -r '.validators[0].attester.eth' "$KEYSTORE_FILE" 2>/dev/null)
         local BLS_ATTESTER_PRIV_KEY=$(jq -r '.validators[0].attester.bls' "$KEYSTORE_FILE" 2>/dev/null)
-        local ETH_ATTESTER_ADDRESS=$(cast wallet address "$NEW_ETH_PRIVATE_KEY" 2>/dev/null)
+        local ETH_ATTESTER_ADDRESS=$(cast wallet address --private-key "$NEW_ETH_PRIVATE_KEY" 2>/dev/null | tr '[:upper:]' '[:lower:]')
 
         if [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
            [ -z "$BLS_ATTESTER_PRIV_KEY" ] || [ "$BLS_ATTESTER_PRIV_KEY" = "null" ]; then
@@ -3263,10 +3378,13 @@ generate_bls_new_operator_method() {
             return 1
         fi
 
-        # Сохраняем ключи в массивы
-        NEW_ETH_PRIVATE_KEYS+=("$NEW_ETH_PRIVATE_KEY")
-        NEW_BLS_KEYS+=("$BLS_ATTESTER_PRIV_KEY")
-        NEW_ETH_ADDRESSES+=("$ETH_ATTESTER_ADDRESS")
+        # Сохраняем ключи в ассоциативные массивы по старому адресу
+        local OLD_ADDRESS="${OLD_VALIDATOR_ADDRESSES[$i]}"
+        if [ "$OLD_ADDRESS" != "unknown" ]; then
+            NEW_ETH_PRIVATE_KEYS_MAP["$OLD_ADDRESS"]="$NEW_ETH_PRIVATE_KEY"
+            NEW_BLS_KEYS_MAP["$OLD_ADDRESS"]="$BLS_ATTESTER_PRIV_KEY"
+            NEW_ETH_ADDRESSES_MAP["$OLD_ADDRESS"]="$ETH_ATTESTER_ADDRESS"
+        fi
 
         # Показываем пользователю новые ключи
         echo -e "${GREEN}✅ Keys generated for validator $((i+1))${NC}"
@@ -3283,29 +3401,48 @@ generate_bls_new_operator_method() {
     # Сохраняем ключи в файл для совместимости с stake_validators
     local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
-    # Создаем массив валидаторов с отдельными new_operator_info для каждого
+    # Создаем массив валидаторов в порядке keystore.json
     local VALIDATORS_JSON=""
-    for ((i=0; i<${#OLD_SEQUENCER_KEYS[@]}; i++)); do
-        if [ $i -gt 0 ]; then
-            VALIDATORS_JSON+=","
-        fi
-        VALIDATORS_JSON+=$(cat <<EOF
+    local MATCH_COUNT=0
+
+    for keystore_address in "${KEYSTORE_VALIDATOR_ADDRESSES[@]}"; do
+        if [ -n "${OLD_PRIVATE_KEYS_MAP[$keystore_address]}" ] &&
+           [ -n "${NEW_ETH_PRIVATE_KEYS_MAP[$keystore_address]}" ] &&
+           [ -n "${NEW_BLS_KEYS_MAP[$keystore_address]}" ] &&
+           [ -n "${NEW_ETH_ADDRESSES_MAP[$keystore_address]}" ]; then
+
+            ((MATCH_COUNT++))
+
+            if [ -n "$VALIDATORS_JSON" ]; then
+                VALIDATORS_JSON+=","
+            fi
+
+            VALIDATORS_JSON+=$(cat <<EOF
     {
       "attester": {
-        "eth": "${OLD_SEQUENCER_KEYS[$i]}",
-        "bls": "${NEW_BLS_KEYS[$i]}",
-        "old_address": "${OLD_VALIDATOR_ADDRESSES[$i]}"
+        "eth": "${OLD_PRIVATE_KEYS_MAP[$keystore_address]}",
+        "bls": "${NEW_BLS_KEYS_MAP[$keystore_address]}",
+        "old_address": "$keystore_address"
       },
       "new_operator_info": {
-        "eth_private_key": "${NEW_ETH_PRIVATE_KEYS[$i]}",
-        "bls_private_key": "${NEW_BLS_KEYS[$i]}",
-        "eth_address": "${NEW_ETH_ADDRESSES[$i]}",
+        "eth_private_key": "${NEW_ETH_PRIVATE_KEYS_MAP[$keystore_address]}",
+        "bls_private_key": "${NEW_BLS_KEYS_MAP[$keystore_address]}",
+        "eth_address": "${NEW_ETH_ADDRESSES_MAP[$keystore_address]}",
         "rpc_url": "$rpc_url"
       }
     }
 EOF
-        )
+            )
+        else
+            echo -e "${YELLOW}⚠️ No matching keys found for address: $keystore_address${NC}"
+        fi
     done
+
+    if [ $MATCH_COUNT -eq 0 ]; then
+        echo -e "${RED}No matching validators found between provided keys and keystore.json${NC}"
+        rm -rf "$TEMP_DIR"
+        return 1
+    fi
 
     cat > "$BLS_PK_FILE" << EOF
 {
@@ -3320,13 +3457,17 @@ EOF
 
     # Показываем сводную информацию
     echo -e "${GREEN}✅ $(t "bls_keys_saved_success")${NC}"
-    echo -e "\n${BLUE}=== Summary of generated validators ===${NC}"
-    for ((i=0; i<${#OLD_SEQUENCER_KEYS[@]}; i++)); do
-        echo -e "${CYAN}Validator $((i+1)):${NC}"
-        echo -e "  Old address: ${OLD_VALIDATOR_ADDRESSES[$i]}"
-        echo -e "  New address: ${NEW_ETH_ADDRESSES[$i]}"
-        echo -e "  Funding required: ${NEW_ETH_ADDRESSES[$i]}"
-        echo ""
+    echo -e "\n${BLUE}=== Summary of generated validators (in keystore.json order) ===${NC}"
+
+    for keystore_address in "${KEYSTORE_VALIDATOR_ADDRESSES[@]}"; do
+        if [ -n "${OLD_PRIVATE_KEYS_MAP[$keystore_address]}" ] &&
+           [ -n "${NEW_ETH_ADDRESSES_MAP[$keystore_address]}" ]; then
+            echo -e "${CYAN}Validator: $keystore_address${NC}"
+            echo -e "  Old address: $keystore_address"
+            echo -e "  New address: ${NEW_ETH_ADDRESSES_MAP[$keystore_address]}"
+            echo -e "  Funding required: ${NEW_ETH_ADDRESSES_MAP[$keystore_address]}"
+            echo ""
+        fi
     done
 
     echo -e "${YELLOW}$(t "bls_next_steps")${NC}"
@@ -3351,9 +3492,9 @@ stake_validators() {
         return 1
     fi
 
-    # Простая и надежная проверка - ищем поле new_operator_info
-    if jq -e '.new_operator_info' "$BLS_PK_FILE" > /dev/null 2>&1; then
-        # Новый формат - есть информация о новом операторе
+    # Правильная проверка формата - ищем поле new_operator_info внутри validators
+    if jq -e '.validators[0].new_operator_info' "$BLS_PK_FILE" > /dev/null 2>&1; then
+        # Новый формат - есть информация о новом операторе внутри валидаторов
         echo -e "${GREEN}🔍 Detected new operator method format${NC}"
         stake_validators_new_format
     else
@@ -3581,6 +3722,10 @@ stake_validators_new_format() {
         local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].new_operator_info.eth_address" "$BLS_PK_FILE" 2>/dev/null)
         local RPC_URL=$(jq -r ".validators[$i].new_operator_info.rpc_url" "$BLS_PK_FILE" 2>/dev/null)
 
+        # Приводим адреса к нижнему регистру для сравнения
+        local OLD_VALIDATOR_ADDRESS_LOWER=$(echo "$OLD_VALIDATOR_ADDRESS" | tr '[:upper:]' '[:lower:]')
+        local ETH_ATTESTER_ADDRESS_LOWER=$(echo "$ETH_ATTESTER_ADDRESS" | tr '[:upper:]' '[:lower:]')
+
         # Проверяем что все данные получены
         if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ] ||
            [ -z "$NEW_ETH_PRIVATE_KEY" ] || [ "$NEW_ETH_PRIVATE_KEY" = "null" ] ||
@@ -3659,6 +3804,22 @@ EOF
 
                         if [ -f "$YML_FILE" ]; then
                             echo -e "${GREEN}📁 $(t "staking_yml_file_created")${NC}" "$YML_FILE"
+
+                            # Перезапускаем web3signer для загрузки нового ключа
+                            echo -e "${BLUE}🔄 $(t "staking_restarting_web3signer")${NC}"
+                            if docker restart web3signer > /dev/null 2>&1; then
+                                echo -e "${GREEN}✅ $(t "staking_web3signer_restarted")${NC}"
+
+                                # Проверяем статус web3signer после перезапуска
+                                sleep 3
+                                if docker ps | grep -q web3signer; then
+                                    echo -e "${GREEN}✅ $(t "staking_web3signer_running")${NC}"
+                                else
+                                    echo -e "${YELLOW}⚠️ $(t "staking_web3signer_not_running")${NC}"
+                                fi
+                            else
+                                echo -e "${RED}❌ $(t "staking_web3signer_restart_failed")${NC}"
+                            fi
                         else
                             echo -e "${RED}⚠️ $(t "staking_yml_file_failed")${NC}" "$YML_FILE"
                         fi
@@ -3670,18 +3831,33 @@ EOF
                             # Создаем временный файл для обновленного keystore
                             local TEMP_KEYSTORE=$(mktemp)
 
-                            # Заменяем старый адрес на новый в keystore.json
-                            if jq --arg old_addr "$OLD_VALIDATOR_ADDRESS" \
+                            # Заменяем старый адрес на новый в keystore.json (регистронезависимо)
+                            if jq --arg old_addr_lower "$OLD_VALIDATOR_ADDRESS_LOWER" \
                                   --arg new_addr "$ETH_ATTESTER_ADDRESS" \
-                                  'walk(if type == "object" and .attester == $old_addr then .attester = $new_addr else . end)' \
+                                  'walk(if type == "object" and has("attester") and (.attester | ascii_downcase) == $old_addr_lower then .attester = $new_addr else . end)' \
                                   "$KEYSTORE_FILE" > "$TEMP_KEYSTORE"; then
 
                                 # Проверяем, что замена произошла
-                                if grep -q "$ETH_ATTESTER_ADDRESS" "$TEMP_KEYSTORE"; then
+                                if jq -e --arg new_addr "$ETH_ATTESTER_ADDRESS" \
+                                         'any(.validators[]; .attester == $new_addr)' "$TEMP_KEYSTORE" > /dev/null; then
+
                                     mv "$TEMP_KEYSTORE" "$KEYSTORE_FILE"
                                     echo -e "${GREEN}✅ $(t "staking_keystore_updated")${NC}" "$OLD_VALIDATOR_ADDRESS → $ETH_ATTESTER_ADDRESS"
+
+                                    # Дополнительная проверка: находим все вхождения нового адреса
+                                    local MATCH_COUNT=$(jq -r --arg new_addr "$ETH_ATTESTER_ADDRESS" \
+                                                         '[.validators[] | select(.attester == $new_addr)] | length' "$KEYSTORE_FILE")
+                                    echo -e "${CYAN}🔍 Found $MATCH_COUNT occurrence(s) of new address in keystore${NC}"
+
                                 else
                                     echo -e "${YELLOW}⚠️ $(t "staking_keystore_no_change")${NC}" "$OLD_VALIDATOR_ADDRESS"
+                                    echo -e "${CYAN}Debug: Searching for old address in keystore...${NC}"
+
+                                    # Отладочная информация: проверяем наличие старого адреса в keystore
+                                    local OLD_ADDR_COUNT=$(jq -r --arg old_addr_lower "$OLD_VALIDATOR_ADDRESS_LOWER" \
+                                                         '[.validators[] | select(.attester | ascii_downcase == $old_addr_lower)] | length' "$KEYSTORE_FILE")
+                                    echo -e "${CYAN}Debug: Found $OLD_ADDR_COUNT occurrence(s) of old address (case-insensitive)${NC}"
+
                                     rm -f "$TEMP_KEYSTORE"
                                 fi
                             else
@@ -3735,6 +3911,14 @@ EOF
     if [ "$CREATED_FILES" -gt 0 ]; then
         echo -e "${GREEN}📂 $(t "staking_total_yml_files_created")${NC}" "$CREATED_FILES"
         echo -e "${CYAN}$(t "staking_yml_files_location")${NC}" "$KEYS_DIR"
+
+        # Финальный перезапуск web3signer для гарантии загрузки всех ключей
+        echo -e "\n${BLUE}🔄 $(t "staking_final_web3signer_restart")${NC}"
+        if docker restart web3signer > /dev/null 2>&1; then
+            echo -e "${GREEN}✅ $(t "staking_final_web3signer_restarted")${NC}"
+        else
+            echo -e "${YELLOW}⚠️ $(t "staking_final_web3signer_restart_failed")${NC}"
+        fi
     fi
 
     return 0
