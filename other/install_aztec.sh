@@ -742,7 +742,7 @@ services:
       KEY_STORE_DIRECTORY: /config
       COINBASE: \${COINBASE}
       P2P_IP: \${P2P_IP}
-      LOG_LEVEL: debug
+      LOG_LEVEL: info;debug:node:sentinel
     entrypoint: >
       sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network testnet --node --archiver --sequencer'
     ports:

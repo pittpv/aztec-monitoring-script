@@ -35,20 +35,27 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 08-11-2025
-* Yeni sözleşme için tam destek
-  * izleme
-  * node kurulumu
-  * doğrulayıcı kontrolü ve arama
-  * doğrulayıcı kuyruğunun izlenmesi
-* Eski sıralaıcınız için mnemonic ifadeden BLS anahtarları oluşturma (bu betik aracılığıyla node kurulumu gereklidir)
-  * tek bir mnemonic’ten birden fazla adres desteği
-  * gereksiz anahtarların otomatik filtrelenmesi ve silinmesi
-* Stake onaylama fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
-* Stake etme — doğrulayıcı ekleme fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
+## 📌 Son Güncellemeler 11-11-2025
+
+- Eski bir doğrulayıcı özel anahtarından yeni bir operatör oluşturmak için bir yöntem eklendi (bu betik aracılığıyla düğüm kurulumu gerektirir, seçenek 11)
+- Ana betikte küçük iyileştirmeler
+- İzleme aracı betiğinde küçük iyileştirmeler
+- Düğüm kurulum betiğinde küçük iyileştirmeler
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 08-11-2025
+* Yeni sözleşme için tam destek
+    * izleme
+    * node kurulumu
+    * doğrulayıcı kontrolü ve arama
+    * doğrulayıcı kuyruğunun izlenmesi
+* Eski sıralaıcınız için mnemonic ifadeden BLS anahtarları oluşturma (bu betik aracılığıyla node kurulumu gereklidir)
+    * tek bir mnemonic’ten birden fazla adres desteği
+    * gereksiz anahtarların otomatik filtrelenmesi ve silinmesi
+* Stake onaylama fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
+* Stake etme — doğrulayıcı ekleme fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
 
 ### 04-10-2025
 ⚠️ Lütfen eski izleme aracını silin (seçenek 3'ü kullanın) ve yeni aracı yükleyin (seçenek 2'yi kullanın)
@@ -261,7 +268,7 @@ Ana menü:
 15. Aztec düğümünü güncelle
 16. Aztec düğümünü eski sürüme düşür
 17. Aztek sürümünü kontrol edin
-18. Anımsatıcı ifadeden BLS anahtarları oluştur
+18. BLS anahtarları oluştur
 19. Approve
 20. Stake
 

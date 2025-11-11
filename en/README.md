@@ -35,20 +35,26 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 08-11-2025
-* Full support for the new contract
-  * monitoring
-  * node installation
-  * validator check and search
-  * validator queue monitoring
-* Generation of BLS keys from a mnemonic phrase for your old sequencer (requires node installation via this script)
-  * support for multiple addresses from one mnemonic
-  * automatic filtering and removal of unnecessary keys
-* Stake approve function (requires node installation via this script)
-* Staking function — adding a validator (requires node installation via this script)
+## 📌 Latest Updates 11-11-2025
+- Added a method for generating a new operator from an old validator private key (requires node installation via this script, option 11)
+- Minor improvements in main script
+- Minor improvements in monitoring agent script
+- Minor improvements in node installation script
 
 <details>
 <summary>📅 Version History</summary>
+
+### 08-11-2025
+* Full support for the new contract
+    * monitoring
+    * node installation
+    * validator check and search
+    * validator queue monitoring
+* Generation of BLS keys from a mnemonic phrase for your old sequencer (requires node installation via this script, option 11)
+    * support for multiple addresses from one mnemonic
+    * automatic filtering and removal of unnecessary keys
+* Stake approve function (requires node installation via this script, option 11)
+* Staking function — adding a validator (requires node installation via this script, option 11)
 
 ### 04-10-2025
 ⚠️ Please Delete old monitoring agent (use option 3) and Install new agent (use option 2)
@@ -262,7 +268,7 @@ Main menu:
 15. Update Aztec node
 16. Downgrade Aztec node
 17. Check Aztec version
-18. Generate BLS keys from mnemonic
+18. Generate BLS keys
 19. Approve
 20. Stake
 

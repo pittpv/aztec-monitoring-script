@@ -37,6 +37,6 @@
   {
     "pattern": "ERROR: cli KeystoreError: Duplicate attester address found",
     "message": "Cli Error in command execution - Duplicate attester address found",
-    "solution": "1. Go to the key storage folder /root/aztec/config/ \n2. Delete the bls-filtered-pk.json file from there. \n3. Stop/Start node container"
+    "solution": "1. Run this command in terminal: mv /root/aztec/config/bls-filtered-pk.json /root/aztec/ \n2. Stop/Start node container"
   }
 ]

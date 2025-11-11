@@ -188,5 +188,10 @@
     "VERSION": "2.2.3",
     "UPDATE_DATE": "10.11.2025",
     "CHANGES": ["Fix - Changed location for temporary JSON keystore files"]
+  },
+  {
+    "VERSION": "2.3.0",
+    "UPDATE_DATE": "11.11.2025",
+    "CHANGES": ["Added a method for generating a new operator from the old validator private key", "Minor improvements in main script", "Minor improvements in monitoring agent script", "Minor improvements in node installation script"]
   }
 ]
