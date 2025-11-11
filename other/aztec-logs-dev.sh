@@ -422,7 +422,7 @@ init_languages() {
   TRANSLATIONS["ru,option16"]="16. Сделать даунгрейд ноды Aztec"
   TRANSLATIONS["ru,option17"]="17. Проверить версию ноды Aztec"
   TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи"
-  TRANSLATIONS["ru,option19"]="19. Аппрув"
+  TRANSLATIONS["ru,option19"]="19. Апрув"
   TRANSLATIONS["ru,option20"]="20. Стейк"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
