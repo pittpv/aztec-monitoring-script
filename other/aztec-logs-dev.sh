@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.2.3"
+SCRIPT_VERSION="2.3.0"
 
 function show_logo() {
     echo -e " "
@@ -63,7 +63,7 @@ init_languages() {
   TRANSLATIONS["en,option15"]="15. Update Aztec node"
   TRANSLATIONS["en,option16"]="16. Downgrade Aztec node"
   TRANSLATIONS["en,option17"]="17. Check Aztec version"
-  TRANSLATIONS["en,option18"]="18. Generate BLS keys from mnemonic"
+  TRANSLATIONS["en,option18"]="18. Generate BLS keys"
   TRANSLATIONS["en,option19"]="19. Approve"
   TRANSLATIONS["en,option20"]="20. Stake"
   TRANSLATIONS["en,option0"]="0. Exit"
@@ -106,7 +106,7 @@ init_languages() {
   TRANSLATIONS["en,private_key"]="Private Key"
   TRANSLATIONS["en,bls_key"]="BLS Key"
   TRANSLATIONS["en,bls_method_existing"]="Use existing addresses (from mnemonic)"
-  TRANSLATIONS["en,bls_method_new_operator"]="Generate new operator address"
+  TRANSLATIONS["en,bls_method_new_operator"]="Generate new operator address (recommended)"
   TRANSLATIONS["en,bls_method_prompt"]="Choose method [1-2]: "
   TRANSLATIONS["en,bls_invalid_method"]="Invalid method selected"
   TRANSLATIONS["en,bls_existing_method_title"]="Existing Address Method"
@@ -421,7 +421,7 @@ init_languages() {
   TRANSLATIONS["ru,option15"]="15. Обновить ноду Aztec"
   TRANSLATIONS["ru,option16"]="16. Сделать даунгрейд ноды Aztec"
   TRANSLATIONS["ru,option17"]="17. Проверить версию ноды Aztec"
-  TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи из мнемонической фразы"
+  TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи"
   TRANSLATIONS["ru,option19"]="19. Аппрув"
   TRANSLATIONS["ru,option20"]="20. Стейк"
   TRANSLATIONS["ru,option0"]="0. Выход"
@@ -464,7 +464,7 @@ init_languages() {
   TRANSLATIONS["ru,private_key"]="Приватный ключ"
   TRANSLATIONS["ru,bls_key"]="BLS ключ"
   TRANSLATIONS["ru,bls_method_existing"]="Использовать существующие адреса (из mnemonic)"
-  TRANSLATIONS["ru,bls_method_new_operator"]="Сгенерировать новый адрес оператора"
+  TRANSLATIONS["ru,bls_method_new_operator"]="Сгенерировать новый адрес оператора (рекомендуется)"
   TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод [1-2]: "
   TRANSLATIONS["ru,bls_invalid_method"]="Выбран неверный метод"
   TRANSLATIONS["ru,bls_existing_method_title"]="Метод существующих адресов"
@@ -779,7 +779,7 @@ init_languages() {
   TRANSLATIONS["tr,option15"]="15. Aztec düğümünü güncelle"
   TRANSLATIONS["tr,option16"]="16. Aztec düğümünü eski sürüme düşür"
   TRANSLATIONS["tr,option17"]="17. Aztek sürümünü kontrol edin"
-  TRANSLATIONS["tr,option18"]="18. Anımsatıcı ifadeden BLS anahtarları oluştur"
+  TRANSLATIONS["tr,option18"]="18. BLS anahtarları oluştur"
   TRANSLATIONS["tr,option19"]="19. Approve"
   TRANSLATIONS["tr,option20"]="20. Stake"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
@@ -822,7 +822,7 @@ init_languages() {
   TRANSLATIONS["tr,private_key"]="Özel Anahtar"
   TRANSLATIONS["tr,bls_key"]="BLS Anahtarı"
   TRANSLATIONS["tr,bls_method_existing"]="Mevcut adresleri kullan (mnemonic'dan)"
-  TRANSLATIONS["tr,bls_method_new_operator"]="Yeni operatör adresi oluştur"
+  TRANSLATIONS["tr,bls_method_new_operator"]="Yeni operatör adresi oluştur (tavsiye edilen)"
   TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin [1-2]: "
   TRANSLATIONS["tr,bls_invalid_method"]="Geçersiz yöntem seçildi"
   TRANSLATIONS["tr,bls_existing_method_title"]="Mevcut Adres Yöntemi"
