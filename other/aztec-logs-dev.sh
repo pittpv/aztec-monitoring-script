@@ -3948,9 +3948,9 @@ main_menu() {
     echo -e "${CYAN}$(t "option15")${NC}"
     echo -e "${YELLOW}$(t "option16")${NC}"
     echo -e "${CYAN}$(t "option17")${NC}"
-    echo -e "${CYAN}$(t "option18")${NC}"
-    echo -e "${CYAN}$(t "option19")${NC}"
-    echo -e "${CYAN}$(t "option20")${NC}"
+    echo -e "${NC}$(t "option18")${NC}"
+    echo -e "${NC}$(t "option19")${NC}"
+    echo -e "${NC}$(t "option20")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
