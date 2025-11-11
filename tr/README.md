@@ -312,7 +312,7 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
 
 Cron-agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
 
-## 🚀 Aztec düğümünü kurma
+## 🚀 Aztec v 2.1.2 düğümünü kurma
 
 Aztec düğümünü kurmak için **seçenek 11**'i seçin ve betik talimatlarını izleyin.
 
