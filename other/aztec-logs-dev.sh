@@ -105,7 +105,7 @@ init_languages() {
   TRANSLATIONS["en,eth_address"]="ETH Address"
   TRANSLATIONS["en,private_key"]="Private Key"
   TRANSLATIONS["en,bls_key"]="BLS Key"
-  TRANSLATIONS["en,bls_method_existing"]="Use existing addresses (from mnemonic)"
+  TRANSLATIONS["en,bls_method_existing"]="Use existing addresses (from mnemonic, only if all validator addresses are from the same seed phrase)"
   TRANSLATIONS["en,bls_method_new_operator"]="Generate new operator address (recommended)"
   TRANSLATIONS["en,bls_method_prompt"]="Choose method [1-2]: "
   TRANSLATIONS["en,bls_invalid_method"]="Invalid method selected"
@@ -463,7 +463,7 @@ init_languages() {
   TRANSLATIONS["ru,eth_address"]="ETH Адрес"
   TRANSLATIONS["ru,private_key"]="Приватный ключ"
   TRANSLATIONS["ru,bls_key"]="BLS ключ"
-  TRANSLATIONS["ru,bls_method_existing"]="Использовать существующие адреса (из mnemonic)"
+  TRANSLATIONS["ru,bls_method_existing"]="Использовать существующие адреса (из mnemonic, только если все адреса валидаторов из одной сид фразы)"
   TRANSLATIONS["ru,bls_method_new_operator"]="Сгенерировать новый адрес оператора (рекомендуется)"
   TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод [1-2]: "
   TRANSLATIONS["ru,bls_invalid_method"]="Выбран неверный метод"
@@ -821,7 +821,7 @@ init_languages() {
   TRANSLATIONS["tr,eth_address"]="ETH Adresi"
   TRANSLATIONS["tr,private_key"]="Özel Anahtar"
   TRANSLATIONS["tr,bls_key"]="BLS Anahtarı"
-  TRANSLATIONS["tr,bls_method_existing"]="Mevcut adresleri kullan (mnemonic'dan)"
+  TRANSLATIONS["tr,bls_method_existing"]="Mevcut adresleri kullan (yalnızca tüm doğrulayıcı adresleri aynı başlangıç ​​ifadesinden geliyorsa, anımsatıcıdan)"
   TRANSLATIONS["tr,bls_method_new_operator"]="Yeni operatör adresi oluştur (tavsiye edilen)"
   TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin [1-2]: "
   TRANSLATIONS["tr,bls_invalid_method"]="Geçersiz yöntem seçildi"
@@ -3028,16 +3028,16 @@ generate_bls_keys() {
 
     # Выбор способа генерации
     echo -e "\n${CYAN}Select BLS generation method:${NC}"
-    echo -e "1) $(t "bls_method_existing")"
-    echo -e "2) $(t "bls_method_new_operator")"
+    echo -e "1) $(t "bls_method_new_operator")"
+    echo -e "2) $(t "bls_method_existing")"
     read -p "$(t "bls_method_prompt") " GENERATION_METHOD
 
     case $GENERATION_METHOD in
         1)
-            generate_bls_existing_method
+            generate_bls_new_operator_method
             ;;
         2)
-            generate_bls_new_operator_method
+            generate_bls_existing_method
             ;;
         *)
             echo -e "${RED}$(t "bls_invalid_method")${NC}"
