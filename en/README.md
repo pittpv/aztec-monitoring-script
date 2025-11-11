@@ -36,17 +36,17 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
 ## 📌 Latest Updates 11-11-2025
-* Added a method for generating a new operator from an old validator private key (requires node installation via this script, option 11)
-  * support for multivalidator mode
-  * creation of a new address, private, and BLS keys from old private keys
-  * correct data sorting according to the order of addresses in keystore.json, regardless of the order in which you enter the old private keys for generating new ones.
-* Staking function update
-  * automatic detection of the selected BLS key generation method
-  * automatic replacement of the validator address in keystore.json when creating new addresses
-  * automatic creation of new yml files with private keys
-  * keystore.json backup
-  * automatic restart of web3signer
-  * preview of the staking command before execution
+- Added a method for generating a new operator from an old validator private key (requires node installation via this script, option 11)
+  - support for multivalidator mode
+  - creation of a new address, private, and BLS keys from old private keys
+  - correct data sorting according to the order of addresses in keystore.json, regardless of the order in which you enter the old private keys for generating new ones.
+- Staking function update
+  - automatic detection of the selected BLS key generation method
+  - automatic replacement of the validator address in keystore.json when creating new addresses
+  - automatic creation of new yml files with private keys
+  - keystore.json backup
+  - automatic restart of web3signer
+  - preview of the staking command before execution
 - Minor improvements in main script
 - Minor improvements in monitoring agent script
 - Minor improvements in node installation script

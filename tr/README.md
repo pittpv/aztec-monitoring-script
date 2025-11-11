@@ -37,17 +37,17 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ## 📌 Son Güncellemeler 11-11-2025
 
-* Eski doğrulayıcı özel anahtarından yeni bir operatör oluşturma yöntemi eklendi (bu betik aracılığıyla düğüm kurulumu gereklidir, seçenek 11)
-  * çoklu doğrulayıcı modu desteği
-  * eski özel anahtarlardan yeni adres, özel ve BLS anahtarlarının oluşturulması
-  * yeni anahtarlar oluşturmak için eski özel anahtarları hangi sırayla girerseniz girin, keystore.json dosyasındaki adres sırasına göre doğru veri sıralaması.
-* Stake fonksiyonu güncellemesi
-  * seçilen BLS anahtarı oluşturma yönteminin otomatik algılanması
-  * yeni adresler oluşturulurken keystore.json içindeki doğrulayıcı adresinin otomatik olarak değiştirilmesi
-  * özel anahtarların yeni yml dosyalarının otomatik oluşturulması
-  * keystore.json yedeklemesi
-  * web3signer’ın otomatik yeniden başlatılması
-  * gönderimden önce stake komutunun önizlemesi
+- Eski doğrulayıcı özel anahtarından yeni bir operatör oluşturma yöntemi eklendi (bu betik aracılığıyla düğüm kurulumu gereklidir, seçenek 11)
+  - çoklu doğrulayıcı modu desteği
+  - eski özel anahtarlardan yeni adres, özel ve BLS anahtarlarının oluşturulması
+  - yeni anahtarlar oluşturmak için eski özel anahtarları hangi sırayla girerseniz girin, keystore.json dosyasındaki adres sırasına göre doğru veri sıralaması.
+- Stake fonksiyonu güncellemesi
+  - seçilen BLS anahtarı oluşturma yönteminin otomatik algılanması
+  - yeni adresler oluşturulurken keystore.json içindeki doğrulayıcı adresinin otomatik olarak değiştirilmesi
+  - özel anahtarların yeni yml dosyalarının otomatik oluşturulması
+  - keystore.json yedeklemesi
+  - web3signer’ın otomatik yeniden başlatılması
+  - gönderimden önce stake komutunun önizlemesi
 - Ana betikte küçük iyileştirmeler
 - İzleme aracı betiğinde küçük iyileştirmeler
 - Düğüm kurulum betiğinde küçük iyileştirmeler
