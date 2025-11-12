@@ -685,8 +685,8 @@ monitor_position(){
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 🔄 *Change:* $last_position → $current_position
 📅 *Queued since:* $queued_at
-🏦 *Withdrawer:* $withdrawer_address
-🔗 *Transaction:* $transaction_hash
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue*
@@ -694,8 +694,8 @@ monitor_position(){
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 📌 *Initial Position:* $current_position
 📅 *Queued since:* $queued_at
-🏦 *Withdrawer:* $withdrawer_address
-🔗 *Transaction:* $transaction_hash
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
             send_telegram "$message" && log_message "Notification sent"
