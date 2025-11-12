@@ -217,7 +217,7 @@ init_languages "$1"
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
 ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
 GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
-QUEUE_URL="https://dashtec.xyz/api/validators/queue"
+QUEUE_URL="https://testnet.dashtec.xyz/api/validators/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
 # ========= HTTP via curl_cffi =========
@@ -230,8 +230,8 @@ from curl_cffi import requests
 u = sys.argv[1]
 headers = {
   "accept": "application/json, text/plain, */*",
-  "origin": "https://dashtec.xyz",
-  "referer": "https://dashtec.xyz/",
+  "origin": "https://testnet.dashtec.xyz",
+  "referer": "https://testnet.dashtec.xyz/",
 }
 try:
     r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
@@ -620,7 +620,7 @@ cffi_http_get(){
 import sys
 from curl_cffi import requests
 u = sys.argv[1]
-headers = {"accept":"application/json, text/plain, */*","origin":"https://dashtec.xyz","referer":"https://dashtec.xyz/"}
+headers = {"accept":"application/json, text/plain, */*","origin":"https://testnet.dashtec.xyz","referer":"https://testnet.dashtec.xyz/"}
 r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
 ct = (r.headers.get("content-type") or "").lower()
 txt = r.text
