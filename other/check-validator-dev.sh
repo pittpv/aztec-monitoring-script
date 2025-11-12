@@ -1004,7 +1004,7 @@ remove_monitor_scripts() {
         return
     fi
 
-    echo -e "${BOLD}$(t "select_monitor_to_remove")${RESET}"
+    echo -e "\n${YELLOW}$(t "select_monitor_to_remove")${RESET}"
     echo -e "1. $(t "remove_all")"
 
     local i=2
