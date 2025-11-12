@@ -35,7 +35,8 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 11-11-2025
+## 📌 Latest Updates 12-11-2025
+
 - Added a method for generating a new operator from an old validator private key (requires node installation via this script, option 11)
   - support for multivalidator mode
   - creation of a new address, private, and BLS keys from old private keys
@@ -47,6 +48,9 @@ Also check out the Version History under the spoiler, there is a lot of useful i
   - keystore.json backup
   - automatic restart of web3signer
   - preview of the staking command before execution
+- Updated the Validator Search and Status Check function (**Option 9**)
+  - **Restored** the validator queue monitoring function
+  - Added a function to delete the validator queue monitoring
 - Minor improvements in main script
 - Minor improvements in monitoring agent script
 - Minor improvements in node installation script

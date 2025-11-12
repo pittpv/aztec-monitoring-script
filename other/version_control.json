@@ -193,5 +193,10 @@
     "VERSION": "2.3.0",
     "UPDATE_DATE": "11.11.2025",
     "CHANGES": ["Added a method for generating a new operator from the old validator private key", "Minor improvements in main script", "Minor improvements in monitoring agent script", "Minor improvements in node installation script"]
+  },
+  {
+    "VERSION": "2.3.1",
+    "UPDATE_DATE": "12.11.2025",
+    "CHANGES": ["Validator queue monitoring functionality has been restored", "Validator queue monitoring deletion functionality has been added"]
   }
 ]

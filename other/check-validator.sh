@@ -83,6 +83,14 @@ init_languages() {
     TRANSLATIONS["en,getting_current_slot"]="Getting current slot..."
     TRANSLATIONS["en,deriving_timestamp"]="Deriving timestamp for slot..."
     TRANSLATIONS["en,querying_attesters"]="Querying attesters from GSE contract..."
+    TRANSLATIONS["en,option5"]="5. Remove existing monitoring"
+    TRANSLATIONS["en,select_monitor_to_remove"]="Select monitor to remove:"
+    TRANSLATIONS["en,monitor_removed"]="Monitoring for validator %s has been removed."
+    TRANSLATIONS["en,all_monitors_removed"]="All monitoring scripts have been removed."
+    TRANSLATIONS["en,remove_all"]="Remove all monitoring scripts"
+    TRANSLATIONS["en,remove_specific"]="Remove specific monitor"
+    TRANSLATIONS["en,enter_choice"]="Enter your choice:"
+    TRANSLATIONS["en,invalid_choice"]="Invalid choice."
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -142,6 +150,14 @@ init_languages() {
     TRANSLATIONS["ru,getting_current_slot"]="Получение текущего слота..."
     TRANSLATIONS["ru,deriving_timestamp"]="Получение временной метки для слота..."
     TRANSLATIONS["ru,querying_attesters"]="Запрос аттестующих из GSE контракта..."
+    TRANSLATIONS["ru,option5"]="5. Удалить существующий мониторинг"
+    TRANSLATIONS["ru,select_monitor_to_remove"]="Выберите монитор для удаления:"
+    TRANSLATIONS["ru,monitor_removed"]="Мониторинг для валидатора %s удален."
+    TRANSLATIONS["ru,all_monitors_removed"]="Все скрипты мониторинга удалены."
+    TRANSLATIONS["ru,remove_all"]="Удалить все скрипты мониторинга"
+    TRANSLATIONS["ru,remove_specific"]="Удалить конкретный монитор"
+    TRANSLATIONS["ru,enter_choice"]="Введите ваш выбор:"
+    TRANSLATIONS["ru,invalid_choice"]="Неверный выбор."
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -201,6 +217,14 @@ init_languages() {
     TRANSLATIONS["tr,getting_current_slot"]="Mevcut slot alınıyor..."
     TRANSLATIONS["tr,deriving_timestamp"]="Slot için zaman damgası türetiliyor..."
     TRANSLATIONS["tr,querying_attesters"]="GSE kontratından onaylayıcılar sorgulanıyor..."
+    TRANSLATIONS["tr,option5"]="5. Mevcut izlemeyi kaldır"
+    TRANSLATIONS["tr,select_monitor_to_remove"]="Kaldırılacak izleyiciyi seçin:"
+    TRANSLATIONS["tr,monitor_removed"]="%s doğrulayıcısı için izleme kaldırıldı."
+    TRANSLATIONS["tr,all_monitors_removed"]="Tüm izleme betikleri kaldırıldı."
+    TRANSLATIONS["tr,remove_all"]="Tüm izleme betiklerini kaldır"
+    TRANSLATIONS["tr,remove_specific"]="Belirli izleyiciyi kaldır"
+    TRANSLATIONS["tr,enter_choice"]="Seçiminizi girin:"
+    TRANSLATIONS["tr,invalid_choice"]="Geçersiz seçim."
 }
 
 t() {
@@ -971,6 +995,74 @@ fast_load_validators() {
     echo -e "${GREEN}Successfully loaded: ${#RESULTS[@]}/$VALIDATOR_COUNT validators${RESET}"
 }
 
+# Функция для удаления мониторинга
+remove_monitor_scripts() {
+    local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
+
+    if [ ${#scripts[@]} -eq 0 ]; then
+        echo -e "${YELLOW}$(t "no_notifications")${RESET}"
+        return
+    fi
+
+    echo -e "\n${YELLOW}$(t "select_monitor_to_remove")${RESET}"
+    echo -e "1. $(t "remove_all")"
+
+    local i=2
+    declare -A script_map
+    for script in "${scripts[@]}"; do
+        local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
+        echo -e "$i. $address"
+        script_map[$i]="$script|$address"
+        ((i++))
+    done
+
+    echo ""
+    read -p "$(t "enter_choice"): " choice
+
+    case $choice in
+        1)
+            # Удаление всех скриптов мониторинга
+            for script in "${scripts[@]}"; do
+                local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
+                local base_name=$(basename "$script" .sh)
+                local log_file="$MONITOR_DIR/${base_name}.log"
+                local position_file="$MONITOR_DIR/last_position_${base_name#monitor_}.txt"
+
+                # Удаляем из crontab
+                (crontab -l | grep -v "$script" | crontab - 2>/dev/null) || true
+
+                # Удаляем файлы
+                rm -f "$script" "$log_file" "$position_file"
+
+                echo -e "${GREEN}$(t "monitor_removed" "$address")${RESET}"
+            done
+            echo -e "${GREEN}$(t "all_monitors_removed")${RESET}"
+            ;;
+        [2-9]|1[0-9])
+            # Удаление конкретного монитора
+            if [[ -n "${script_map[$choice]}" ]]; then
+                IFS='|' read -r script address <<< "${script_map[$choice]}"
+                local base_name=$(basename "$script" .sh)
+                local log_file="$MONITOR_DIR/${base_name}.log"
+                local position_file="$MONITOR_DIR/last_position_${base_name#monitor_}.txt"
+
+                # Удаляем из crontab
+                (crontab -l | grep -v "$script" | crontab - 2>/dev/null) || true
+
+                # Удаляем файлы
+                rm -f "$script" "$log_file" "$position_file"
+
+                echo -e "${GREEN}$(t "monitor_removed" "$address")${RESET}"
+            else
+                echo -e "${RED}$(t "invalid_choice")${RESET}"
+            fi
+            ;;
+        *)
+            echo -e "${RED}$(t "invalid_choice")${RESET}"
+            ;;
+    esac
+}
+
 # Основной код
 echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${RESET}..."
 
@@ -1105,6 +1197,7 @@ while true; do
     echo -e "${CYAN}2. Set up queue position notification for validator${RESET}"
     echo -e "${CYAN}3. Check validator in queue${RESET}"
     echo -e "${CYAN}4. List active monitors${RESET}"
+    echo -e "${CYAN}5. Remove existing monitoring${RESET}"
     echo -e "${RED}0. Exit${RESET}"
     read -p "$(t "enter_option") " choice
 
@@ -1259,6 +1352,10 @@ while true; do
         4)
             # Новая опция: показать активные мониторы
             list_monitor_scripts
+            ;;
+        5)
+            # Новая опция: удаление мониторинга
+            remove_monitor_scripts
             ;;
         0)
             echo -e "\n${CYAN}$(t "exiting")${RESET}"

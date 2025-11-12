@@ -35,7 +35,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 11-11-2025
+## 📌 Son Güncellemeler 12-11-2025
 
 - Eski doğrulayıcı özel anahtarından yeni bir operatör oluşturma yöntemi eklendi (bu betik aracılığıyla düğüm kurulumu gereklidir, seçenek 11)
   - çoklu doğrulayıcı modu desteği
@@ -48,6 +48,9 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
   - keystore.json yedeklemesi
   - web3signer’ın otomatik yeniden başlatılması
   - gönderimden önce stake komutunun önizlemesi
+- Doğrulayıcı Arama ve Durum Kontrolü işlevi güncellendi (**Seçenek 9**)
+  - Doğrulayıcı Sıra İzleme işlevi geri yüklendi**
+  - Doğrulayıcı Sıra İzleme işlevini silmek için bir işlev eklendi
 - Ana betikte küçük iyileştirmeler
 - İzleme aracı betiğinde küçük iyileştirmeler
 - Düğüm kurulum betiğinde küçük iyileştirmeler
