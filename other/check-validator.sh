@@ -241,7 +241,7 @@ init_languages "$1"
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
 ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
 GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
-QUEUE_URL="https://testnet.dashtec.xyz/api/validators/queue"
+QUEUE_URL="https://testnet.dashtec.xyz/api/sequencers/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
 # ========= HTTP via curl_cffi =========
@@ -682,20 +682,20 @@ monitor_position(){
             if [[ -n "$last_position" ]]; then
                 message="📊 *Validator Position Update*
 
-🔹 *Address:* $VALIDATOR_ADDRESS
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 🔄 *Change:* $last_position → $current_position
 📅 *Queued since:* $queued_at
-🏦 *Withdrawer:* $withdrawer_address
-🔗 *Transaction:* $transaction_hash
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue*
 
-🔹 *Address:* $VALIDATOR_ADDRESS
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 📌 *Initial Position:* $current_position
 📅 *Queued since:* $queued_at
-🏦 *Withdrawer:* $withdrawer_address
-🔗 *Transaction:* $transaction_hash
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
             send_telegram "$message" && log_message "Notification sent"
@@ -709,7 +709,7 @@ monitor_position(){
         if [[ -n "$last_position" ]]; then
             local message="❌ *Validator Removed from Queue*
 
-🔹 *Address:* $VALIDATOR_ADDRESS
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 ⌛ *Last Position:* $last_position
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
 send_telegram "$message" && log_message "Removal notification sent"

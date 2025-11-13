@@ -2150,7 +2150,7 @@ check_committee() {
   for validator in "\${VALIDATOR_ARRAY[@]}"; do
     validator_lower=\$(echo "\$validator" | tr '[:upper:]' '[:lower:]')
     if echo "\$committee" | grep -qi "\$validator_lower"; then
-      validator_link="[\$validator](https://dashtec.xyz/validators/\$validator)"
+      validator_link="[\$validator](https://testnet.dashtec.xyz/validators/\$validator)"
       found_validators+=("\$validator_link")
       committee_validators+=("\$validator_lower")
       debug_log "Validator \$validator found in committee"

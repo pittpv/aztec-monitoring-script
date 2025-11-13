@@ -198,5 +198,10 @@
     "VERSION": "2.3.1",
     "UPDATE_DATE": "12.11.2025",
     "CHANGES": ["Validator queue monitoring functionality has been restored", "Validator queue monitoring deletion functionality has been added"]
+  },
+  {
+    "VERSION": "2.3.2",
+    "UPDATE_DATE": "13.11.2025",
+    "CHANGES": ["New URL for the testnet sequencer dashboard in the Telegram notification about sequencer inclusion in the committee", "Validator queue monitoring deletion functionality has been added"]
   }
 ]
