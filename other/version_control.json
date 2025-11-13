@@ -202,6 +202,6 @@
   {
     "VERSION": "2.3.2",
     "UPDATE_DATE": "13.11.2025",
-    "CHANGES": ["New URL for the testnet sequencer dashboard in the Telegram notification about sequencer inclusion in the committee", "Validator queue monitoring deletion functionality has been added"]
+    "CHANGES": ["New URL for displaying sequencer data on the test network at Dashtec.xyz", "Easily copy the attester and output address, as well as the transaction hash", "New URL for the sequencer page in Slot statistics monitoring"]
   }
 ]
