@@ -595,6 +595,9 @@ echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
 read -p "$(t "multiple_validators_prompt")" -n 1 -r
 echo
 
+# Store the response for validator mode selection
+VALIDATOR_MODE_REPLY=$REPLY
+
 # Initialize arrays for keys and addresses
 VALIDATOR_PRIVATE_KEYS_ARRAY=()
 VALIDATOR_ADDRESSES_ARRAY=()
@@ -604,7 +607,6 @@ USE_FIRST_AS_PUBLISHER=false
 HAS_BLS_KEYS=false
 
 # Ask if user has BLS keys
-echo -e "\n${YELLOW}$(t "has_bls_keys")${NC}"
 read -p "$(t "has_bls_keys") " -n 1 -r
 echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -612,7 +614,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo -e "${GREEN}BLS keys will be added to configuration${NC}"
 fi
 
-if [[ $REPLY =~ ^[Yy]$ ]]; then
+# Use the stored response for validator mode selection
+if [[ $VALIDATOR_MODE_REPLY =~ ^[Yy]$ ]]; then
     echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
 
     if [ "$HAS_BLS_KEYS" = true ]; then
