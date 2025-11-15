@@ -646,10 +646,14 @@ else
     USE_FIRST_AS_PUBLISHER=true  # For single validator, always use own address
 fi
 
-# Ask for Aztec L2 Address for feeRecipient
+# Ask for Aztec L2 Address for feeRecipient и COINBASE
 echo -e "\n${YELLOW}Enter Aztec L2 Address to use as feeRecipient for all validators:${NC}"
 read -p "Aztec L2 Address: " FEE_RECIPIENT_ADDRESS
 FEE_RECIPIENT_ADDRESS=$(echo "$FEE_RECIPIENT_ADDRESS" | tr -d ' ')
+
+# Добавляем запрос COINBASE сразу после Aztec L2 Address
+read -p "COINBASE: " COINBASE
+COINBASE=$(echo "$COINBASE" | tr -d ' ')
 
 # Create keys directory and YML files
 echo -e "\n${GREEN}Creating key files...${NC}"
@@ -688,7 +692,8 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
         "eth": "$address"
       },
       "publisher": ["$publisher"],
-      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
+      "coinbase": "$COINBASE"
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS",
     }
 EOF
     )
@@ -716,13 +721,11 @@ DEFAULT_IP=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me)
 echo -e "\n${GREEN}$(t "creating_env")${NC}"
 read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
 read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
-read -p "COINBASE: " COINBASE
 
-# Create .env file without VALIDATOR_PRIVATE_KEYS
+# Create .env file без COINBASE
 cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
 CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
-COINBASE=${COINBASE}
 P2P_IP=${DEFAULT_IP}
 EOF
 
@@ -741,7 +744,6 @@ services:
       L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
       DATA_DIRECTORY: /data
       KEY_STORE_DIRECTORY: /config
-      COINBASE: \${COINBASE}
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: info;debug:node:sentinel
     entrypoint: >
