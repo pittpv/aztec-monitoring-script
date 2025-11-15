@@ -687,7 +687,7 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
     fi
 
     VALIDATOR_JSON=$(cat <<EOF
-    {
+{
       "attester": {
         "eth": "$address"
       },
