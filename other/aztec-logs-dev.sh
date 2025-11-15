@@ -3661,7 +3661,8 @@ generate_bls_new_operator_method() {
     {
       "attester": {
         "eth": "${OLD_PRIVATE_KEYS_MAP[$keystore_address]}",
-        "bls": "${NEW_BLS_KEYS_MAP[$keystore_address]}"
+        "bls": "${NEW_BLS_KEYS_MAP[$keystore_address]}",
+        "old_address": "$keystore_address"
       },
       "feeRecipient": "$FEE_RECIPIENT_ADDRESS",
       "new_operator_info": {
