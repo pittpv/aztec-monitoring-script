@@ -74,6 +74,7 @@ init_languages() {
   TRANSLATIONS["en,bls_fee_recipient_not_found"]="❌ feeRecipient not found in keystore.json"
   TRANSLATIONS["en,bls_generating_keys"]="🔑 Generating BLS keys..."
   TRANSLATIONS["en,bls_generation_success"]="✅ BLS keys generated successfully"
+  TRANSLATIONS["en,bls_public_save_attention"]="⚠️ ATTENTION: Copy the account details above (white text) and save them, they contain eth addresses and public bls keys that you may need in the future."
   TRANSLATIONS["en,bls_generation_failed"]="❌ Failed to generate BLS keys"
   TRANSLATIONS["en,bls_searching_matches"]="🔍 Searching for matching addresses in keystore..."
   TRANSLATIONS["en,bls_matches_found"]="✅ Found %d matching addresses"
@@ -432,6 +433,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_fee_recipient_not_found"]="❌ feeRecipient не найден в keystore.json"
   TRANSLATIONS["ru,bls_generating_keys"]="🔑 Генерация BLS ключей..."
   TRANSLATIONS["ru,bls_generation_success"]="✅ BLS ключи успешно сгенерированы"
+  TRANSLATIONS["ru,bls_public_save_attention"]="⚠️ ВНИМАНИЕ: скопируйте данные аккаунтов выше (белый текст) и сохраните, в них содержатся eth-адреса публичные bls-ключи, которые могут вам пригодиться в будущем."
   TRANSLATIONS["ru,bls_generation_failed"]="❌ Не удалось сгенерировать BLS ключи"
   TRANSLATIONS["ru,bls_searching_matches"]="🔍 Поиск совпадающих адресов в keystore..."
   TRANSLATIONS["ru,bls_matches_found"]="✅ Найдено %d совпадающих адресов"
@@ -790,6 +792,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_fee_recipient_not_found"]="❌ keystore.json dosyasında feeRecipient bulunamadı"
   TRANSLATIONS["tr,bls_generating_keys"]="🔑 BLS anahtarları oluşturuluyor..."
   TRANSLATIONS["tr,bls_generation_success"]="✅ BLS anahtarları başarıyla oluşturuldu"
+  TRANSLATIONS["tr,bls_public_save_attention"]="⚠️ DİKKAT: Yukarıdaki hesap bilgilerini (beyaz metin) kopyalayın ve kaydedin, bunlar gelecekte ihtiyaç duyabileceğiniz eth adreslerini ve genel bls anahtarlarını içerir."
   TRANSLATIONS["tr,bls_generation_failed"]="❌ BLS anahtarları oluşturulamadı"
   TRANSLATIONS["tr,bls_searching_matches"]="🔍 Keystore'da eşleşen adresler aranıyor..."
   TRANSLATIONS["tr,bls_matches_found"]="✅ %d eşleşen adres bulundu"
@@ -3105,6 +3108,7 @@ generate_bls_existing_method() {
         --data-dir "$HOME/aztec/"; then
 
         echo -e "${GREEN}$(t "bls_generation_success")${NC}"
+        echo -e "${YELLOW}$(t "bls_public_save_attention")${NC}"
     else
         echo -e "${RED}$(t "bls_generation_failed")${NC}"
         return 1
