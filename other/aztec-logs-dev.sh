@@ -2618,7 +2618,7 @@ function check_validator {
 
 # === Install Aztec node ===
 function install_aztec {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_install_node")${NC}"
   echo -e ""
@@ -2668,7 +2668,7 @@ function install_aztec {
 
 # === Delete Aztec node ===
 function delete_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
     local FUNCTION_NAME="delete_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
@@ -2677,7 +2677,7 @@ function delete_aztec() {
 
 # === Update Aztec node ===
 function update_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
     local FUNCTION_NAME="update_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
@@ -2686,7 +2686,7 @@ function update_aztec() {
 
 # === Downgrade Aztec node ===
 function downgrade_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
     local FUNCTION_NAME="downgrade_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
