@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.3.0"
+SCRIPT_VERSION="2.3.2"
 
 function show_logo() {
     echo -e " "
@@ -2150,7 +2150,7 @@ check_committee() {
   for validator in "\${VALIDATOR_ARRAY[@]}"; do
     validator_lower=\$(echo "\$validator" | tr '[:upper:]' '[:lower:]')
     if echo "\$committee" | grep -qi "\$validator_lower"; then
-      validator_link="[\$validator](https://dashtec.xyz/validators/\$validator)"
+      validator_link="[\$validator](https://testnet.dashtec.xyz/validators/\$validator)"
       found_validators+=("\$validator_link")
       committee_validators+=("\$validator_lower")
       debug_log "Validator \$validator found in committee"
@@ -3046,7 +3046,7 @@ generate_bls_keys() {
     esac
 }
 
-# === Исправленная версия функции ===
+# === Исправленная версия функции для новой структуры keystore.json ===
 generate_bls_existing_method() {
     echo -e "\n${BLUE}=== $(t "bls_existing_method_title") ===${NC}"
 
@@ -3076,10 +3076,11 @@ generate_bls_existing_method() {
         return 1
     fi
 
+    # Извлекаем feeRecipient из первого валидатора
     local FEE_RECIPIENT_ADDRESS
-    FEE_RECIPIENT_ADDRESS=$(grep -o '"feeRecipient": *"[^"]*"' "$KEYSTORE_FILE" | head -n 1 | cut -d'"' -f4)
+    FEE_RECIPIENT_ADDRESS=$(jq -r '.validators[0].feeRecipient' "$KEYSTORE_FILE" 2>/dev/null)
 
-    if [ -z "$FEE_RECIPIENT_ADDRESS" ]; then
+    if [ -z "$FEE_RECIPIENT_ADDRESS" ] || [ "$FEE_RECIPIENT_ADDRESS" = "null" ]; then
         echo -e "${RED}$(t "bls_fee_recipient_not_found")${NC}"
         return 1
     fi
@@ -3117,16 +3118,16 @@ generate_bls_existing_method() {
 
     echo -e "${GREEN}✅ Generated BLS file: $BLS_OUTPUT_FILE${NC}"
 
-    # 6. Получаем порядок адресов из keystore.json
+    # 6. Получаем адреса валидаторов из keystore.json
     echo -e "\n${BLUE}$(t "bls_searching_matches")${NC}"
 
     # Извлекаем адреса валидаторов из keystore.json в правильном порядке
     local KEYSTORE_VALIDATOR_ADDRESSES=()
-    while IFS= read -r line; do
-        if [[ "$line" =~ \"attester\"[[:space:]]*:[[:space:]]*\"(0x[0-9a-fA-F]+)\" ]]; then
-            KEYSTORE_VALIDATOR_ADDRESSES+=("${BASH_REMATCH[1],,}")
+    while IFS= read -r address; do
+        if [ -n "$address" ] && [ "$address" != "null" ]; then
+            KEYSTORE_VALIDATOR_ADDRESSES+=("${address,,}")
         fi
-    done < <(jq -c '.validators[]' "$KEYSTORE_FILE" 2>/dev/null)
+    done < <(jq -r '.validators[].attester.eth' "$KEYSTORE_FILE" 2>/dev/null)
 
     if [ ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} -eq 0 ]; then
         echo -e "${RED}No validator addresses found in keystore.json${NC}"
@@ -3233,7 +3234,8 @@ generate_bls_existing_method() {
       "attester": {
         "eth": "$PRIVATE_KEY",
         "bls": "$BLS_KEY"
-      }
+      },
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
     }
 EOF
             )
@@ -3246,6 +3248,7 @@ EOF
     if [ $MATCH_COUNT -gt 0 ]; then
         cat > "$BLS_FILTERED_PK_FILE" << EOF
 {
+  "schemaVersion": 1,
   "validators": [
 $VALIDATORS_JSON
   ]
@@ -3269,7 +3272,7 @@ EOF
     fi
 }
 
-# === New operator method ===
+# === New operator method для новой структуры keystore.json ===
 generate_bls_new_operator_method() {
     echo -e "\n${BLUE}=== $(t "bls_new_operator_title") ===${NC}"
 
@@ -3309,12 +3312,13 @@ generate_bls_new_operator_method() {
         return 1
     fi
 
+    # Извлекаем адреса валидаторов из новой структуры keystore.json
     local KEYSTORE_VALIDATOR_ADDRESSES=()
-    while IFS= read -r line; do
-        if [[ "$line" =~ \"attester\"[[:space:]]*:[[:space:]]*\"(0x[0-9a-fA-F]+)\" ]]; then
-            KEYSTORE_VALIDATOR_ADDRESSES+=("${BASH_REMATCH[1],,}")
+    while IFS= read -r address; do
+        if [ -n "$address" ] && [ "$address" != "null" ]; then
+            KEYSTORE_VALIDATOR_ADDRESSES+=("${address,,}")
         fi
-    done < <(jq -c '.validators[]' "$KEYSTORE_FILE" 2>/dev/null)
+    done < <(jq -r '.validators[].attester.eth' "$KEYSTORE_FILE" 2>/dev/null)
 
     if [ ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} -eq 0 ]; then
         echo -e "${RED}No validator addresses found in keystore.json${NC}"
@@ -3322,6 +3326,17 @@ generate_bls_new_operator_method() {
     fi
 
     echo -e "${GREEN}Found ${#KEYSTORE_VALIDATOR_ADDRESSES[@]} validators in keystore.json${NC}"
+
+    # Получаем feeRecipient из keystore.json
+    local FEE_RECIPIENT_ADDRESS
+    FEE_RECIPIENT_ADDRESS=$(jq -r '.validators[0].feeRecipient' "$KEYSTORE_FILE" 2>/dev/null)
+
+    if [ -z "$FEE_RECIPIENT_ADDRESS" ] || [ "$FEE_RECIPIENT_ADDRESS" = "null" ]; then
+        echo -e "${RED}$(t "bls_fee_recipient_not_found")${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Found feeRecipient: $FEE_RECIPIENT_ADDRESS${NC}"
 
     # Используем стандартный RPC URL вместо запроса у пользователя
     local RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
@@ -3354,8 +3369,8 @@ generate_bls_new_operator_method() {
         rm -f ~/.aztec/keystore/key1.json
         read -p "$(t "bls_press_enter_to_generate") " -r
 
-        # Генерация новых ключей
-        if ! aztec validator-keys new --fee-recipient 0x0000000000000000000000000000000000000000000000000000000000000000; then
+        # Генерация новых ключей с правильным feeRecipient
+        if ! aztec validator-keys new --fee-recipient "$FEE_RECIPIENT_ADDRESS"; then
             echo -e "${RED}$(t "bls_generation_failed")${NC}"
             rm -rf "$TEMP_DIR"
             return 1
@@ -3423,9 +3438,9 @@ generate_bls_new_operator_method() {
     {
       "attester": {
         "eth": "${OLD_PRIVATE_KEYS_MAP[$keystore_address]}",
-        "bls": "${NEW_BLS_KEYS_MAP[$keystore_address]}",
-        "old_address": "$keystore_address"
+        "bls": "${NEW_BLS_KEYS_MAP[$keystore_address]}"
       },
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS",
       "new_operator_info": {
         "eth_private_key": "${NEW_ETH_PRIVATE_KEYS_MAP[$keystore_address]}",
         "bls_private_key": "${NEW_BLS_KEYS_MAP[$keystore_address]}",
@@ -3448,6 +3463,7 @@ EOF
 
     cat > "$BLS_PK_FILE" << EOF
 {
+  "schemaVersion": 1,
   "validators": [
 $VALIDATORS_JSON
   ]

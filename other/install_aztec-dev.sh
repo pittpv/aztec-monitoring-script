@@ -675,17 +675,19 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
     address="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
 
     if [ "$USE_FIRST_AS_PUBLISHER" = true ] && [ $i -gt 0 ]; then
-        # Use first private key as publisher for all other validators
+        # Use first address as publisher for all other validators
         publisher="${VALIDATOR_ADDRESSES_ARRAY[0]}"
     else
-        # Use own private key as publisher
+        # Use own address as publisher
         publisher="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
     fi
 
     VALIDATOR_JSON=$(cat <<EOF
     {
-      "attester": "$address",
-      "publisher": "$publisher",
+      "attester": {
+        "eth": "$address"
+      },
+      "publisher": ["$publisher"],
       "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
     }
 EOF
@@ -696,7 +698,7 @@ done
 # Join validators array with commas
 VALIDATORS_JSON_STRING=$(IFS=,; echo "${VALIDATORS_JSON_ARRAY[*]}")
 
-# Create keystore.json
+# Create keystore.json with updated schema
 cat > "$HOME/aztec/config/keystore.json" <<EOF
 {
   "schemaVersion": 1,
@@ -741,7 +743,7 @@ services:
       KEY_STORE_DIRECTORY: /config
       COINBASE: \${COINBASE}
       P2P_IP: \${P2P_IP}
-      LOG_LEVEL: debug
+      LOG_LEVEL: info;debug:node:sentinel
     entrypoint: >
       sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network testnet --node --archiver --sequencer'
     ports:
@@ -784,7 +786,7 @@ EOF
     cat > docker-compose.yml <<EOF
 services:
   watchtower:
-    image: containrrr/watchtower:latest
+    image: nickfedor/watchtower:latest
     container_name: watchtower
     restart: unless-stopped
     volumes:
