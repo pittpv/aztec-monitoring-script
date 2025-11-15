@@ -3108,6 +3108,7 @@ generate_bls_existing_method() {
         --data-dir "$HOME/aztec/"; then
 
         echo -e "${GREEN}$(t "bls_generation_success")${NC}"
+        echo -e "${YELLOW}↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓${NC}"
         echo -e "${YELLOW}$(t "bls_public_save_attention")${NC}"
     else
         echo -e "${RED}$(t "bls_generation_failed")${NC}"
