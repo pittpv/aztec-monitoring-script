@@ -692,8 +692,8 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
         "eth": "$address"
       },
       "publisher": ["$publisher"],
-      "coinbase": "$COINBASE"
-      "feeRecipient": "$FEE_RECIPIENT_ADDRESS",
+      "coinbase": "$COINBASE",
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
     }
 EOF
     )
