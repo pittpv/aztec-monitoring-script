@@ -3110,6 +3110,7 @@ generate_bls_existing_method() {
         echo -e "${GREEN}$(t "bls_generation_success")${NC}"
         echo -e "${YELLOW}↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓${NC}"
         echo -e "${YELLOW}$(t "bls_public_save_attention")${NC}"
+        echo -e "${YELLOW}↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑${NC}"
     else
         echo -e "${RED}$(t "bls_generation_failed")${NC}"
         return 1
