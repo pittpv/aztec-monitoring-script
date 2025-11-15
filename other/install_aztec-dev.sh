@@ -676,10 +676,10 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
 
     if [ "$USE_FIRST_AS_PUBLISHER" = true ] && [ $i -gt 0 ]; then
         # Use first private key as publisher for all other validators
-        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[0]}"
+        publisher="${VALIDATOR_ADDRESSES_ARRAY[0]}"
     else
         # Use own private key as publisher
-        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
+        publisher="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
     fi
 
     VALIDATOR_JSON=$(cat <<EOF
@@ -701,7 +701,6 @@ cat > "$HOME/aztec/config/keystore.json" <<EOF
 {
   "schemaVersion": 1,
   "remoteSigner": "http://127.0.0.1:10500",
-  "slasher": "${VALIDATOR_ADDRESSES_ARRAY[0]}",
   "validators": [
     $VALIDATORS_JSON_STRING
   ]
