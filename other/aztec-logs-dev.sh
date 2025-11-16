@@ -2676,7 +2676,7 @@ change_rpc_url() {
 
 # === Check validator ===
 function check_validator {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator.sh"
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator-dev.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
