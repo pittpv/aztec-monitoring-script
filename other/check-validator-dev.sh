@@ -661,6 +661,8 @@ LAST_POSITION_FILE="__POSFILE__"
 LOG_FILE="__LOGFILE__"
 TELEGRAM_BOT_TOKEN="__TBOT__"
 TELEGRAM_CHAT_ID="__TCHAT__"
+RPC_URL="__RPCURL__"  # Добавляем эту строку
+ROLLUP_ADDRESS="$ROLLUP_ADDRESS"
 
 CURL_CONNECT_TIMEOUT=15
 CURL_MAX_TIME=45
@@ -722,6 +724,24 @@ monitor_position(){
     local last_position=""
     [[ -f "$LAST_POSITION_FILE" ]] && last_position=$(cat "$LAST_POSITION_FILE")
 
+    # Функция для проверки, находится ли валидатор в активном наборе
+    check_if_validator_active() {
+        local validator=$1
+        log_message "Checking if validator $validator is in active set"
+
+        # Используем основной RPC для проверки активного набора
+        local is_active=$(cast call "$ROLLUP_ADDRESS" "isActiveAttester(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null | cast to-dec)
+        local exit_code=$?
+
+        if [ $exit_code -eq 0 ] && [ "$is_active" = "1" ]; then
+            log_message "Validator $validator is in active set"
+            return 0  # 0 = true в bash
+        else
+            log_message "Validator $validator is NOT in active set (is_active: $is_active, exit_code: $exit_code)"
+            return 1  # 1 = false в bash
+        fi
+    }
+
     # Функция для отправки уведомления об ошибке API в мониторе
     send_monitor_api_error(){
         local error_type="$1"
@@ -740,44 +760,44 @@ monitor_position(){
     }
 
     local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
-    log_message "GET $search_url"
-    local response_data; response_data="$(cffi_http_get "$search_url")"
+        log_message "GET $search_url"
+        local response_data; response_data="$(cffi_http_get "$search_url")"
 
-    if [ -z "$response_data" ]; then
-        log_message "Empty API response"
-        send_monitor_api_error "Empty response"
-        return 1
-    fi
+        if [ -z "$response_data" ]; then
+            log_message "Empty API response"
+            send_monitor_api_error "Empty response"
+            return 1
+        fi
 
-    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
-        log_message "Invalid JSON response"
-        send_monitor_api_error "Invalid JSON"
-        return 1
-    fi
+        if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
+            log_message "Invalid JSON response"
+            send_monitor_api_error "Invalid JSON"
+            return 1
+        fi
 
-    # Проверяем статус ответа
-    local api_status=$(echo "$response_data" | jq -r '.status')
-    if [ "$api_status" != "ok" ]; then
-        log_message "API returned non-ok status: $api_status"
-        send_monitor_api_error "Non-OK status: $api_status"
-        return 1
-    fi
+        local api_status=$(echo "$response_data" | jq -r '.status')
+        if [ "$api_status" != "ok" ]; then
+            log_message "API returned non-ok status: $api_status"
+            send_monitor_api_error "Non-OK status: $api_status"
+            return 1
+        fi
 
-    local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
-    local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+        local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+        local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
 
-    if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
-        local current_position queued_at withdrawer_address transaction_hash index
-        current_position=$(echo "$validator_info" | jq -r '.position')
-        queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
-        withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
-        transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
-        index=$(echo "$validator_info" | jq -r '.index')
+        if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
+            # Валидатор найден в очереди - обрабатываем как раньше
+            local current_position queued_at withdrawer_address transaction_hash index
+            current_position=$(echo "$validator_info" | jq -r '.position')
+            queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
+            withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
+            transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
+            index=$(echo "$validator_info" | jq -r '.index')
 
-        if [[ "$last_position" != "$current_position" ]]; then
-            local message
-            if [[ -n "$last_position" ]]; then
-                message="📊 *Validator Position Update*
+            if [[ "$last_position" != "$current_position" ]]; then
+                local message
+                if [[ -n "$last_position" ]]; then
+                    message="📊 *Validator Position Update*
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 🔄 *Change:* $last_position → $current_position
@@ -786,8 +806,8 @@ monitor_position(){
 🔗 *Transaction:* \`$transaction_hash\`
 🏷️ *Index:* $index
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
-            else
-                message="🎉 *New Validator in Queue*
+                else
+                    message="🎉 *New Validator in Queue*
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 📌 *Initial Position:* $current_position
@@ -796,31 +816,50 @@ monitor_position(){
 🔗 *Transaction:* \`$transaction_hash\`
 🏷️ *Index:* $index
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+                fi
+                send_telegram "$message" && log_message "Notification sent"
+                echo "$current_position" > "$LAST_POSITION_FILE"
+                log_message "Saved new position: $current_position"
+            else
+                log_message "Position unchanged: $current_position"
             fi
-            send_telegram "$message" && log_message "Notification sent"
-            echo "$current_position" > "$LAST_POSITION_FILE"
-            log_message "Saved new position: $current_position"
         else
-            log_message "Position unchanged: $current_position"
-        fi
-    else
-        log_message "Validator not found in queue"
-        if [[ -n "$last_position" ]]; then
-            local message="❌ *Validator Removed from Queue or moved to the Active Set*
-Please check [queue on Dashtec](https://${NETWORK}.dashtec.xyz/queue)
+            # Валидатор не найден в очереди
+            log_message "Validator not found in queue"
+            if [[ -n "$last_position" ]]; then
+                # Проверяем, переместился ли валидатор в активный набор
+                if check_if_validator_active "$VALIDATOR_ADDRESS"; then
+                    # Валидатор в активном наборе - отправляем уведомление о перемещении
+                    local message="🎉 *Validator Moved to Active Set*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+✅ *Status:* Successfully moved from queue to active validator set
+⌛ *Last Queue Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+🎊 *Congratulations!* Your validator is now active."
+                    send_telegram "$message" && log_message "Active set notification sent"
+                else
+                    # Валидатор действительно удален из очереди и не в активном наборе
+                    local message="❌ *Validator Removed from Queue*
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 ⌛ *Last Position:* $last_position
-⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
-            send_telegram "$message" && log_message "Removal notification sent"
-            rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
-            rm -f "$0"; log_message "Removed monitor script"
-            (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
-            rm -f "$LOG_FILE"
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+⚠️ *Note:* Validator is not in the active set either. Please check the status manually."
+                    send_telegram "$message" && log_message "Removal notification sent"
+                fi
+
+                # В ЛЮБОМ СЛУЧАЕ (активный набор или удаление) удаляем файлы мониторинга
+                rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
+                rm -f "$0"; log_message "Removed monitor script"
+                (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
+                rm -f "$LOG_FILE"
+            fi
         fi
-    fi
-    return 0
-}
+        return 0
+    }
 
 main(){
     log_message "===== Starting monitor cycle ====="
@@ -841,6 +880,8 @@ EOF
         sed -i "s|__LOGFILE__|$log_file|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__TBOT__|${TELEGRAM_BOT_TOKEN-}|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__TCHAT__|${TELEGRAM_CHAT_ID-}|g" "$MONITOR_DIR/$script_name"
+        # Добавляем RPC_URL для проверки активного набора
+        sed -i "s|__RPCURL__|${RPC_URL}|g" "$MONITOR_DIR/$script_name"
 
         chmod +x "$MONITOR_DIR/$script_name"
         if ! crontab -l 2>/dev/null | grep -q "$MONITOR_DIR/$script_name"; then
