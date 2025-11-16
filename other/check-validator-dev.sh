@@ -739,7 +739,9 @@ monitor_position(){
         fi
     }
 
-    local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
+    # Проверяем очередь - используем новый URL
+    local queue_url="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+    local search_url="${queue_url}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
     log_message "GET $search_url"
     local response_data; response_data="$(cffi_http_get "$search_url")"
 
@@ -806,14 +808,91 @@ monitor_position(){
     else
         log_message "Validator not found in queue"
         if [[ -n "$last_position" ]]; then
-            # СТАРАЯ ЛОГИКА: если была позиция, но сейчас валидатора нет в очереди - отправляем уведомление об удалении
-            local message="❌ *Validator Removed from Queue or moved to the Active Set*
-Please check [queue on Dashtec](https://${NETWORK}.dashtec.xyz/queue)
+            # ПРОВЕРЯЕМ АКТИВНЫЙ НАБОР - используем новый URL с сортировкой
+            local active_url="https://${NETWORK}.dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            log_message "Checking active set: $active_url"
+            local active_response; active_response="$(cffi_http_get "$active_url" 2>/dev/null || echo "")"
+
+            if [[ -n "$active_response" ]] && echo "$active_response" | jq -e . >/dev/null 2>&1; then
+                local api_status_active=$(echo "$active_response" | jq -r '.status')
+
+                if [[ "$api_status_active" == "ok" ]]; then
+                    local active_validator; active_validator=$(echo "$active_response" | jq -r ".validators[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+
+                    if [[ -n "$active_validator" ]]; then
+                        # Валидатор найден в активном наборе
+                        local status balance rank attestation_success proposal_success
+                        status=$(echo "$active_validator" | jq -r '.status')
+                        balance=$(echo "$active_validator" | jq -r '.balance')
+                        rank=$(echo "$active_validator" | jq -r '.rank')
+                        attestation_success=$(echo "$active_validator" | jq -r '.attestationSuccess')
+                        proposal_success=$(echo "$active_validator" | jq -r '.proposalSuccess')
+
+                        # Форматируем баланс для лучшей читаемости
+                        local formatted_balance
+                        if (( $(echo "$balance >= 1000000000000000000" | bc -l 2>/dev/null || echo "0") )); then
+                            formatted_balance=$(echo "scale=2; $balance / 1000000000000000000" | bc -l 2>/dev/null || echo "$balance")
+                            formatted_balance="${formatted_balance} ETH"
+                        else
+                            formatted_balance="$balance wei"
+                        fi
+
+                        local message="✅ *Validator Moved to Active Set*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+🎉 *Status:* $status
+💰 *Balance:* $formatted_balance
+🏆 *Rank:* $rank
+🎯 *Attestation Success:* $attestation_success
+⚡ *Proposal Success:* $proposal_success
+⌛ *Last Queue Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+📊 Check active validator: https://${NETWORK}.dashtec.xyz/validators"
+                        send_telegram "$message" && log_message "Active set notification sent"
+                    else
+                        # Валидатор не найден ни в очереди, ни в активном наборе
+                        local message="❌ *Validator Removed from Queue*
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 ⌛ *Last Position:* $last_position
-⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
-            send_telegram "$message" && log_message "Removal notification sent"
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+⚠️ *Possible reasons:*
+• Validator was removed from queue
+• Validator activation failed
+• Technical issue with the validator
+
+📊 Check queue: https://${NETWORK}.dashtec.xyz/queue"
+                        send_telegram "$message" && log_message "Removal notification sent"
+                    fi
+                else
+                    log_message "Active set API returned non-ok status: $api_status_active"
+                    # Не удалось проверить активный набор из-за статуса API
+                    local message="❌ *Validator No Longer in Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+ℹ️ *Note:* Could not verify active set status (API error)
+📊 Check status: https://${NETWORK}.dashtec.xyz/queue"
+                    send_telegram "$message" && log_message "General removal notification sent"
+                fi
+            else
+                # Не удалось получить ответ от API активного набора
+                local message="❌ *Validator No Longer in Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+ℹ️ *Note:* Could not verify active set status
+📊 Check status: https://${NETWORK}.dashtec.xyz/queue"
+                send_telegram "$message" && log_message "General removal notification sent"
+            fi
+
+            # Очищаем ресурсы в любом случае
             rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
             rm -f "$0"; log_message "Removed monitor script"
             (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
