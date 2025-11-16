@@ -655,7 +655,7 @@ set -euo pipefail
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 VALIDATOR_ADDRESS="__ADDR__"
-QUEUE_URL="__QURL__"
+NETWORK="__NETWORK__"
 MONITOR_DIR="__MDIR__"
 LAST_POSITION_FILE="__POSFILE__"
 LOG_FILE="__LOGFILE__"
@@ -701,19 +701,27 @@ format_date(){
 
 cffi_http_get(){
   local url="$1"
-  python3 - "$url" <<'PY'
+  python3 - "$url" "$NETWORK" <<'PY'
 import sys
 from curl_cffi import requests
 u = sys.argv[1]
-headers = {"accept":"application/json, text/plain, */*","origin":"https://${NETWORK}.dashtec.xyz","referer":"https://${NETWORK}.dashtec.xyz/"}
-r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
-ct = (r.headers.get("content-type") or "").lower()
-txt = r.text
-if "application/json" in ct:
-    print(txt)
-else:
-    i, j = txt.find("{"), txt.rfind("}")
-    print(txt[i:j+1] if i!=-1 and j!=-1 and j>i else txt)
+network = sys.argv[2]
+headers = {
+    "accept": "application/json, text/plain, */*",
+    "origin": f"https://{network}.dashtec.xyz",
+    "referer": f"https://{network}.dashtec.xyz/"
+}
+try:
+    r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
+    ct = (r.headers.get("content-type") or "").lower()
+    txt = r.text
+    if "application/json" in ct:
+        print(txt)
+    else:
+        i, j = txt.find("{"), txt.rfind("}")
+        print(txt[i:j+1] if i!=-1 and j!=-1 and j>i else txt)
+except Exception as e:
+    print(f'{{"error": "Request failed: {e}"}}')
 PY
 }
 
@@ -739,7 +747,7 @@ monitor_position(){
         fi
     }
 
-    # Проверяем очередь - используем новый URL
+    # Проверяем очередь
     local queue_url="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
     local search_url="${queue_url}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
     log_message "GET $search_url"
@@ -751,8 +759,16 @@ monitor_position(){
         return 1
     fi
 
+    # Проверяем наличие ошибки в ответе
+    if echo "$response_data" | jq -e 'has("error")' >/dev/null 2>&1; then
+        local error_msg=$(echo "$response_data" | jq -r '.error')
+        log_message "API request failed: $error_msg"
+        send_monitor_api_error "Request failed: $error_msg"
+        return 1
+    fi
+
     if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
-        log_message "Invalid JSON response"
+        log_message "Invalid JSON response: $response_data"
         send_monitor_api_error "Invalid JSON"
         return 1
     fi
@@ -799,7 +815,11 @@ monitor_position(){
 🏷️ *Index:* $index
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
-            send_telegram "$message" && log_message "Notification sent"
+            if send_telegram "$message"; then
+                log_message "Notification sent"
+            else
+                log_message "Failed to send notification"
+            fi
             echo "$current_position" > "$LAST_POSITION_FILE"
             log_message "Saved new position: $current_position"
         else
@@ -808,7 +828,7 @@ monitor_position(){
     else
         log_message "Validator not found in queue"
         if [[ -n "$last_position" ]]; then
-            # ПРОВЕРЯЕМ АКТИВНЫЙ НАБОР - используем новый URL с сортировкой
+            # ПРОВЕРЯЕМ АКТИВНЫЙ НАБОР
             local active_url="https://${NETWORK}.dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
             log_message "Checking active set: $active_url"
             local active_response; active_response="$(cffi_http_get "$active_url" 2>/dev/null || echo "")"
@@ -830,7 +850,7 @@ monitor_position(){
 
                         # Форматируем баланс для лучшей читаемости
                         local formatted_balance
-                        if (( $(echo "$balance >= 1000000000000000000" | bc -l 2>/dev/null || echo "0") )); then
+                        if command -v bc >/dev/null 2>&1 && (( $(echo "$balance >= 1000000000000000000" | bc -l 2>/dev/null || echo "0") )); then
                             formatted_balance=$(echo "scale=2; $balance / 1000000000000000000" | bc -l 2>/dev/null || echo "$balance")
                             formatted_balance="${formatted_balance} ETH"
                         else
@@ -915,7 +935,7 @@ main >> "$LOG_FILE" 2>&1
 EOF
         # substitute placeholders
         sed -i "s|__ADDR__|$validator_address|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|__QURL__|$QUEUE_URL|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__NETWORK__|$NETWORK|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__MDIR__|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__POSFILE__|$position_file|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__LOGFILE__|$log_file|g" "$MONITOR_DIR/$script_name"
@@ -932,7 +952,6 @@ EOF
         timeout 60 "$MONITOR_DIR/$script_name" >/dev/null 2>&1 || true
     done
 }
-
 
 # Функция для отображения списка активных мониторингов
 list_monitor_scripts() {
