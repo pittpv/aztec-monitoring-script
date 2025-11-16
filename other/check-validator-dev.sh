@@ -953,6 +953,7 @@ EOF
     done
 }
 
+
 # Функция для отображения списка активных мониторингов
 list_monitor_scripts() {
     local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
