@@ -852,14 +852,12 @@ read -p "$(t "enter_choice") " network_choice
 
 case $network_choice in
     1)
-        NETWORK_FLAG="--network mainnet"
-        DATA_DIR="/root/.aztec/mainnet/data/"
-        echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}mainnet${NC}"
+        NETWORK="mainnet"
+        DATA_DIR="$HOME/.aztec/mainnet/data/"
         ;;
     2)
-        NETWORK_FLAG="--network testnet"
-        DATA_DIR="/root/.aztec/testnet/data/"
-        echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}testnet${NC}"
+        NETWORK="testnet"
+        DATA_DIR="$HOME/.aztec/testnet/data/"
         ;;
     *)
         echo -e "\n${RED}$(t "invalid_choice")${NC}"
@@ -868,6 +866,25 @@ case $network_choice in
 esac
 
 echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}$NETWORK${NC}"
+
+# Сохраняем/обновляем NETWORK в файле .env-aztec-agent
+ENV_FILE="$HOME/.env-aztec-agent"
+
+# Если файл существует, обновляем переменную NETWORK
+if [ -f "$ENV_FILE" ]; then
+    # Если NETWORK уже существует в файле, заменяем её значение
+    if grep -q "^NETWORK=" "$ENV_FILE"; then
+        sed -i "s/^NETWORK=.*/NETWORK=$NETWORK/" "$ENV_FILE"
+    else
+        # Если NETWORK нет, добавляем в конец файла
+        echo "NETWORK=$NETWORK" >> "$ENV_FILE"
+    fi
+else
+    # Если файла нет, создаем его с переменной NETWORK
+    echo "NETWORK=$NETWORK" > "$ENV_FILE"
+fi
+
+echo -e "${GREEN}Network saved to $ENV_FILE${NC}"
 
 # Создаем docker-compose.yml
 echo -e "\n${GREEN}$(t "creating_compose")${NC}"
@@ -887,7 +904,7 @@ services:
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: info;debug:node:sentinel
     entrypoint: >
-      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer $NETWORK_FLAG'
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --network $NETWORK'
     ports:
       - ${p2p_port}:${p2p_port}/tcp
       - ${p2p_port}:${p2p_port}/udp
