@@ -468,22 +468,48 @@ check_validator_queue(){
     echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${RESET}"
     local temp_file; temp_file=$(mktemp)
 
+    # Функция для отправки уведомления об ошибке API
+    send_api_error_notification() {
+        local error_type="$1"
+        local validator_address="$2"
+        local message="🚨 *Dashtec API Error*
+
+🔧 *Error Type:* $error_type
+🔍 *Validator:* \`${validator_address:-"Batch check"}\`
+⏰ *Time:* $(date '+%d.%m.%Y %H:%M UTC')
+⚠️ *Issue:* Possible problems with Dashtec API
+
+📞 *Contact developer:* https://t.me/+zEaCtoXYYwIyZjQ0"
+
+        if [ -n "${TELEGRAM_BOT_TOKEN-}" ] && [ -n "${TELEGRAM_CHAT_ID-}" ]; then
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null 2>&1
+        fi
+    }
+
     check_single_validator(){
         local validator_address=$1; local temp_file=$2
         local search_address_lower=${validator_address,,}
         local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
         local response_data; response_data="$(cffi_http_get "$search_url")"
+
         if [ -z "$response_data" ]; then
-            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"; return 1
-        fi
-        if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
-            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"; return 1
+            echo "$validator_address|ERROR|Empty API response" >> "$temp_file"
+            send_api_error_notification "Empty response" "$validator_address"
+            return 1
         fi
 
-        # ИСПРАВЛЕНИЕ: Проверяем статус ответа и корректно парсим данные
+        if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
+            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
+            send_api_error_notification "Invalid JSON" "$validator_address"
+            return 1
+        fi
+
+        # Проверяем статус ответа
         local status=$(echo "$response_data" | jq -r '.status')
         if [ "$status" != "ok" ]; then
             echo "$validator_address|ERROR|API returned non-ok status: $status" >> "$temp_file"
+            send_api_error_notification "Non-OK status: $status" "$validator_address"
             return 1
         fi
 
@@ -508,8 +534,19 @@ check_validator_queue(){
         check_single_validator "$validator_address" "$temp_file" &
         pids+=($!)
     done
-    for pid in "${pids[@]}"; do wait "$pid" 2>/dev/null || true; done
 
+    # Ожидаем завершения всех процессов
+    local api_errors=0
+    for pid in "${pids[@]}"; do
+        wait "$pid" 2>/dev/null || ((api_errors++))
+    done
+
+    # Если все запросы завершились с ошибкой API, отправляем общее уведомление
+    if [ $api_errors -eq ${#validator_addresses[@]} ] && [ ${#validator_addresses[@]} -gt 0 ]; then
+        send_api_error_notification "All API requests failed" "Batch check"
+    fi
+
+    # Остальная часть функции без изменений...
     while IFS='|' read -r address status position withdrawer queued_at tx_hash index; do
         case "$status" in
             FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash|$index"); found_count=$((found_count+1));;
@@ -672,16 +709,44 @@ monitor_position(){
     local last_position=""
     [[ -f "$LAST_POSITION_FILE" ]] && last_position=$(cat "$LAST_POSITION_FILE")
 
+    # Функция для отправки уведомления об ошибке API в мониторе
+    send_monitor_api_error(){
+        local error_type="$1"
+        local message="🚨 *Dashtec API Error - Monitor*
+
+🔧 *Error Type:* $error_type
+🔍 *Validator:* \`$VALIDATOR_ADDRESS\`
+⏰ *Time:* $(date '+%d.%m.%Y %H:%M UTC')
+⚠️ *Issue:* Possible problems with Dashtec API
+📞 *Contact developer:* https://t.me/+zEaCtoXYYwIyZjQ0"
+
+        if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null
+        fi
+    }
+
     local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
     log_message "GET $search_url"
     local response_data; response_data="$(cffi_http_get "$search_url")"
-    if [ -z "$response_data" ]; then log_message "Empty response"; return 1; fi
-    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then log_message "Invalid JSON"; return 1; fi
 
-    # ИСПРАВЛЕНИЕ: Проверяем статус ответа
+    if [ -z "$response_data" ]; then
+        log_message "Empty API response"
+        send_monitor_api_error "Empty response"
+        return 1
+    fi
+
+    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
+        log_message "Invalid JSON response"
+        send_monitor_api_error "Invalid JSON"
+        return 1
+    fi
+
+    # Проверяем статус ответа
     local api_status=$(echo "$response_data" | jq -r '.status')
     if [ "$api_status" != "ok" ]; then
         log_message "API returned non-ok status: $api_status"
+        send_monitor_api_error "Non-OK status: $api_status"
         return 1
     fi
 
