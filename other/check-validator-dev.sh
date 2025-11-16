@@ -91,6 +91,8 @@ init_languages() {
     TRANSLATIONS["en,remove_specific"]="Remove specific monitor"
     TRANSLATIONS["en,enter_choice"]="Enter your choice:"
     TRANSLATIONS["en,invalid_choice"]="Invalid choice."
+    TRANSLATIONS["en,api_error"]="Possible problems with Dashtec API"
+    TRANSLATIONS["en,contact_developer"]="Contact developer: https://t.me/+zEaCtoXYYwIyZjQ0"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -158,6 +160,8 @@ init_languages() {
     TRANSLATIONS["ru,remove_specific"]="Удалить конкретный монитор"
     TRANSLATIONS["ru,enter_choice"]="Введите ваш выбор:"
     TRANSLATIONS["ru,invalid_choice"]="Неверный выбор."
+    TRANSLATIONS["ru,api_error"]="Возможны проблемы с Dashtec API"
+    TRANSLATIONS["ru,contact_developer"]="Сообщите разработчику: https://t.me/+zEaCtoXYYwIyZjQ0"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -225,6 +229,8 @@ init_languages() {
     TRANSLATIONS["tr,remove_specific"]="Belirli izleyiciyi kaldır"
     TRANSLATIONS["tr,enter_choice"]="Seçiminizi girin:"
     TRANSLATIONS["tr,invalid_choice"]="Geçersiz seçim."
+    TRANSLATIONS["tr,api_error"]="Dashtec API'de olası sorunlar"
+    TRANSLATIONS["tr,contact_developer"]="Geliştiriciye bildirin: https://t.me/+zEaCtoXYYwIyZjQ0"
 }
 
 t() {
