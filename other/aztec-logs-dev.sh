@@ -184,6 +184,7 @@ init_languages() {
   TRANSLATIONS["en,staking_found_validators_new_operator"]="Found validators for new operator method:"
   TRANSLATIONS["en,staking_processing_new_operator"]="Processing validator %s/%s (new operator method)"
   TRANSLATIONS["en,staking_success_new_operator"]="Successfully staked validator %s with new operator method using %s"
+  TRANSLATIONS["en,validator_link"]="Validator link"
   TRANSLATIONS["en,staking_failed_new_operator"]="Failed to stake validator %s with new operator method using %s"
   TRANSLATIONS["en,staking_all_failed_new_operator"]="All RPC providers failed for validator %s with new operator method"
   TRANSLATIONS["en,staking_completed_new_operator"]="New operator staking completed!"
@@ -565,6 +566,7 @@ init_languages() {
   TRANSLATIONS["ru,staking_found_validators_new_operator"]="Найдено валидаторов для метода нового оператора:"
   TRANSLATIONS["ru,staking_processing_new_operator"]="Обработка валидатора %s/%s (метод нового оператора)"
   TRANSLATIONS["ru,staking_success_new_operator"]="Успешный стейкинг валидатора %s методом нового оператора с использованием %s"
+  TRANSLATIONS["ru,validator_link"]="Ссылка на валидатора"
   TRANSLATIONS["ru,staking_failed_new_operator"]="Не удалось выполнить стейкинг валидатора %s методом нового оператора с использованием %s"
   TRANSLATIONS["ru,staking_all_failed_new_operator"]="Все RPC провайдеры не сработали для валидатора %s с методом нового оператора"
   TRANSLATIONS["ru,staking_completed_new_operator"]="Стейкинг нового оператора завершен!"
@@ -946,6 +948,7 @@ init_languages() {
   TRANSLATIONS["tr,staking_found_validators_new_operator"]="Yeni operatör yöntemi için validatörler bulundu:"
   TRANSLATIONS["tr,staking_processing_new_operator"]="Validatör %s/%s işleniyor (yeni operatör yöntemi)"
   TRANSLATIONS["tr,staking_success_new_operator"]="Validatör %s, yeni operatör yöntemiyle %s kullanılarak başarıyla stake edildi"
+  TRANSLATIONS["tr,validator_link"]="Validator bağlantısı"
   TRANSLATIONS["tr,staking_failed_new_operator"]="Validatör %s, yeni operatör yöntemiyle %s kullanılarak stake edilemedi"
   TRANSLATIONS["tr,staking_all_failed_new_operator"]="Validatör %s için tüm RPC sağlayıcıları yeni operatör yöntemiyle başarısız oldu"
   TRANSLATIONS["tr,staking_completed_new_operator"]="Yeni operatör staking tamamlandı!"
@@ -1904,6 +1907,13 @@ TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
 LANG="$LANG"
 
+# Получаем значение NETWORK из env-aztec-agent
+NETWORK="testnet"
+if [[ -f "\$HOME/.env-aztec-agent" ]]; then
+  source "\$HOME/.env-aztec-agent"
+  [[ -n "\$NETWORK" ]] && NETWORK="\$NETWORK"
+fi
+
 # URL JSON файла с ошибками на GitHub
 ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
 ERROR_DEFINITIONS_FILE="\$HOME/aztec_error_definitions.json"
@@ -2219,7 +2229,7 @@ check_committee() {
   for validator in "\${VALIDATOR_ARRAY[@]}"; do
     validator_lower=\$(echo "\$validator" | tr '[:upper:]' '[:lower:]')
     if echo "\$committee" | grep -qi "\$validator_lower"; then
-      validator_link="[\$validator](https://testnet.dashtec.xyz/validators/\$validator)"
+      validator_link="[\$validator](https://\${NETWORK}.dashtec.xyz/validators/\$validator)"
       found_validators+=("\$validator_link")
       committee_validators+=("\$validator_lower")
       debug_log "Validator \$validator found in committee"
@@ -2916,6 +2926,14 @@ function start_aztec_containers() {
     fi
   fi
 
+  # Получаем значение NETWORK из env-aztec-agent
+  local aztec_agent_env="$HOME/.env-aztec-agent"
+  local network="testnet"
+  if [[ -f "$aztec_agent_env" ]]; then
+    network=$(_read_env_var "$aztec_agent_env" "NETWORK")
+    [[ -z "$network" ]] && network="testnet"
+  fi
+
   case "$run_type" in
     "DOCKER")
       local compose_path
@@ -2987,7 +3005,7 @@ function start_aztec_containers() {
 
       if screen -dmS "$session_name" && \
          screen -S "$session_name" -p 0 -X stuff "aztec start --node --archiver --sequencer \
---network testnet \
+--network $network \
 --l1-rpc-urls $ethereum_rpc_url \
 --l1-consensus-host-urls $consensus_beacon_url \
 --sequencer.validatorPrivateKeys 0x$validator_private_key \
@@ -3762,6 +3780,17 @@ stake_validators_old_format() {
         return 1
     fi
 
+    # Получаем значение NETWORK из env-aztec-agent
+    local aztec_agent_env="$HOME/.env-aztec-agent"
+    local network="testnet"
+    if [[ -f "$aztec_agent_env" ]]; then
+        network=$(_read_env_var "$aztec_agent_env" "NETWORK")
+        [[ -z "$network" ]] && network="testnet"
+    fi
+
+    # Формируем ссылку для валидатора в зависимости от сети
+    local validator_link_template="https://${network}.dashtec.xyz/validators/\$validator"
+
     # Оригинальная логика для существующего метода
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
     if [ -z "$VALIDATOR_COUNT" ] || [ "$VALIDATOR_COUNT" -eq 0 ]; then
@@ -3836,7 +3865,7 @@ stake_validators_old_format() {
             # Формируем команду
             local cmd="aztec add-l1-validator \\
   --l1-rpc-urls \"$rpc_url\" \\
-  --network testnet \\
+  --network $network \\
   --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
@@ -3849,7 +3878,7 @@ stake_validators_old_format() {
 
             local safe_cmd="aztec add-l1-validator \\
   --l1-rpc-urls \"$rpc_url\" \\
-  --network testnet \\
+  --network $network \\
   --private-key \"$PRIVATE_KEY_PREVIEW\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
@@ -3871,6 +3900,9 @@ stake_validators_old_format() {
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success")${NC}\n" \
 						            "$((i+1))" "$rpc_url"
+                        # Показываем ссылку на валидатора
+                        local validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        echo -e "${CYAN}🌐 $(t "validator_link"): $validator_link${NC}"
 						 echo ""
 
                         success=true
@@ -3920,6 +3952,14 @@ stake_validators_old_format() {
 stake_validators_new_format() {
     local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+
+    # Получаем значение NETWORK из env-aztec-agent
+    local aztec_agent_env="$HOME/.env-aztec-agent"
+    local network="testnet"
+    if [[ -f "$aztec_agent_env" ]]; then
+        network=$(_read_env_var "$aztec_agent_env" "NETWORK")
+        [[ -z "$network" ]] && network="testnet"
+    fi
 
     # Получаем количество валидаторов
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
@@ -4002,7 +4042,7 @@ stake_validators_new_format() {
             # Формируем команду
             local cmd="aztec add-l1-validator \\
   --l1-rpc-urls \"$rpc_url\" \\
-  --network testnet \\
+  --network $network \\
   --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
@@ -4015,7 +4055,7 @@ stake_validators_new_format() {
 
             local safe_cmd="aztec add-l1-validator \\
   --l1-rpc-urls \"$rpc_url\" \\
-  --network testnet \\
+  --network $network \\
   --private-key \"$PRIVATE_KEY_PREVIEW\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
@@ -4035,6 +4075,10 @@ stake_validators_new_format() {
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success_new_operator")${NC}\n" \
 						            "$((i+1))" "$rpc_url"
+
+                        # Показываем ссылку на валидатора
+                        local validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        echo -e "${CYAN}🌐 $(t "validator_link"): $validator_link${NC}"
 
                         # Создаем YML файл для успешно застейканного валидатора
                         local YML_FILE="$KEYS_DIR/new_validator_$((i+1)).yml"
