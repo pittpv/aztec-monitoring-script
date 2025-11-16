@@ -787,7 +787,7 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
     if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}" ]; then
         # Create validator JSON with BLS key
         VALIDATOR_JSON=$(cat <<EOF
-    {
+{
       "attester": {
         "eth": "$address",
         "bls": "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}"
@@ -801,7 +801,7 @@ EOF
     else
         # Create validator JSON without BLS key (original format)
         VALIDATOR_JSON=$(cat <<EOF
-    {
+{
       "attester": {
         "eth": "$address"
       },
@@ -844,9 +844,34 @@ CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
 P2P_IP=${DEFAULT_IP}
 EOF
 
+# Запрашиваем выбор сети
+echo -e "\n${GREEN}$(t "select_network")${NC}"
+echo "1) $(t "mainnet")"
+echo "2) $(t "testnet")"
+read -p "$(t "enter_choice") " network_choice
+
+case $network_choice in
+    1)
+        NETWORK_FLAG="--network mainnet"
+        DATA_DIR="/root/.aztec/mainnet/data/"
+        echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}mainnet${NC}"
+        ;;
+    2)
+        NETWORK_FLAG="--network testnet"
+        DATA_DIR="/root/.aztec/testnet/data/"
+        echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}testnet${NC}"
+        ;;
+    *)
+        echo -e "\n${RED}$(t "invalid_choice")${NC}"
+        exit 1
+        ;;
+esac
+
+echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}$NETWORK${NC}"
+
+# Создаем docker-compose.yml
 echo -e "\n${GREEN}$(t "creating_compose")${NC}"
 
-# Создаем docker-compose.yml без VALIDATOR_PRIVATE_KEYS и с KEY_STORE_DIRECTORY
 cat > docker-compose.yml <<EOF
 services:
   aztec-node:
@@ -862,13 +887,13 @@ services:
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: info;debug:node:sentinel
     entrypoint: >
-      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network testnet --node --archiver --sequencer'
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer $NETWORK_FLAG'
     ports:
       - ${p2p_port}:${p2p_port}/tcp
       - ${p2p_port}:${p2p_port}/udp
       - ${http_port}:${http_port}
     volumes:
-      - /root/.aztec/testnet/data/:/data
+      - $DATA_DIR:/data
       - $HOME/aztec/config:/config
     labels:
       - com.centurylinklabs.watchtower.enable=true
