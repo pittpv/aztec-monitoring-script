@@ -10,6 +10,13 @@ BLUE="\e[34m"
 BOLD="\e[1m"
 RESET="\e[0m"
 
+# Получаем значение NETWORK из env-aztec-agent
+NETWORK="testnet"
+if [[ -f "$HOME/.env-aztec-agent" ]]; then
+  source "$HOME/.env-aztec-agent"
+  [[ -n "$NETWORK" ]] && NETWORK="$NETWORK"
+fi
+
 # === Language settings ===
 LANG="en"
 declare -A TRANSLATIONS
@@ -247,7 +254,7 @@ init_languages "$1"
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
 ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
 GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
-QUEUE_URL="https://testnet.dashtec.xyz/api/sequencers/queue"
+QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
 MONITOR_DIR="/root/aztec-monitor-agent"
 
 # ========= HTTP via curl_cffi =========
@@ -260,8 +267,8 @@ from curl_cffi import requests
 u = sys.argv[1]
 headers = {
   "accept": "application/json, text/plain, */*",
-  "origin": "https://testnet.dashtec.xyz",
-  "referer": "https://testnet.dashtec.xyz/",
+  "origin": "https://${NETWORK}.dashtec.xyz",
+  "referer": "https://${NETWORK}.dashtec.xyz/",
 }
 try:
     r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
@@ -698,7 +705,7 @@ cffi_http_get(){
 import sys
 from curl_cffi import requests
 u = sys.argv[1]
-headers = {"accept":"application/json, text/plain, */*","origin":"https://testnet.dashtec.xyz","referer":"https://testnet.dashtec.xyz/"}
+headers = {"accept":"application/json, text/plain, */*","origin":"https://${NETWORK}.dashtec.xyz","referer":"https://${NETWORK}.dashtec.xyz/"}
 r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
 ct = (r.headers.get("content-type") or "").lower()
 txt = r.text
@@ -800,7 +807,7 @@ monitor_position(){
         log_message "Validator not found in queue"
         if [[ -n "$last_position" ]]; then
             local message="❌ *Validator Removed from Queue or moved to the Active Set*
-Please check [queue on Dashtec](https://testnet.dashtec.xyz/queue)
+Please check [queue on Dashtec](https://${NETWORK}.dashtec.xyz/queue)
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 ⌛ *Last Position:* $last_position
