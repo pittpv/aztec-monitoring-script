@@ -479,15 +479,25 @@ check_validator_queue(){
         if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
             echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"; return 1
         fi
+
+        # ИСПРАВЛЕНИЕ: Проверяем статус ответа и корректно парсим данные
+        local status=$(echo "$response_data" | jq -r '.status')
+        if [ "$status" != "ok" ]; then
+            echo "$validator_address|ERROR|API returned non-ok status: $status" >> "$temp_file"
+            return 1
+        fi
+
         local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
         local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+
         if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
-            local position withdrawer queued_at tx_hash
+            local position withdrawer queued_at tx_hash index
             position=$(echo "$validator_info" | jq -r '.position')
             withdrawer=$(echo "$validator_info" | jq -r '.withdrawerAddress')
             queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
             tx_hash=$(echo "$validator_info" | jq -r '.transactionHash')
-            echo "$validator_address|FOUND|$position|$withdrawer|$queued_at|$tx_hash" >> "$temp_file"
+            index=$(echo "$validator_info" | jq -r '.index')
+            echo "$validator_address|FOUND|$position|$withdrawer|$queued_at|$tx_hash|$index" >> "$temp_file"
         else
             echo "$validator_address|NOT_FOUND||" >> "$temp_file"
         fi
@@ -500,9 +510,9 @@ check_validator_queue(){
     done
     for pid in "${pids[@]}"; do wait "$pid" 2>/dev/null || true; done
 
-    while IFS='|' read -r address status position withdrawer queued_at tx_hash; do
+    while IFS='|' read -r address status position withdrawer queued_at tx_hash index; do
         case "$status" in
-            FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash"); found_count=$((found_count+1));;
+            FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash|$index"); found_count=$((found_count+1));;
             NOT_FOUND) results+=("NOT_FOUND|$address"); not_found_count=$((not_found_count+1));;
             ERROR) results+=("ERROR|$address|$position"); not_found_count=$((not_found_count+1));;
         esac
@@ -517,7 +527,7 @@ check_validator_queue(){
     if [ $found_count -gt 0 ]; then
         echo -e "\n${GREEN}Validators found in queue:${RESET}"
         for result in "${results[@]}"; do
-            IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
+            IFS='|' read -r status address position withdrawer queued_at tx_hash index <<<"$result"
             if [ "$status" == "FOUND" ]; then
                 local formatted_date; formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
                 echo -e "  ${CYAN}• ${address}${RESET}"
@@ -525,6 +535,7 @@ check_validator_queue(){
                 echo -e "    ${BOLD}Withdrawer:${RESET} $withdrawer"
                 echo -e "    ${BOLD}Queued at:${RESET} $formatted_date"
                 echo -e "    ${BOLD}Tx Hash:${RESET} $tx_hash"
+                echo -e "    ${BOLD}Index:${RESET} $index"
             fi
         done
     fi
@@ -547,7 +558,7 @@ check_validator_queue(){
 
     # Заполняем массив найденными адресами
     for result in "${results[@]}"; do
-        IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
+        IFS='|' read -r status address position withdrawer queued_at tx_hash index <<<"$result"
         if [ "$status" == "FOUND" ]; then
             QUEUE_FOUND_ADDRESSES+=("$address")
         fi
@@ -667,15 +678,23 @@ monitor_position(){
     if [ -z "$response_data" ]; then log_message "Empty response"; return 1; fi
     if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then log_message "Invalid JSON"; return 1; fi
 
+    # ИСПРАВЛЕНИЕ: Проверяем статус ответа
+    local api_status=$(echo "$response_data" | jq -r '.status')
+    if [ "$api_status" != "ok" ]; then
+        log_message "API returned non-ok status: $api_status"
+        return 1
+    fi
+
     local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
     local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
 
     if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
-        local current_position queued_at withdrawer_address transaction_hash
+        local current_position queued_at withdrawer_address transaction_hash index
         current_position=$(echo "$validator_info" | jq -r '.position')
         queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
         withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
         transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
+        index=$(echo "$validator_info" | jq -r '.index')
 
         if [[ "$last_position" != "$current_position" ]]; then
             local message
@@ -687,6 +706,7 @@ monitor_position(){
 📅 *Queued since:* $queued_at
 🏦 *Withdrawer:* \`$withdrawer_address\`
 🔗 *Transaction:* \`$transaction_hash\`
+🏷️ *Index:* $index
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue*
@@ -696,6 +716,7 @@ monitor_position(){
 📅 *Queued since:* $queued_at
 🏦 *Withdrawer:* \`$withdrawer_address\`
 🔗 *Transaction:* \`$transaction_hash\`
+🏷️ *Index:* $index
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
             send_telegram "$message" && log_message "Notification sent"
@@ -707,14 +728,15 @@ monitor_position(){
     else
         log_message "Validator not found in queue"
         if [[ -n "$last_position" ]]; then
-            local message="❌ *Validator Removed from Queue*
+            local message="❌ *Validator Removed from Queue or moved to the Active Set*
+Please check [queue on Dashtec](https://testnet.dashtec.xyz/queue)
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 ⌛ *Last Position:* $last_position
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
-send_telegram "$message" && log_message "Removal notification sent"
-rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
-rm -f "$0"; log_message "Removed monitor script"
+            send_telegram "$message" && log_message "Removal notification sent"
+            rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
+            rm -f "$0"; log_message "Removed monitor script"
             (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
             rm -f "$LOG_FILE"
         fi
