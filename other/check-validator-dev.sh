@@ -843,28 +843,12 @@ monitor_position(){
                         # Валидатор найден в активном наборе
                         local status balance rank attestation_success proposal_success
                         status=$(echo "$active_validator" | jq -r '.status')
-                        balance=$(echo "$active_validator" | jq -r '.balance')
                         rank=$(echo "$active_validator" | jq -r '.rank')
-
-                        # Преобразуем экспоненциальную форму в целое
-                        expand_number() { printf "%.0f" "$1"; }
-
-                        expanded_balance=$(expand_number "$balance")
-
-                        # Форматируем баланс
-                        local formatted_balance
-                        if (( expanded_balance >= 1000000000000000000 )); then
-                            formatted_balance=$(echo "$expanded_balance / 1000000000000000000" | bc)
-                            formatted_balance="${formatted_balance} STK"
-                        else
-                            formatted_balance="${expanded_balance} wei"
-                        fi
 
                         local message="✅ *Validator Moved to Active Set*
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 🎉 *Status:* $status
-💰 *Balance:* $formatted_balance
 🏆 *Rank:* $rank
 ⌛ *Last Queue Position:* $last_position
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
