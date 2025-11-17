@@ -845,16 +845,19 @@ monitor_position(){
                         status=$(echo "$active_validator" | jq -r '.status')
                         balance=$(echo "$active_validator" | jq -r '.balance')
                         rank=$(echo "$active_validator" | jq -r '.rank')
-                        attestation_success=$(echo "$active_validator" | jq -r '.attestationSuccess')
-                        proposal_success=$(echo "$active_validator" | jq -r '.proposalSuccess')
 
-                        # Форматируем баланс для лучшей читаемости
+                        # Преобразуем экспоненциальную форму в целое
+                        expand_number() { printf "%.0f" "$1"; }
+
+                        expanded_balance=$(expand_number "$balance")
+
+                        # Форматируем баланс
                         local formatted_balance
-                        if command -v bc >/dev/null 2>&1 && (( $(echo "$balance >= 1000000000000000000" | bc -l 2>/dev/null || echo "0") )); then
-                            formatted_balance=$(echo "scale=2; $balance / 1000000000000000000" | bc -l 2>/dev/null || echo "$balance")
-                            formatted_balance="${formatted_balance} ETH"
+                        if (( expanded_balance >= 1000000000000000000 )); then
+                            formatted_balance=$(echo "$expanded_balance / 1000000000000000000" | bc)
+                            formatted_balance="${formatted_balance} STK"
                         else
-                            formatted_balance="$balance wei"
+                            formatted_balance="${expanded_balance} wei"
                         fi
 
                         local message="✅ *Validator Moved to Active Set*
@@ -863,8 +866,6 @@ monitor_position(){
 🎉 *Status:* $status
 💰 *Balance:* $formatted_balance
 🏆 *Rank:* $rank
-🎯 *Attestation Success:* $attestation_success
-⚡ *Proposal Success:* $proposal_success
 ⌛ *Last Queue Position:* $last_position
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
 
