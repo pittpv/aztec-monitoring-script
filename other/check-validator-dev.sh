@@ -1416,7 +1416,7 @@ if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
     echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
     echo "----------------------------------------"
     for line in "${RESULTS[@]}"; do
-        IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
+        IFS='|' read -r validator stake withdrawer rewards status status_text status_color <<< "$line"
         echo -e "${BOLD}$(t "address"):${RESET} $validator"
         echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
         echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
