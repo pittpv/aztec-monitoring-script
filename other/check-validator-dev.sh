@@ -1225,6 +1225,17 @@ fast_load_validators() {
             withdrawer="0x0000000000000000000000000000000000000000"
         fi
 
+        # Получаем информацию о ревардах
+        rewards_response=$(cast call "$ROLLUP_ADDRESS" "getSequencerRewards(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null)
+        if [[ $? -eq 0 && -n "$rewards_response" ]]; then
+            rewards_decimal=$(echo "$rewards_response" | cast --to-dec 2>/dev/null)
+            rewards_wei=$(echo "$rewards_decimal" | cast --from-wei 2>/dev/null)
+            # Оставляем только целую часть
+            rewards=$(echo "$rewards_wei" | cut -d. -f1)
+        else
+            rewards="0"
+        fi
+
         # Преобразуем hex в decimal с использованием вспомогательных функций
         status=$(hex_to_dec "$status_hex")
         stake_decimal=$(hex_to_dec "$stake_hex")
@@ -1235,7 +1246,7 @@ fast_load_validators() {
         local status_color="${STATUS_COLOR[$status]:-$RESET}"
 
         # Добавляем в результаты
-        RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
+        RESULTS+=("$validator|$stake|$withdrawer|$rewards|$status|$status_text|$status_color")
         #echo -e "${GREEN}✓ Loaded: $validator - $stake STK - $status_text${RESET}"
     done
 
@@ -1406,6 +1417,7 @@ if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
         echo -e "${BOLD}$(t "address"):${RESET} $validator"
         echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
         echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+        echo -e "  ${BOLD}$(t "rewards"):${RESET} $rewards"
         echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
         echo -e ""
         echo "----------------------------------------"
