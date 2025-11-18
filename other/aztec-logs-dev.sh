@@ -2229,7 +2229,12 @@ check_committee() {
   for validator in "\${VALIDATOR_ARRAY[@]}"; do
     validator_lower=\$(echo "\$validator" | tr '[:upper:]' '[:lower:]')
     if echo "\$committee" | grep -qi "\$validator_lower"; then
-      validator_link="[\$validator](https://\${NETWORK}.dashtec.xyz/validators/\$validator)"
+      # Формируем ссылку в зависимости от сети
+      if [[ "\$NETWORK" == "mainnet" ]]; then
+        validator_link="[\$validator](https://dashtec.xyz/validators/\$validator)"
+      else
+        validator_link="[\$validator](https://\${NETWORK}.dashtec.xyz/validators/\$validator)"
+      fi
       found_validators+=("\$validator_link")
       committee_validators+=("\$validator_lower")
       debug_log "Validator \$validator found in committee"
@@ -3789,7 +3794,12 @@ stake_validators_old_format() {
     fi
 
     # Формируем ссылку для валидатора в зависимости от сети
-    local validator_link_template="https://${network}.dashtec.xyz/validators/\$validator"
+    local validator_link_template
+    if [[ "$network" == "mainnet" ]]; then
+        validator_link_template="https://dashtec.xyz/validators/\$validator"
+    else
+        validator_link_template="https://${network}.dashtec.xyz/validators/\$validator"
+    fi
 
     # Оригинальная логика для существующего метода
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
@@ -3896,12 +3906,16 @@ stake_validators_old_format() {
                 [yY])
                     echo -e "${GREEN}$(t "staking_executing")${NC}"
 
-                    # Выполняем команду
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success")${NC}\n" \
-						            "$((i+1))" "$rpc_url"
+                            "$((i+1))" "$rpc_url"
                         # Показываем ссылку на валидатора
-                        local validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        local validator_link
+                        if [[ "$network" == "mainnet" ]]; then
+                            validator_link="https://dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        else
+                            validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        fi
                         echo -e "${CYAN}🌐 $(t "validator_link"): $validator_link${NC}"
 						 echo ""
 
@@ -4076,8 +4090,12 @@ stake_validators_new_format() {
                         printf "${GREEN}✅ $(t "staking_success_new_operator")${NC}\n" \
 						            "$((i+1))" "$rpc_url"
 
-                        # Показываем ссылку на валидатора
-                        local validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        local validator_link
+                        if [[ "$network" == "mainnet" ]]; then
+                            validator_link="https://dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        else
+                            validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
+                        fi
                         echo -e "${CYAN}🌐 $(t "validator_link"): $validator_link${NC}"
 
                         # Создаем YML файл для успешно застейканного валидатора

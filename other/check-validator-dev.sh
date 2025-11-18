@@ -254,21 +254,33 @@ init_languages "$1"
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
 ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
 GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
-QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+if [[ "$NETWORK" == "mainnet" ]]; then
+    QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
+else
+    QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+fi
 MONITOR_DIR="/root/aztec-monitor-agent"
 
 # ========= HTTP via curl_cffi =========
 # cffi_http_get <url>
 cffi_http_get() {
   local url="$1"
-  python3 - "$url" <<'PY'
+  python3 - "$url" "$NETWORK" <<'PY'
 import sys, json
 from curl_cffi import requests
 u = sys.argv[1]
+network = sys.argv[2]
+
+# Формируем origin и referer в зависимости от сети
+if network == "mainnet":
+    base_url = "https://dashtec.xyz"
+else:
+    base_url = f"https://{network}.dashtec.xyz"
+
 headers = {
   "accept": "application/json, text/plain, */*",
-  "origin": "https://${NETWORK}.dashtec.xyz",
-  "referer": "https://${NETWORK}.dashtec.xyz/",
+  "origin": base_url,
+  "referer": base_url + "/",
 }
 try:
     r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
@@ -706,10 +718,17 @@ import sys
 from curl_cffi import requests
 u = sys.argv[1]
 network = sys.argv[2]
+
+# Формируем origin и referer в зависимости от сети
+if network == "mainnet":
+    base_url = "https://dashtec.xyz"
+else:
+    base_url = f"https://{network}.dashtec.xyz"
+
 headers = {
     "accept": "application/json, text/plain, */*",
-    "origin": f"https://{network}.dashtec.xyz",
-    "referer": f"https://{network}.dashtec.xyz/"
+    "origin": base_url,
+    "referer": base_url + "/"
 }
 try:
     r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
@@ -747,8 +766,14 @@ monitor_position(){
         fi
     }
 
-    # Проверяем очередь
-    local queue_url="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+    # Формируем URL для очереди в зависимости от сети
+    local queue_url
+    if [[ "$NETWORK" == "mainnet" ]]; then
+        queue_url="https://dashtec.xyz/api/sequencers/queue"
+    else
+        queue_url="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+    fi
+
     local search_url="${queue_url}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
     log_message "GET $search_url"
     local response_data; response_data="$(cffi_http_get "$search_url")"
@@ -828,8 +853,14 @@ monitor_position(){
     else
         log_message "Validator not found in queue"
         if [[ -n "$last_position" ]]; then
-            # ПРОВЕРЯЕМ АКТИВНЫЙ НАБОР
-            local active_url="https://${NETWORK}.dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            # Формируем URL для активного набора в зависимости от сети
+            local active_url
+            if [[ "$NETWORK" == "mainnet" ]]; then
+                active_url="https://dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            else
+                active_url="https://${NETWORK}.dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            fi
+
             log_message "Checking active set: $active_url"
             local active_response; active_response="$(cffi_http_get "$active_url" 2>/dev/null || echo "")"
 
@@ -845,17 +876,32 @@ monitor_position(){
                         status=$(echo "$active_validator" | jq -r '.status')
                         rank=$(echo "$active_validator" | jq -r '.rank')
 
+                        # Формируем ссылку для валидатора в зависимости от сети
+                        local validator_link
+                        if [[ "$NETWORK" == "mainnet" ]]; then
+                            validator_link="https://dashtec.xyz/validators"
+                        else
+                            validator_link="https://${NETWORK}.dashtec.xyz/validators"
+                        fi
+
                         local message="✅ *Validator Moved to Active Set*
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 🎉 *Status:* $status
 🏆 *Rank:* $rank
 ⌛ *Last Queue Position:* $last_position
-⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
-
-📊 Check active validator: https://${NETWORK}.dashtec.xyz/validators"
+🔗 *Validator Link:* $validator_link/$VALIDATOR_ADDRESS
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
                         send_telegram "$message" && log_message "Active set notification sent"
                     else
+                        # Формируем ссылку для очереди в зависимости от сети
+                        local queue_link
+                        if [[ "$NETWORK" == "mainnet" ]]; then
+                            queue_link="https://dashtec.xyz/queue"
+                        else
+                            queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                        fi
+
                         # Валидатор не найден ни в очереди, ни в активном наборе
                         local message="❌ *Validator Removed from Queue*
 
@@ -868,11 +914,19 @@ monitor_position(){
 • Validator activation failed
 • Technical issue with the validator
 
-📊 Check queue: https://${NETWORK}.dashtec.xyz/queue"
+📊 Check queue: $queue_link"
                         send_telegram "$message" && log_message "Removal notification sent"
                     fi
                 else
                     log_message "Active set API returned non-ok status: $api_status_active"
+                    # Формируем ссылку для очереди в зависимости от сети
+                    local queue_link
+                    if [[ "$NETWORK" == "mainnet" ]]; then
+                        queue_link="https://dashtec.xyz/queue"
+                    else
+                        queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                    fi
+
                     # Не удалось проверить активный набор из-за статуса API
                     local message="❌ *Validator No Longer in Queue*
 
@@ -881,10 +935,18 @@ monitor_position(){
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
 
 ℹ️ *Note:* Could not verify active set status (API error)
-📊 Check status: https://${NETWORK}.dashtec.xyz/queue"
+📊 Check status: $queue_link"
                     send_telegram "$message" && log_message "General removal notification sent"
                 fi
             else
+                # Формируем ссылку для очереди в зависимости от сети
+                local queue_link
+                if [[ "$NETWORK" == "mainnet" ]]; then
+                    queue_link="https://dashtec.xyz/queue"
+                else
+                    queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                fi
+
                 # Не удалось получить ответ от API активного набора
                 local message="❌ *Validator No Longer in Queue*
 
@@ -893,7 +955,7 @@ monitor_position(){
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
 
 ℹ️ *Note:* Could not verify active set status
-📊 Check status: https://${NETWORK}.dashtec.xyz/queue"
+📊 Check status: $queue_link"
                 send_telegram "$message" && log_message "General removal notification sent"
             fi
 
