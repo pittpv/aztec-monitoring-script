@@ -35,32 +35,64 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 13-11-2025
+## 📌 Latest Updates 20-11-2025
 
-- Added a method for generating a new operator from an old validator private key (requires node installation via this script, option 11)
-  - support for multivalidator mode
-  - creation of a new address, private, and BLS keys from old private keys
-  - correct data sorting according to the order of addresses in keystore.json, regardless of the order in which you enter the old private keys for generating new ones.
-- Staking function update
-  - automatic detection of the selected BLS key generation method
-  - automatic replacement of the validator address in keystore.json when creating new addresses
-  - automatic creation of new yml files with private keys
-  - keystore.json backup
-  - automatic restart of web3signer
-  - preview of the staking command before execution
-- Updated the Validator Search and Status Check function (**Option 9**)
-  - **Restored** the validator queue monitoring function
-  - Added a function to delete the validator queue monitoring
-  - New URL for displaying sequencer data on the test network at Dashtec.xyz
-  - Easily copy the attester and output address, as well as the transaction hash
-- Slot statistics monitoring
-  - New URL for the sequencer page
-- Minor improvements in main script
-- Minor improvements in monitoring agent script
-- Minor improvements in node installation script
+⚠️ **A full node reinstallation is required. Prepare the data before installation!**
+For multivalidator mode with BLS keys use the format: `private_key,address,private_bls,public_bls`
+For multivalidator mode without BLS keys use the format: `private_key,address`
+For single-validator mode the same data is required but provided separately.
+
+- Network selection testnet/mainnet when installing the node
+  - Written to the NETWORK variable in .env-aztec-agent
+  - Added to docker-compose.yml
+  - Script parameters change depending on the network
+- New method of adding validators with BLS keys
+  - Automatic creation of BN254-type yml files for web3signer
+  - Support for multivalidator and solo modes
+- Updated structure of keystore.json, mainnet-ready
+  - `slasher` removed
+  - `attester`: with an eth field instead of a simple string
+  - `publisher`: Now it is an array of strings
+  - `coinbase`: now in the keystore schema, removed from env and docker-compose.yml
+- Updated BLS generation functions considering the new keystore.json structure
+  - Warning to save public BLS keys
+- Added function for migrating BLS into keystore – Option 18-3
+  - Fetching migration data from bls-filtered-pk.json, comparing, and adding a private BLS key to your attester in keystore.json
+- Updated watchtower image URL to support new Docker versions
+- Updated function for obtaining validator statistics from the contract (Option 9)
+  - Added reward display
+- Updated validator queue monitoring function (recreate monitoring)
+  - Added check for presence in the active set
+  - Added notification about API issues or other reasons for removal from queue
+  - Added index
+- Added translation on the first RPC request – Enter Ethereum RPC URL
 
 <details>
 <summary>📅 Version History</summary>
+
+### 13-11-2025
+
+- Added a method for generating a new operator from an old validator private key (requires node installation via this script, option 11)
+    - support for multivalidator mode
+    - creation of a new address, private, and BLS keys from old private keys
+    - correct data sorting according to the order of addresses in keystore.json, regardless of the order in which you enter the old private keys for generating new ones.
+- Staking function update
+    - automatic detection of the selected BLS key generation method
+    - automatic replacement of the validator address in keystore.json when creating new addresses
+    - automatic creation of new yml files with private keys
+    - keystore.json backup
+    - automatic restart of web3signer
+    - preview of the staking command before execution
+- Updated the Validator Search and Status Check function (**Option 9**)
+    - **Restored** the validator queue monitoring function
+    - Added a function to delete the validator queue monitoring
+    - New URL for displaying sequencer data on the test network at Dashtec.xyz
+    - Easily copy the attester and withdraw address, as well as the transaction hash
+- Slot statistics monitoring
+    - New URL for the sequencer page
+- Minor improvements in main script
+- Minor improvements in monitoring agent script
+- Minor improvements in node installation script
 
 ### 08-11-2025
 * Full support for the new contract
@@ -301,12 +333,12 @@ After running the script, select the option to `Install node monitoring agent wi
 - Sends an initial status update to Telegram
 - Continuously monitors the node and logs to `~/aztec-monitor-agent/agent.log`
 - Sends Telegram alerts if:
-   - The Aztec container is not found
-   - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
-   - There is an RPC server issue
-   - Critical errors found
-   - Selected for committee
-   - Statistics for each slot while validator to the committee (successful/missed attestation, proposed/mined/missed block)
+  - The Aztec container is not found
+  - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
+  - There is an RPC server issue
+  - Critical errors found
+  - Selected for committee
+  - Statistics for each slot while validator to the committee (successful/missed attestation, proposed/mined/missed block)
 - Clears the log file when it reaches 1 MB in size, saving the very first report.
 
 ### Requirements for Monitoring Agent:
@@ -320,7 +352,7 @@ After running the script, select the option to `Install node monitoring agent wi
 
 If there is an update for the cron-agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
 
-## 🚀 Installing the Aztec node v 2.1.2
+## 🚀 Installing the Aztec node v 2.1.7
 
 To install the Aztec node, select **option 11** and follow the script instructions.
 

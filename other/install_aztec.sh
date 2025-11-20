@@ -99,6 +99,11 @@ init_languages() {
   TRANSLATIONS["en,multiple_validators_prompt"]="Do you want to run multiple validators? (y/n) "
   TRANSLATIONS["en,ufw_not_installed"]="⚠️ ufw is not installed"
   TRANSLATIONS["en,ufw_not_active"]="⚠️ ufw is not active"
+  TRANSLATIONS["en,has_bls_keys"]="Do you have BLS keys? (y/n) "
+  TRANSLATIONS["en,multi_validator_format"]="Enter validator data (format: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["en,single_validator_bls_private"]="Enter validator BLS private key:"
+  TRANSLATIONS["en,single_validator_bls_public"]="Enter validator BLS public key:"
+  TRANSLATIONS["en,bls_keys_added"]="BLS keys added to validator configuration"
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -171,6 +176,11 @@ init_languages() {
   TRANSLATIONS["ru,multiple_validators_prompt"]="Вы хотите запустить несколько валидаторов? (y/n)"
   TRANSLATIONS["ru,ufw_not_installed"]="⚠️ ufw не установлен"
   TRANSLATIONS["ru,ufw_not_active"]="⚠️ ufw не активен"
+  TRANSLATIONS["ru,has_bls_keys"]="У вас есть BLS ключи? (y/n) "
+  TRANSLATIONS["ru,multi_validator_format"]="Введите данные валидатора (формат: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["ru,single_validator_bls_private"]="Введите приватный BLS ключ валидатора:"
+  TRANSLATIONS["ru,single_validator_bls_public"]="Введите публичный BLS ключ валидатора:"
+  TRANSLATIONS["ru,bls_keys_added"]="BLS ключи добавлены в конфигурацию валидатора"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -243,6 +253,11 @@ init_languages() {
   TRANSLATIONS["tr,multiple_validators_prompt"]="Birden fazla validator çalıştırmak istiyor musunuz? (y/n) "
   TRANSLATIONS["tr,ufw_not_installed"]="⚠️ ufw yüklü değil"
   TRANSLATIONS["tr,ufw_not_active"]="⚠️ ufw aktif değil"
+  TRANSLATIONS["tr,has_bls_keys"]="BLS anahtarlarınız var mı? (y/n) "
+  TRANSLATIONS["tr,multi_validator_format"]="Validator verilerini girin (format: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["tr,single_validator_bls_private"]="Validator BLS özel anahtarını girin:"
+  TRANSLATIONS["tr,single_validator_bls_public"]="Validator BLS genel anahtarını girin:"
+  TRANSLATIONS["tr,bls_keys_added"]="BLS anahtarları validator konfigürasyonuna eklendi"
 }
 
 # Colors
@@ -580,39 +595,91 @@ echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
 read -p "$(t "multiple_validators_prompt")" -n 1 -r
 echo
 
+# Store the response for validator mode selection
+VALIDATOR_MODE_REPLY=$REPLY
+
 # Initialize arrays for keys and addresses
 VALIDATOR_PRIVATE_KEYS_ARRAY=()
 VALIDATOR_ADDRESSES_ARRAY=()
+VALIDATOR_BLS_PRIVATE_KEYS_ARRAY=()
+VALIDATOR_BLS_PUBLIC_KEYS_ARRAY=()
 USE_FIRST_AS_PUBLISHER=false
+HAS_BLS_KEYS=false
 
+# Ask if user has BLS keys
+read -p "$(t "has_bls_keys") " -n 1 -r
+echo
 if [[ $REPLY =~ ^[Yy]$ ]]; then
+    HAS_BLS_KEYS=true
+    echo -e "${GREEN}BLS keys will be added to configuration${NC}"
+fi
+
+# Use the stored response for validator mode selection
+if [[ $VALIDATOR_MODE_REPLY =~ ^[Yy]$ ]]; then
     echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
 
-    # Get multiple validator key-address pairs
-    echo -e "${YELLOW}Enter validator private keys and addresses (up to 10, format: private_key,address):${NC}"
-    for i in {1..10}; do
-        read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_PAIR
-        if [ -z "$KEY_ADDRESS_PAIR" ]; then
-            break
-        fi
+    if [ "$HAS_BLS_KEYS" = true ]; then
+        # Get multiple validator key-address-bls data
+        echo -e "${YELLOW}$(t "multi_validator_format")${NC}"
+        for i in {1..10}; do
+            read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_BLS_PAIR
+            if [ -z "$KEY_ADDRESS_BLS_PAIR" ]; then
+                break
+            fi
 
-        # Split the input into private key and address
-        IFS=',' read -r PRIVATE_KEY ADDRESS <<< "$KEY_ADDRESS_PAIR"
+            # Split the input into private key, address, private bls, and public bls
+            IFS=',' read -r PRIVATE_KEY ADDRESS PRIVATE_BLS PUBLIC_BLS <<< "$KEY_ADDRESS_BLS_PAIR"
 
-        # Remove any spaces and ensure private key starts with 0x
-        PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
-        if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
-            PRIVATE_KEY="0x$PRIVATE_KEY"
-        fi
+            # Remove any spaces and ensure private key starts with 0x
+            PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+            if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+                PRIVATE_KEY="0x$PRIVATE_KEY"
+            fi
 
-        # Remove any spaces from address
-        ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+            # Remove any spaces from address
+            ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
 
-        VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
-        VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+            # Remove any spaces from BLS keys
+            PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
+            PUBLIC_BLS=$(echo "$PUBLIC_BLS" | tr -d ' ')
 
-        echo -e "${GREEN}Added validator $i${NC}"
-    done
+            VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+            VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+            VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
+            VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("$PUBLIC_BLS")
+
+            echo -e "${GREEN}Added validator $i with BLS keys${NC}"
+        done
+    else
+        # Get multiple validator key-address pairs (original logic)
+        echo -e "${YELLOW}Enter validator private keys and addresses (up to 10, format: private_key,address):${NC}"
+        for i in {1..10}; do
+            read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_PAIR
+            if [ -z "$KEY_ADDRESS_PAIR" ]; then
+                break
+            fi
+
+            # Split the input into private key and address
+            IFS=',' read -r PRIVATE_KEY ADDRESS <<< "$KEY_ADDRESS_PAIR"
+
+            # Remove any spaces and ensure private key starts with 0x
+            PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+            if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+                PRIVATE_KEY="0x$PRIVATE_KEY"
+            fi
+
+            # Remove any spaces from address
+            ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+            VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+            VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+            # Add empty BLS keys for consistency
+            VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("")
+            VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("")
+
+            echo -e "${GREEN}Added validator $i${NC}"
+        done
+    fi
 
     # Ask if user wants to use first address as publisher for all validators
     echo ""
@@ -643,26 +710,61 @@ else
 
     VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
     VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+
+    if [ "$HAS_BLS_KEYS" = true ]; then
+        # Get BLS keys for single validator
+        read -p "$(t "single_validator_bls_private") " PRIVATE_BLS
+        read -p "$(t "single_validator_bls_public") " PUBLIC_BLS
+
+        # Remove any spaces from BLS keys
+        PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
+        PUBLIC_BLS=$(echo "$PUBLIC_BLS" | tr -d ' ')
+
+        VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
+        VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("$PUBLIC_BLS")
+        echo -e "${GREEN}$(t "bls_keys_added")${NC}"
+    else
+        # Add empty BLS keys for consistency
+        VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("")
+        VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("")
+    fi
+
     USE_FIRST_AS_PUBLISHER=true  # For single validator, always use own address
 fi
 
-# Ask for Aztec L2 Address for feeRecipient
+# Ask for Aztec L2 Address for feeRecipient и COINBASE
 echo -e "\n${YELLOW}Enter Aztec L2 Address to use as feeRecipient for all validators:${NC}"
 read -p "Aztec L2 Address: " FEE_RECIPIENT_ADDRESS
 FEE_RECIPIENT_ADDRESS=$(echo "$FEE_RECIPIENT_ADDRESS" | tr -d ' ')
 
-# Create keys directory and YML files
+# Добавляем запрос COINBASE сразу после Aztec L2 Address
+read -p "COINBASE: " COINBASE
+COINBASE=$(echo "$COINBASE" | tr -d ' ')
+
+# Create keys directory and separate YML files
 echo -e "\n${GREEN}Creating key files...${NC}"
 mkdir -p "$HOME/aztec/keys"
 
 for i in "${!VALIDATOR_PRIVATE_KEYS_ARRAY[@]}"; do
+    # Create SECP256K1 YML file for validator
     KEY_FILE="$HOME/aztec/keys/validator_$((i+1)).yml"
     cat > "$KEY_FILE" <<EOF
 type: "file-raw"
 keyType: "SECP256K1"
 privateKey: "${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
 EOF
-    echo -e "${GREEN}Created key file: $KEY_FILE${NC}"
+    echo -e "${GREEN}Created SECP256K1 key file: $KEY_FILE${NC}"
+
+    if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}" ]; then
+        # Create separate BLS YML file
+        BLS_KEY_FILE="$HOME/aztec/keys/bls_validator_$((i+1)).yml"
+        cat > "$BLS_KEY_FILE" <<EOF
+type: "file-raw"
+keyType: "BN254"
+privateKey: "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}"
+EOF
+        echo -e "${GREEN}Created BLS key file: $BLS_KEY_FILE${NC}"
+    fi
 done
 
 # Create config directory and keystore.json
@@ -675,33 +777,52 @@ for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
     address="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
 
     if [ "$USE_FIRST_AS_PUBLISHER" = true ] && [ $i -gt 0 ]; then
-        # Use first private key as publisher for all other validators
-        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[0]}"
+        # Use first address as publisher for all other validators
+        publisher="${VALIDATOR_ADDRESSES_ARRAY[0]}"
     else
-        # Use own private key as publisher
-        publisher="${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
+        # Use own address as publisher
+        publisher="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
     fi
 
-    VALIDATOR_JSON=$(cat <<EOF
-    {
-      "attester": "$address",
-      "publisher": "$publisher",
+    if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}" ]; then
+        # Create validator JSON with BLS key
+        VALIDATOR_JSON=$(cat <<EOF
+{
+      "attester": {
+        "eth": "$address",
+        "bls": "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}"
+      },
+      "publisher": ["$publisher"],
+      "coinbase": "$COINBASE",
       "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
     }
 EOF
-    )
+        )
+    else
+        # Create validator JSON without BLS key (original format)
+        VALIDATOR_JSON=$(cat <<EOF
+{
+      "attester": {
+        "eth": "$address"
+      },
+      "publisher": ["$publisher"],
+      "coinbase": "$COINBASE",
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
+    }
+EOF
+        )
+    fi
     VALIDATORS_JSON_ARRAY+=("$VALIDATOR_JSON")
 done
 
 # Join validators array with commas
 VALIDATORS_JSON_STRING=$(IFS=,; echo "${VALIDATORS_JSON_ARRAY[*]}")
 
-# Create keystore.json
+# Create keystore.json with updated schema
 cat > "$HOME/aztec/config/keystore.json" <<EOF
 {
   "schemaVersion": 1,
   "remoteSigner": "http://127.0.0.1:10500",
-  "slasher": "${VALIDATOR_ADDRESSES_ARRAY[0]}",
   "validators": [
     $VALIDATORS_JSON_STRING
   ]
@@ -715,19 +836,59 @@ DEFAULT_IP=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me)
 echo -e "\n${GREEN}$(t "creating_env")${NC}"
 read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
 read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
-read -p "COINBASE: " COINBASE
 
-# Create .env file without VALIDATOR_PRIVATE_KEYS
+# Create .env file без COINBASE
 cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
 CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
-COINBASE=${COINBASE}
 P2P_IP=${DEFAULT_IP}
 EOF
 
+# Запрашиваем выбор сети
+echo -e "\n${GREEN}$(t "select_network")${NC}"
+echo "1) $(t "mainnet")"
+echo "2) $(t "testnet")"
+read -p "$(t "enter_choice") " network_choice
+
+case $network_choice in
+    1)
+        NETWORK="mainnet"
+        DATA_DIR="$HOME/.aztec/mainnet/data/"
+        ;;
+    2)
+        NETWORK="testnet"
+        DATA_DIR="$HOME/.aztec/testnet/data/"
+        ;;
+    *)
+        echo -e "\n${RED}$(t "invalid_choice")${NC}"
+        exit 1
+        ;;
+esac
+
+echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}$NETWORK${NC}"
+
+# Сохраняем/обновляем NETWORK в файле .env-aztec-agent
+ENV_FILE="$HOME/.env-aztec-agent"
+
+# Если файл существует, обновляем переменную NETWORK
+if [ -f "$ENV_FILE" ]; then
+    # Если NETWORK уже существует в файле, заменяем её значение
+    if grep -q "^NETWORK=" "$ENV_FILE"; then
+        sed -i "s/^NETWORK=.*/NETWORK=$NETWORK/" "$ENV_FILE"
+    else
+        # Если NETWORK нет, добавляем в конец файла
+        echo "NETWORK=$NETWORK" >> "$ENV_FILE"
+    fi
+else
+    # Если файла нет, создаем его с переменной NETWORK
+    echo "NETWORK=$NETWORK" > "$ENV_FILE"
+fi
+
+echo -e "${GREEN}Network saved to $ENV_FILE${NC}"
+
+# Создаем docker-compose.yml
 echo -e "\n${GREEN}$(t "creating_compose")${NC}"
 
-# Создаем docker-compose.yml без VALIDATOR_PRIVATE_KEYS и с KEY_STORE_DIRECTORY
 cat > docker-compose.yml <<EOF
 services:
   aztec-node:
@@ -740,17 +901,16 @@ services:
       L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
       DATA_DIRECTORY: /data
       KEY_STORE_DIRECTORY: /config
-      COINBASE: \${COINBASE}
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: info;debug:node:sentinel
     entrypoint: >
-      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --network testnet --node --archiver --sequencer'
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --network $NETWORK'
     ports:
       - ${p2p_port}:${p2p_port}/tcp
       - ${p2p_port}:${p2p_port}/udp
       - ${http_port}:${http_port}
     volumes:
-      - /root/.aztec/testnet/data/:/data
+      - $DATA_DIR:/data
       - $HOME/aztec/config:/config
     labels:
       - com.centurylinklabs.watchtower.enable=true
@@ -785,7 +945,7 @@ EOF
     cat > docker-compose.yml <<EOF
 services:
   watchtower:
-    image: containrrr/watchtower:latest
+    image: nickfedor/watchtower:latest
     container_name: watchtower
     restart: unless-stopped
     volumes:

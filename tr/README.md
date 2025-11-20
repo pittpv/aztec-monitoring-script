@@ -35,7 +35,42 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 13-11-2025
+## 📌 Son Güncellemeler 20-11-2025
+
+⚠️ **Tam node yeniden kurulumu gereklidir. Kurulumdan önce verileri hazırlayın!**
+BLS anahtarlarıyla multivalidator modu için format: `private_key,address,private_bls,public_bls`
+BLS anahtarları olmadan multivalidator modu için format: `private_key,address`
+Tek validator modu için aynı veriler ayrı ayrı sağlanır.
+
+- Node kurulumu sırasında testnet/mainnet ağı seçimi
+  - NETWORK değişkenine .env-aztec-agent dosyasında yazılır
+  - docker-compose.yml dosyasına eklenir
+  - Script parametreleri ağa göre değişir
+- BLS anahtarlarıyla validator eklemek için yeni yöntem
+  - web3signer için BN254 tipi yml dosyalarının otomatik oluşturulması
+  - Multi-validator ve solo mod desteği
+- keystore.json yapısı güncellendi
+  - `slasher` kaldırıldı
+  - `attester`: basit bir string yerine eth alanı içeriyor
+  - `publisher`: Artık string dizisidir
+  - `coinbase`: artık keystore şemasında, env ve docker-compose.yml dosyalarından kaldırıldı
+- Yeni keystore.json yapısına göre BLS oluşturma fonksiyonları güncellendi
+  - Public BLS anahtarlarının kaydedilmesi uyarısı
+- BLS'yi keystore’a taşımak için fonksiyon eklendi – Seçenek 18-3
+  - bls-filtered-pk.json dosyasından göç verilerinin alınması, karşılaştırılması ve private BLS anahtarının kendi attester’ına eklenmesi
+- Yeni Docker sürümlerini desteklemek için watchtower imaj URL’si güncellendi
+- Sözleşmeden validator istatistikleri alma fonksiyonu güncellendi
+  - Reward gösterimi eklendi
+- Validator kuyruğu izleme fonksiyonu güncellendi (izlemeyi yeniden oluşturun)
+  - Aktif sette bulunma kontrolü eklendi
+  - API sorunları veya kuyruktan çıkma ile ilgili diğer sebepler için bildirim eklendi
+  - İndeks eklendi
+- İlk RPC isteğinde çeviriye eklendi – Ethereum RPC URL’sini girin
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 13-11-2025
 
 - Eski doğrulayıcı özel anahtarından yeni bir operatör oluşturma yöntemi eklendi (bu betik aracılığıyla düğüm kurulumu gereklidir, seçenek 11)
   - çoklu doğrulayıcı modu desteği
@@ -59,20 +94,17 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 - İzleme aracı betiğinde küçük iyileştirmeler
 - Düğüm kurulum betiğinde küçük iyileştirmeler
 
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
-
 ### 08-11-2025
-* Yeni sözleşme için tam destek
-    * izleme
-    * node kurulumu
-    * doğrulayıcı kontrolü ve arama
-    * doğrulayıcı kuyruğunun izlenmesi
-* Eski sıralaıcınız için mnemonic ifadeden BLS anahtarları oluşturma (bu betik aracılığıyla node kurulumu gereklidir)
-    * tek bir mnemonic’ten birden fazla adres desteği
-    * gereksiz anahtarların otomatik filtrelenmesi ve silinmesi
-* Stake onaylama fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
-* Stake etme — doğrulayıcı ekleme fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
+- Yeni sözleşme için tam destek
+  - izleme
+  - node kurulumu
+  - doğrulayıcı kontrolü ve arama
+  - doğrulayıcı kuyruğunun izlenmesi
+- Eski sıralaıcınız için mnemonic ifadeden BLS anahtarları oluşturma (bu betik aracılığıyla node kurulumu gereklidir)
+  - tek bir mnemonic’ten birden fazla adres desteği
+  - gereksiz anahtarların otomatik filtrelenmesi ve silinmesi
+- Stake onaylama fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
+- Stake etme — doğrulayıcı ekleme fonksiyonu (bu betik aracılığıyla node kurulumu gereklidir)
 
 ### 04-10-2025
 ⚠️ Lütfen eski izleme aracını silin (seçenek 3'ü kullanın) ve yeni aracı yükleyin (seçenek 2'yi kullanın)
@@ -319,7 +351,7 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
 
 Cron-agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
 
-## 🚀 Aztec v 2.1.2 düğümünü kurma
+## 🚀 Aztec v 2.1.7 düğümünü kurma
 
 Aztec düğümünü kurmak için **seçenek 11**'i seçin ve betik talimatlarını izleyin.
 

@@ -10,6 +10,13 @@ BLUE="\e[34m"
 BOLD="\e[1m"
 RESET="\e[0m"
 
+# Получаем значение NETWORK из env-aztec-agent
+NETWORK="testnet"
+if [[ -f "$HOME/.env-aztec-agent" ]]; then
+  source "$HOME/.env-aztec-agent"
+  [[ -n "$NETWORK" ]] && NETWORK="$NETWORK"
+fi
+
 # === Language settings ===
 LANG="en"
 declare -A TRANSLATIONS
@@ -41,6 +48,7 @@ init_languages() {
     TRANSLATIONS["en,address"]="Address"
     TRANSLATIONS["en,stake"]="Stake"
     TRANSLATIONS["en,withdrawer"]="Withdrawer"
+    TRANSLATIONS["en,rewards"]="Rewards"
     TRANSLATIONS["en,status"]="Status"
     TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
     TRANSLATIONS["en,exiting"]="Exiting."
@@ -91,6 +99,8 @@ init_languages() {
     TRANSLATIONS["en,remove_specific"]="Remove specific monitor"
     TRANSLATIONS["en,enter_choice"]="Enter your choice:"
     TRANSLATIONS["en,invalid_choice"]="Invalid choice."
+    TRANSLATIONS["en,api_error"]="Possible problems with Dashtec API"
+    TRANSLATIONS["en,contact_developer"]="Contact developer: https://t.me/+zEaCtoXYYwIyZjQ0"
 
     # Russian translations
     TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
@@ -108,6 +118,7 @@ init_languages() {
     TRANSLATIONS["ru,address"]="Адрес"
     TRANSLATIONS["ru,stake"]="Стейк"
     TRANSLATIONS["ru,withdrawer"]="Withdrawer адрес"
+    TRANSLATIONS["ru,rewards"]="Реварды"
     TRANSLATIONS["ru,status"]="Статус"
     TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
     TRANSLATIONS["ru,exiting"]="Выход."
@@ -158,6 +169,8 @@ init_languages() {
     TRANSLATIONS["ru,remove_specific"]="Удалить конкретный монитор"
     TRANSLATIONS["ru,enter_choice"]="Введите ваш выбор:"
     TRANSLATIONS["ru,invalid_choice"]="Неверный выбор."
+    TRANSLATIONS["ru,api_error"]="Возможны проблемы с Dashtec API"
+    TRANSLATIONS["ru,contact_developer"]="Сообщите разработчику: https://t.me/+zEaCtoXYYwIyZjQ0"
 
     # Turkish translations
     TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
@@ -175,6 +188,7 @@ init_languages() {
     TRANSLATIONS["tr,address"]="Adres"
     TRANSLATIONS["tr,stake"]="Stake"
     TRANSLATIONS["tr,withdrawer"]="Çekici"
+    TRANSLATIONS["tr,rewards"]="Ödüller"
     TRANSLATIONS["tr,status"]="Durum"
     TRANSLATIONS["tr,validator_not_found"]="%s adresli doğrulayıcı bulunamadı."
     TRANSLATIONS["tr,exiting"]="Çıkılıyor."
@@ -225,6 +239,8 @@ init_languages() {
     TRANSLATIONS["tr,remove_specific"]="Belirli izleyiciyi kaldır"
     TRANSLATIONS["tr,enter_choice"]="Seçiminizi girin:"
     TRANSLATIONS["tr,invalid_choice"]="Geçersiz seçim."
+    TRANSLATIONS["tr,api_error"]="Dashtec API'de olası sorunlar"
+    TRANSLATIONS["tr,contact_developer"]="Geliştiriciye bildirin: https://t.me/+zEaCtoXYYwIyZjQ0"
 }
 
 t() {
@@ -241,21 +257,33 @@ init_languages "$1"
 #ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
 ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
 GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
-QUEUE_URL="https://testnet.dashtec.xyz/api/sequencers/queue"
+if [[ "$NETWORK" == "mainnet" ]]; then
+    QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
+else
+    QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+fi
 MONITOR_DIR="/root/aztec-monitor-agent"
 
 # ========= HTTP via curl_cffi =========
 # cffi_http_get <url>
 cffi_http_get() {
   local url="$1"
-  python3 - "$url" <<'PY'
+  python3 - "$url" "$NETWORK" <<'PY'
 import sys, json
 from curl_cffi import requests
 u = sys.argv[1]
+network = sys.argv[2]
+
+# Формируем origin и referer в зависимости от сети
+if network == "mainnet":
+    base_url = "https://dashtec.xyz"
+else:
+    base_url = f"https://{network}.dashtec.xyz"
+
 headers = {
   "accept": "application/json, text/plain, */*",
-  "origin": "https://testnet.dashtec.xyz",
-  "referer": "https://testnet.dashtec.xyz/",
+  "origin": base_url,
+  "referer": base_url + "/",
 }
 try:
     r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
@@ -468,26 +496,62 @@ check_validator_queue(){
     echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${RESET}"
     local temp_file; temp_file=$(mktemp)
 
+    # Функция для отправки уведомления об ошибке API
+    send_api_error_notification() {
+        local error_type="$1"
+        local validator_address="$2"
+        local message="🚨 *Dashtec API Error*
+
+🔧 *Error Type:* $error_type
+🔍 *Validator:* \`${validator_address:-"Batch check"}\`
+⏰ *Time:* $(date '+%d.%m.%Y %H:%M UTC')
+⚠️ *Issue:* Possible problems with Dashtec API
+
+📞 *Contact developer:* https://t.me/+zEaCtoXYYwIyZjQ0"
+
+        if [ -n "${TELEGRAM_BOT_TOKEN-}" ] && [ -n "${TELEGRAM_CHAT_ID-}" ]; then
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null 2>&1
+        fi
+    }
+
     check_single_validator(){
         local validator_address=$1; local temp_file=$2
         local search_address_lower=${validator_address,,}
         local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
         local response_data; response_data="$(cffi_http_get "$search_url")"
+
         if [ -z "$response_data" ]; then
-            echo "$validator_address|ERROR|Error fetching data" >> "$temp_file"; return 1
+            echo "$validator_address|ERROR|Empty API response" >> "$temp_file"
+            send_api_error_notification "Empty response" "$validator_address"
+            return 1
         fi
+
         if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
-            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"; return 1
+            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
+            send_api_error_notification "Invalid JSON" "$validator_address"
+            return 1
         fi
+
+        # Проверяем статус ответа
+        local status=$(echo "$response_data" | jq -r '.status')
+        if [ "$status" != "ok" ]; then
+            echo "$validator_address|ERROR|API returned non-ok status: $status" >> "$temp_file"
+            send_api_error_notification "Non-OK status: $status" "$validator_address"
+            return 1
+        fi
+
         local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
         local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+
         if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
-            local position withdrawer queued_at tx_hash
+            local position withdrawer queued_at tx_hash index
             position=$(echo "$validator_info" | jq -r '.position')
             withdrawer=$(echo "$validator_info" | jq -r '.withdrawerAddress')
             queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
             tx_hash=$(echo "$validator_info" | jq -r '.transactionHash')
-            echo "$validator_address|FOUND|$position|$withdrawer|$queued_at|$tx_hash" >> "$temp_file"
+            index=$(echo "$validator_info" | jq -r '.index')
+            echo "$validator_address|FOUND|$position|$withdrawer|$queued_at|$tx_hash|$index" >> "$temp_file"
         else
             echo "$validator_address|NOT_FOUND||" >> "$temp_file"
         fi
@@ -498,11 +562,22 @@ check_validator_queue(){
         check_single_validator "$validator_address" "$temp_file" &
         pids+=($!)
     done
-    for pid in "${pids[@]}"; do wait "$pid" 2>/dev/null || true; done
 
-    while IFS='|' read -r address status position withdrawer queued_at tx_hash; do
+    # Ожидаем завершения всех процессов
+    local api_errors=0
+    for pid in "${pids[@]}"; do
+        wait "$pid" 2>/dev/null || ((api_errors++))
+    done
+
+    # Если все запросы завершились с ошибкой API, отправляем общее уведомление
+    if [ $api_errors -eq ${#validator_addresses[@]} ] && [ ${#validator_addresses[@]} -gt 0 ]; then
+        send_api_error_notification "All API requests failed" "Batch check"
+    fi
+
+    # Остальная часть функции без изменений...
+    while IFS='|' read -r address status position withdrawer queued_at tx_hash index; do
         case "$status" in
-            FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash"); found_count=$((found_count+1));;
+            FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash|$index"); found_count=$((found_count+1));;
             NOT_FOUND) results+=("NOT_FOUND|$address"); not_found_count=$((not_found_count+1));;
             ERROR) results+=("ERROR|$address|$position"); not_found_count=$((not_found_count+1));;
         esac
@@ -517,7 +592,7 @@ check_validator_queue(){
     if [ $found_count -gt 0 ]; then
         echo -e "\n${GREEN}Validators found in queue:${RESET}"
         for result in "${results[@]}"; do
-            IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
+            IFS='|' read -r status address position withdrawer queued_at tx_hash index <<<"$result"
             if [ "$status" == "FOUND" ]; then
                 local formatted_date; formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
                 echo -e "  ${CYAN}• ${address}${RESET}"
@@ -525,6 +600,7 @@ check_validator_queue(){
                 echo -e "    ${BOLD}Withdrawer:${RESET} $withdrawer"
                 echo -e "    ${BOLD}Queued at:${RESET} $formatted_date"
                 echo -e "    ${BOLD}Tx Hash:${RESET} $tx_hash"
+                echo -e "    ${BOLD}Index:${RESET} $index"
             fi
         done
     fi
@@ -547,7 +623,7 @@ check_validator_queue(){
 
     # Заполняем массив найденными адресами
     for result in "${results[@]}"; do
-        IFS='|' read -r status address position withdrawer queued_at tx_hash <<<"$result"
+        IFS='|' read -r status address position withdrawer queued_at tx_hash index <<<"$result"
         if [ "$status" == "FOUND" ]; then
             QUEUE_FOUND_ADDRESSES+=("$address")
         fi
@@ -594,7 +670,7 @@ set -euo pipefail
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 
 VALIDATOR_ADDRESS="__ADDR__"
-QUEUE_URL="__QURL__"
+NETWORK="__NETWORK__"
 MONITOR_DIR="__MDIR__"
 LAST_POSITION_FILE="__POSFILE__"
 LOG_FILE="__LOGFILE__"
@@ -640,19 +716,34 @@ format_date(){
 
 cffi_http_get(){
   local url="$1"
-  python3 - "$url" <<'PY'
+  python3 - "$url" "$NETWORK" <<'PY'
 import sys
 from curl_cffi import requests
 u = sys.argv[1]
-headers = {"accept":"application/json, text/plain, */*","origin":"https://testnet.dashtec.xyz","referer":"https://testnet.dashtec.xyz/"}
-r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
-ct = (r.headers.get("content-type") or "").lower()
-txt = r.text
-if "application/json" in ct:
-    print(txt)
+network = sys.argv[2]
+
+# Формируем origin и referer в зависимости от сети
+if network == "mainnet":
+    base_url = "https://dashtec.xyz"
 else:
-    i, j = txt.find("{"), txt.rfind("}")
-    print(txt[i:j+1] if i!=-1 and j!=-1 and j>i else txt)
+    base_url = f"https://{network}.dashtec.xyz"
+
+headers = {
+    "accept": "application/json, text/plain, */*",
+    "origin": base_url,
+    "referer": base_url + "/"
+}
+try:
+    r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
+    ct = (r.headers.get("content-type") or "").lower()
+    txt = r.text
+    if "application/json" in ct:
+        print(txt)
+    else:
+        i, j = txt.find("{"), txt.rfind("}")
+        print(txt[i:j+1] if i!=-1 and j!=-1 and j>i else txt)
+except Exception as e:
+    print(f'{{"error": "Request failed: {e}"}}')
 PY
 }
 
@@ -661,21 +752,73 @@ monitor_position(){
     local last_position=""
     [[ -f "$LAST_POSITION_FILE" ]] && last_position=$(cat "$LAST_POSITION_FILE")
 
-    local search_url="${QUEUE_URL}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
+    # Функция для отправки уведомления об ошибке API в мониторе
+    send_monitor_api_error(){
+        local error_type="$1"
+        local message="🚨 *Dashtec API Error - Monitor*
+
+🔧 *Error Type:* $error_type
+🔍 *Validator:* \`$VALIDATOR_ADDRESS\`
+⏰ *Time:* $(date '+%d.%m.%Y %H:%M UTC')
+⚠️ *Issue:* Possible problems with Dashtec API
+📞 *Contact developer:* https://t.me/+zEaCtoXYYwIyZjQ0"
+
+        if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null
+        fi
+    }
+
+    # Формируем URL для очереди в зависимости от сети
+    local queue_url
+    if [[ "$NETWORK" == "mainnet" ]]; then
+        queue_url="https://dashtec.xyz/api/sequencers/queue"
+    else
+        queue_url="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+    fi
+
+    local search_url="${queue_url}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
     log_message "GET $search_url"
     local response_data; response_data="$(cffi_http_get "$search_url")"
-    if [ -z "$response_data" ]; then log_message "Empty response"; return 1; fi
-    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then log_message "Invalid JSON"; return 1; fi
+
+    if [ -z "$response_data" ]; then
+        log_message "Empty API response"
+        send_monitor_api_error "Empty response"
+        return 1
+    fi
+
+    # Проверяем наличие ошибки в ответе
+    if echo "$response_data" | jq -e 'has("error")' >/dev/null 2>&1; then
+        local error_msg=$(echo "$response_data" | jq -r '.error')
+        log_message "API request failed: $error_msg"
+        send_monitor_api_error "Request failed: $error_msg"
+        return 1
+    fi
+
+    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
+        log_message "Invalid JSON response: $response_data"
+        send_monitor_api_error "Invalid JSON"
+        return 1
+    fi
+
+    # Проверяем статус ответа
+    local api_status=$(echo "$response_data" | jq -r '.status')
+    if [ "$api_status" != "ok" ]; then
+        log_message "API returned non-ok status: $api_status"
+        send_monitor_api_error "Non-OK status: $api_status"
+        return 1
+    fi
 
     local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
     local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
 
     if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
-        local current_position queued_at withdrawer_address transaction_hash
+        local current_position queued_at withdrawer_address transaction_hash index
         current_position=$(echo "$validator_info" | jq -r '.position')
         queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
         withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
         transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
+        index=$(echo "$validator_info" | jq -r '.index')
 
         if [[ "$last_position" != "$current_position" ]]; then
             local message
@@ -687,6 +830,7 @@ monitor_position(){
 📅 *Queued since:* $queued_at
 🏦 *Withdrawer:* \`$withdrawer_address\`
 🔗 *Transaction:* \`$transaction_hash\`
+🏷️ *Index:* $index
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             else
                 message="🎉 *New Validator in Queue*
@@ -696,9 +840,14 @@ monitor_position(){
 📅 *Queued since:* $queued_at
 🏦 *Withdrawer:* \`$withdrawer_address\`
 🔗 *Transaction:* \`$transaction_hash\`
+🏷️ *Index:* $index
 ⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
             fi
-            send_telegram "$message" && log_message "Notification sent"
+            if send_telegram "$message"; then
+                log_message "Notification sent"
+            else
+                log_message "Failed to send notification"
+            fi
             echo "$current_position" > "$LAST_POSITION_FILE"
             log_message "Saved new position: $current_position"
         else
@@ -707,14 +856,115 @@ monitor_position(){
     else
         log_message "Validator not found in queue"
         if [[ -n "$last_position" ]]; then
-            local message="❌ *Validator Removed from Queue*
+            # Формируем URL для активного набора в зависимости от сети
+            local active_url
+            if [[ "$NETWORK" == "mainnet" ]]; then
+                active_url="https://dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            else
+                active_url="https://${NETWORK}.dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            fi
+
+            log_message "Checking active set: $active_url"
+            local active_response; active_response="$(cffi_http_get "$active_url" 2>/dev/null || echo "")"
+
+            if [[ -n "$active_response" ]] && echo "$active_response" | jq -e . >/dev/null 2>&1; then
+                local api_status_active=$(echo "$active_response" | jq -r '.status')
+
+                if [[ "$api_status_active" == "ok" ]]; then
+                    local active_validator; active_validator=$(echo "$active_response" | jq -r ".validators[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+
+                    if [[ -n "$active_validator" ]]; then
+                        # Валидатор найден в активном наборе
+                        local status balance rank attestation_success proposal_success
+                        status=$(echo "$active_validator" | jq -r '.status')
+                        rank=$(echo "$active_validator" | jq -r '.rank')
+
+                        # Формируем ссылку для валидатора в зависимости от сети
+                        local validator_link
+                        if [[ "$NETWORK" == "mainnet" ]]; then
+                            validator_link="https://dashtec.xyz/validators"
+                        else
+                            validator_link="https://${NETWORK}.dashtec.xyz/validators"
+                        fi
+
+                        local message="✅ *Validator Moved to Active Set*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+🎉 *Status:* $status
+🏆 *Rank:* $rank
+⌛ *Last Queue Position:* $last_position
+🔗 *Validator Link:* $validator_link/$VALIDATOR_ADDRESS
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+                        send_telegram "$message" && log_message "Active set notification sent"
+                    else
+                        # Формируем ссылку для очереди в зависимости от сети
+                        local queue_link
+                        if [[ "$NETWORK" == "mainnet" ]]; then
+                            queue_link="https://dashtec.xyz/queue"
+                        else
+                            queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                        fi
+
+                        # Валидатор не найден ни в очереди, ни в активном наборе
+                        local message="❌ *Validator Removed from Queue*
 
 🔹 *Address:* \`$VALIDATOR_ADDRESS\`
 ⌛ *Last Position:* $last_position
-⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
-send_telegram "$message" && log_message "Removal notification sent"
-rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
-rm -f "$0"; log_message "Removed monitor script"
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+⚠️ *Possible reasons:*
+• Validator was removed from queue
+• Validator activation failed
+• Technical issue with the validator
+
+📊 Check queue: $queue_link"
+                        send_telegram "$message" && log_message "Removal notification sent"
+                    fi
+                else
+                    log_message "Active set API returned non-ok status: $api_status_active"
+                    # Формируем ссылку для очереди в зависимости от сети
+                    local queue_link
+                    if [[ "$NETWORK" == "mainnet" ]]; then
+                        queue_link="https://dashtec.xyz/queue"
+                    else
+                        queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                    fi
+
+                    # Не удалось проверить активный набор из-за статуса API
+                    local message="❌ *Validator No Longer in Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+ℹ️ *Note:* Could not verify active set status (API error)
+📊 Check status: $queue_link"
+                    send_telegram "$message" && log_message "General removal notification sent"
+                fi
+            else
+                # Формируем ссылку для очереди в зависимости от сети
+                local queue_link
+                if [[ "$NETWORK" == "mainnet" ]]; then
+                    queue_link="https://dashtec.xyz/queue"
+                else
+                    queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                fi
+
+                # Не удалось получить ответ от API активного набора
+                local message="❌ *Validator No Longer in Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+ℹ️ *Note:* Could not verify active set status
+📊 Check status: $queue_link"
+                send_telegram "$message" && log_message "General removal notification sent"
+            fi
+
+            # Очищаем ресурсы в любом случае
+            rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
+            rm -f "$0"; log_message "Removed monitor script"
             (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
             rm -f "$LOG_FILE"
         fi
@@ -735,7 +985,7 @@ main >> "$LOG_FILE" 2>&1
 EOF
         # substitute placeholders
         sed -i "s|__ADDR__|$validator_address|g" "$MONITOR_DIR/$script_name"
-        sed -i "s|__QURL__|$QUEUE_URL|g" "$MONITOR_DIR/$script_name"
+        sed -i "s|__NETWORK__|$NETWORK|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__MDIR__|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__POSFILE__|$position_file|g" "$MONITOR_DIR/$script_name"
         sed -i "s|__LOGFILE__|$log_file|g" "$MONITOR_DIR/$script_name"
@@ -978,6 +1228,17 @@ fast_load_validators() {
             withdrawer="0x0000000000000000000000000000000000000000"
         fi
 
+        # Получаем информацию о ревардах
+        rewards_response=$(cast call "$ROLLUP_ADDRESS" "getSequencerRewards(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null)
+        if [[ $? -eq 0 && -n "$rewards_response" ]]; then
+            rewards_decimal=$(echo "$rewards_response" | cast --to-dec 2>/dev/null)
+            rewards_wei=$(echo "$rewards_decimal" | cast --from-wei 2>/dev/null)
+            # Оставляем только целую часть
+            rewards=$(echo "$rewards_wei" | cut -d. -f1)
+        else
+            rewards="0"
+        fi
+
         # Преобразуем hex в decimal с использованием вспомогательных функций
         status=$(hex_to_dec "$status_hex")
         stake_decimal=$(hex_to_dec "$stake_hex")
@@ -988,7 +1249,7 @@ fast_load_validators() {
         local status_color="${STATUS_COLOR[$status]:-$RESET}"
 
         # Добавляем в результаты
-        RESULTS+=("$validator|$stake|$withdrawer|$status|$status_text|$status_color")
+        RESULTS+=("$validator|$stake|$withdrawer|$rewards|$status|$status_text|$status_color")
         #echo -e "${GREEN}✓ Loaded: $validator - $stake STK - $status_text${RESET}"
     done
 
@@ -1155,10 +1416,11 @@ if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
     echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${RESET}"
     echo "----------------------------------------"
     for line in "${RESULTS[@]}"; do
-        IFS='|' read -r validator stake withdrawer status status_text status_color <<< "$line"
+        IFS='|' read -r validator stake withdrawer rewards status status_text status_color <<< "$line"
         echo -e "${BOLD}$(t "address"):${RESET} $validator"
         echo -e "  ${BOLD}$(t "stake"):${RESET} $stake STK"
         echo -e "  ${BOLD}$(t "withdrawer"):${RESET} $withdrawer"
+        echo -e "  ${BOLD}$(t "rewards"):${RESET} $rewards STK"
         echo -e "  ${BOLD}$(t "status"):${RESET} ${status_color}$status ($status_text)${RESET}"
         echo -e ""
         echo "----------------------------------------"
