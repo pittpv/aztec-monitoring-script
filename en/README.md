@@ -38,8 +38,11 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 ## 📌 Latest Updates 20-11-2025
 
 ⚠️ **A full node reinstallation is required. Prepare the data before installation!**
+
 For multivalidator mode with BLS keys use the format: `private_key,address,private_bls,public_bls`
+
 For multivalidator mode without BLS keys use the format: `private_key,address`
+
 For single-validator mode the same data is required but provided separately.
 
 - Network selection testnet/mainnet when installing the node

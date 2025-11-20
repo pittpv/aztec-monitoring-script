@@ -38,8 +38,11 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 ## 📌 Son Güncellemeler 20-11-2025
 
 ⚠️ **Tam node yeniden kurulumu gereklidir. Kurulumdan önce verileri hazırlayın!**
+
 BLS anahtarlarıyla multivalidator modu için format: `private_key,address,private_bls,public_bls`
+
 BLS anahtarları olmadan multivalidator modu için format: `private_key,address`
+
 Tek validator modu için aynı veriler ayrı ayrı sağlanır.
 
 - Node kurulumu sırasında testnet/mainnet ağı seçimi
