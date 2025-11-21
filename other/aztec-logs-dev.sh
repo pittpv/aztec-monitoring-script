@@ -476,7 +476,7 @@ init_languages() {
   TRANSLATIONS["en,total_coinbase_addresses_in_keystore"]="Total coinbase addresses in keystore:"
   TRANSLATIONS["en,contract_used"]="Contract used:"
   TRANSLATIONS["en,earliest_rewards_claimable_timestamp"]="Earliest rewards claimable timestamp: %s (%s)"
-  TRANSLATIONS["en,claim_function_not_activated"]="Currently the claim function is not activated"
+  TRANSLATIONS["en,claim_function_not_activated"]="Currently the claim function is not activated in contract"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -911,7 +911,7 @@ init_languages() {
   TRANSLATIONS["ru,total_coinbase_addresses_in_keystore"]="Всего адресов coinbase в keystore:"
   TRANSLATIONS["ru,contract_used"]="Использованный контракт:"
   TRANSLATIONS["ru,earliest_rewards_claimable_timestamp"]="Самая ранняя метка времени для получения наград: %s (%s)"
-  TRANSLATIONS["ru,claim_function_not_activated"]="В настоящее время функция клейма неактивирована"
+  TRANSLATIONS["ru,claim_function_not_activated"]="В настоящее время функция клейма неактивирована в контракте"
 
   # Turkish translations
   TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
@@ -1345,7 +1345,7 @@ init_languages() {
   TRANSLATIONS["tr,total_coinbase_addresses_in_keystore"]="Keystore'daki toplam coinbase adresleri:"
   TRANSLATIONS["tr,contract_used"]="Kullanılan kontrat:"
   TRANSLATIONS["tr,earliest_rewards_claimable_timestamp"]="En erken ödül talep edilebilir zaman damgası: %s (%s)"
-  TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda talep işlevi etkinleştirilmemiş"
+  TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
 # === Configuration ===
