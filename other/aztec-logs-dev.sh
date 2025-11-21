@@ -476,6 +476,7 @@ init_languages() {
   TRANSLATIONS["en,total_coinbase_addresses_in_keystore"]="Total coinbase addresses in keystore:"
   TRANSLATIONS["en,contract_used"]="Contract used:"
   TRANSLATIONS["en,earliest_rewards_claimable_timestamp"]="Earliest rewards claimable timestamp: %s (%s)"
+  TRANSLATIONS["en,claim_function_not_activated"]="Currently the claim function is not activated"
 
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
@@ -910,6 +911,7 @@ init_languages() {
   TRANSLATIONS["ru,total_coinbase_addresses_in_keystore"]="Всего адресов coinbase в keystore:"
   TRANSLATIONS["ru,contract_used"]="Использованный контракт:"
   TRANSLATIONS["ru,earliest_rewards_claimable_timestamp"]="Самая ранняя метка времени для получения наград: %s (%s)"
+  TRANSLATIONS["ru,claim_function_not_activated"]="В настоящее время функция клейма неактивирована"
 
   # Turkish translations
   TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
@@ -1343,6 +1345,7 @@ init_languages() {
   TRANSLATIONS["tr,total_coinbase_addresses_in_keystore"]="Keystore'daki toplam coinbase adresleri:"
   TRANSLATIONS["tr,contract_used"]="Kullanılan kontrat:"
   TRANSLATIONS["tr,earliest_rewards_claimable_timestamp"]="En erken ödül talep edilebilir zaman damgası: %s (%s)"
+  TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda talep işlevi etkinleştirilmemiş"
 }
 
 # === Configuration ===
@@ -4432,13 +4435,17 @@ claim_rewards() {
                 local timestamp_dec
                 timestamp_dec=$(cast --to-dec "$timestamp_result" 2>/dev/null)
                 if [ $? -eq 0 ]; then
-                    local timestamp_human
-                    timestamp_human=$(date -d "@$timestamp_dec" 2>/dev/null || echo "unknown format")
-                    printf "${CYAN}ℹ️  $(t "earliest_rewards_claimable_timestamp")${NC}\n" "$timestamp_dec" "$timestamp_human"
+                    if [ "$timestamp_dec" -eq "0" ]; then
+                        echo -e "${YELLOW}ℹ️  $(t "claim_function_not_activated")${NC}"
+                    else
+                        local timestamp_human
+                        timestamp_human=$(date -d "@$timestamp_dec" 2>/dev/null || echo "unknown format")
+                        printf "${CYAN}ℹ️  $(t "earliest_rewards_claimable_timestamp")${NC}\n" "$timestamp_dec" "$timestamp_human"
+                    fi
                 fi
             fi
             return 1
-        fi
+    fi
 
     echo -e "${GREEN}✅ $(t "rewards_are_claimable")${NC}"
 
