@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.3.2"
+SCRIPT_VERSION="2.4.0"
 
 function show_logo() {
     echo -e " "
@@ -66,6 +66,7 @@ init_languages() {
   TRANSLATIONS["en,option18"]="18. Generate BLS keys"
   TRANSLATIONS["en,option19"]="19. Approve"
   TRANSLATIONS["en,option20"]="20. Stake"
+  TRANSLATIONS["en,option21"]="21. Claim rewards"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
@@ -448,6 +449,7 @@ init_languages() {
   TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи"
   TRANSLATIONS["ru,option19"]="19. Апрув"
   TRANSLATIONS["ru,option20"]="20. Стейк"
+  TRANSLATIONS["ru,option21"]="21. Получить награды"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
@@ -830,6 +832,7 @@ init_languages() {
   TRANSLATIONS["tr,option18"]="18. BLS anahtarları oluştur"
   TRANSLATIONS["tr,option19"]="19. Approve"
   TRANSLATIONS["tr,option20"]="20. Stake"
+  TRANSLATIONS["tr,option21"]="21. Ödülleri talep edin"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
@@ -4228,6 +4231,289 @@ EOF
     return 0
 }
 
+# === Claim Rewards Function ===
+claim_rewards() {
+    echo -e "\n${BLUE}=== Aztec Rewards Claim ===${NC}"
+
+    # Load environment and use global CONTRACT_ADDRESS
+    source "$HOME/.env-aztec-agent" 2>/dev/null || {
+        echo -e "${RED}❌ Environment file not found${NC}"
+        return 1
+    }
+
+    if [ -z "$RPC_URL" ]; then
+        echo -e "${RED}❌ RPC_URL not set${NC}"
+        return 1
+    fi
+
+    # Use global CONTRACT_ADDRESS variable
+    if [ -z "$CONTRACT_ADDRESS" ]; then
+        echo -e "${RED}❌ CONTRACT_ADDRESS not set${NC}"
+        return 1
+    fi
+
+    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+
+    echo -e "${CYAN}Using contract: $CONTRACT_ADDRESS${NC}"
+    echo -e "${CYAN}Using RPC: $RPC_URL${NC}"
+
+    # Check if rewards are claimable
+    echo -e "${BLUE}🔍 Checking if rewards are claimable...${NC}"
+    local claimable_result
+    claimable_result=$(cast call "$CONTRACT_ADDRESS" "isRewardsClaimable()" --rpc-url "$RPC_URL" 2>/dev/null)
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Failed to check rewards claimable status${NC}"
+        return 1
+    fi
+
+    if [ "$claimable_result" != "0x1" ]; then
+        echo -e "${RED}❌ Rewards are not claimable at this time${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}✅ Rewards are claimable${NC}"
+
+    # Extract validator addresses from keystore
+    if [ ! -f "$KEYSTORE_FILE" ]; then
+        echo -e "${RED}❌ Keystore file not found: $KEYSTORE_FILE${NC}"
+        return 1
+    fi
+
+    echo -e "${BLUE}📋 Extracting validator addresses...${NC}"
+
+    # Extract coinbase addresses (they are the ones eligible for rewards)
+    local coinbase_addresses=()
+    while IFS= read -r address; do
+        if [ -n "$address" ] && [ "$address" != "null" ] && [[ "$address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            coinbase_addresses+=("$address")
+        fi
+    done < <(jq -r '.validators[].coinbase' "$KEYSTORE_FILE" 2>/dev/null)
+
+    if [ ${#coinbase_addresses[@]} -eq 0 ]; then
+        echo -e "${YELLOW}⚠️ No coinbase addresses found in keystore${NC}"
+        return 1
+    fi
+
+    # Remove duplicates and track unique addresses
+    local unique_addresses=()
+    local address_counts=()
+
+    for addr in "${coinbase_addresses[@]}"; do
+        local addr_lower=$(echo "$addr" | tr '[:upper:]' '[:lower:]')
+        local found=0
+
+        for i in "${!unique_addresses[@]}"; do
+            if [ "${unique_addresses[i],,}" = "$addr_lower" ]; then
+                ((address_counts[i]++))
+                found=1
+                break
+            fi
+        done
+
+        if [ $found -eq 0 ]; then
+            unique_addresses+=("$addr")
+            address_counts+=("1")
+        fi
+    done
+
+    echo -e "${GREEN}✅ Found ${#unique_addresses[@]} unique coinbase addresses${NC}"
+
+    # Show address distribution
+    for i in "${!unique_addresses[@]}"; do
+        if [ "${address_counts[i]}" -gt 1 ]; then
+            echo -e "${CYAN}  📍 ${unique_addresses[i]} (repeats ${address_counts[i]} times)${NC}"
+        else
+            echo -e "${CYAN}  📍 ${unique_addresses[i]}${NC}"
+        fi
+    done
+
+    # Check rewards for each unique address
+    local addresses_with_rewards=()
+    local reward_amounts=()
+
+    echo -e "${BLUE}💰 Checking rewards...${NC}"
+
+    for address in "${unique_addresses[@]}"; do
+        echo -e "${CYAN}Checking $address...${NC}"
+
+        local rewards_hex
+        rewards_hex=$(cast call "$CONTRACT_ADDRESS" "getSequencerRewards(address)" "$address" --rpc-url "$RPC_URL" 2>/dev/null)
+
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}⚠️ Failed to get rewards for $address${NC}"
+            continue
+        fi
+
+        # Convert hex to decimal
+        local rewards_wei
+        rewards_wei=$(cast --to-dec "$rewards_hex" 2>/dev/null)
+
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}⚠️ Failed to convert rewards amount for $address${NC}"
+            continue
+        fi
+
+        # Convert wei to ETH
+        local rewards_eth
+        rewards_eth=$(echo "scale=6; $rewards_wei / 1000000000000000000" | bc 2>/dev/null)
+
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}⚠️ Failed to convert to ETH for $address${NC}"
+            continue
+        fi
+
+        # Check if rewards > 0
+        if (( $(echo "$rewards_eth > 0" | bc -l) )); then
+            echo -e "${GREEN}🎯 Rewards: $rewards_eth ETH${NC}"
+            addresses_with_rewards+=("$address")
+            reward_amounts+=("$rewards_eth")
+        else
+            echo -e "${YELLOW}⏭️ No rewards${NC}"
+        fi
+    done
+
+    if [ ${#addresses_with_rewards[@]} -eq 0 ]; then
+        echo -e "${YELLOW}🎉 No rewards to claim at this time${NC}"
+        return 0
+    fi
+
+    echo -e "${GREEN}✅ Found ${#addresses_with_rewards[@]} unique addresses with rewards to claim${NC}"
+
+    # Claim rewards
+    local claimed_count=0
+    local failed_count=0
+    local claimed_addresses=()
+
+    for i in "${!addresses_with_rewards[@]}"; do
+        local address="${addresses_with_rewards[$i]}"
+        local amount="${reward_amounts[$i]}"
+
+        # Check if we already claimed this address in this session
+        if [[ " ${claimed_addresses[@]} " =~ " ${address} " ]]; then
+            echo -e "${YELLOW}⏭️ Already claimed $address in this session, skipping${NC}"
+            continue
+        fi
+
+        echo -e "\n${BLUE}================================${NC}"
+        echo -e "${CYAN}🎯 Address: $address${NC}"
+        echo -e "${YELLOW}💰 Amount: $amount ETH${NC}"
+
+        # Find how many times this address repeats
+        local repeat_count=0
+        for j in "${!unique_addresses[@]}"; do
+            if [ "${unique_addresses[j],,}" = "${address,,}" ]; then
+                repeat_count="${address_counts[j]}"
+                break
+            fi
+        done
+
+        if [ "$repeat_count" -gt 1 ]; then
+            echo -e "${CYAN}📊 This address appears $repeat_count times in keystore${NC}"
+        fi
+
+        # Ask for confirmation
+        read -p "$(echo -e "${YELLOW}Do you want to claim these rewards? (y/n/skip): ${NC}")" confirm
+
+        case "$confirm" in
+            [yY]|yes)
+                echo -e "${BLUE}🚀 Claiming rewards...${NC}"
+
+                # Send claim transaction
+                local tx_hash
+                tx_hash=$(cast send "$CONTRACT_ADDRESS" "claimSequencerRewards(address)" "$address" \
+                    --rpc-url "$RPC_URL" \
+                    --keystore "$KEYSTORE_FILE" \
+                    --from "$address" 2>/dev/null)
+
+                if [ $? -eq 0 ] && [ -n "$tx_hash" ]; then
+                    echo -e "${GREEN}✅ Transaction sent: $tx_hash${NC}"
+
+                    # Wait and check receipt
+                    echo -e "${BLUE}⏳ Waiting for confirmation...${NC}"
+                    sleep 10
+
+                    local receipt
+                    receipt=$(cast receipt "$tx_hash" --rpc-url "$RPC_URL" 2>/dev/null)
+
+                    if [ $? -eq 0 ]; then
+                        local status
+                        status=$(echo "$receipt" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+
+                        if [ "$status" = "0x1" ] || [ "$status" = "1" ]; then
+                            echo -e "${GREEN}✅ Transaction confirmed successfully${NC}"
+
+                            # Mark this address as claimed
+                            claimed_addresses+=("$address")
+
+                            # Verify rewards are now zero
+                            local new_rewards_hex
+                            new_rewards_hex=$(cast call "$CONTRACT_ADDRESS" "getSequencerRewards(address)" "$address" --rpc-url "$RPC_URL" 2>/dev/null)
+                            local new_rewards_wei
+                            new_rewards_wei=$(cast --to-dec "$new_rewards_hex" 2>/dev/null)
+                            local new_rewards_eth
+                            new_rewards_eth=$(echo "scale=6; $new_rewards_wei / 1000000000000000000" | bc 2>/dev/null)
+
+                            if (( $(echo "$new_rewards_eth == 0" | bc -l) )); then
+                                echo -e "${GREEN}✅ Rewards successfully claimed${NC}"
+                            else
+                                echo -e "${YELLOW}⚠️ Rewards claimed but balance not zero: $new_rewards_eth ETH${NC}"
+                            fi
+
+                            ((claimed_count++))
+
+                            # If this address repeats multiple times, show message
+                            if [ "$repeat_count" -gt 1 ]; then
+                                echo -e "${GREEN}✅ Claimed rewards for $address (appears $repeat_count times)${NC}"
+                            fi
+                        else
+                            echo -e "${RED}❌ Transaction failed${NC}"
+                            ((failed_count++))
+                        fi
+                    else
+                        echo -e "${YELLOW}⚠️ Could not get receipt, but transaction was sent${NC}"
+                        claimed_addresses+=("$address")
+                        ((claimed_count++))
+                    fi
+                else
+                    echo -e "${RED}❌ Failed to send transaction${NC}"
+                    ((failed_count++))
+                fi
+                ;;
+            [nN]|no)
+                echo -e "${YELLOW}⏭️ Skipping claim for $address${NC}"
+                ;;
+            skip)
+                echo -e "${YELLOW}⏭️ Skipping all remaining claims${NC}"
+                break
+                ;;
+            *)
+                echo -e "${YELLOW}⏭️ Skipping claim for $address${NC}"
+                ;;
+        esac
+
+        # Delay between transactions
+        if [ $i -lt $((${#addresses_with_rewards[@]} - 1)) ]; then
+            echo -e "${BLUE}⏳ Waiting 5 seconds...${NC}"
+            sleep 5
+        fi
+    done
+
+    # Summary
+    echo -e "\n${CYAN}================================${NC}"
+    echo -e "${CYAN}           SUMMARY${NC}"
+    echo -e "${CYAN}================================${NC}"
+    echo -e "${GREEN}✅ Successfully claimed: $claimed_count${NC}"
+    if [ $failed_count -gt 0 ]; then
+        echo -e "${RED}❌ Failed: $failed_count${NC}"
+    fi
+    echo -e "${GREEN}🎯 Unique addresses with rewards: ${#addresses_with_rewards[@]}${NC}"
+    echo -e "${GREEN}📊 Total coinbase addresses in keystore: ${#coinbase_addresses[@]}${NC}"
+    echo -e "${CYAN}📍 Contract used: $CONTRACT_ADDRESS${NC}"
+
+    return 0
+}
+
 # === Main menu ===
 main_menu() {
   show_logo
@@ -4253,6 +4539,7 @@ main_menu() {
     echo -e "${NC}$(t "option18")${NC}"
     echo -e "${NC}$(t "option19")${NC}"
     echo -e "${NC}$(t "option20")${NC}"
+    echo -e "${NC}$(t "option21")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -4279,6 +4566,7 @@ main_menu() {
       18) generate_bls_keys ;;
       19) approve_with_all_keys ;;
       20) stake_validators ;;
+      21) claim_rewards ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
