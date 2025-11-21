@@ -426,6 +426,56 @@ init_languages() {
   TRANSLATIONS["en,bls_final_web3signer_restarted"]="Final web3signer restart completed"
   TRANSLATIONS["en,bls_final_web3signer_restart_failed"]="Final web3signer restart failed"
 
+  TRANSLATIONS["en,aztec_rewards_claim"]="Aztec Rewards Claim"
+  TRANSLATIONS["en,environment_file_not_found"]="Environment file not found"
+  TRANSLATIONS["en,rpc_url_not_set"]="RPC_URL not set"
+  TRANSLATIONS["en,contract_address_not_set"]="CONTRACT_ADDRESS not set"
+  TRANSLATIONS["en,using_contract"]="Using contract:"
+  TRANSLATIONS["en,using_rpc"]="Using RPC:"
+  TRANSLATIONS["en,checking_rewards_claimable"]="Checking if rewards are claimable..."
+  TRANSLATIONS["en,failed_check_rewards_claimable"]="Failed to check rewards claimable status"
+  TRANSLATIONS["en,rewards_not_claimable"]="Rewards are not claimable at this time"
+  TRANSLATIONS["en,rewards_are_claimable"]="Rewards are claimable"
+  TRANSLATIONS["en,keystore_file_not_found"]="Keystore file not found:"
+  TRANSLATIONS["en,extracting_validator_addresses"]="Extracting validator addresses..."
+  TRANSLATIONS["en,no_coinbase_addresses_found"]="No coinbase addresses found in keystore"
+  TRANSLATIONS["en,found_unique_coinbase_addresses"]="Found unique coinbase addresses:"
+  TRANSLATIONS["en,repeats_times"]="repeats %s times"
+  TRANSLATIONS["en,checking_rewards"]="Checking rewards..."
+  TRANSLATIONS["en,checking_address"]="Checking address"
+  TRANSLATIONS["en,failed_get_rewards_for_address"]="Failed to get rewards for address"
+  TRANSLATIONS["en,failed_convert_rewards_amount"]="Failed to convert rewards amount for address"
+  TRANSLATIONS["en,failed_convert_to_eth"]="Failed to convert to ETH for address"
+  TRANSLATIONS["en,rewards_amount"]="Rewards: %s ETH"
+  TRANSLATIONS["en,no_rewards"]="No rewards"
+  TRANSLATIONS["en,no_rewards_to_claim"]="No rewards to claim at this time"
+  TRANSLATIONS["en,found_unique_addresses_with_rewards"]="Found unique addresses with rewards to claim:"
+  TRANSLATIONS["en,already_claimed_this_session"]="Already claimed address"
+  TRANSLATIONS["en,skipping"]="skipping"
+  TRANSLATIONS["en,address_label"]="Address:"
+  TRANSLATIONS["en,amount_eth"]="Amount: %s ETH"
+  TRANSLATIONS["en,address_appears_times"]="This address appears %s times in keystore"
+  TRANSLATIONS["en,claim_rewards_confirmation"]="Do you want to claim these rewards? (y/n/skip):"
+  TRANSLATIONS["en,claiming_rewards"]="Claiming rewards..."
+  TRANSLATIONS["en,transaction_sent"]="Transaction sent:"
+  TRANSLATIONS["en,waiting_confirmation"]="Waiting for confirmation..."
+  TRANSLATIONS["en,transaction_confirmed_successfully"]="Transaction confirmed successfully"
+  TRANSLATIONS["en,rewards_successfully_claimed"]="Rewards successfully claimed"
+  TRANSLATIONS["en,rewards_claimed_balance_not_zero"]="Rewards claimed but balance not zero: %s ETH"
+  TRANSLATIONS["en,claimed_rewards_for_address_appears_times"]="Claimed rewards for %s (appears %s times)"
+  TRANSLATIONS["en,transaction_failed"]="Transaction failed"
+  TRANSLATIONS["en,could_not_get_receipt_transaction_sent"]="Could not get receipt, but transaction was sent"
+  TRANSLATIONS["en,failed_send_transaction"]="Failed to send transaction"
+  TRANSLATIONS["en,skipping_claim_for_address"]="Skipping claim for address"
+  TRANSLATIONS["en,skipping_all_remaining_claims"]="Skipping all remaining claims"
+  TRANSLATIONS["en,waiting_seconds"]="Waiting 5 seconds..."
+  TRANSLATIONS["en,summary"]="SUMMARY"
+  TRANSLATIONS["en,successfully_claimed"]="Successfully claimed:"
+  TRANSLATIONS["en,failed_count"]="Failed:"
+  TRANSLATIONS["en,unique_addresses_with_rewards"]="Unique addresses with rewards:"
+  TRANSLATIONS["en,total_coinbase_addresses_in_keystore"]="Total coinbase addresses in keystore:"
+  TRANSLATIONS["en,contract_used"]="Contract used:"
+
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
   TRANSLATIONS["ru,title"]="========= Главное меню ========="
@@ -809,6 +859,56 @@ init_languages() {
   TRANSLATIONS["ru,bls_final_web3signer_restarted"]="Финальный перезапуск web3signer завершен"
   TRANSLATIONS["ru,bls_final_web3signer_restart_failed"]="Финальный перезапуск web3signer не удался"
 
+  TRANSLATIONS["ru,aztec_rewards_claim"]="Aztec Rewards Claim"
+  TRANSLATIONS["ru,environment_file_not_found"]="Файл окружения не найден"
+  TRANSLATIONS["ru,rpc_url_not_set"]="RPC_URL не установлен"
+  TRANSLATIONS["ru,contract_address_not_set"]="CONTRACT_ADDRESS не установлен"
+  TRANSLATIONS["ru,using_contract"]="Используется контракт:"
+  TRANSLATIONS["ru,using_rpc"]="Используется RPC:"
+  TRANSLATIONS["ru,checking_rewards_claimable"]="Проверка доступности наград..."
+  TRANSLATIONS["ru,failed_check_rewards_claimable"]="Не удалось проверить статус доступности наград"
+  TRANSLATIONS["ru,rewards_not_claimable"]="Награды не доступны для получения в данный момент"
+  TRANSLATIONS["ru,rewards_are_claimable"]="Награды доступны для получения"
+  TRANSLATIONS["ru,keystore_file_not_found"]="Файл keystore не найден:"
+  TRANSLATIONS["ru,extracting_validator_addresses"]="Извлечение адресов валидаторов..."
+  TRANSLATIONS["ru,no_coinbase_addresses_found"]="Адреса coinbase не найдены в keystore"
+  TRANSLATIONS["ru,found_unique_coinbase_addresses"]="Найдено уникальных адресов coinbase:"
+  TRANSLATIONS["ru,repeats_times"]="повторяется %s раз"
+  TRANSLATIONS["ru,checking_rewards"]="Проверка наград..."
+  TRANSLATIONS["ru,checking_address"]="Проверка адреса"
+  TRANSLATIONS["ru,failed_get_rewards_for_address"]="Не удалось получить награды для адреса"
+  TRANSLATIONS["ru,failed_convert_rewards_amount"]="Не удалось конвертировать сумму наград для адреса"
+  TRANSLATIONS["ru,failed_convert_to_eth"]="Не удалось конвертировать в ETH для адреса"
+  TRANSLATIONS["ru,rewards_amount"]="Награды: %s ETH"
+  TRANSLATIONS["ru,no_rewards"]="Нет наград"
+  TRANSLATIONS["ru,no_rewards_to_claim"]="Нет наград для получения в данный момент"
+  TRANSLATIONS["ru,found_unique_addresses_with_rewards"]="Найдено уникальных адресов с наградами для получения:"
+  TRANSLATIONS["ru,already_claimed_this_session"]="Уже получено для адреса"
+  TRANSLATIONS["ru,skipping"]="пропускаем"
+  TRANSLATIONS["ru,address_label"]="Адрес:"
+  TRANSLATIONS["ru,amount_eth"]="Сумма: %s ETH"
+  TRANSLATIONS["ru,address_appears_times"]="Этот адрес появляется %s раз в keystore"
+  TRANSLATIONS["ru,claim_rewards_confirmation"]="Хотите получить эти награды? (y/n/skip):"
+  TRANSLATIONS["ru,claiming_rewards"]="Получение наград..."
+  TRANSLATIONS["ru,transaction_sent"]="Транзакция отправлена:"
+  TRANSLATIONS["ru,waiting_confirmation"]="Ожидание подтверждения..."
+  TRANSLATIONS["ru,transaction_confirmed_successfully"]="Транзакция успешно подтверждена"
+  TRANSLATIONS["ru,rewards_successfully_claimed"]="Награды успешно получены"
+  TRANSLATIONS["ru,rewards_claimed_balance_not_zero"]="Награды получены, но баланс не обнулен: %s ETH"
+  TRANSLATIONS["ru,claimed_rewards_for_address_appears_times"]="Получены награды для %s (появляется %s раз)"
+  TRANSLATIONS["ru,transaction_failed"]="Транзакция не удалась"
+  TRANSLATIONS["ru,could_not_get_receipt_transaction_sent"]="Не удалось получить квитанцию, но транзакция была отправлена"
+  TRANSLATIONS["ru,failed_send_transaction"]="Не удалось отправить транзакцию"
+  TRANSLATIONS["ru,skipping_claim_for_address"]="Пропускаем получение для адреса"
+  TRANSLATIONS["ru,skipping_all_remaining_claims"]="Пропускаем все оставшиеся получения"
+  TRANSLATIONS["ru,waiting_seconds"]="Ожидание 5 секунд..."
+  TRANSLATIONS["ru,summary"]="СВОДКА"
+  TRANSLATIONS["ru,successfully_claimed"]="Успешно получено:"
+  TRANSLATIONS["ru,failed_count"]="Не удалось:"
+  TRANSLATIONS["ru,unique_addresses_with_rewards"]="Уникальных адресов с наградами:"
+  TRANSLATIONS["ru,total_coinbase_addresses_in_keystore"]="Всего адресов coinbase в keystore:"
+  TRANSLATIONS["ru,contract_used"]="Использованный контракт:"
+
   # Turkish translations
   TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
   TRANSLATIONS["tr,title"]="========= Ana Menü ========="
@@ -1190,6 +1290,56 @@ init_languages() {
   TRANSLATIONS["tr,bls_final_web3signer_restart"]="Tüm anahtarları yüklemek için son web3signer yeniden başlatma işlemi yapılıyor"
   TRANSLATIONS["tr,bls_final_web3signer_restarted"]="Son web3signer yeniden başlatma işlemi tamamlandı"
   TRANSLATIONS["tr,bls_final_web3signer_restart_failed"]="Son web3signer yeniden başlatma işlemi başarısız oldu"
+
+  TRANSLATIONS["tr,aztec_rewards_claim"]="Aztec Ödül Talep"
+  TRANSLATIONS["tr,environment_file_not_found"]="Ortam dosyası bulunamadı"
+  TRANSLATIONS["tr,rpc_url_not_set"]="RPC_URL ayarlanmamış"
+  TRANSLATIONS["tr,contract_address_not_set"]="CONTRACT_ADDRESS ayarlanmamış"
+  TRANSLATIONS["tr,using_contract"]="Kullanılan kontrat:"
+  TRANSLATIONS["tr,using_rpc"]="Kullanılan RPC:"
+  TRANSLATIONS["tr,checking_rewards_claimable"]="Ödüllerin talep edilip edilemeyeceği kontrol ediliyor..."
+  TRANSLATIONS["tr,failed_check_rewards_claimable"]="Ödül talep durumu kontrol edilemedi"
+  TRANSLATIONS["tr,rewards_not_claimable"]="Ödüller şu anda talep edilemez"
+  TRANSLATIONS["tr,rewards_are_claimable"]="Ödüller talep edilebilir"
+  TRANSLATIONS["tr,keystore_file_not_found"]="Keystore dosyası bulunamadı:"
+  TRANSLATIONS["tr,extracting_validator_addresses"]="Doğrulayıcı adresleri çıkarılıyor..."
+  TRANSLATIONS["tr,no_coinbase_addresses_found"]="Keystore'da coinbase adresi bulunamadı"
+  TRANSLATIONS["tr,found_unique_coinbase_addresses"]="Benzersiz coinbase adresleri bulundu:"
+  TRANSLATIONS["tr,repeats_times"]="%s kez tekrarlanıyor"
+  TRANSLATIONS["tr,checking_rewards"]="Ödüller kontrol ediliyor..."
+  TRANSLATIONS["tr,checking_address"]="Adres kontrol ediliyor"
+  TRANSLATIONS["tr,failed_get_rewards_for_address"]="Adres için ödüller alınamadı"
+  TRANSLATIONS["tr,failed_convert_rewards_amount"]="Adres için ödül miktarı dönüştürülemedi"
+  TRANSLATIONS["tr,failed_convert_to_eth"]="Adres için ETH'ye dönüştürülemedi"
+  TRANSLATIONS["tr,rewards_amount"]="Ödüller: %s ETH"
+  TRANSLATIONS["tr,no_rewards"]="Ödül yok"
+  TRANSLATIONS["tr,no_rewards_to_claim"]="Şu anda talep edilecek ödül yok"
+  TRANSLATIONS["tr,found_unique_addresses_with_rewards"]="Talep edilecek ödülü olan benzersiz adresler bulundu:"
+  TRANSLATIONS["tr,already_claimed_this_session"]="Bu oturumda zaten talep edildi"
+  TRANSLATIONS["tr,skipping"]="atlanıyor"
+  TRANSLATIONS["tr,address_label"]="Adres:"
+  TRANSLATIONS["tr,amount_eth"]="Miktar: %s ETH"
+  TRANSLATIONS["tr,address_appears_times"]="Bu adres keystore'da %s kez görünüyor"
+  TRANSLATIONS["tr,claim_rewards_confirmation"]="Bu ödülleri talep etmek istiyor musunuz? (y/n/skip):"
+  TRANSLATIONS["tr,claiming_rewards"]="Ödüller talep ediliyor..."
+  TRANSLATIONS["tr,transaction_sent"]="İşlem gönderildi:"
+  TRANSLATIONS["tr,waiting_confirmation"]="Onay bekleniyor..."
+  TRANSLATIONS["tr,transaction_confirmed_successfully"]="İşlem başarıyla onaylandı"
+  TRANSLATIONS["tr,rewards_successfully_claimed"]="Ödüller başarıyla talep edildi"
+  TRANSLATIONS["tr,rewards_claimed_balance_not_zero"]="Ödüller talep edildi ancak bakiye sıfır değil: %s ETH"
+  TRANSLATIONS["tr,claimed_rewards_for_address_appears_times"]="%s için ödüller talep edildi (%s kez görünüyor)"
+  TRANSLATIONS["tr,transaction_failed"]="İşlem başarısız oldu"
+  TRANSLATIONS["tr,could_not_get_receipt_transaction_sent"]="Makbuz alınamadı, ancak işlem gönderildi"
+  TRANSLATIONS["tr,failed_send_transaction"]="İşlem gönderilemedi"
+  TRANSLATIONS["tr,skipping_claim_for_address"]="Adres için talep atlanıyor"
+  TRANSLATIONS["tr,skipping_all_remaining_claims"]="Kalan tüm talepler atlanıyor"
+  TRANSLATIONS["tr,waiting_seconds"]="5 saniye bekleniyor..."
+  TRANSLATIONS["tr,summary"]="ÖZET"
+  TRANSLATIONS["tr,successfully_claimed"]="Başarıyla talep edildi:"
+  TRANSLATIONS["tr,failed_count"]="Başarısız:"
+  TRANSLATIONS["tr,unique_addresses_with_rewards"]="Ödüllü benzersiz adresler:"
+  TRANSLATIONS["tr,total_coinbase_addresses_in_keystore"]="Keystore'daki toplam coinbase adresleri:"
+  TRANSLATIONS["tr,contract_used"]="Kullanılan kontrat:"
 }
 
 # === Configuration ===
@@ -4233,54 +4383,55 @@ EOF
 
 # === Claim Rewards Function ===
 claim_rewards() {
-    echo -e "\n${BLUE}=== Aztec Rewards Claim ===${NC}"
+    echo -e "\n${BLUE}=== $(t "aztec_rewards_claim") ===${NC}"
+    echo ""
 
     # Load environment and use global CONTRACT_ADDRESS
     source "$HOME/.env-aztec-agent" 2>/dev/null || {
-        echo -e "${RED}❌ Environment file not found${NC}"
+        echo -e "${RED}❌ $(t "environment_file_not_found")${NC}"
         return 1
     }
 
     if [ -z "$RPC_URL" ]; then
-        echo -e "${RED}❌ RPC_URL not set${NC}"
+        echo -e "${RED}❌ $(t "rpc_url_not_set")${NC}"
         return 1
     fi
 
     # Use global CONTRACT_ADDRESS variable
     if [ -z "$CONTRACT_ADDRESS" ]; then
-        echo -e "${RED}❌ CONTRACT_ADDRESS not set${NC}"
+        echo -e "${RED}❌ $(t "contract_address_not_set")${NC}"
         return 1
     fi
 
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
 
-    echo -e "${CYAN}Using contract: $CONTRACT_ADDRESS${NC}"
-    echo -e "${CYAN}Using RPC: $RPC_URL${NC}"
+    echo -e "${CYAN}$(t "using_contract") $CONTRACT_ADDRESS${NC}"
+    echo -e "${CYAN}$(t "using_rpc") $RPC_URL${NC}"
 
     # Check if rewards are claimable
-    echo -e "${BLUE}🔍 Checking if rewards are claimable...${NC}"
+    echo -e "\n${BLUE}🔍 $(t "checking_rewards_claimable")${NC}"
     local claimable_result
     claimable_result=$(cast call "$CONTRACT_ADDRESS" "isRewardsClaimable()" --rpc-url "$RPC_URL" 2>/dev/null)
 
     if [ $? -ne 0 ]; then
-        echo -e "${RED}❌ Failed to check rewards claimable status${NC}"
+        echo -e "${RED}❌ $(t "failed_check_rewards_claimable")${NC}"
         return 1
     fi
 
     if [ "$claimable_result" != "0x1" ]; then
-        echo -e "${RED}❌ Rewards are not claimable at this time${NC}"
+        echo -e "${RED}❌ $(t "rewards_not_claimable")${NC}"
         return 1
     fi
 
-    echo -e "${GREEN}✅ Rewards are claimable${NC}"
+    echo -e "${GREEN}✅ $(t "rewards_are_claimable")${NC}"
 
     # Extract validator addresses from keystore
     if [ ! -f "$KEYSTORE_FILE" ]; then
-        echo -e "${RED}❌ Keystore file not found: $KEYSTORE_FILE${NC}"
+        echo -e "\n${RED}❌ $(t "keystore_file_not_found") $KEYSTORE_FILE${NC}"
         return 1
     fi
 
-    echo -e "${BLUE}📋 Extracting validator addresses...${NC}"
+    echo -e "\n${BLUE}📋 $(t "extracting_validator_addresses")${NC}"
 
     # Extract coinbase addresses (they are the ones eligible for rewards)
     local coinbase_addresses=()
@@ -4291,7 +4442,7 @@ claim_rewards() {
     done < <(jq -r '.validators[].coinbase' "$KEYSTORE_FILE" 2>/dev/null)
 
     if [ ${#coinbase_addresses[@]} -eq 0 ]; then
-        echo -e "${YELLOW}⚠️ No coinbase addresses found in keystore${NC}"
+        echo -e "${YELLOW}⚠️ $(t "no_coinbase_addresses_found")${NC}"
         return 1
     fi
 
@@ -4317,12 +4468,12 @@ claim_rewards() {
         fi
     done
 
-    echo -e "${GREEN}✅ Found ${#unique_addresses[@]} unique coinbase addresses${NC}"
+    echo -e "${GREEN}✅ $(t "found_unique_coinbase_addresses") ${#unique_addresses[@]}${NC}"
 
     # Show address distribution
     for i in "${!unique_addresses[@]}"; do
         if [ "${address_counts[i]}" -gt 1 ]; then
-            echo -e "${CYAN}  📍 ${unique_addresses[i]} (repeats ${address_counts[i]} times)${NC}"
+            printf "${CYAN}  📍 %s ($(t "repeats_times"))${NC}\n" "${unique_addresses[i]}" "${address_counts[i]}"
         else
             echo -e "${CYAN}  📍 ${unique_addresses[i]}${NC}"
         fi
@@ -4332,16 +4483,16 @@ claim_rewards() {
     local addresses_with_rewards=()
     local reward_amounts=()
 
-    echo -e "${BLUE}💰 Checking rewards...${NC}"
+    echo -e "\n${BLUE}💰 $(t "checking_rewards")${NC}"
 
     for address in "${unique_addresses[@]}"; do
-        echo -e "${CYAN}Checking $address...${NC}"
+        echo -e "${CYAN}$(t "checking_address") $address...${NC}"
 
         local rewards_hex
         rewards_hex=$(cast call "$CONTRACT_ADDRESS" "getSequencerRewards(address)" "$address" --rpc-url "$RPC_URL" 2>/dev/null)
 
         if [ $? -ne 0 ]; then
-            echo -e "${YELLOW}⚠️ Failed to get rewards for $address${NC}"
+            echo -e "${YELLOW}⚠️ $(t "failed_get_rewards_for_address") $address${NC}"
             continue
         fi
 
@@ -4350,7 +4501,7 @@ claim_rewards() {
         rewards_wei=$(cast --to-dec "$rewards_hex" 2>/dev/null)
 
         if [ $? -ne 0 ]; then
-            echo -e "${YELLOW}⚠️ Failed to convert rewards amount for $address${NC}"
+            echo -e "${YELLOW}⚠️ $(t "failed_convert_rewards_amount") $address${NC}"
             continue
         fi
 
@@ -4359,26 +4510,26 @@ claim_rewards() {
         rewards_eth=$(echo "scale=6; $rewards_wei / 1000000000000000000" | bc 2>/dev/null)
 
         if [ $? -ne 0 ]; then
-            echo -e "${YELLOW}⚠️ Failed to convert to ETH for $address${NC}"
+            echo -e "${YELLOW}⚠️ $(t "failed_convert_to_eth") $address${NC}"
             continue
         fi
 
         # Check if rewards > 0
         if (( $(echo "$rewards_eth > 0" | bc -l) )); then
-            echo -e "${GREEN}🎯 Rewards: $rewards_eth ETH${NC}"
+            printf "${GREEN}🎯 $(t "rewards_amount")${NC}\n" "$rewards_eth"
             addresses_with_rewards+=("$address")
             reward_amounts+=("$rewards_eth")
         else
-            echo -e "${YELLOW}⏭️ No rewards${NC}"
+            echo -e "${YELLOW}⏭️ $(t "no_rewards")${NC}"
         fi
     done
 
     if [ ${#addresses_with_rewards[@]} -eq 0 ]; then
-        echo -e "${YELLOW}🎉 No rewards to claim at this time${NC}"
+        echo -e "${YELLOW}🎉 $(t "no_rewards_to_claim")${NC}"
         return 0
     fi
 
-    echo -e "${GREEN}✅ Found ${#addresses_with_rewards[@]} unique addresses with rewards to claim${NC}"
+    printf "${GREEN}✅ $(t "found_unique_addresses_with_rewards") ${#addresses_with_rewards[@]}${NC}\n"
 
     # Claim rewards
     local claimed_count=0
@@ -4391,13 +4542,13 @@ claim_rewards() {
 
         # Check if we already claimed this address in this session
         if [[ " ${claimed_addresses[@]} " =~ " ${address} " ]]; then
-            echo -e "${YELLOW}⏭️ Already claimed $address in this session, skipping${NC}"
+            echo -e "${YELLOW}⏭️ $(t "already_claimed_this_session") $address, $(t "skipping")${NC}"
             continue
         fi
 
         echo -e "\n${BLUE}================================${NC}"
-        echo -e "${CYAN}🎯 Address: $address${NC}"
-        echo -e "${YELLOW}💰 Amount: $amount ETH${NC}"
+        echo -e "${CYAN}🎯 $(t "address_label") $address${NC}"
+        printf "${YELLOW}💰 $(t "amount_eth")${NC}\n" "$amount"
 
         # Find how many times this address repeats
         local repeat_count=0
@@ -4409,15 +4560,15 @@ claim_rewards() {
         done
 
         if [ "$repeat_count" -gt 1 ]; then
-            echo -e "${CYAN}📊 This address appears $repeat_count times in keystore${NC}"
+            printf "${CYAN}📊 $(t "address_appears_times")${NC}\n" "$repeat_count"
         fi
 
         # Ask for confirmation
-        read -p "$(echo -e "${YELLOW}Do you want to claim these rewards? (y/n/skip): ${NC}")" confirm
+        read -p "$(echo -e "\n${YELLOW}$(t "claim_rewards_confirmation") ${NC}")" confirm
 
         case "$confirm" in
             [yY]|yes)
-                echo -e "${BLUE}🚀 Claiming rewards...${NC}"
+                echo -e "${BLUE}🚀 $(t "claiming_rewards")${NC}"
 
                 # Send claim transaction
                 local tx_hash
@@ -4427,10 +4578,10 @@ claim_rewards() {
                     --from "$address" 2>/dev/null)
 
                 if [ $? -eq 0 ] && [ -n "$tx_hash" ]; then
-                    echo -e "${GREEN}✅ Transaction sent: $tx_hash${NC}"
+                    echo -e "${GREEN}✅ $(t "transaction_sent") $tx_hash${NC}"
 
                     # Wait and check receipt
-                    echo -e "${BLUE}⏳ Waiting for confirmation...${NC}"
+                    echo -e "${BLUE}⏳ $(t "waiting_confirmation")${NC}"
                     sleep 10
 
                     local receipt
@@ -4441,7 +4592,7 @@ claim_rewards() {
                         status=$(echo "$receipt" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
 
                         if [ "$status" = "0x1" ] || [ "$status" = "1" ]; then
-                            echo -e "${GREEN}✅ Transaction confirmed successfully${NC}"
+                            echo -e "${GREEN}✅ $(t "transaction_confirmed_successfully")${NC}"
 
                             # Mark this address as claimed
                             claimed_addresses+=("$address")
@@ -4455,61 +4606,61 @@ claim_rewards() {
                             new_rewards_eth=$(echo "scale=6; $new_rewards_wei / 1000000000000000000" | bc 2>/dev/null)
 
                             if (( $(echo "$new_rewards_eth == 0" | bc -l) )); then
-                                echo -e "${GREEN}✅ Rewards successfully claimed${NC}"
+                                echo -e "${GREEN}✅ $(t "rewards_successfully_claimed")${NC}"
                             else
-                                echo -e "${YELLOW}⚠️ Rewards claimed but balance not zero: $new_rewards_eth ETH${NC}"
+                                printf "${YELLOW}⚠️ $(t "rewards_claimed_balance_not_zero")${NC}\n" "$new_rewards_eth"
                             fi
 
                             ((claimed_count++))
 
                             # If this address repeats multiple times, show message
                             if [ "$repeat_count" -gt 1 ]; then
-                                echo -e "${GREEN}✅ Claimed rewards for $address (appears $repeat_count times)${NC}"
+                                printf "${GREEN}✅ $(t "claimed_rewards_for_address_appears_times")${NC}\n" "$address" "$repeat_count"
                             fi
                         else
-                            echo -e "${RED}❌ Transaction failed${NC}"
+                            echo -e "${RED}❌ $(t "transaction_failed")${NC}"
                             ((failed_count++))
                         fi
                     else
-                        echo -e "${YELLOW}⚠️ Could not get receipt, but transaction was sent${NC}"
+                        echo -e "${YELLOW}⚠️ $(t "could_not_get_receipt_transaction_sent")${NC}"
                         claimed_addresses+=("$address")
                         ((claimed_count++))
                     fi
                 else
-                    echo -e "${RED}❌ Failed to send transaction${NC}"
+                    echo -e "${RED}❌ $(t "failed_send_transaction")${NC}"
                     ((failed_count++))
                 fi
                 ;;
             [nN]|no)
-                echo -e "${YELLOW}⏭️ Skipping claim for $address${NC}"
+                echo -e "${YELLOW}⏭️ $(t "skipping_claim_for_address") $address${NC}"
                 ;;
             skip)
-                echo -e "${YELLOW}⏭️ Skipping all remaining claims${NC}"
+                echo -e "${YELLOW}⏭️ $(t "skipping_all_remaining_claims")${NC}"
                 break
                 ;;
             *)
-                echo -e "${YELLOW}⏭️ Skipping claim for $address${NC}"
+                echo -e "${YELLOW}⏭️ $(t "skipping_claim_for_address") $address${NC}"
                 ;;
         esac
 
         # Delay between transactions
         if [ $i -lt $((${#addresses_with_rewards[@]} - 1)) ]; then
-            echo -e "${BLUE}⏳ Waiting 5 seconds...${NC}"
+            echo -e "${BLUE}⏳ $(t "waiting_seconds")${NC}"
             sleep 5
         fi
     done
 
     # Summary
     echo -e "\n${CYAN}================================${NC}"
-    echo -e "${CYAN}           SUMMARY${NC}"
+    echo -e "${CYAN}           $(t "summary")${NC}"
     echo -e "${CYAN}================================${NC}"
-    echo -e "${GREEN}✅ Successfully claimed: $claimed_count${NC}"
+    printf "${GREEN}✅ $(t "successfully_claimed") $claimed_count${NC}\n"
     if [ $failed_count -gt 0 ]; then
-        echo -e "${RED}❌ Failed: $failed_count${NC}"
+        printf "${RED}❌ $(t "failed_count") $failed_count${NC}\n"
     fi
-    echo -e "${GREEN}🎯 Unique addresses with rewards: ${#addresses_with_rewards[@]}${NC}"
-    echo -e "${GREEN}📊 Total coinbase addresses in keystore: ${#coinbase_addresses[@]}${NC}"
-    echo -e "${CYAN}📍 Contract used: $CONTRACT_ADDRESS${NC}"
+    printf "${GREEN}🎯 $(t "unique_addresses_with_rewards") ${#addresses_with_rewards[@]}${NC}\n"
+    printf "${GREEN}📊 $(t "total_coinbase_addresses_in_keystore") ${#coinbase_addresses[@]}${NC}\n"
+    echo -e "${CYAN}📍 $(t "contract_used") $CONTRACT_ADDRESS${NC}"
 
     return 0
 }
