@@ -1157,6 +1157,10 @@ get_validators_via_gse() {
             --rpc-url "$current_rpc")
         local exit_code=$?
 
+        # Отладочный вывод
+        echo -e "${GRAY}Command: \"$GSE_ADDRESS\" \"getAttestersFromIndicesAtTime(address,uint256,uint256[])\" \"$ROLLUP_ADDRESS\" \"$TIMESTAMP\" \"[$INDICES_STR]\" --rpc-url \"$current_rpc\"${RESET}"
+        echo -e "${GRAY}Validator response: \"$VALIDATORS_RESPONSE\" ${RESET}"
+
         if [ $exit_code -ne 0 ]; then
             echo -e "${RED}Error: GSE contract call failed for batch $CURRENT_BATCH with exit code $exit_code${RESET}"
             return 1
