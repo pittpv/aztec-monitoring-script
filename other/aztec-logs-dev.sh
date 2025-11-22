@@ -1350,11 +1350,33 @@ init_languages() {
 
 # === Configuration ===
 CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
+CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
 FUNCTION_SIG="getPendingBlockNumber()"
 
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
+
+# === Helper function to get network and RPC settings ===
+get_network_settings() {
+    local env_file="$HOME/.env-aztec-agent"
+    local network="testnet"
+    local rpc_url="$RPC_URL"
+
+    if [[ -f "$env_file" ]]; then
+        source "$env_file"
+        [[ -n "$NETWORK" ]] && network="$NETWORK"
+        [[ -n "$ALT_RPC" ]] && rpc_url="$ALT_RPC"
+    fi
+
+    # Determine contract address based on network
+    local contract_address="$CONTRACT_ADDRESS"
+    if [[ "$network" == "mainnet" ]]; then
+        contract_address="$CONTRACT_ADDRESS_MAINNET"
+    fi
+
+    echo "$network|$rpc_url|$contract_address"
+}
 
 # === Dependency check ===
 check_dependencies() {
@@ -1631,7 +1653,13 @@ spinner() {
 # === Check container logs for block ===
 check_aztec_container_logs() {
     cd $HOME
-    source .env-aztec-agent
+
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
     # URL JSON файла с ошибками на GitHub
     ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
@@ -1645,7 +1673,6 @@ check_aztec_container_logs() {
             echo -e "${YELLOW}Warning: Failed to download error definitions from GitHub${NC}"
             return 1
         fi
-        return 0
         return 0
     }
 
@@ -1702,7 +1729,7 @@ check_aztec_container_logs() {
     echo -e "\n${GREEN}$(t "container_found") $container_id${NC}"
 
     echo -e "\n${BLUE}$(t "get_block")${NC}"
-    block_hex=$(cast call "$CONTRACT_ADDRESS" "$FUNCTION_SIG" --rpc-url "$RPC_URL" 2>/dev/null)
+    block_hex=$(cast call "$contract_address" "$FUNCTION_SIG" --rpc-url "$rpc_url" 2>/dev/null)
     if [ -z "$block_hex" ]; then
         echo -e "\n${RED}$(t "block_error")${NC}"
         return
@@ -1729,7 +1756,6 @@ check_aztec_container_logs() {
         fi
     done
 
-    # Остальная часть функции остается без изменений
     temp_file=$(mktemp)
     {
         echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file" 2>/dev/null
@@ -2060,18 +2086,39 @@ export PATH="\$PATH:/root/.foundry/bin"
 
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
+CONTRACT_ADDRESS_MAINNET="$CONTRACT_ADDRESS_MAINNET"
 FUNCTION_SIG="$FUNCTION_SIG"
 TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
 LANG="$LANG"
 
-# Получаем значение NETWORK из env-aztec-agent
-NETWORK="testnet"
-if [[ -f "\$HOME/.env-aztec-agent" ]]; then
-  source "\$HOME/.env-aztec-agent"
-  [[ -n "\$NETWORK" ]] && NETWORK="\$NETWORK"
-fi
+# === Helper function to get network and RPC settings ===
+get_network_settings() {
+    local env_file="\$HOME/.env-aztec-agent"
+    local network="testnet"
+    local rpc_url="\$RPC_URL"
+
+    if [[ -f "\$env_file" ]]; then
+        source "\$env_file"
+        [[ -n "\$NETWORK" ]] && network="\$NETWORK"
+        [[ -n "\$ALT_RPC" ]] && rpc_url="\$ALT_RPC"
+    fi
+
+    # Determine contract address based on network
+    local contract_address="\$CONTRACT_ADDRESS"
+    if [[ "\$network" == "mainnet" ]]; then
+        contract_address="\$CONTRACT_ADDRESS_MAINNET"
+    fi
+
+    echo "\$network|\$rpc_url|\$contract_address"
+}
+
+# Получаем настройки сети
+NETWORK_SETTINGS=\$(get_network_settings)
+NETWORK=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f1)
+RPC_URL=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f2)
+CONTRACT_ADDRESS=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f3)
 
 # URL JSON файла с ошибками на GitHub
 ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
@@ -2733,82 +2780,90 @@ remove_systemd_agent() {
 }
 
 
+# === Check Proven L2 Block and Sync Proof ===
 check_proven_block() {
-  ENV_FILE="/root/.env-aztec-agent"
+    ENV_FILE="/root/.env-aztec-agent"
 
-  if [ -f "$ENV_FILE" ]; then
-    source "$ENV_FILE"
-  fi
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
-  AZTEC_PORT=${AZTEC_PORT:-8080}
-
-  echo -e "\n${CYAN}$(t "current_aztec_port") $AZTEC_PORT${NC}"
-  read -p "$(t "enter_aztec_port_prompt") [${AZTEC_PORT}]: " user_port
-
-  if [ -n "$user_port" ]; then
-    AZTEC_PORT=$user_port
-
-    if grep -q "^AZTEC_PORT=" "$ENV_FILE" 2>/dev/null; then
-      sed -i "s/^AZTEC_PORT=.*/AZTEC_PORT=$AZTEC_PORT/" "$ENV_FILE"
-    else
-      echo "AZTEC_PORT=$AZTEC_PORT" >> "$ENV_FILE"
+    if [ -f "$ENV_FILE" ]; then
+        source "$ENV_FILE"
     fi
 
-    echo -e "${GREEN}$(t "port_saved_successfully")${NC}"
-  fi
+    AZTEC_PORT=${AZTEC_PORT:-8080}
 
-  echo -e "\n${BLUE}$(t "checking_port") $AZTEC_PORT...${NC}"
-  if ! nc -z -w 2 localhost $AZTEC_PORT; then
-    echo -e "\n${RED}$(t "port_not_available") $AZTEC_PORT${NC}"
-    echo -e "${YELLOW}$(t "check_node_running")${NC}"
-    return 1
-  fi
+    echo -e "\n${CYAN}$(t "current_aztec_port") $AZTEC_PORT${NC}"
+    read -p "$(t "enter_aztec_port_prompt") [${AZTEC_PORT}]: " user_port
 
-  echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
+    if [ -n "$user_port" ]; then
+        AZTEC_PORT=$user_port
 
-  # Фоновый процесс получения блока
-  (
-    curl -s -X POST -H 'Content-Type: application/json' \
-      -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
-      http://localhost:$AZTEC_PORT | jq -r ".result.proven.number"
-  ) > /tmp/proven_block.tmp &
-  pid1=$!
-  spinner $pid1
-  wait $pid1
+        if grep -q "^AZTEC_PORT=" "$ENV_FILE" 2>/dev/null; then
+            sed -i "s/^AZTEC_PORT=.*/AZTEC_PORT=$AZTEC_PORT/" "$ENV_FILE"
+        else
+            echo "AZTEC_PORT=$AZTEC_PORT" >> "$ENV_FILE"
+        fi
 
-  PROVEN_BLOCK=$(< /tmp/proven_block.tmp)
-  rm -f /tmp/proven_block.tmp
+        echo -e "${GREEN}$(t "port_saved_successfully")${NC}"
+    fi
 
-  if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
-    echo -e "\n${RED}$(t "proven_block_error")${NC}"
-    return 1
-  fi
+    echo -e "\n${BLUE}$(t "checking_port") $AZTEC_PORT...${NC}"
+    if ! nc -z -w 2 localhost $AZTEC_PORT; then
+        echo -e "\n${RED}$(t "port_not_available") $AZTEC_PORT${NC}"
+        echo -e "${YELLOW}$(t "check_node_running")${NC}"
+        return 1
+    fi
 
-  echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
+    echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
 
-  echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
+    # Фоновый процесс получения блока
+    (
+        curl -s -X POST -H 'Content-Type: application/json' \
+          -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
+          http://localhost:$AZTEC_PORT | jq -r ".result.proven.number"
+    ) > /tmp/proven_block.tmp &
+    pid1=$!
+    spinner $pid1
+    wait $pid1
 
-  # Фоновый процесс получения proof
-  (
-    curl -s -X POST -H 'Content-Type: application/json' \
-      -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
-      http://localhost:$AZTEC_PORT | jq -r ".result"
-  ) > /tmp/sync_proof.tmp &
-  pid2=$!
-  spinner $pid2
-  wait $pid2
+    PROVEN_BLOCK=$(< /tmp/proven_block.tmp)
+    rm -f /tmp/proven_block.tmp
 
-  SYNC_PROOF=$(< /tmp/sync_proof.tmp)
-  rm -f /tmp/sync_proof.tmp
+    if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
+        echo -e "\n${RED}$(t "proven_block_error")${NC}"
+        return 1
+    fi
 
-  if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
-    echo -e "\n${RED}$(t "sync_proof_error")${NC}"
-    return 1
-  fi
+    echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
 
-  echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
-  echo "$SYNC_PROOF"
-  return 0
+    echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
+
+    # Фоновый процесс получения proof
+    (
+        curl -s -X POST -H 'Content-Type: application/json' \
+          -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
+          http://localhost:$AZTEC_PORT | jq -r ".result"
+    ) > /tmp/sync_proof.tmp &
+    pid2=$!
+    spinner $pid2
+    wait $pid2
+
+    SYNC_PROOF=$(< /tmp/sync_proof.tmp)
+    rm -f /tmp/sync_proof.tmp
+
+    if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
+        echo -e "\n${RED}$(t "sync_proof_error")${NC}"
+        return 1
+    fi
+
+    echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
+    echo "$SYNC_PROOF"
+    return 0
 }
 
 # === Change RPC URL ===
@@ -3226,14 +3281,22 @@ function check_aztec_version() {
 
 # === Approve ===
 approve_with_all_keys() {
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
+
     local rpc_providers=(
+        "$rpc_url"
         "https://ethereum-sepolia-rpc.publicnode.com"
         "https://1rpc.io/sepolia"
         "https://sepolia.drpc.org"
     )
     local key_files
     local private_key
-    local rpc_url
+    local current_rpc_url
 
     # Find all YML key files
     key_files=$(find /root/aztec/keys/ -name "*.yml" -type f)
@@ -3244,7 +3307,7 @@ approve_with_all_keys() {
 
     # Execute command for each private key sequentially
     for key_file in $key_files; do
-	    echo ""
+        echo ""
         echo "Processing key file: $key_file"
 
         # Extract private key from YML file
@@ -3254,16 +3317,16 @@ approve_with_all_keys() {
             echo "Executing with private key from $key_file"
 
             # Use the first RPC provider from the list
-            rpc_url="${rpc_providers[0]}"
-            echo "Using RPC URL: $rpc_url"
+            current_rpc_url="${rpc_providers[0]}"
+            echo "Using RPC URL: $current_rpc_url"
 
             # Execute the cast command
             cast send 0x139d2a7a0881e16332d7D1F8DB383A4507E1Ea7A \
                 "approve(address,uint256)" \
-                "$CONTRACT_ADDRESS" \
+                "$contract_address" \
                 200000ether \
                 --private-key "$private_key" \
-                --rpc-url "$rpc_url"
+                --rpc-url "$current_rpc_url"
 
             # Wait for completion before proceeding to next key
             wait
@@ -3906,6 +3969,13 @@ EOF
 stake_validators() {
     echo -e "\n${BLUE}=== $(t "staking_title") ===${NC}"
 
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
+
     # Проверяем существование необходимых файлов
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
     local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
@@ -3920,16 +3990,20 @@ stake_validators() {
     if jq -e '.validators[0].new_operator_info' "$BLS_PK_FILE" > /dev/null 2>&1; then
         # Новый формат - есть информация о новом операторе внутри валидаторов
         echo -e "${GREEN}🔍 Detected new operator method format${NC}"
-        stake_validators_new_format
+        stake_validators_new_format "$network" "$rpc_url" "$contract_address"
     else
         # Старый формат - нет информации о новом операторе
         echo -e "${GREEN}🔍 Detected existing method format${NC}"
-        stake_validators_old_format
+        stake_validators_old_format "$network" "$rpc_url" "$contract_address"
     fi
 }
 
 # === Old format (existing method) ===
 stake_validators_old_format() {
+    local network="$1"
+    local rpc_url="$2"
+    local contract_address="$3"
+
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
     local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
 
@@ -3942,14 +4016,6 @@ stake_validators_old_format() {
         printf "${RED}❌ $(t "file_not_found")${NC}\n" \
          "bls-filtered-pk.json" "$BLS_PK_FILE"
         return 1
-    fi
-
-    # Получаем значение NETWORK из env-aztec-agent
-    local aztec_agent_env="$HOME/.env-aztec-agent"
-    local network="testnet"
-    if [[ -f "$aztec_agent_env" ]]; then
-        network=$(_read_env_var "$aztec_agent_env" "NETWORK")
-        [[ -z "$network" ]] && network="testnet"
     fi
 
     # Формируем ссылку для валидатора в зависимости от сети
@@ -3972,26 +4038,20 @@ stake_validators_old_format() {
 
     # Список RPC провайдеров
     local rpc_providers=(
+        "$rpc_url"
         "https://ethereum-sepolia-rpc.publicnode.com"
         "https://1rpc.io/sepolia"
         "https://sepolia.drpc.org"
     )
 
-    # Используем глобальную переменную контракта
-    if [ -z "$CONTRACT_ADDRESS" ]; then
-        echo -e "${RED}❌ $(t "contract_not_set")${NC}"
-        return 1
-    fi
-
-    printf "${YELLOW}$(t "using_contract_address")${NC}\n" \
-	 "$CONTRACT_ADDRESS"
-	 echo ""
+    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$contract_address"
+    echo ""
 
     # Цикл по всем валидаторам
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
         printf "\n${BLUE}=== $(t "staking_processing") ===${NC}\n" \
-		 "$((i+1))" "$VALIDATOR_COUNT"
-		 echo ""
+         "$((i+1))" "$VALIDATOR_COUNT"
+         echo ""
 
         # Из BLS файла берем приватные ключи
         local PRIVATE_KEY_OF_OLD_SEQUENCER=$(jq -r ".validators[$i].attester.eth" "$BLS_PK_FILE" 2>/dev/null)
@@ -4026,33 +4086,33 @@ stake_validators_old_format() {
 
         # Цикл по RPC провайдерам
         local success=false
-        for rpc_url in "${rpc_providers[@]}"; do
+        for current_rpc_url in "${rpc_providers[@]}"; do
             printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" \
-			      "$rpc_url"
-			 echo ""
+                  "$current_rpc_url"
+             echo ""
 
             # Формируем команду
             local cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_ATTESTER_PRIV_KEY\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             # Показываем команду с частичными приватными ключами (первые 7 символов)
             local PRIVATE_KEY_PREVIEW="${PRIVATE_KEY_OF_OLD_SEQUENCER:0:7}..."
             local BLS_KEY_PREVIEW="${BLS_ATTESTER_PRIV_KEY:0:7}..."
 
             local safe_cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_PREVIEW\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_KEY_PREVIEW\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             echo -e "${CYAN}$(t "command_to_execute")${NC}"
             echo -e "$safe_cmd"
@@ -4067,7 +4127,7 @@ stake_validators_old_format() {
 
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success")${NC}\n" \
-                            "$((i+1))" "$rpc_url"
+                            "$((i+1))" "$current_rpc_url"
                         # Показываем ссылку на валидатора
                         local validator_link
                         if [[ "$network" == "mainnet" ]]; then
@@ -4076,14 +4136,14 @@ stake_validators_old_format() {
                             validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
                         fi
                         echo -e "${CYAN}🌐 $(t "validator_link"): $validator_link${NC}"
-						 echo ""
+                         echo ""
 
                         success=true
                         break  # Переходим к следующему валидатору
                     else
                         printf "${RED}❌ $(t "staking_failed")${NC}\n" \
-						 "$((i+1))" "$rpc_url"
-						 echo ""
+                         "$((i+1))" "$current_rpc_url"
+                         echo ""
                         echo -e "${YELLOW}$(t "trying_next_rpc")${NC}"
                     fi
                     ;;
@@ -4105,8 +4165,8 @@ stake_validators_old_format() {
 
         if [ "$success" = false ]; then
             printf "${RED}❌ $(t "staking_all_failed")${NC}\n" \
-			 "$((i+1))"
-			 echo ""
+             "$((i+1))"
+             echo ""
             echo -e "${YELLOW}$(t "continuing_next_validator")${NC}"
         fi
 
@@ -4123,16 +4183,12 @@ stake_validators_old_format() {
 
 # === New format (new operator method) ===
 stake_validators_new_format() {
+    local network="$1"
+    local rpc_url="$2"
+    local contract_address="$3"
+
     local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-
-    # Получаем значение NETWORK из env-aztec-agent
-    local aztec_agent_env="$HOME/.env-aztec-agent"
-    local network="testnet"
-    if [[ -f "$aztec_agent_env" ]]; then
-        network=$(_read_env_var "$aztec_agent_env" "NETWORK")
-        [[ -z "$network" ]] && network="testnet"
-    fi
 
     # Получаем количество валидаторов
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
@@ -4148,12 +4204,7 @@ stake_validators_new_format() {
     local KEYS_DIR="/root/aztec/keys"
     mkdir -p "$KEYS_DIR"
 
-    if [ -z "$CONTRACT_ADDRESS" ]; then
-        echo -e "${RED}❌ $(t "contract_not_set")${NC}"
-        return 1
-    fi
-
-    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$CONTRACT_ADDRESS"
+    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$contract_address"
     echo ""
 
     # Создаем резервную копию keystore.json перед изменениями
@@ -4166,8 +4217,8 @@ stake_validators_new_format() {
     # Цикл по всем валидаторам
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
         printf "\n${BLUE}=== $(t "staking_processing_new_operator") ===${NC}\n" \
-		 "$((i+1))" "$VALIDATOR_COUNT"
-		 echo ""
+         "$((i+1))" "$VALIDATOR_COUNT"
+         echo ""
 
         # Получаем данные для текущего валидатора
         local PRIVATE_KEY_OF_OLD_SEQUENCER=$(jq -r ".validators[$i].attester.eth" "$BLS_PK_FILE" 2>/dev/null)
@@ -4175,7 +4226,7 @@ stake_validators_new_format() {
         local NEW_ETH_PRIVATE_KEY=$(jq -r ".validators[$i].new_operator_info.eth_private_key" "$BLS_PK_FILE" 2>/dev/null)
         local BLS_ATTESTER_PRIV_KEY=$(jq -r ".validators[$i].new_operator_info.bls_private_key" "$BLS_PK_FILE" 2>/dev/null)
         local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].new_operator_info.eth_address" "$BLS_PK_FILE" 2>/dev/null)
-        local RPC_URL=$(jq -r ".validators[$i].new_operator_info.rpc_url" "$BLS_PK_FILE" 2>/dev/null)
+        local VALIDATOR_RPC_URL=$(jq -r ".validators[$i].new_operator_info.rpc_url" "$BLS_PK_FILE" 2>/dev/null)
 
         # Приводим адреса к нижнему регистру для сравнения
         local OLD_VALIDATOR_ADDRESS_LOWER=$(echo "$OLD_VALIDATOR_ADDRESS" | tr '[:upper:]' '[:lower:]')
@@ -4197,9 +4248,10 @@ stake_validators_new_format() {
         echo -e "  $(t "bls_key"): ${BLS_ATTESTER_PRIV_KEY:0:20}..."
 
         # Список RPC провайдеров (используем сохраненный или дефолтный список)
-        local rpc_providers=("$RPC_URL")
-        if [ -z "$RPC_URL" ] || [ "$RPC_URL" = "null" ]; then
+        local rpc_providers=("${VALIDATOR_RPC_URL:-$rpc_url}")
+        if [ -z "$VALIDATOR_RPC_URL" ] || [ "$VALIDATOR_RPC_URL" = "null" ]; then
             rpc_providers=(
+                "$rpc_url"
                 "https://ethereum-sepolia-rpc.publicnode.com"
                 "https://1rpc.io/sepolia"
                 "https://sepolia.drpc.org"
@@ -4208,32 +4260,32 @@ stake_validators_new_format() {
 
         # Цикл по RPC провайдерам
         local success=false
-        for rpc_url in "${rpc_providers[@]}"; do
-            printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" "$rpc_url"
+        for current_rpc_url in "${rpc_providers[@]}"; do
+            printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" "$current_rpc_url"
             echo ""
 
             # Формируем команду
             local cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_ATTESTER_PRIV_KEY\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             # Безопасное отображение команды
             local PRIVATE_KEY_PREVIEW="${PRIVATE_KEY_OF_OLD_SEQUENCER:0:7}..."
             local BLS_KEY_PREVIEW="${BLS_ATTESTER_PRIV_KEY:0:7}..."
 
             local safe_cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_PREVIEW\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_KEY_PREVIEW\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             echo -e "${CYAN}$(t "command_to_execute")${NC}"
             echo -e "$safe_cmd"
@@ -4247,7 +4299,7 @@ stake_validators_new_format() {
                     echo -e "${GREEN}$(t "staking_executing")${NC}"
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success_new_operator")${NC}\n" \
-						            "$((i+1))" "$rpc_url"
+                                    "$((i+1))" "$current_rpc_url"
 
                         local validator_link
                         if [[ "$network" == "mainnet" ]]; then
@@ -4335,7 +4387,7 @@ EOF
                         break
                     else
                         printf "${RED}❌ $(t "staking_failed_new_operator")${NC}\n" \
-						 "$((i+1))" "$rpc_url"
+                         "$((i+1))" "$current_rpc_url"
                         echo -e "${YELLOW}$(t "trying_next_rpc")${NC}"
                     fi
                     ;;
@@ -4392,32 +4444,22 @@ claim_rewards() {
     echo -e "\n${BLUE}=== $(t "aztec_rewards_claim") ===${NC}"
     echo ""
 
-    # Load environment and use global CONTRACT_ADDRESS
-    source "$HOME/.env-aztec-agent" 2>/dev/null || {
-        echo -e "${RED}❌ $(t "environment_file_not_found")${NC}"
-        return 1
-    }
-
-    if [ -z "$RPC_URL" ]; then
-        echo -e "${RED}❌ $(t "rpc_url_not_set")${NC}"
-        return 1
-    fi
-
-    # Use global CONTRACT_ADDRESS variable
-    if [ -z "$CONTRACT_ADDRESS" ]; then
-        echo -e "${RED}❌ $(t "contract_address_not_set")${NC}"
-        return 1
-    fi
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
     local KEYSTORE_FILE="/root/aztec/config/keystore.json"
 
-    echo -e "${CYAN}$(t "using_contract") $CONTRACT_ADDRESS${NC}"
-    echo -e "${CYAN}$(t "using_rpc") $RPC_URL${NC}"
+    echo -e "${CYAN}$(t "using_contract") $contract_address${NC}"
+    echo -e "${CYAN}$(t "using_rpc") $rpc_url${NC}"
 
     # Check if rewards are claimable
     echo -e "\n${BLUE}🔍 $(t "checking_rewards_claimable")${NC}"
     local claimable_result
-    claimable_result=$(cast call "$CONTRACT_ADDRESS" "isRewardsClaimable()" --rpc-url "$RPC_URL" 2>/dev/null)
+    claimable_result=$(cast call "$contract_address" "isRewardsClaimable()" --rpc-url "$rpc_url" 2>/dev/null)
 
     if [ $? -ne 0 ]; then
         echo -e "${RED}❌ $(t "failed_check_rewards_claimable")${NC}"
@@ -4429,7 +4471,7 @@ claim_rewards() {
 
             # Get earliest claimable timestamp for information
             local timestamp_result
-            timestamp_result=$(cast call "$CONTRACT_ADDRESS" "getEarliestRewardsClaimableTimestamp()" --rpc-url "$RPC_URL" 2>/dev/null)
+            timestamp_result=$(cast call "$contract_address" "getEarliestRewardsClaimableTimestamp()" --rpc-url "$rpc_url" 2>/dev/null)
 
             if [ $? -eq 0 ] && [ -n "$timestamp_result" ]; then
                 local timestamp_dec
@@ -4513,7 +4555,7 @@ claim_rewards() {
         echo -e "${CYAN}$(t "checking_address") $address...${NC}"
 
         local rewards_hex
-        rewards_hex=$(cast call "$CONTRACT_ADDRESS" "getSequencerRewards(address)" "$address" --rpc-url "$RPC_URL" 2>/dev/null)
+        rewards_hex=$(cast call "$contract_address" "getSequencerRewards(address)" "$address" --rpc-url "$rpc_url" 2>/dev/null)
 
         if [ $? -ne 0 ]; then
             echo -e "${YELLOW}⚠️ $(t "failed_get_rewards_for_address") $address${NC}"
@@ -4596,8 +4638,8 @@ claim_rewards() {
 
                 # Send claim transaction
                 local tx_hash
-                tx_hash=$(cast send "$CONTRACT_ADDRESS" "claimSequencerRewards(address)" "$address" \
-                    --rpc-url "$RPC_URL" \
+                tx_hash=$(cast send "$contract_address" "claimSequencerRewards(address)" "$address" \
+                    --rpc-url "$rpc_url" \
                     --keystore "$KEYSTORE_FILE" \
                     --from "$address" 2>/dev/null)
 
@@ -4609,7 +4651,7 @@ claim_rewards() {
                     sleep 10
 
                     local receipt
-                    receipt=$(cast receipt "$tx_hash" --rpc-url "$RPC_URL" 2>/dev/null)
+                    receipt=$(cast receipt "$tx_hash" --rpc-url "$rpc_url" 2>/dev/null)
 
                     if [ $? -eq 0 ]; then
                         local status
@@ -4623,7 +4665,7 @@ claim_rewards() {
 
                             # Verify rewards are now zero
                             local new_rewards_hex
-                            new_rewards_hex=$(cast call "$CONTRACT_ADDRESS" "getSequencerRewards(address)" "$address" --rpc-url "$RPC_URL" 2>/dev/null)
+                            new_rewards_hex=$(cast call "$contract_address" "getSequencerRewards(address)" "$address" --rpc-url "$rpc_url" 2>/dev/null)
                             local new_rewards_wei
                             new_rewards_wei=$(cast --to-dec "$new_rewards_hex" 2>/dev/null)
                             local new_rewards_eth
@@ -4684,7 +4726,7 @@ claim_rewards() {
     fi
     printf "${GREEN}🎯 $(t "unique_addresses_with_rewards") ${#addresses_with_rewards[@]}${NC}\n"
     printf "${GREEN}📊 $(t "total_coinbase_addresses_in_keystore") ${#coinbase_addresses[@]}${NC}\n"
-    echo -e "${CYAN}📍 $(t "contract_used") $CONTRACT_ADDRESS${NC}"
+    echo -e "${CYAN}📍 $(t "contract_used") $contract_address${NC}"
 
     return 0
 }
