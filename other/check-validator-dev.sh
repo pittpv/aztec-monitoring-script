@@ -10,13 +10,6 @@ BLUE="\e[34m"
 BOLD="\e[1m"
 RESET="\e[0m"
 
-# Получаем значение NETWORK из env-aztec-agent
-NETWORK="testnet"
-if [[ -f "$HOME/.env-aztec-agent" ]]; then
-  source "$HOME/.env-aztec-agent"
-  [[ -n "$NETWORK" ]] && NETWORK="$NETWORK"
-fi
-
 # === Language settings ===
 LANG="en"
 declare -A TRANSLATIONS
@@ -254,15 +247,47 @@ t() {
 
 init_languages "$1"
 
-#ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
-ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
-GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
+# Получаем значение NETWORK из env-aztec-agent
+NETWORK="testnet"
+if [[ -f "$HOME/.env-aztec-agent" ]]; then
+  source "$HOME/.env-aztec-agent"
+  [[ -n "$NETWORK" ]] && NETWORK="$NETWORK"
+fi
+
+# === Адреса контрактов в зависимости от сети ===
+# Testnet адреса
+ROLLUP_ADDRESS_TESTNET="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
+GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
+
+# Mainnet адреса
+ROLLUP_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
+GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
+
+# Выбор адресов в зависимости от сети
 if [[ "$NETWORK" == "mainnet" ]]; then
+    ROLLUP_ADDRESS="$ROLLUP_ADDRESS_MAINNET"
+    GSE_ADDRESS="$GSE_ADDRESS_MAINNET"
     QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
 else
+    ROLLUP_ADDRESS="$ROLLUP_ADDRESS_TESTNET"
+    GSE_ADDRESS="$GSE_ADDRESS_TESTNET"
     QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
 fi
+
 MONITOR_DIR="/root/aztec-monitor-agent"
+
+##ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
+#ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
+#GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
+#ROLLUP_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
+#GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
+
+#if [[ "$NETWORK" == "mainnet" ]]; then
+#    QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
+#else
+#    QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+#fi
+#MONITOR_DIR="/root/aztec-monitor-agent"
 
 # ========= HTTP via curl_cffi =========
 # cffi_http_get <url>
@@ -332,12 +357,21 @@ load_rpc_config() {
 get_new_rpc_url() {
     echo -e "${YELLOW}$(t "getting_new_rpc")${RESET}"
 
-    # Список возможных RPC провайдеров (можно расширить)
-    local rpc_providers=(
-        "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://1rpc.io/sepolia"
-        "https://sepolia.drpc.org"
-    )
+    # Список возможных RPC провайдеров в зависимости от сети
+    local rpc_providers=()
+
+    if [[ "$NETWORK" == "mainnet" ]]; then
+        rpc_providers=(
+            "https://ethereum-rpc.publicnode.com"
+            "https://eth.llamarpc.com"
+        )
+    else
+        rpc_providers=(
+            "https://ethereum-sepolia-rpc.publicnode.com"
+            "https://1rpc.io/sepolia"
+            "https://sepolia.drpc.org"
+        )
+    fi
 
     # Пробуем каждый RPC пока не найдем рабочий
     for rpc_url in "${rpc_providers[@]}"; do
