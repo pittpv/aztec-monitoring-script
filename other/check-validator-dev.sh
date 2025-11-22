@@ -341,8 +341,8 @@ load_rpc_config() {
         fi
 
         # Если есть резервный RPC, используем его
-        if [ -n "$RPC_URL_VCHECK" ]; then
-            echo -e "${YELLOW}Using backup RPC to load the list of validators: $RPC_URL_VCHECK${RESET}"
+        if [ -n "$ALT_RPC" ]; then
+            echo -e "${YELLOW}Using backup RPC to load the list of validators: $ALT_RPC${RESET}"
             USING_BACKUP_RPC=true
         else
             USING_BACKUP_RPC=false
@@ -386,14 +386,14 @@ get_new_rpc_url() {
                 echo -e "${GREEN}RPC is working properly: $rpc_url${RESET}"
 
                 # Добавляем новый RPC в файл конфигурации
-                if grep -q "RPC_URL_VCHECK=" "/root/.env-aztec-agent"; then
-                    sed -i "s|RPC_URL_VCHECK=.*|RPC_URL_VCHECK=$rpc_url|" "/root/.env-aztec-agent"
+                if grep -q "ALT_RPC=" "/root/.env-aztec-agent"; then
+                    sed -i "s|ALT_RPC=.*|ALT_RPC=$rpc_url|" "/root/.env-aztec-agent"
                 else
-                    echo "RPC_URL_VCHECK=$rpc_url" >> "/root/.env-aztec-agent"
+                    echo "ALT_RPC=$rpc_url" >> "/root/.env-aztec-agent"
                 fi
 
                 # Обновляем текущую переменную
-                RPC_URL_VCHECK="$rpc_url"
+                ALT_RPC="$rpc_url"
                 USING_BACKUP_RPC=true
 
                 # Перезагружаем конфигурацию, чтобы обновить переменные
@@ -423,8 +423,8 @@ cast_call_with_fallback() {
     while [ $retry_count -lt $max_retries ]; do
         # Определяем какой RPC использовать
         local current_rpc
-        if [ "$use_validator_rpc" = true ] && [ -n "$RPC_URL_VCHECK" ]; then
-            current_rpc="$RPC_URL_VCHECK"
+        if [ "$use_validator_rpc" = true ] && [ -n "$ALT_RPC" ]; then
+            current_rpc="$ALT_RPC"
             echo -e "${YELLOW}Using validator RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${RESET}"
         else
             current_rpc="$RPC_URL"
@@ -1060,8 +1060,8 @@ get_validators_via_gse() {
 
     # Используем правильный RPC URL в зависимости от сети
     local current_rpc="$RPC_URL"
-    if [[ "$NETWORK" == "mainnet" && -n "$RPC_URL_VCHECK" ]]; then
-        current_rpc="$RPC_URL_VCHECK"
+    if [[ "$NETWORK" == "mainnet" && -n "$ALT_RPC" ]]; then
+        current_rpc="$ALT_RPC"
         echo -e "${YELLOW}Using mainnet RPC: $current_rpc${RESET}"
     fi
 
@@ -1235,8 +1235,8 @@ fast_load_validators() {
 
     # Используем правильный RPC URL в зависимости от сети
     local current_rpc="$RPC_URL"
-    if [[ "$NETWORK" == "mainnet" && -n "$RPC_URL_VCHECK" ]]; then
-        current_rpc="$RPC_URL_VCHECK"
+    if [[ "$NETWORK" == "mainnet" && -n "$ALT_RPC" ]]; then
+        current_rpc="$ALT_RPC"
     fi
 
     echo -e "${YELLOW}Using RPC: $current_rpc${RESET}"
