@@ -1058,10 +1058,17 @@ list_monitor_scripts() {
 get_validators_via_gse() {
     echo -e "${YELLOW}$(t "getting_validator_count")${RESET}"
 
-    # Отладочный вывод команды
-    echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    # Используем правильный RPC URL в зависимости от сети
+    local current_rpc="$RPC_URL"
+    if [[ "$NETWORK" == "mainnet" && -n "$RPC_URL_VCHECK" ]]; then
+        current_rpc="$RPC_URL_VCHECK"
+        echo -e "${YELLOW}Using mainnet RPC: $current_rpc${RESET}"
+    fi
 
-    VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$RPC_URL" | cast to-dec)
+    # Отладочный вывод команды
+    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
+
+    VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$current_rpc" | cast to-dec)
 
     # Проверяем успешность выполнения и валидность результата
     if [ $? -ne 0 ]; then
@@ -1078,9 +1085,9 @@ get_validators_via_gse() {
 
     echo -e "${YELLOW}$(t "getting_current_slot")${RESET}"
     # Отладочный вывод
-     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
 
-    SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$RPC_URL" | cast to-dec)
+    SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$current_rpc" | cast to-dec)
 
     if [ $? -ne 0 ]; then
         echo -e "${RED}Error: Failed to get current slot${RESET}"
@@ -1096,9 +1103,9 @@ get_validators_via_gse() {
 
     echo -e "${YELLOW}$(t "deriving_timestamp")${RESET}"
     # Отладочный вывод
-     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$RPC_URL\" | cast to-dec${RESET}"
+    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
 
-    TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$RPC_URL" | cast to-dec)
+    TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$current_rpc" | cast to-dec)
 
     if [ $? -ne 0 ]; then
         echo -e "${RED}Error: Failed to get timestamp for slot${RESET}"
@@ -1147,7 +1154,7 @@ get_validators_via_gse() {
         VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
             "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
             "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
-            --rpc-url "$RPC_URL")
+            --rpc-url "$current_rpc")
         local exit_code=$?
 
         if [ $exit_code -ne 0 ]; then
@@ -1221,7 +1228,14 @@ get_validators_via_gse() {
 
 fast_load_validators() {
     echo -e "\n${YELLOW}$(t "loading_validators")${RESET}"
-    echo -e "${YELLOW}Using RPC: $RPC_URL${RESET}"
+
+    # Используем правильный RPC URL в зависимости от сети
+    local current_rpc="$RPC_URL"
+    if [[ "$NETWORK" == "mainnet" && -n "$RPC_URL_VCHECK" ]]; then
+        current_rpc="$RPC_URL_VCHECK"
+    fi
+
+    echo -e "${YELLOW}Using RPC: $current_rpc${RESET}"
 
     # Обрабатываем валидаторов последовательно
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
@@ -1229,7 +1243,7 @@ fast_load_validators() {
         echo -e "${GRAY}Processing: $validator${RESET}"
 
         # Получаем данные getAttesterView
-        response=$(cast call "$ROLLUP_ADDRESS" "getAttesterView(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null)
+        response=$(cast call "$ROLLUP_ADDRESS" "getAttesterView(address)" "$validator" --rpc-url "$current_rpc" 2>/dev/null)
 
         if [[ $? -ne 0 || -z "$response" || ${#response} -lt 130 ]]; then
             echo -e "${RED}Error getting data for: $validator${RESET}"
@@ -1263,7 +1277,7 @@ fast_load_validators() {
         fi
 
         # Получаем информацию о ревардах
-        rewards_response=$(cast call "$ROLLUP_ADDRESS" "getSequencerRewards(address)" "$validator" --rpc-url "$RPC_URL" 2>/dev/null)
+        rewards_response=$(cast call "$ROLLUP_ADDRESS" "getSequencerRewards(address)" "$validator" --rpc-url "$current_rpc" 2>/dev/null)
         if [[ $? -eq 0 && -n "$rewards_response" ]]; then
             rewards_decimal=$(echo "$rewards_response" | cast --to-dec 2>/dev/null)
             rewards_wei=$(echo "$rewards_decimal" | cast --from-wei 2>/dev/null)
