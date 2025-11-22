@@ -1066,7 +1066,7 @@ get_validators_via_gse() {
     fi
 
     # Отладочный вывод команды
-    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
+     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getActiveAttesterCount()\" --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
 
     VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$current_rpc" | cast to-dec)
 
@@ -1085,7 +1085,7 @@ get_validators_via_gse() {
 
     echo -e "${YELLOW}$(t "getting_current_slot")${RESET}"
     # Отладочный вывод
-    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
+     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getCurrentSlot()\" --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
 
     SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$current_rpc" | cast to-dec)
 
@@ -1103,7 +1103,7 @@ get_validators_via_gse() {
 
     echo -e "${YELLOW}$(t "deriving_timestamp")${RESET}"
     # Отладочный вывод
-    # echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
+     echo -e "${GRAY}Command: cast call \"$ROLLUP_ADDRESS\" \"getTimestampForSlot(uint256)\" $SLOT --rpc-url \"$current_rpc\" | cast to-dec${RESET}"
 
     TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$current_rpc" | cast to-dec)
 
