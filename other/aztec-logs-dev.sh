@@ -3344,6 +3344,11 @@ approve_with_all_keys() {
 
     # Execute command for each private key sequentially
     for key_file in $key_files; do
+        # Skip files with 'bls' in the name
+        if [[ "$key_file" == *"bls"* ]]; then
+            continue
+        fi
+
         echo ""
         echo "Processing key file: $key_file"
 
