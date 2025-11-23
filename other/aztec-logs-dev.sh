@@ -1595,7 +1595,8 @@ check_dependencies() {
       echo -e "\n${GREEN}$(t "env_created")${NC}"
   else
       source .env-aztec-agent
-      echo -e "\n${GREEN}$(t "env_exists") RPC_URL: $RPC_URL, NETWORK: $NETWORK${NC}"
+      DISPLAY_NETWORK="${NETWORK:-testnet}"
+      echo -e "\n${GREEN}$(t "env_exists") RPC_URL: $RPC_URL, NETWORK: $DISPLAY_NETWORK${NC}"
   fi
 
   # === Проверяем и добавляем ключ VERSION в ~/.env-aztec-agent ===
