@@ -4100,7 +4100,7 @@ stake_validators_old_format() {
         local BLS_ATTESTER_PRIV_KEY=$(jq -r ".validators[$i].attester.bls" "$BLS_PK_FILE" 2>/dev/null)
 
         # Из keystore файла берем Ethereum адреса
-        local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].attester" "$KEYSTORE_FILE" 2>/dev/null)
+        local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].attester.eth" "$KEYSTORE_FILE" 2>/dev/null)
 
         # Проверяем что все данные получены
         if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ]; then
