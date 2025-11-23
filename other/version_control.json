@@ -208,5 +208,10 @@
     "VERSION": "2.4.0",
     "UPDATE_DATE": "20.11.2025",
     "CHANGES": ["Network selection during installation: test network/main network", "New method of adding validators with BLS keys", "Updated mainnet-ready structure of keystore.json", "Updated BLS generation functions", "Added function for migrating BLS", "Updated watchtower image URL", "Added reward display in Option 9", "Updated validator queue monitoring function", "Minor improvements"]
+  },
+  {
+    "VERSION": "2.5.0",
+    "UPDATE_DATE": "23.11.2025",
+    "CHANGES": ["Full mainnet support in all script functions", "All /root replaced with $HOME", "Added reward collection function (Claim)", "Monitoring updates", "Minor improvements"]
   }
 ]

@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.4.0"
+SCRIPT_VERSION="2.5.0"
 
 function show_logo() {
     echo -e " "
@@ -66,11 +66,12 @@ init_languages() {
   TRANSLATIONS["en,option18"]="18. Generate BLS keys"
   TRANSLATIONS["en,option19"]="19. Approve"
   TRANSLATIONS["en,option20"]="20. Stake"
+  TRANSLATIONS["en,option21"]="21. Claim rewards"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
   TRANSLATIONS["en,bls_invalid_number"]="Invalid number. Please enter a positive integer."
-  TRANSLATIONS["en,bls_keystore_not_found"]="❌ keystore.json not found at /root/aztec/config/keystore.json"
+  TRANSLATIONS["en,bls_keystore_not_found"]="❌ keystore.json not found at $HOME/aztec/config/keystore.json"
   TRANSLATIONS["en,bls_fee_recipient_not_found"]="❌ feeRecipient not found in keystore.json"
   TRANSLATIONS["en,bls_generating_keys"]="🔑 Generating BLS keys..."
   TRANSLATIONS["en,bls_generation_success"]="✅ BLS keys generated successfully"
@@ -114,13 +115,13 @@ init_languages() {
   TRANSLATIONS["en,bls_new_operator_title"]="New Operator Address Method"
   TRANSLATIONS["en,bls_old_validator_info"]="Please provide your old validator info:"
   TRANSLATIONS["en,bls_old_private_key_prompt"]="Copy and paste one or more OLD private keys, separated by commas without spaces, and press Enter (the input is hidden, but pasted): "
-  TRANSLATIONS["en,bls_sepolia_rpc_prompt"]="Enter your sepolia RPC URL: "
+  TRANSLATIONS["en,bls_sepolia_rpc_prompt"]="Enter your Sepolia RPC URL: "
   TRANSLATIONS["en,bls_starting_generation"]="Starting generation process..."
-  TRANSLATIONS["en,bls_ready_to_generate"]="⚠️ ATTENTION: BE READY to write down all the new operator's details: the mnemonic phrase, public address and public BLS key. The private key and private BLS key will be saved in the file /root/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["en,bls_ready_to_generate"]="⚠️ ATTENTION: BE READY to write down all the new operator's details: the mnemonic phrase, public address and public BLS key. The private key and private BLS key will be saved in the file $HOME/aztec/bls-filtered-pk.json"
   TRANSLATIONS["en,bls_press_enter_to_generate"]="Press [Enter] to generate your new keys..."
   TRANSLATIONS["en,bls_add_to_keystore_title"]="Add BLS Keys to Keystore"
-  TRANSLATIONS["en,bls_pk_file_not_found"]="BLS keys file not found: /root/aztec/bls-filtered-pk.json"
-  TRANSLATIONS["en,bls_keystore_not_found"]="Keystore file not found: /root/aztec/config/keystore.json"
+  TRANSLATIONS["en,bls_pk_file_not_found"]="BLS keys file not found: $HOME/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["en,bls_keystore_not_found"]="Keystore file not found: $HOME/aztec/config/keystore.json"
   TRANSLATIONS["en,bls_creating_backup"]="Creating backup of keystore.json..."
   TRANSLATIONS["en,bls_backup_created"]="Backup created"
   TRANSLATIONS["en,bls_processing_validators"]="Processing validators"
@@ -139,7 +140,7 @@ init_languages() {
   TRANSLATIONS["en,bls_invalid_json"]="Invalid JSON generated, restoring from backup"
   TRANSLATIONS["en,bls_restoring_backup"]="Restoring original keystore from backup"
   TRANSLATIONS["en,bls_operation_completed"]="BLS keys addition completed successfully"
-  TRANSLATIONS["en,bls_to_keystore"]="Add BLS keys to keystore.json (run only after BLS generation)"
+  TRANSLATIONS["en,bls_to_keystore"]="Add BLS keys to keystore.json (run ONLY after BLS generation and ONLY if BLS are generated from a SEED phrase or you have correctly created bls-filtered-pk.json yourself)"
   TRANSLATIONS["en,bls_new_keys_generated"]="Good! Your new keys are below. SAVE THIS INFO SECURELY!"
   TRANSLATIONS["en,bls_new_eth_private_key"]="NEW ETH Private Key"
   TRANSLATIONS["en,bls_new_bls_private_key"]="NEW BLS Private Key"
@@ -157,7 +158,7 @@ init_languages() {
   TRANSLATIONS["en,bls_new_operator_success"]="All done! You have successfully joined the new testnet"
   TRANSLATIONS["en,bls_restart_node_notice"]="Now restart your node, check that YML files with new private keys have been added to /aztec/keys, and that /aztec/config/keystore.json has been replaced with the new eth addresses of the validators."
   TRANSLATIONS["en,bls_key_extraction_failed"]="Failed to extract keys from generated file"
-  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 18)"
+  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 18) or add "
   TRANSLATIONS["en,staking_invalid_bls_file"]="Invalid BLS keys file format"
   TRANSLATIONS["en,staking_failed_generate_address"]="Failed to generate address from private key"
   TRANSLATIONS["en,staking_found_single_validator"]="Found single validator for new operator method"
@@ -200,8 +201,11 @@ init_languages() {
   TRANSLATIONS["en,install_prompt"]="Do you want to install them now? (Y/n):"
   TRANSLATIONS["en,missing_required"]="⚠️ Script cannot work without required components. Exiting."
   TRANSLATIONS["en,rpc_prompt"]="Enter Ethereum RPC URL:"
+  TRANSLATIONS["en,network_prompt"]="Enter network type (e.g. testnet or mainnet):"
   TRANSLATIONS["en,env_created"]="✅ Created .env file with RPC URL"
   TRANSLATIONS["en,env_exists"]="✅ Using existing .env file with RPC URL:"
+  TRANSLATIONS["en,rpc_empty_error"]="RPC URL cannot be empty. Please enter a valid URL."
+  TRANSLATIONS["en,network_empty_error"]="Network cannot be empty. Please enter a network name."
   TRANSLATIONS["en,search_container"]="🔍 Searching for 'aztec' container..."
   TRANSLATIONS["en,container_not_found"]="❌ Container 'aztec' not found."
   TRANSLATIONS["en,container_found"]="✅ Container found:"
@@ -294,7 +298,7 @@ init_languages() {
   TRANSLATIONS["en,installation_cancelled_by_user"]="✖ Installation cancelled by user"
   TRANSLATIONS["en,unknown_error_occurred"]="⚠ An unknown error occurred during installation"
   TRANSLATIONS["en,stop_method_prompt"]="Choose method to stop Aztec node (docker-compose / cli): "
-  TRANSLATIONS["en,enter_compose_path"]="Enter full path to folder with docker-compose.yml (/root/your_path or ./your_path): "
+  TRANSLATIONS["en,enter_compose_path"]="Enter full path to folder with docker-compose.yml ($HOME/your_path or ./your_path): "
   TRANSLATIONS["en,docker_stop_success"]="Containers stopped and docker path saved to .env-aztec-agent"
   TRANSLATIONS["en,no_aztec_screen"]="No active Aztec screen sessions found."
   TRANSLATIONS["en,cli_stop_success"]="Aztec CLI node stopped and session saved to .env-aztec-agent"
@@ -425,6 +429,58 @@ init_languages() {
   TRANSLATIONS["en,bls_final_web3signer_restarted"]="Final web3signer restart completed"
   TRANSLATIONS["en,bls_final_web3signer_restart_failed"]="Final web3signer restart failed"
 
+  TRANSLATIONS["en,aztec_rewards_claim"]="Aztec Rewards Claim"
+  TRANSLATIONS["en,environment_file_not_found"]="Environment file not found"
+  TRANSLATIONS["en,rpc_url_not_set"]="RPC_URL not set"
+  TRANSLATIONS["en,contract_address_not_set"]="CONTRACT_ADDRESS not set"
+  TRANSLATIONS["en,using_contract"]="Using contract:"
+  TRANSLATIONS["en,using_rpc"]="Using RPC:"
+  TRANSLATIONS["en,checking_rewards_claimable"]="Checking if rewards are claimable..."
+  TRANSLATIONS["en,failed_check_rewards_claimable"]="Failed to check rewards claimable status"
+  TRANSLATIONS["en,rewards_not_claimable"]="Rewards are not claimable at this time"
+  TRANSLATIONS["en,rewards_are_claimable"]="Rewards are claimable"
+  TRANSLATIONS["en,keystore_file_not_found"]="Keystore file not found:"
+  TRANSLATIONS["en,extracting_validator_addresses"]="Extracting validator addresses..."
+  TRANSLATIONS["en,no_coinbase_addresses_found"]="No coinbase addresses found in keystore"
+  TRANSLATIONS["en,found_unique_coinbase_addresses"]="Found unique coinbase addresses:"
+  TRANSLATIONS["en,repeats_times"]="repeats %s times"
+  TRANSLATIONS["en,checking_rewards"]="Checking rewards..."
+  TRANSLATIONS["en,checking_address"]="Checking address"
+  TRANSLATIONS["en,failed_get_rewards_for_address"]="Failed to get rewards for address"
+  TRANSLATIONS["en,failed_convert_rewards_amount"]="Failed to convert rewards amount for address"
+  TRANSLATIONS["en,failed_convert_to_eth"]="Failed to convert to ETH for address"
+  TRANSLATIONS["en,rewards_amount"]="Rewards: %s ETH"
+  TRANSLATIONS["en,no_rewards"]="No rewards"
+  TRANSLATIONS["en,no_rewards_to_claim"]="No rewards to claim at this time"
+  TRANSLATIONS["en,found_unique_addresses_with_rewards"]="Found unique addresses with rewards to claim:"
+  TRANSLATIONS["en,already_claimed_this_session"]="Already claimed address"
+  TRANSLATIONS["en,skipping"]="skipping"
+  TRANSLATIONS["en,address_label"]="Address:"
+  TRANSLATIONS["en,amount_eth"]="Amount: %s ETH"
+  TRANSLATIONS["en,address_appears_times"]="This address appears %s times in keystore"
+  TRANSLATIONS["en,claim_rewards_confirmation"]="Do you want to claim these rewards? (y/n/skip):"
+  TRANSLATIONS["en,claiming_rewards"]="Claiming rewards..."
+  TRANSLATIONS["en,transaction_sent"]="Transaction sent:"
+  TRANSLATIONS["en,waiting_confirmation"]="Waiting for confirmation..."
+  TRANSLATIONS["en,transaction_confirmed_successfully"]="Transaction confirmed successfully"
+  TRANSLATIONS["en,rewards_successfully_claimed"]="Rewards successfully claimed"
+  TRANSLATIONS["en,rewards_claimed_balance_not_zero"]="Rewards claimed but balance not zero: %s ETH"
+  TRANSLATIONS["en,claimed_rewards_for_address_appears_times"]="Claimed rewards for %s (appears %s times)"
+  TRANSLATIONS["en,transaction_failed"]="Transaction failed"
+  TRANSLATIONS["en,could_not_get_receipt_transaction_sent"]="Could not get receipt, but transaction was sent"
+  TRANSLATIONS["en,failed_send_transaction"]="Failed to send transaction"
+  TRANSLATIONS["en,skipping_claim_for_address"]="Skipping claim for address"
+  TRANSLATIONS["en,skipping_all_remaining_claims"]="Skipping all remaining claims"
+  TRANSLATIONS["en,waiting_seconds"]="Waiting 5 seconds..."
+  TRANSLATIONS["en,summary"]="SUMMARY"
+  TRANSLATIONS["en,successfully_claimed"]="Successfully claimed:"
+  TRANSLATIONS["en,failed_count"]="Failed:"
+  TRANSLATIONS["en,unique_addresses_with_rewards"]="Unique addresses with rewards:"
+  TRANSLATIONS["en,total_coinbase_addresses_in_keystore"]="Total coinbase addresses in keystore:"
+  TRANSLATIONS["en,contract_used"]="Contract used:"
+  TRANSLATIONS["en,earliest_rewards_claimable_timestamp"]="Earliest rewards claimable timestamp: %s (%s)"
+  TRANSLATIONS["en,claim_function_not_activated"]="Currently the claim function is not activated in contract"
+
   # Russian translations
   TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
   TRANSLATIONS["ru,title"]="========= Главное меню ========="
@@ -448,11 +504,12 @@ init_languages() {
   TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи"
   TRANSLATIONS["ru,option19"]="19. Апрув"
   TRANSLATIONS["ru,option20"]="20. Стейк"
+  TRANSLATIONS["ru,option21"]="21. Получить награды"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
   TRANSLATIONS["ru,bls_invalid_number"]="Неверное число. Введите положительное целое число."
-  TRANSLATIONS["ru,bls_keystore_not_found"]="❌ Файл keystore.json не найден в /root/aztec/config/keystore.json"
+  TRANSLATIONS["ru,bls_keystore_not_found"]="❌ Файл keystore.json не найден в $HOME/aztec/config/keystore.json"
   TRANSLATIONS["ru,bls_fee_recipient_not_found"]="❌ feeRecipient не найден в keystore.json"
   TRANSLATIONS["ru,bls_generating_keys"]="🔑 Генерация BLS ключей..."
   TRANSLATIONS["ru,bls_generation_success"]="✅ BLS ключи успешно сгенерированы"
@@ -498,11 +555,11 @@ init_languages() {
   TRANSLATIONS["ru,bls_old_private_key_prompt"]="Скопируйте и вставьте один или несколько СТАРЫХ приватных ключей через запятую без пробелов и нажмите Enter (ввод скрыт, но вставлен): "
   TRANSLATIONS["ru,bls_sepolia_rpc_prompt"]="Введите ваш Sepolia RPC URL: "
   TRANSLATIONS["ru,bls_starting_generation"]="Запуск процесса генерации..."
-  TRANSLATIONS["ru,bls_ready_to_generate"]="⚠️ ATTENTION: БУДЬТЕ ГОТОВЫ записать все данные нового оператора: мнемоническую фразу, публичный адрес и публичный BLS-ключ. Приватный ключ и приватный BLS-ключ буду сохранены в файл /root/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["ru,bls_ready_to_generate"]="⚠️ ATTENTION: БУДЬТЕ ГОТОВЫ записать все данные нового оператора: мнемоническую фразу, публичный адрес и публичный BLS-ключ. Приватный ключ и приватный BLS-ключ буду сохранены в файл $HOME/aztec/bls-filtered-pk.json"
   TRANSLATIONS["ru,bls_press_enter_to_generate"]="Нажмите [Enter] для генерации новых ключей..."
   TRANSLATIONS["ru,bls_add_to_keystore_title"]="Добавление BLS ключей в Keystore"
-  TRANSLATIONS["ru,bls_pk_file_not_found"]="Файл BLS ключей не найден: /root/aztec/bls-filtered-pk.json"
-  TRANSLATIONS["ru,bls_keystore_not_found"]="Файл keystore не найден: /root/aztec/config/keystore.json"
+  TRANSLATIONS["ru,bls_pk_file_not_found"]="Файл BLS ключей не найден: $HOME/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["ru,bls_keystore_not_found"]="Файл keystore не найден: $HOME/aztec/config/keystore.json"
   TRANSLATIONS["ru,bls_creating_backup"]="Создание резервной копии keystore.json..."
   TRANSLATIONS["ru,bls_backup_created"]="Резервная копия создана"
   TRANSLATIONS["ru,bls_processing_validators"]="Обработка валидаторов"
@@ -521,7 +578,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_invalid_json"]="Сгенерирован невалидный JSON, восстанавливаем из резервной копии"
   TRANSLATIONS["ru,bls_restoring_backup"]="Восстановление оригинального keystore из резервной копии"
   TRANSLATIONS["ru,bls_operation_completed"]="Добавление BLS ключей успешно завершено"
-  TRANSLATIONS["ru,bls_to_keystore"]="Добавить BLS-ключи в keystore.json (запускать только после генерации BLS)"
+  TRANSLATIONS["ru,bls_to_keystore"]="Добавить ключи BLS в keystore.json (запускать только после генерации BLS и только если BLS сгенерированы из сид-фразы или вы самостоятельно верно создали bls-filtered-pk.json)"
   TRANSLATIONS["ru,bls_new_keys_generated"]="Отлично! Ваши новые ключи ниже. СОХРАНИТЕ ЭТУ ИНФОРМАЦИЮ В БЕЗОПАСНОМ МЕСТЕ!"
   TRANSLATIONS["ru,bls_new_eth_private_key"]="НОВЫЙ приватный ключ ETH"
   TRANSLATIONS["ru,bls_new_bls_private_key"]="НОВЫЙ приватный ключ BLS"
@@ -582,8 +639,11 @@ init_languages() {
   TRANSLATIONS["ru,install_prompt"]="Хотите установить их сейчас? (Y/n):"
   TRANSLATIONS["ru,missing_required"]="⚠️ Без необходимых компонентов скрипт не сможет работать. Завершение."
   TRANSLATIONS["ru,rpc_prompt"]="Введите Ethereum RPC URL:"
+  TRANSLATIONS["ru,network_prompt"]="Введите тип сети (например: testnet или mainnet):"
   TRANSLATIONS["ru,env_created"]="✅ Создан файл .env с RPC URL"
   TRANSLATIONS["ru,env_exists"]="✅ Используется существующий .env файл с RPC URL:"
+  TRANSLATIONS["ru,rpc_empty_error"]="RPC URL не может быть пустым. Пожалуйста, введите действительный URL."
+  TRANSLATIONS["ru,network_empty_error"]="Название сети не может быть пустым. Пожалуйста, введите название сети."
   TRANSLATIONS["ru,search_container"]="🔍 Поиск контейнера с именем 'aztec'..."
   TRANSLATIONS["ru,container_not_found"]="❌ Контейнер с именем 'aztec' не найден."
   TRANSLATIONS["ru,container_found"]="✅ Найден контейнер:"
@@ -676,7 +736,7 @@ init_languages() {
   TRANSLATIONS["ru,installation_cancelled_by_user"]="✖ Установка отменена пользователем"
   TRANSLATIONS["ru,unknown_error_occurred"]="⚠ Произошла неизвестная ошибка при установке"
   TRANSLATIONS["ru,stop_method_prompt"]="Выберите способ остановки ноды Aztec (docker-compose / cli): "
-  TRANSLATIONS["ru,enter_compose_path"]="Введите полный путь к папке с docker-compose.yml (/root/your_path or ./your_path): "
+  TRANSLATIONS["ru,enter_compose_path"]="Введите полный путь к папке с docker-compose.yml ($HOME/your_path or ./your_path): "
   TRANSLATIONS["ru,docker_stop_success"]="Контейнеры остановлены, путь сохранён в .env-aztec-agent"
   TRANSLATIONS["ru,no_aztec_screen"]="Активных screen-сессий с Aztec не найдено."
   TRANSLATIONS["ru,cli_stop_success"]="Нода Aztec CLI остановлена, сессия сохранена в .env-aztec-agent"
@@ -807,6 +867,58 @@ init_languages() {
   TRANSLATIONS["ru,bls_final_web3signer_restarted"]="Финальный перезапуск web3signer завершен"
   TRANSLATIONS["ru,bls_final_web3signer_restart_failed"]="Финальный перезапуск web3signer не удался"
 
+  TRANSLATIONS["ru,aztec_rewards_claim"]="Aztec Rewards Claim"
+  TRANSLATIONS["ru,environment_file_not_found"]="Файл окружения не найден"
+  TRANSLATIONS["ru,rpc_url_not_set"]="RPC_URL не установлен"
+  TRANSLATIONS["ru,contract_address_not_set"]="CONTRACT_ADDRESS не установлен"
+  TRANSLATIONS["ru,using_contract"]="Используется контракт:"
+  TRANSLATIONS["ru,using_rpc"]="Используется RPC:"
+  TRANSLATIONS["ru,checking_rewards_claimable"]="Проверка доступности наград..."
+  TRANSLATIONS["ru,failed_check_rewards_claimable"]="Не удалось проверить статус доступности наград"
+  TRANSLATIONS["ru,rewards_not_claimable"]="Награды не доступны для получения в данный момент"
+  TRANSLATIONS["ru,rewards_are_claimable"]="Награды доступны для получения"
+  TRANSLATIONS["ru,keystore_file_not_found"]="Файл keystore не найден:"
+  TRANSLATIONS["ru,extracting_validator_addresses"]="Извлечение адресов валидаторов..."
+  TRANSLATIONS["ru,no_coinbase_addresses_found"]="Адреса coinbase не найдены в keystore"
+  TRANSLATIONS["ru,found_unique_coinbase_addresses"]="Найдено уникальных адресов coinbase:"
+  TRANSLATIONS["ru,repeats_times"]="повторяется %s раз"
+  TRANSLATIONS["ru,checking_rewards"]="Проверка наград..."
+  TRANSLATIONS["ru,checking_address"]="Проверка адреса"
+  TRANSLATIONS["ru,failed_get_rewards_for_address"]="Не удалось получить награды для адреса"
+  TRANSLATIONS["ru,failed_convert_rewards_amount"]="Не удалось конвертировать сумму наград для адреса"
+  TRANSLATIONS["ru,failed_convert_to_eth"]="Не удалось конвертировать в ETH для адреса"
+  TRANSLATIONS["ru,rewards_amount"]="Награды: %s ETH"
+  TRANSLATIONS["ru,no_rewards"]="Нет наград"
+  TRANSLATIONS["ru,no_rewards_to_claim"]="Нет наград для получения в данный момент"
+  TRANSLATIONS["ru,found_unique_addresses_with_rewards"]="Найдено уникальных адресов с наградами для получения:"
+  TRANSLATIONS["ru,already_claimed_this_session"]="Уже получено для адреса"
+  TRANSLATIONS["ru,skipping"]="пропускаем"
+  TRANSLATIONS["ru,address_label"]="Адрес:"
+  TRANSLATIONS["ru,amount_eth"]="Сумма: %s ETH"
+  TRANSLATIONS["ru,address_appears_times"]="Этот адрес появляется %s раз в keystore"
+  TRANSLATIONS["ru,claim_rewards_confirmation"]="Хотите получить эти награды? (y/n/skip):"
+  TRANSLATIONS["ru,claiming_rewards"]="Получение наград..."
+  TRANSLATIONS["ru,transaction_sent"]="Транзакция отправлена:"
+  TRANSLATIONS["ru,waiting_confirmation"]="Ожидание подтверждения..."
+  TRANSLATIONS["ru,transaction_confirmed_successfully"]="Транзакция успешно подтверждена"
+  TRANSLATIONS["ru,rewards_successfully_claimed"]="Награды успешно получены"
+  TRANSLATIONS["ru,rewards_claimed_balance_not_zero"]="Награды получены, но баланс не обнулен: %s ETH"
+  TRANSLATIONS["ru,claimed_rewards_for_address_appears_times"]="Получены награды для %s (появляется %s раз)"
+  TRANSLATIONS["ru,transaction_failed"]="Транзакция не удалась"
+  TRANSLATIONS["ru,could_not_get_receipt_transaction_sent"]="Не удалось получить квитанцию, но транзакция была отправлена"
+  TRANSLATIONS["ru,failed_send_transaction"]="Не удалось отправить транзакцию"
+  TRANSLATIONS["ru,skipping_claim_for_address"]="Пропускаем получение для адреса"
+  TRANSLATIONS["ru,skipping_all_remaining_claims"]="Пропускаем все оставшиеся получения"
+  TRANSLATIONS["ru,waiting_seconds"]="Ожидание 5 секунд..."
+  TRANSLATIONS["ru,summary"]="СВОДКА"
+  TRANSLATIONS["ru,successfully_claimed"]="Успешно получено:"
+  TRANSLATIONS["ru,failed_count"]="Не удалось:"
+  TRANSLATIONS["ru,unique_addresses_with_rewards"]="Уникальных адресов с наградами:"
+  TRANSLATIONS["ru,total_coinbase_addresses_in_keystore"]="Всего адресов coinbase в keystore:"
+  TRANSLATIONS["ru,contract_used"]="Использованный контракт:"
+  TRANSLATIONS["ru,earliest_rewards_claimable_timestamp"]="Самая ранняя метка времени для получения наград: %s (%s)"
+  TRANSLATIONS["ru,claim_function_not_activated"]="В настоящее время функция клейма неактивирована в контракте"
+
   # Turkish translations
   TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
   TRANSLATIONS["tr,title"]="========= Ana Menü ========="
@@ -830,11 +942,12 @@ init_languages() {
   TRANSLATIONS["tr,option18"]="18. BLS anahtarları oluştur"
   TRANSLATIONS["tr,option19"]="19. Approve"
   TRANSLATIONS["tr,option20"]="20. Stake"
+  TRANSLATIONS["tr,option21"]="21. Ödülleri talep edin"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
   TRANSLATIONS["tr,bls_invalid_number"]="Geçersiz sayı. Lütfen pozitif bir tam sayı girin."
-  TRANSLATIONS["tr,bls_keystore_not_found"]="❌ /root/aztec/config/keystore.json konumunda keystore.json bulunamadı"
+  TRANSLATIONS["tr,bls_keystore_not_found"]="❌ $HOME/aztec/config/keystore.json konumunda keystore.json bulunamadı"
   TRANSLATIONS["tr,bls_fee_recipient_not_found"]="❌ keystore.json dosyasında feeRecipient bulunamadı"
   TRANSLATIONS["tr,bls_generating_keys"]="🔑 BLS anahtarları oluşturuluyor..."
   TRANSLATIONS["tr,bls_generation_success"]="✅ BLS anahtarları başarıyla oluşturuldu"
@@ -880,11 +993,11 @@ init_languages() {
   TRANSLATIONS["tr,bls_old_private_key_prompt"]="Bir veya daha fazla ESKİ özel anahtarı, aralarında boşluk olmadan virgülle ayırarak kopyalayıp yapıştırın ve Enter'a basın (giriş gizlidir, ancak yapıştırılır): "
   TRANSLATIONS["tr,bls_sepolia_rpc_prompt"]="Sepolia RPC URL'nizi girin: "
   TRANSLATIONS["tr,bls_starting_generation"]="Oluşturma süreci başlatılıyor..."
-  TRANSLATIONS["tr,bls_ready_to_generate"]="⚠️ DİKKAT: Yeni operatörün tüm bilgilerini yazmaya HAZIR OLUN: anımsatıcı ifade, genel adres ve genel BLS anahtarı. Özel anahtar ve özel BLS anahtarı /root/aztec/bls-filtered-pk.json dosyasına kaydedilecektir."
+  TRANSLATIONS["tr,bls_ready_to_generate"]="⚠️ DİKKAT: Yeni operatörün tüm bilgilerini yazmaya HAZIR OLUN: anımsatıcı ifade, genel adres ve genel BLS anahtarı. Özel anahtar ve özel BLS anahtarı $HOME/aztec/bls-filtered-pk.json dosyasına kaydedilecektir."
   TRANSLATIONS["tr,bls_press_enter_to_generate"]="Yeni anahtarlarınızı oluşturmak için [Enter] tuşuna basın..."
   TRANSLATIONS["tr,bls_add_to_keystore_title"]="Keystore'a BLS Anahtarları Ekleme"
-  TRANSLATIONS["tr,bls_pk_file_not_found"]="BLS anahtar dosyası bulunamadı: /root/aztec/bls-filtered-pk.json"
-  TRANSLATIONS["tr,bls_keystore_not_found"]="Keystore dosyası bulunamadı: /root/aztec/config/keystore.json"
+  TRANSLATIONS["tr,bls_pk_file_not_found"]="BLS anahtar dosyası bulunamadı: $HOME/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["tr,bls_keystore_not_found"]="Keystore dosyası bulunamadı: $HOME/aztec/config/keystore.json"
   TRANSLATIONS["tr,bls_creating_backup"]="keystore.json yedekleniyor..."
   TRANSLATIONS["tr,bls_backup_created"]="Yedek oluşturuldu"
   TRANSLATIONS["tr,bls_processing_validators"]="Validatörler işleniyor"
@@ -903,7 +1016,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_invalid_json"]="Geçersiz JSON oluşturuldu, yedekten geri yükleniyor"
   TRANSLATIONS["tr,bls_restoring_backup"]="Orijinal keystore yedekten geri yükleniyor"
   TRANSLATIONS["tr,bls_operation_completed"]="BLS anahtarı ekleme işlemi başarıyla tamamlandı"
-  TRANSLATIONS["tr,bls_to_keystore"]="BLS anahtarlarını keystore.json dosyasına ekleyin (yalnızca BLS oluşturma işleminden sonra çalıştırın)"
+  TRANSLATIONS["tr,bls_to_keystore"]="BLS anahtarlarını keystore.json dosyasına ekleyin (yalnızca BLS oluşturulduktan sonra ve yalnızca BLS bir başlangıç ​​ifadesinden oluşturulduysa veya bls-filtered-pk.json dosyasını kendiniz doğru bir şekilde oluşturduysanız çalıştırın)"
   TRANSLATIONS["tr,bls_new_keys_generated"]="Harika! Yeni anahtarlarınız aşağıdadır. BU BİLGİYİ GÜVENLİ BİR YERE KAYDEDİN!"
   TRANSLATIONS["tr,bls_new_eth_private_key"]="YENİ ETH Özel Anahtarı"
   TRANSLATIONS["tr,bls_new_bls_private_key"]="YENİ BLS Özel Anahtarı"
@@ -964,8 +1077,11 @@ init_languages() {
   TRANSLATIONS["tr,install_prompt"]="Şimdi yüklemek istiyor musunuz? (Y/n):"
   TRANSLATIONS["tr,missing_required"]="⚠️ Betik, gerekli bileşenler olmadan çalışamaz. Çıkılıyor."
   TRANSLATIONS["tr,rpc_prompt"]="Ethereum RPC URL'sini girin:"
+  TRANSLATIONS["tr,network_prompt"]="Ağ türünü girin (örneğin testnet veya mainnet):"
   TRANSLATIONS["tr,env_created"]="✅ RPC URL'si ile .env dosyası oluşturuldu"
   TRANSLATIONS["tr,env_exists"]="✅ Mevcut .env dosyası kullanılıyor, RPC URL:"
+  TRANSLATIONS["tr,rpc_empty_error"]="RPC URL boş olamaz. Lütfen geçerli bir URL girin."
+  TRANSLATIONS["tr,network_empty_error"]="Ağ adı boş olamaz. Lütfen bir ağ adı girin."
   TRANSLATIONS["tr,search_container"]="🔍 'aztec' konteyneri aranıyor..."
   TRANSLATIONS["tr,container_not_found"]="❌ 'aztec' konteyneri bulunamadı."
   TRANSLATIONS["tr,container_found"]="✅ Konteyner bulundu:"
@@ -1058,7 +1174,7 @@ init_languages() {
   TRANSLATIONS["tr,installation_cancelled_by_user"]="✖ Kurulum kullanıcı tarafından iptal edildi"
   TRANSLATIONS["tr,unknown_error_occurred"]="⚠ Kurulum sırasında bilinmeyen bir hata oluştu"
   TRANSLATIONS["tr,stop_method_prompt"]="Aztec düğümünü durdurma yöntemi seçin (docker-compose / cli): "
-  TRANSLATIONS["tr,enter_compose_path"]="docker-compose.yml dosyasının bulunduğu klasörün tam yolunu girin  (/root/your_path veya ./your_path): "
+  TRANSLATIONS["tr,enter_compose_path"]="docker-compose.yml dosyasının bulunduğu klasörün tam yolunu girin  ($HOME/your_path veya ./your_path): "
   TRANSLATIONS["tr,docker_stop_success"]="Konteynerler durduruldu ve yol .env-aztec-agent dosyasına kaydedildi"
   TRANSLATIONS["tr,no_aztec_screen"]="Aktif Aztec screen oturumu bulunamadı."
   TRANSLATIONS["tr,cli_stop_success"]="Aztec CLI düğümü durduruldu ve oturum .env-aztec-agent dosyasına kaydedildi"
@@ -1187,15 +1303,89 @@ init_languages() {
   TRANSLATIONS["tr,bls_final_web3signer_restart"]="Tüm anahtarları yüklemek için son web3signer yeniden başlatma işlemi yapılıyor"
   TRANSLATIONS["tr,bls_final_web3signer_restarted"]="Son web3signer yeniden başlatma işlemi tamamlandı"
   TRANSLATIONS["tr,bls_final_web3signer_restart_failed"]="Son web3signer yeniden başlatma işlemi başarısız oldu"
+
+  TRANSLATIONS["tr,aztec_rewards_claim"]="Aztec Ödül Talep"
+  TRANSLATIONS["tr,environment_file_not_found"]="Ortam dosyası bulunamadı"
+  TRANSLATIONS["tr,rpc_url_not_set"]="RPC_URL ayarlanmamış"
+  TRANSLATIONS["tr,contract_address_not_set"]="CONTRACT_ADDRESS ayarlanmamış"
+  TRANSLATIONS["tr,using_contract"]="Kullanılan kontrat:"
+  TRANSLATIONS["tr,using_rpc"]="Kullanılan RPC:"
+  TRANSLATIONS["tr,checking_rewards_claimable"]="Ödüllerin talep edilip edilemeyeceği kontrol ediliyor..."
+  TRANSLATIONS["tr,failed_check_rewards_claimable"]="Ödül talep durumu kontrol edilemedi"
+  TRANSLATIONS["tr,rewards_not_claimable"]="Ödüller şu anda talep edilemez"
+  TRANSLATIONS["tr,rewards_are_claimable"]="Ödüller talep edilebilir"
+  TRANSLATIONS["tr,keystore_file_not_found"]="Keystore dosyası bulunamadı:"
+  TRANSLATIONS["tr,extracting_validator_addresses"]="Doğrulayıcı adresleri çıkarılıyor..."
+  TRANSLATIONS["tr,no_coinbase_addresses_found"]="Keystore'da coinbase adresi bulunamadı"
+  TRANSLATIONS["tr,found_unique_coinbase_addresses"]="Benzersiz coinbase adresleri bulundu:"
+  TRANSLATIONS["tr,repeats_times"]="%s kez tekrarlanıyor"
+  TRANSLATIONS["tr,checking_rewards"]="Ödüller kontrol ediliyor..."
+  TRANSLATIONS["tr,checking_address"]="Adres kontrol ediliyor"
+  TRANSLATIONS["tr,failed_get_rewards_for_address"]="Adres için ödüller alınamadı"
+  TRANSLATIONS["tr,failed_convert_rewards_amount"]="Adres için ödül miktarı dönüştürülemedi"
+  TRANSLATIONS["tr,failed_convert_to_eth"]="Adres için ETH'ye dönüştürülemedi"
+  TRANSLATIONS["tr,rewards_amount"]="Ödüller: %s ETH"
+  TRANSLATIONS["tr,no_rewards"]="Ödül yok"
+  TRANSLATIONS["tr,no_rewards_to_claim"]="Şu anda talep edilecek ödül yok"
+  TRANSLATIONS["tr,found_unique_addresses_with_rewards"]="Talep edilecek ödülü olan benzersiz adresler bulundu:"
+  TRANSLATIONS["tr,already_claimed_this_session"]="Bu oturumda zaten talep edildi"
+  TRANSLATIONS["tr,skipping"]="atlanıyor"
+  TRANSLATIONS["tr,address_label"]="Adres:"
+  TRANSLATIONS["tr,amount_eth"]="Miktar: %s ETH"
+  TRANSLATIONS["tr,address_appears_times"]="Bu adres keystore'da %s kez görünüyor"
+  TRANSLATIONS["tr,claim_rewards_confirmation"]="Bu ödülleri talep etmek istiyor musunuz? (y/n/skip):"
+  TRANSLATIONS["tr,claiming_rewards"]="Ödüller talep ediliyor..."
+  TRANSLATIONS["tr,transaction_sent"]="İşlem gönderildi:"
+  TRANSLATIONS["tr,waiting_confirmation"]="Onay bekleniyor..."
+  TRANSLATIONS["tr,transaction_confirmed_successfully"]="İşlem başarıyla onaylandı"
+  TRANSLATIONS["tr,rewards_successfully_claimed"]="Ödüller başarıyla talep edildi"
+  TRANSLATIONS["tr,rewards_claimed_balance_not_zero"]="Ödüller talep edildi ancak bakiye sıfır değil: %s ETH"
+  TRANSLATIONS["tr,claimed_rewards_for_address_appears_times"]="%s için ödüller talep edildi (%s kez görünüyor)"
+  TRANSLATIONS["tr,transaction_failed"]="İşlem başarısız oldu"
+  TRANSLATIONS["tr,could_not_get_receipt_transaction_sent"]="Makbuz alınamadı, ancak işlem gönderildi"
+  TRANSLATIONS["tr,failed_send_transaction"]="İşlem gönderilemedi"
+  TRANSLATIONS["tr,skipping_claim_for_address"]="Adres için talep atlanıyor"
+  TRANSLATIONS["tr,skipping_all_remaining_claims"]="Kalan tüm talepler atlanıyor"
+  TRANSLATIONS["tr,waiting_seconds"]="5 saniye bekleniyor..."
+  TRANSLATIONS["tr,summary"]="ÖZET"
+  TRANSLATIONS["tr,successfully_claimed"]="Başarıyla talep edildi:"
+  TRANSLATIONS["tr,failed_count"]="Başarısız:"
+  TRANSLATIONS["tr,unique_addresses_with_rewards"]="Ödüllü benzersiz adresler:"
+  TRANSLATIONS["tr,total_coinbase_addresses_in_keystore"]="Keystore'daki toplam coinbase adresleri:"
+  TRANSLATIONS["tr,contract_used"]="Kullanılan kontrat:"
+  TRANSLATIONS["tr,earliest_rewards_claimable_timestamp"]="En erken ödül talep edilebilir zaman damgası: %s (%s)"
+  TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
 # === Configuration ===
 CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
+CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
 FUNCTION_SIG="getPendingBlockNumber()"
 
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
+
+# === Helper function to get network and RPC settings ===
+get_network_settings() {
+    local env_file="$HOME/.env-aztec-agent"
+    local network="testnet"
+    local rpc_url="$RPC_URL"
+
+    if [[ -f "$env_file" ]]; then
+        source "$env_file"
+        [[ -n "$NETWORK" ]] && network="$NETWORK"
+        [[ -n "$ALT_RPC" ]] && rpc_url="$ALT_RPC"
+    fi
+
+    # Determine contract address based on network
+    local contract_address="$CONTRACT_ADDRESS"
+    if [[ "$network" == "mainnet" ]]; then
+        contract_address="$CONTRACT_ADDRESS_MAINNET"
+    fi
+
+    echo "$network|$rpc_url|$contract_address"
+}
 
 # === Dependency check ===
 check_dependencies() {
@@ -1372,13 +1562,41 @@ check_dependencies() {
 
   # Request RPC URL from user and create .env file
   if [ ! -f .env-aztec-agent ]; then
-    echo -e "\n${BLUE}$(t "rpc_prompt")${NC}"
-    read -p "> " RPC_URL
-    echo "RPC_URL=$RPC_URL" > .env-aztec-agent
-    echo -e "\n${GREEN}$(t "env_created")${NC}"
+      echo -e "\n${BLUE}$(t "rpc_prompt")${NC}"
+
+      # Запрос RPC URL с проверкой
+      while true; do
+          read -p "> " RPC_URL
+          if [ -n "$RPC_URL" ]; then
+              break
+          else
+              echo -e "${RED}$(t "rpc_empty_error")${NC}"
+          fi
+      done
+
+      echo -e "\n${BLUE}$(t "network_prompt")${NC}"
+
+      # Запрос сети с проверкой
+      while true; do
+          read -p "> " NETWORK
+          if [ -n "$NETWORK" ]; then
+              break
+          else
+              echo -e "${RED}$(t "network_empty_error")${NC}"
+          fi
+      done
+
+      # Создание файла с обеими переменными
+      {
+          echo "RPC_URL=$RPC_URL"
+          echo "NETWORK=$NETWORK"
+      } > .env-aztec-agent
+
+      echo -e "\n${GREEN}$(t "env_created")${NC}"
   else
-    source .env-aztec-agent
-    echo -e "\n${GREEN}$(t "env_exists") $RPC_URL${NC}"
+      source .env-aztec-agent
+      DISPLAY_NETWORK="${NETWORK:-testnet}"
+      echo -e "\n${GREEN}$(t "env_exists") RPC_URL: $RPC_URL, NETWORK: $DISPLAY_NETWORK${NC}"
   fi
 
   # === Проверяем и добавляем ключ VERSION в ~/.env-aztec-agent ===
@@ -1472,7 +1690,13 @@ spinner() {
 # === Check container logs for block ===
 check_aztec_container_logs() {
     cd $HOME
-    source .env-aztec-agent
+
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
     # URL JSON файла с ошибками на GitHub
     ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
@@ -1486,7 +1710,6 @@ check_aztec_container_logs() {
             echo -e "${YELLOW}Warning: Failed to download error definitions from GitHub${NC}"
             return 1
         fi
-        return 0
         return 0
     }
 
@@ -1528,7 +1751,7 @@ check_aztec_container_logs() {
             ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
         )
         error_solutions=(
-            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/testnet/data/\n3. Run the container. Use option 14"
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 14"
         )
     fi
 
@@ -1543,7 +1766,7 @@ check_aztec_container_logs() {
     echo -e "\n${GREEN}$(t "container_found") $container_id${NC}"
 
     echo -e "\n${BLUE}$(t "get_block")${NC}"
-    block_hex=$(cast call "$CONTRACT_ADDRESS" "$FUNCTION_SIG" --rpc-url "$RPC_URL" 2>/dev/null)
+    block_hex=$(cast call "$contract_address" "$FUNCTION_SIG" --rpc-url "$rpc_url" 2>/dev/null)
     if [ -z "$block_hex" ]; then
         echo -e "\n${RED}$(t "block_error")${NC}"
         return
@@ -1570,7 +1793,6 @@ check_aztec_container_logs() {
         fi
     done
 
-    # Остальная часть функции остается без изменений
     temp_file=$(mktemp)
     {
         echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file" 2>/dev/null
@@ -1870,20 +2092,20 @@ create_systemd_agent() {
   fi
 
   # === Проверка и получение VALIDATORS (если NOTIFICATION_TYPE == 2) ===
-  if [ "$NOTIFICATION_TYPE" -eq 2 ] && [ ! -f "/root/.env-aztec-agent" ] || ! grep -q "^VALIDATORS=" "/root/.env-aztec-agent"; then
+  if [ "$NOTIFICATION_TYPE" -eq 2 ] && [ ! -f "$HOME/.env-aztec-agent" ] || ! grep -q "^VALIDATORS=" "$HOME/.env-aztec-agent"; then
     echo -e "\n${BLUE}$(t "validators_prompt")${NC}"
     echo -e "${YELLOW}$(t "validators_format")${NC}"
     while true; do
       read -p "> " VALIDATORS
       if [[ -n "$VALIDATORS" ]]; then
-        if [ -f "/root/.env-aztec-agent" ]; then
-          if grep -q "^VALIDATORS=" "/root/.env-aztec-agent"; then
-            sed -i "s/^VALIDATORS=.*/VALIDATORS=\"$VALIDATORS\"/" "/root/.env-aztec-agent"
+        if [ -f "$HOME/.env-aztec-agent" ]; then
+          if grep -q "^VALIDATORS=" "$HOME/.env-aztec-agent"; then
+            sed -i "s/^VALIDATORS=.*/VALIDATORS=\"$VALIDATORS\"/" "$HOME/.env-aztec-agent"
           else
-            echo "VALIDATORS=\"$VALIDATORS\"" >> "/root/.env-aztec-agent"
+            echo "VALIDATORS=\"$VALIDATORS\"" >> "$HOME/.env-aztec-agent"
           fi
         else
-          echo "VALIDATORS=\"$VALIDATORS\"" > "/root/.env-aztec-agent"
+          echo "VALIDATORS=\"$VALIDATORS\"" > "$HOME/.env-aztec-agent"
         fi
         break
       else
@@ -1897,22 +2119,43 @@ create_systemd_agent() {
   # Генерация скрипта агента
   cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
-export PATH="\$PATH:/root/.foundry/bin"
+export PATH="\$PATH:\$HOME/.foundry/bin"
 
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
+CONTRACT_ADDRESS_MAINNET="$CONTRACT_ADDRESS_MAINNET"
 FUNCTION_SIG="$FUNCTION_SIG"
 TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
 LANG="$LANG"
 
-# Получаем значение NETWORK из env-aztec-agent
-NETWORK="testnet"
-if [[ -f "\$HOME/.env-aztec-agent" ]]; then
-  source "\$HOME/.env-aztec-agent"
-  [[ -n "\$NETWORK" ]] && NETWORK="\$NETWORK"
-fi
+# === Helper function to get network and RPC settings ===
+get_network_settings() {
+    local env_file="\$HOME/.env-aztec-agent"
+    local network="testnet"
+    local rpc_url="\$RPC_URL"
+
+    if [[ -f "\$env_file" ]]; then
+        source "\$env_file"
+        [[ -n "\$NETWORK" ]] && network="\$NETWORK"
+        [[ -n "\$ALT_RPC" ]] && rpc_url="\$ALT_RPC"
+    fi
+
+    # Determine contract address based on network
+    local contract_address="\$CONTRACT_ADDRESS"
+    if [[ "\$network" == "mainnet" ]]; then
+        contract_address="\$CONTRACT_ADDRESS_MAINNET"
+    fi
+
+    echo "\$network|\$rpc_url|\$contract_address"
+}
+
+# Получаем настройки сети
+NETWORK_SETTINGS=\$(get_network_settings)
+NETWORK=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f1)
+RPC_URL=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f2)
+CONTRACT_ADDRESS=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f3)
 
 # URL JSON файла с ошибками на GitHub
 ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
@@ -2135,7 +2378,7 @@ find_last_log_line() {
 
 # === Функция для проверки и добавления переменной DEBUG ===
 ensure_debug_variable() {
-  local env_file="/root/.env-aztec-agent"
+  local env_file="\$HOME/.env-aztec-agent"
   if [ ! -f "\$env_file" ]; then
     return
   fi
@@ -2153,12 +2396,12 @@ ensure_debug_variable
 
 # === Функция для проверки отладочного режима ===
 is_debug_enabled() {
-  if [ ! -f "/root/.env-aztec-agent" ]; then
+  if [ ! -f "\$HOME/.env-aztec-agent" ]; then
     return 1
   fi
 
   # Загружаем только переменную DEBUG
-  debug_value=\$(grep "^DEBUG=" "/root/.env-aztec-agent" | cut -d'=' -f2 | tr -d '"' | tr -d "'" | tr '[:upper:]' '[:lower:]')
+  debug_value=\$(grep "^DEBUG=" "\$HOME/.env-aztec-agent" | cut -d'=' -f2 | tr -d '"' | tr -d "'" | tr '[:upper:]' '[:lower:]')
 
   if [ "\$debug_value" = "true" ] || [ "\$debug_value" = "1" ] || [ "\$debug_value" = "yes" ]; then
     return 0
@@ -2184,12 +2427,12 @@ check_committee() {
   fi
 
   # Загружаем список валидаторов
-  if [ ! -f "/root/.env-aztec-agent" ]; then
-    log "Validator file /root/.env-aztec-agent not found"
+  if [ ! -f "\$HOME/.env-aztec-agent" ]; then
+    log "Validator file \$HOME/.env-aztec-agent not found"
     return
   fi
 
-  source /root/.env-aztec-agent
+  source \$HOME/.env-aztec-agent
   if [ -z "\$VALIDATORS" ]; then
     log "No validators defined in VALIDATORS variable"
     return
@@ -2574,82 +2817,90 @@ remove_systemd_agent() {
 }
 
 
+# === Check Proven L2 Block and Sync Proof ===
 check_proven_block() {
-  ENV_FILE="/root/.env-aztec-agent"
+    ENV_FILE="$HOME/.env-aztec-agent"
 
-  if [ -f "$ENV_FILE" ]; then
-    source "$ENV_FILE"
-  fi
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
-  AZTEC_PORT=${AZTEC_PORT:-8080}
-
-  echo -e "\n${CYAN}$(t "current_aztec_port") $AZTEC_PORT${NC}"
-  read -p "$(t "enter_aztec_port_prompt") [${AZTEC_PORT}]: " user_port
-
-  if [ -n "$user_port" ]; then
-    AZTEC_PORT=$user_port
-
-    if grep -q "^AZTEC_PORT=" "$ENV_FILE" 2>/dev/null; then
-      sed -i "s/^AZTEC_PORT=.*/AZTEC_PORT=$AZTEC_PORT/" "$ENV_FILE"
-    else
-      echo "AZTEC_PORT=$AZTEC_PORT" >> "$ENV_FILE"
+    if [ -f "$ENV_FILE" ]; then
+        source "$ENV_FILE"
     fi
 
-    echo -e "${GREEN}$(t "port_saved_successfully")${NC}"
-  fi
+    AZTEC_PORT=${AZTEC_PORT:-8080}
 
-  echo -e "\n${BLUE}$(t "checking_port") $AZTEC_PORT...${NC}"
-  if ! nc -z -w 2 localhost $AZTEC_PORT; then
-    echo -e "\n${RED}$(t "port_not_available") $AZTEC_PORT${NC}"
-    echo -e "${YELLOW}$(t "check_node_running")${NC}"
-    return 1
-  fi
+    echo -e "\n${CYAN}$(t "current_aztec_port") $AZTEC_PORT${NC}"
+    read -p "$(t "enter_aztec_port_prompt") [${AZTEC_PORT}]: " user_port
 
-  echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
+    if [ -n "$user_port" ]; then
+        AZTEC_PORT=$user_port
 
-  # Фоновый процесс получения блока
-  (
-    curl -s -X POST -H 'Content-Type: application/json' \
-      -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
-      http://localhost:$AZTEC_PORT | jq -r ".result.proven.number"
-  ) > /tmp/proven_block.tmp &
-  pid1=$!
-  spinner $pid1
-  wait $pid1
+        if grep -q "^AZTEC_PORT=" "$ENV_FILE" 2>/dev/null; then
+            sed -i "s/^AZTEC_PORT=.*/AZTEC_PORT=$AZTEC_PORT/" "$ENV_FILE"
+        else
+            echo "AZTEC_PORT=$AZTEC_PORT" >> "$ENV_FILE"
+        fi
 
-  PROVEN_BLOCK=$(< /tmp/proven_block.tmp)
-  rm -f /tmp/proven_block.tmp
+        echo -e "${GREEN}$(t "port_saved_successfully")${NC}"
+    fi
 
-  if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
-    echo -e "\n${RED}$(t "proven_block_error")${NC}"
-    return 1
-  fi
+    echo -e "\n${BLUE}$(t "checking_port") $AZTEC_PORT...${NC}"
+    if ! nc -z -w 2 localhost $AZTEC_PORT; then
+        echo -e "\n${RED}$(t "port_not_available") $AZTEC_PORT${NC}"
+        echo -e "${YELLOW}$(t "check_node_running")${NC}"
+        return 1
+    fi
 
-  echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
+    echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
 
-  echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
+    # Фоновый процесс получения блока
+    (
+        curl -s -X POST -H 'Content-Type: application/json' \
+          -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
+          http://localhost:$AZTEC_PORT | jq -r ".result.proven.number"
+    ) > /tmp/proven_block.tmp &
+    pid1=$!
+    spinner $pid1
+    wait $pid1
 
-  # Фоновый процесс получения proof
-  (
-    curl -s -X POST -H 'Content-Type: application/json' \
-      -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
-      http://localhost:$AZTEC_PORT | jq -r ".result"
-  ) > /tmp/sync_proof.tmp &
-  pid2=$!
-  spinner $pid2
-  wait $pid2
+    PROVEN_BLOCK=$(< /tmp/proven_block.tmp)
+    rm -f /tmp/proven_block.tmp
 
-  SYNC_PROOF=$(< /tmp/sync_proof.tmp)
-  rm -f /tmp/sync_proof.tmp
+    if [[ -z "$PROVEN_BLOCK" || "$PROVEN_BLOCK" == "null" ]]; then
+        echo -e "\n${RED}$(t "proven_block_error")${NC}"
+        return 1
+    fi
 
-  if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
-    echo -e "\n${RED}$(t "sync_proof_error")${NC}"
-    return 1
-  fi
+    echo -e "\n${GREEN}$(t "proven_block_found") $PROVEN_BLOCK${NC}"
 
-  echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
-  echo "$SYNC_PROOF"
-  return 0
+    echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
+
+    # Фоновый процесс получения proof
+    (
+        curl -s -X POST -H 'Content-Type: application/json' \
+          -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
+          http://localhost:$AZTEC_PORT | jq -r ".result"
+    ) > /tmp/sync_proof.tmp &
+    pid2=$!
+    spinner $pid2
+    wait $pid2
+
+    SYNC_PROOF=$(< /tmp/sync_proof.tmp)
+    rm -f /tmp/sync_proof.tmp
+
+    if [[ -z "$SYNC_PROOF" || "$SYNC_PROOF" == "null" ]]; then
+        echo -e "\n${RED}$(t "sync_proof_error")${NC}"
+        return 1
+    fi
+
+    echo -e "\n${GREEN}$(t "sync_proof_found")${NC}"
+    echo "$SYNC_PROOF"
+    return 0
 }
 
 # === Change RPC URL ===
@@ -2691,7 +2942,7 @@ change_rpc_url() {
 
 # === Check validator ===
 function check_validator {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator-dev.sh"
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
@@ -2702,7 +2953,7 @@ function check_validator {
 
 # === Install Aztec node ===
 function install_aztec {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_install_node")${NC}"
   echo -e ""
@@ -2752,7 +3003,7 @@ function install_aztec {
 
 # === Delete Aztec node ===
 function delete_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
     local FUNCTION_NAME="delete_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
@@ -2761,7 +3012,7 @@ function delete_aztec() {
 
 # === Update Aztec node ===
 function update_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
     local FUNCTION_NAME="update_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
@@ -2770,7 +3021,7 @@ function update_aztec() {
 
 # === Downgrade Aztec node ===
 function downgrade_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
     local FUNCTION_NAME="downgrade_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
@@ -3067,25 +3318,38 @@ function check_aztec_version() {
 
 # === Approve ===
 approve_with_all_keys() {
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
+
     local rpc_providers=(
+        "$rpc_url"
         "https://ethereum-sepolia-rpc.publicnode.com"
         "https://1rpc.io/sepolia"
         "https://sepolia.drpc.org"
     )
     local key_files
     local private_key
-    local rpc_url
+    local current_rpc_url
 
     # Find all YML key files
-    key_files=$(find /root/aztec/keys/ -name "*.yml" -type f)
+    key_files=$(find $HOME/aztec/keys/ -name "*.yml" -type f)
     if [ -z "$key_files" ]; then
-        echo "Error: No YML key files found in /root/aztec/keys/"
+        echo "Error: No YML key files found in $HOME/aztec/keys/"
         return 1
     fi
 
     # Execute command for each private key sequentially
     for key_file in $key_files; do
-	    echo ""
+        # Skip files with 'bls' in the name
+        if [[ "$key_file" == *"bls"* ]]; then
+            continue
+        fi
+
+        echo ""
         echo "Processing key file: $key_file"
 
         # Extract private key from YML file
@@ -3095,16 +3359,16 @@ approve_with_all_keys() {
             echo "Executing with private key from $key_file"
 
             # Use the first RPC provider from the list
-            rpc_url="${rpc_providers[0]}"
-            echo "Using RPC URL: $rpc_url"
+            current_rpc_url="${rpc_providers[0]}"
+            echo "Using RPC URL: $current_rpc_url"
 
             # Execute the cast command
             cast send 0x139d2a7a0881e16332d7D1F8DB383A4507E1Ea7A \
                 "approve(address,uint256)" \
-                "$CONTRACT_ADDRESS" \
+                "$contract_address" \
                 200000ether \
                 --private-key "$private_key" \
-                --rpc-url "$rpc_url"
+                --rpc-url "$current_rpc_url"
 
             # Wait for completion before proceeding to next key
             wait
@@ -3119,8 +3383,8 @@ add_bls_to_keystore() {
     echo -e "\n${BLUE}=== $(t "bls_add_to_keystore_title") ===${NC}"
 
     # Файлы
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
     local KEYSTORE_BACKUP="${KEYSTORE_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
 
     # Проверка существования файлов
@@ -3313,7 +3577,7 @@ generate_bls_existing_method() {
     fi
 
     # 3. Получение feeRecipient из keystore.json
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
     if [ ! -f "$KEYSTORE_FILE" ]; then
         echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
         return 1
@@ -3552,7 +3816,7 @@ generate_bls_new_operator_method() {
     done
 
     # Получаем порядок адресов из keystore.json
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
     if [ ! -f "$KEYSTORE_FILE" ]; then
         echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
         return 1
@@ -3747,9 +4011,16 @@ EOF
 stake_validators() {
     echo -e "\n${BLUE}=== $(t "staking_title") ===${NC}"
 
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
+
     # Проверяем существование необходимых файлов
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
     if [ ! -f "$BLS_PK_FILE" ]; then
         printf "${RED}❌ $(t "file_not_found")${NC}\n" "bls-filtered-pk.json" "$BLS_PK_FILE"
@@ -3761,18 +4032,22 @@ stake_validators() {
     if jq -e '.validators[0].new_operator_info' "$BLS_PK_FILE" > /dev/null 2>&1; then
         # Новый формат - есть информация о новом операторе внутри валидаторов
         echo -e "${GREEN}🔍 Detected new operator method format${NC}"
-        stake_validators_new_format
+        stake_validators_new_format "$network" "$rpc_url" "$contract_address"
     else
         # Старый формат - нет информации о новом операторе
         echo -e "${GREEN}🔍 Detected existing method format${NC}"
-        stake_validators_old_format
+        stake_validators_old_format "$network" "$rpc_url" "$contract_address"
     fi
 }
 
 # === Old format (existing method) ===
 stake_validators_old_format() {
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
+    local network="$1"
+    local rpc_url="$2"
+    local contract_address="$3"
+
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
     if [ ! -f "$KEYSTORE_FILE" ]; then
         printf "${RED}❌ $(t "file_not_found")${NC}\n" "keystore.json" "$KEYSTORE_FILE"
@@ -3783,14 +4058,6 @@ stake_validators_old_format() {
         printf "${RED}❌ $(t "file_not_found")${NC}\n" \
          "bls-filtered-pk.json" "$BLS_PK_FILE"
         return 1
-    fi
-
-    # Получаем значение NETWORK из env-aztec-agent
-    local aztec_agent_env="$HOME/.env-aztec-agent"
-    local network="testnet"
-    if [[ -f "$aztec_agent_env" ]]; then
-        network=$(_read_env_var "$aztec_agent_env" "NETWORK")
-        [[ -z "$network" ]] && network="testnet"
     fi
 
     # Формируем ссылку для валидатора в зависимости от сети
@@ -3813,33 +4080,27 @@ stake_validators_old_format() {
 
     # Список RPC провайдеров
     local rpc_providers=(
+        "$rpc_url"
         "https://ethereum-sepolia-rpc.publicnode.com"
         "https://1rpc.io/sepolia"
         "https://sepolia.drpc.org"
     )
 
-    # Используем глобальную переменную контракта
-    if [ -z "$CONTRACT_ADDRESS" ]; then
-        echo -e "${RED}❌ $(t "contract_not_set")${NC}"
-        return 1
-    fi
-
-    printf "${YELLOW}$(t "using_contract_address")${NC}\n" \
-	 "$CONTRACT_ADDRESS"
-	 echo ""
+    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$contract_address"
+    echo ""
 
     # Цикл по всем валидаторам
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
         printf "\n${BLUE}=== $(t "staking_processing") ===${NC}\n" \
-		 "$((i+1))" "$VALIDATOR_COUNT"
-		 echo ""
+         "$((i+1))" "$VALIDATOR_COUNT"
+         echo ""
 
         # Из BLS файла берем приватные ключи
         local PRIVATE_KEY_OF_OLD_SEQUENCER=$(jq -r ".validators[$i].attester.eth" "$BLS_PK_FILE" 2>/dev/null)
         local BLS_ATTESTER_PRIV_KEY=$(jq -r ".validators[$i].attester.bls" "$BLS_PK_FILE" 2>/dev/null)
 
         # Из keystore файла берем Ethereum адреса
-        local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].attester" "$KEYSTORE_FILE" 2>/dev/null)
+        local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].attester.eth" "$KEYSTORE_FILE" 2>/dev/null)
 
         # Проверяем что все данные получены
         if [ -z "$PRIVATE_KEY_OF_OLD_SEQUENCER" ] || [ "$PRIVATE_KEY_OF_OLD_SEQUENCER" = "null" ]; then
@@ -3867,33 +4128,33 @@ stake_validators_old_format() {
 
         # Цикл по RPC провайдерам
         local success=false
-        for rpc_url in "${rpc_providers[@]}"; do
+        for current_rpc_url in "${rpc_providers[@]}"; do
             printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" \
-			      "$rpc_url"
-			 echo ""
+                  "$current_rpc_url"
+             echo ""
 
             # Формируем команду
             local cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_ATTESTER_PRIV_KEY\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             # Показываем команду с частичными приватными ключами (первые 7 символов)
             local PRIVATE_KEY_PREVIEW="${PRIVATE_KEY_OF_OLD_SEQUENCER:0:7}..."
             local BLS_KEY_PREVIEW="${BLS_ATTESTER_PRIV_KEY:0:7}..."
 
             local safe_cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_PREVIEW\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_KEY_PREVIEW\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             echo -e "${CYAN}$(t "command_to_execute")${NC}"
             echo -e "$safe_cmd"
@@ -3908,7 +4169,7 @@ stake_validators_old_format() {
 
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success")${NC}\n" \
-                            "$((i+1))" "$rpc_url"
+                            "$((i+1))" "$current_rpc_url"
                         # Показываем ссылку на валидатора
                         local validator_link
                         if [[ "$network" == "mainnet" ]]; then
@@ -3917,14 +4178,14 @@ stake_validators_old_format() {
                             validator_link="https://${network}.dashtec.xyz/validators/$ETH_ATTESTER_ADDRESS"
                         fi
                         echo -e "${CYAN}🌐 $(t "validator_link"): $validator_link${NC}"
-						 echo ""
+                         echo ""
 
                         success=true
                         break  # Переходим к следующему валидатору
                     else
                         printf "${RED}❌ $(t "staking_failed")${NC}\n" \
-						 "$((i+1))" "$rpc_url"
-						 echo ""
+                         "$((i+1))" "$current_rpc_url"
+                         echo ""
                         echo -e "${YELLOW}$(t "trying_next_rpc")${NC}"
                     fi
                     ;;
@@ -3946,8 +4207,8 @@ stake_validators_old_format() {
 
         if [ "$success" = false ]; then
             printf "${RED}❌ $(t "staking_all_failed")${NC}\n" \
-			 "$((i+1))"
-			 echo ""
+             "$((i+1))"
+             echo ""
             echo -e "${YELLOW}$(t "continuing_next_validator")${NC}"
         fi
 
@@ -3964,16 +4225,12 @@ stake_validators_old_format() {
 
 # === New format (new operator method) ===
 stake_validators_new_format() {
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local network="$1"
+    local rpc_url="$2"
+    local contract_address="$3"
 
-    # Получаем значение NETWORK из env-aztec-agent
-    local aztec_agent_env="$HOME/.env-aztec-agent"
-    local network="testnet"
-    if [[ -f "$aztec_agent_env" ]]; then
-        network=$(_read_env_var "$aztec_agent_env" "NETWORK")
-        [[ -z "$network" ]] && network="testnet"
-    fi
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
 
     # Получаем количество валидаторов
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
@@ -3986,15 +4243,10 @@ stake_validators_new_format() {
     echo ""
 
     # Создаем папку для ключей если не существует
-    local KEYS_DIR="/root/aztec/keys"
+    local KEYS_DIR="$HOME/aztec/keys"
     mkdir -p "$KEYS_DIR"
 
-    if [ -z "$CONTRACT_ADDRESS" ]; then
-        echo -e "${RED}❌ $(t "contract_not_set")${NC}"
-        return 1
-    fi
-
-    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$CONTRACT_ADDRESS"
+    printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$contract_address"
     echo ""
 
     # Создаем резервную копию keystore.json перед изменениями
@@ -4007,8 +4259,8 @@ stake_validators_new_format() {
     # Цикл по всем валидаторам
     for ((i=0; i<VALIDATOR_COUNT; i++)); do
         printf "\n${BLUE}=== $(t "staking_processing_new_operator") ===${NC}\n" \
-		 "$((i+1))" "$VALIDATOR_COUNT"
-		 echo ""
+         "$((i+1))" "$VALIDATOR_COUNT"
+         echo ""
 
         # Получаем данные для текущего валидатора
         local PRIVATE_KEY_OF_OLD_SEQUENCER=$(jq -r ".validators[$i].attester.eth" "$BLS_PK_FILE" 2>/dev/null)
@@ -4016,7 +4268,7 @@ stake_validators_new_format() {
         local NEW_ETH_PRIVATE_KEY=$(jq -r ".validators[$i].new_operator_info.eth_private_key" "$BLS_PK_FILE" 2>/dev/null)
         local BLS_ATTESTER_PRIV_KEY=$(jq -r ".validators[$i].new_operator_info.bls_private_key" "$BLS_PK_FILE" 2>/dev/null)
         local ETH_ATTESTER_ADDRESS=$(jq -r ".validators[$i].new_operator_info.eth_address" "$BLS_PK_FILE" 2>/dev/null)
-        local RPC_URL=$(jq -r ".validators[$i].new_operator_info.rpc_url" "$BLS_PK_FILE" 2>/dev/null)
+        local VALIDATOR_RPC_URL=$(jq -r ".validators[$i].new_operator_info.rpc_url" "$BLS_PK_FILE" 2>/dev/null)
 
         # Приводим адреса к нижнему регистру для сравнения
         local OLD_VALIDATOR_ADDRESS_LOWER=$(echo "$OLD_VALIDATOR_ADDRESS" | tr '[:upper:]' '[:lower:]')
@@ -4038,9 +4290,10 @@ stake_validators_new_format() {
         echo -e "  $(t "bls_key"): ${BLS_ATTESTER_PRIV_KEY:0:20}..."
 
         # Список RPC провайдеров (используем сохраненный или дефолтный список)
-        local rpc_providers=("$RPC_URL")
-        if [ -z "$RPC_URL" ] || [ "$RPC_URL" = "null" ]; then
+        local rpc_providers=("${VALIDATOR_RPC_URL:-$rpc_url}")
+        if [ -z "$VALIDATOR_RPC_URL" ] || [ "$VALIDATOR_RPC_URL" = "null" ]; then
             rpc_providers=(
+                "$rpc_url"
                 "https://ethereum-sepolia-rpc.publicnode.com"
                 "https://1rpc.io/sepolia"
                 "https://sepolia.drpc.org"
@@ -4049,32 +4302,32 @@ stake_validators_new_format() {
 
         # Цикл по RPC провайдерам
         local success=false
-        for rpc_url in "${rpc_providers[@]}"; do
-            printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" "$rpc_url"
+        for current_rpc_url in "${rpc_providers[@]}"; do
+            printf "\n${YELLOW}$(t "staking_trying_rpc")${NC}\n" "$current_rpc_url"
             echo ""
 
             # Формируем команду
             local cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_OF_OLD_SEQUENCER\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_ATTESTER_PRIV_KEY\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             # Безопасное отображение команды
             local PRIVATE_KEY_PREVIEW="${PRIVATE_KEY_OF_OLD_SEQUENCER:0:7}..."
             local BLS_KEY_PREVIEW="${BLS_ATTESTER_PRIV_KEY:0:7}..."
 
             local safe_cmd="aztec add-l1-validator \\
-  --l1-rpc-urls \"$rpc_url\" \\
+  --l1-rpc-urls \"$current_rpc_url\" \\
   --network $network \\
   --private-key \"$PRIVATE_KEY_PREVIEW\" \\
   --attester \"$ETH_ATTESTER_ADDRESS\" \\
   --withdrawer \"$ETH_ATTESTER_ADDRESS\" \\
   --bls-secret-key \"$BLS_KEY_PREVIEW\" \\
-  --rollup \"$CONTRACT_ADDRESS\""
+  --rollup \"$contract_address\""
 
             echo -e "${CYAN}$(t "command_to_execute")${NC}"
             echo -e "$safe_cmd"
@@ -4088,7 +4341,7 @@ stake_validators_new_format() {
                     echo -e "${GREEN}$(t "staking_executing")${NC}"
                     if eval "$cmd"; then
                         printf "${GREEN}✅ $(t "staking_success_new_operator")${NC}\n" \
-						            "$((i+1))" "$rpc_url"
+                                    "$((i+1))" "$current_rpc_url"
 
                         local validator_link
                         if [[ "$network" == "mainnet" ]]; then
@@ -4176,7 +4429,7 @@ EOF
                         break
                     else
                         printf "${RED}❌ $(t "staking_failed_new_operator")${NC}\n" \
-						 "$((i+1))" "$rpc_url"
+                         "$((i+1))" "$current_rpc_url"
                         echo -e "${YELLOW}$(t "trying_next_rpc")${NC}"
                     fi
                     ;;
@@ -4228,6 +4481,298 @@ EOF
     return 0
 }
 
+# === Claim Rewards Function ===
+claim_rewards() {
+    echo -e "\n${BLUE}=== $(t "aztec_rewards_claim") ===${NC}"
+    echo ""
+
+    # Get network settings
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    local contract_address=$(echo "$settings" | cut -d'|' -f3)
+
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
+
+    echo -e "${CYAN}$(t "using_contract") $contract_address${NC}"
+    echo -e "${CYAN}$(t "using_rpc") $rpc_url${NC}"
+
+    # Check if rewards are claimable
+    echo -e "\n${BLUE}🔍 $(t "checking_rewards_claimable")${NC}"
+    local claimable_result
+    claimable_result=$(cast call "$contract_address" "isRewardsClaimable()" --rpc-url "$rpc_url" 2>/dev/null)
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ $(t "failed_check_rewards_claimable")${NC}"
+        return 1
+    fi
+
+    if [ "$claimable_result" != "0x1" ]; then
+            echo -e "${RED}❌ $(t "rewards_not_claimable")${NC}"
+
+            # Get earliest claimable timestamp for information
+            local timestamp_result
+            timestamp_result=$(cast call "$contract_address" "getEarliestRewardsClaimableTimestamp()" --rpc-url "$rpc_url" 2>/dev/null)
+
+            if [ $? -eq 0 ] && [ -n "$timestamp_result" ]; then
+                local timestamp_dec
+                timestamp_dec=$(cast --to-dec "$timestamp_result" 2>/dev/null)
+                if [ $? -eq 0 ]; then
+                    if [ "$timestamp_dec" -eq "0" ]; then
+                        echo -e "${YELLOW}ℹ️  $(t "claim_function_not_activated")${NC}"
+                    else
+                        local timestamp_human
+                        timestamp_human=$(date -d "@$timestamp_dec" 2>/dev/null || echo "unknown format")
+                        printf "${CYAN}ℹ️  $(t "earliest_rewards_claimable_timestamp")${NC}\n" "$timestamp_dec" "$timestamp_human"
+                    fi
+                fi
+            fi
+            return 1
+    fi
+
+    echo -e "${GREEN}✅ $(t "rewards_are_claimable")${NC}"
+
+    # Extract validator addresses from keystore
+    if [ ! -f "$KEYSTORE_FILE" ]; then
+        echo -e "\n${RED}❌ $(t "keystore_file_not_found") $KEYSTORE_FILE${NC}"
+        return 1
+    fi
+
+    echo -e "\n${BLUE}📋 $(t "extracting_validator_addresses")${NC}"
+
+    # Extract coinbase addresses (they are the ones eligible for rewards)
+    local coinbase_addresses=()
+    while IFS= read -r address; do
+        if [ -n "$address" ] && [ "$address" != "null" ] && [[ "$address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            coinbase_addresses+=("$address")
+        fi
+    done < <(jq -r '.validators[].coinbase' "$KEYSTORE_FILE" 2>/dev/null)
+
+    if [ ${#coinbase_addresses[@]} -eq 0 ]; then
+        echo -e "${YELLOW}⚠️ $(t "no_coinbase_addresses_found")${NC}"
+        return 1
+    fi
+
+    # Remove duplicates and track unique addresses
+    local unique_addresses=()
+    local address_counts=()
+
+    for addr in "${coinbase_addresses[@]}"; do
+        local addr_lower=$(echo "$addr" | tr '[:upper:]' '[:lower:]')
+        local found=0
+
+        for i in "${!unique_addresses[@]}"; do
+            if [ "${unique_addresses[i],,}" = "$addr_lower" ]; then
+                ((address_counts[i]++))
+                found=1
+                break
+            fi
+        done
+
+        if [ $found -eq 0 ]; then
+            unique_addresses+=("$addr")
+            address_counts+=("1")
+        fi
+    done
+
+    echo -e "${GREEN}✅ $(t "found_unique_coinbase_addresses") ${#unique_addresses[@]}${NC}"
+
+    # Show address distribution
+    for i in "${!unique_addresses[@]}"; do
+        if [ "${address_counts[i]}" -gt 1 ]; then
+            printf "${CYAN}  📍 %s ($(t "repeats_times"))${NC}\n" "${unique_addresses[i]}" "${address_counts[i]}"
+        else
+            echo -e "${CYAN}  📍 ${unique_addresses[i]}${NC}"
+        fi
+    done
+
+    # Check rewards for each unique address
+    local addresses_with_rewards=()
+    local reward_amounts=()
+
+    echo -e "\n${BLUE}💰 $(t "checking_rewards")${NC}"
+
+    for address in "${unique_addresses[@]}"; do
+        echo -e "${CYAN}$(t "checking_address") $address...${NC}"
+
+        local rewards_hex
+        rewards_hex=$(cast call "$contract_address" "getSequencerRewards(address)" "$address" --rpc-url "$rpc_url" 2>/dev/null)
+
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}⚠️ $(t "failed_get_rewards_for_address") $address${NC}"
+            continue
+        fi
+
+        # Convert hex to decimal
+        local rewards_wei
+        rewards_wei=$(cast --to-dec "$rewards_hex" 2>/dev/null)
+
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}⚠️ $(t "failed_convert_rewards_amount") $address${NC}"
+            continue
+        fi
+
+        # Convert wei to ETH
+        local rewards_eth
+        rewards_eth=$(echo "scale=6; $rewards_wei / 1000000000000000000" | bc 2>/dev/null)
+
+        if [ $? -ne 0 ]; then
+            echo -e "${YELLOW}⚠️ $(t "failed_convert_to_eth") $address${NC}"
+            continue
+        fi
+
+        # Check if rewards > 0
+        if (( $(echo "$rewards_eth > 0" | bc -l) )); then
+            printf "${GREEN}🎯 $(t "rewards_amount")${NC}\n" "$rewards_eth"
+            addresses_with_rewards+=("$address")
+            reward_amounts+=("$rewards_eth")
+        else
+            echo -e "${YELLOW}⏭️ $(t "no_rewards")${NC}"
+        fi
+    done
+
+    if [ ${#addresses_with_rewards[@]} -eq 0 ]; then
+        echo -e "${YELLOW}🎉 $(t "no_rewards_to_claim")${NC}"
+        return 0
+    fi
+
+    printf "${GREEN}✅ $(t "found_unique_addresses_with_rewards") ${#addresses_with_rewards[@]}${NC}\n"
+
+    # Claim rewards
+    local claimed_count=0
+    local failed_count=0
+    local claimed_addresses=()
+
+    for i in "${!addresses_with_rewards[@]}"; do
+        local address="${addresses_with_rewards[$i]}"
+        local amount="${reward_amounts[$i]}"
+
+        # Check if we already claimed this address in this session
+        if [[ " ${claimed_addresses[@]} " =~ " ${address} " ]]; then
+            echo -e "${YELLOW}⏭️ $(t "already_claimed_this_session") $address, $(t "skipping")${NC}"
+            continue
+        fi
+
+        echo -e "\n${BLUE}================================${NC}"
+        echo -e "${CYAN}🎯 $(t "address_label") $address${NC}"
+        printf "${YELLOW}💰 $(t "amount_eth")${NC}\n" "$amount"
+
+        # Find how many times this address repeats
+        local repeat_count=0
+        for j in "${!unique_addresses[@]}"; do
+            if [ "${unique_addresses[j],,}" = "${address,,}" ]; then
+                repeat_count="${address_counts[j]}"
+                break
+            fi
+        done
+
+        if [ "$repeat_count" -gt 1 ]; then
+            printf "${CYAN}📊 $(t "address_appears_times")${NC}\n" "$repeat_count"
+        fi
+
+        # Ask for confirmation
+        read -p "$(echo -e "\n${YELLOW}$(t "claim_rewards_confirmation") ${NC}")" confirm
+
+        case "$confirm" in
+            [yY]|yes)
+                echo -e "${BLUE}🚀 $(t "claiming_rewards")${NC}"
+
+                # Send claim transaction
+                local tx_hash
+                tx_hash=$(cast send "$contract_address" "claimSequencerRewards(address)" "$address" \
+                    --rpc-url "$rpc_url" \
+                    --keystore "$KEYSTORE_FILE" \
+                    --from "$address" 2>/dev/null)
+
+                if [ $? -eq 0 ] && [ -n "$tx_hash" ]; then
+                    echo -e "${GREEN}✅ $(t "transaction_sent") $tx_hash${NC}"
+
+                    # Wait and check receipt
+                    echo -e "${BLUE}⏳ $(t "waiting_confirmation")${NC}"
+                    sleep 10
+
+                    local receipt
+                    receipt=$(cast receipt "$tx_hash" --rpc-url "$rpc_url" 2>/dev/null)
+
+                    if [ $? -eq 0 ]; then
+                        local status
+                        status=$(echo "$receipt" | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+
+                        if [ "$status" = "0x1" ] || [ "$status" = "1" ]; then
+                            echo -e "${GREEN}✅ $(t "transaction_confirmed_successfully")${NC}"
+
+                            # Mark this address as claimed
+                            claimed_addresses+=("$address")
+
+                            # Verify rewards are now zero
+                            local new_rewards_hex
+                            new_rewards_hex=$(cast call "$contract_address" "getSequencerRewards(address)" "$address" --rpc-url "$rpc_url" 2>/dev/null)
+                            local new_rewards_wei
+                            new_rewards_wei=$(cast --to-dec "$new_rewards_hex" 2>/dev/null)
+                            local new_rewards_eth
+                            new_rewards_eth=$(echo "scale=6; $new_rewards_wei / 1000000000000000000" | bc 2>/dev/null)
+
+                            if (( $(echo "$new_rewards_eth == 0" | bc -l) )); then
+                                echo -e "${GREEN}✅ $(t "rewards_successfully_claimed")${NC}"
+                            else
+                                printf "${YELLOW}⚠️ $(t "rewards_claimed_balance_not_zero")${NC}\n" "$new_rewards_eth"
+                            fi
+
+                            ((claimed_count++))
+
+                            # If this address repeats multiple times, show message
+                            if [ "$repeat_count" -gt 1 ]; then
+                                printf "${GREEN}✅ $(t "claimed_rewards_for_address_appears_times")${NC}\n" "$address" "$repeat_count"
+                            fi
+                        else
+                            echo -e "${RED}❌ $(t "transaction_failed")${NC}"
+                            ((failed_count++))
+                        fi
+                    else
+                        echo -e "${YELLOW}⚠️ $(t "could_not_get_receipt_transaction_sent")${NC}"
+                        claimed_addresses+=("$address")
+                        ((claimed_count++))
+                    fi
+                else
+                    echo -e "${RED}❌ $(t "failed_send_transaction")${NC}"
+                    ((failed_count++))
+                fi
+                ;;
+            [nN]|no)
+                echo -e "${YELLOW}⏭️ $(t "skipping_claim_for_address") $address${NC}"
+                ;;
+            skip)
+                echo -e "${YELLOW}⏭️ $(t "skipping_all_remaining_claims")${NC}"
+                break
+                ;;
+            *)
+                echo -e "${YELLOW}⏭️ $(t "skipping_claim_for_address") $address${NC}"
+                ;;
+        esac
+
+        # Delay between transactions
+        if [ $i -lt $((${#addresses_with_rewards[@]} - 1)) ]; then
+            echo -e "${BLUE}⏳ $(t "waiting_seconds")${NC}"
+            sleep 5
+        fi
+    done
+
+    # Summary
+    echo -e "\n${CYAN}================================${NC}"
+    echo -e "${CYAN}           $(t "summary")${NC}"
+    echo -e "${CYAN}================================${NC}"
+    printf "${GREEN}✅ $(t "successfully_claimed") $claimed_count${NC}\n"
+    if [ $failed_count -gt 0 ]; then
+        printf "${RED}❌ $(t "failed_count") $failed_count${NC}\n"
+    fi
+    printf "${GREEN}🎯 $(t "unique_addresses_with_rewards") ${#addresses_with_rewards[@]}${NC}\n"
+    printf "${GREEN}📊 $(t "total_coinbase_addresses_in_keystore") ${#coinbase_addresses[@]}${NC}\n"
+    echo -e "${CYAN}📍 $(t "contract_used") $contract_address${NC}"
+
+    return 0
+}
+
 # === Main menu ===
 main_menu() {
   show_logo
@@ -4253,6 +4798,7 @@ main_menu() {
     echo -e "${NC}$(t "option18")${NC}"
     echo -e "${NC}$(t "option19")${NC}"
     echo -e "${NC}$(t "option20")${NC}"
+    echo -e "${NC}$(t "option21")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -4279,6 +4825,7 @@ main_menu() {
       18) generate_bls_keys ;;
       19) approve_with_all_keys ;;
       20) stake_validators ;;
+      21) claim_rewards ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

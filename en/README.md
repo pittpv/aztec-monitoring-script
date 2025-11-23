@@ -35,7 +35,36 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                  |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
 
-## 📌 Latest Updates 20-11-2025
+## 📌 Latest Updates 23-11-2025
+
+⚠️ **If your script version is 2.3.2 or lower, you will need to completely reinstall the node. Prepare the data before installation!**
+
+For multivalidator mode with BLS keys use the format: `private_key,address,private_bls,public_bls`
+
+For multivalidator mode without BLS keys use the format: `private_key,address`
+
+For single-validator mode the same data is required but provided separately.
+
+- Full mainnet support in all script functions
+- All `/root` replaced with `$HOME`
+- Added reward collection function (Claim)
+  - Checks availability of reward collection in the contract
+  - Displays the nearest reward collection time, if available
+  - Supports multiple coinbase addresses from the keystore
+  - Collects only from validators that have rewards
+  - Collects only from unique coinbase addresses
+  - Processes transactions through the keystore with the appropriate signature
+  - Checks transaction statuses and confirms successful execution
+- Monitoring updates
+  - Works with previously installed nodes (the node container name must contain the word aztec, and there must be only one container in the system containing the word aztec)
+  - Added network type request on first launch and saving the variable to .env-aztec-agent
+  - ALT_RPC variable — you can manually add the ALT_RPC variable to .env-aztec-agent, which will take priority over the default RPC_URL
+- Minor improvements
+
+<details>
+<summary>📅 Version History</summary>
+
+### 20-11-2025
 
 ⚠️ **A full node reinstallation is required. Prepare the data before installation!**
 
@@ -46,32 +75,29 @@ For multivalidator mode without BLS keys use the format: `private_key,address`
 For single-validator mode the same data is required but provided separately.
 
 - Network selection testnet/mainnet when installing the node
-  - Written to the NETWORK variable in .env-aztec-agent
-  - Added to docker-compose.yml
-  - Script parameters change depending on the network
+    - Written to the NETWORK variable in .env-aztec-agent
+    - Added to docker-compose.yml
+    - Script parameters change depending on the network
 - New method of adding validators with BLS keys
-  - Automatic creation of BN254-type yml files for web3signer
-  - Support for multivalidator and solo modes
+    - Automatic creation of BN254-type yml files for web3signer
+    - Support for multivalidator and solo modes
 - Updated structure of keystore.json, mainnet-ready
-  - `slasher` removed
-  - `attester`: with an eth field instead of a simple string
-  - `publisher`: Now it is an array of strings
-  - `coinbase`: now in the keystore schema, removed from env and docker-compose.yml
+    - `slasher` removed
+    - `attester`: with an eth field instead of a simple string
+    - `publisher`: Now it is an array of strings
+    - `coinbase`: now in the keystore schema, removed from env and docker-compose.yml
 - Updated BLS generation functions considering the new keystore.json structure
-  - Warning to save public BLS keys
+    - Warning to save public BLS keys
 - Added function for migrating BLS into keystore – Option 18-3
-  - Fetching migration data from bls-filtered-pk.json, comparing, and adding a private BLS key to your attester in keystore.json
+    - Fetching migration data from bls-filtered-pk.json, comparing, and adding a private BLS key to your attester in keystore.json
 - Updated watchtower image URL to support new Docker versions
 - Updated function for obtaining validator statistics from the contract (Option 9)
-  - Added reward display
+    - Added reward display
 - Updated validator queue monitoring function (recreate monitoring)
-  - Added check for presence in the active set
-  - Added notification about API issues or other reasons for removal from queue
-  - Added index
+    - Added check for presence in the active set
+    - Added notification about API issues or other reasons for removal from queue
+    - Added index
 - Added translation on the first RPC request – Enter Ethereum RPC URL
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 13-11-2025
 

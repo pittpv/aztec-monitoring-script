@@ -81,7 +81,7 @@ init_languages() {
   TRANSLATIONS["en,node_deleted"]="✅ Aztec node successfully deleted"
   TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
   TRANSLATIONS["en,warn_orig_install"]="⚠️ Type 'n' when prompted with the question:"
-  TRANSLATIONS["en,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["en,warn_orig_install_2"]="Add it to $HOME/.bash_profile to make the aztec binaries accessible?"
   TRANSLATIONS["en,watchtower_exists"]="✅ Watchtower is already installed"
   TRANSLATIONS["en,installing_watchtower"]="⬇️ Installing Watchtower..."
   TRANSLATIONS["en,creating_watchtower_compose"]="🛠️ Creating Watchtower docker-compose.yml"
@@ -104,6 +104,9 @@ init_languages() {
   TRANSLATIONS["en,single_validator_bls_private"]="Enter validator BLS private key:"
   TRANSLATIONS["en,single_validator_bls_public"]="Enter validator BLS public key:"
   TRANSLATIONS["en,bls_keys_added"]="BLS keys added to validator configuration"
+  TRANSLATIONS["en,select_network"]="Select network"
+  TRANSLATIONS["en,enter_choice"]="Enter choice:"
+  TRANSLATIONS["en,selected_network"]="Selected network:"
 
   # Russian translations
   TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
@@ -158,7 +161,7 @@ init_languages() {
   TRANSLATIONS["ru,node_deleted"]="✅ Нода Aztec успешно удалена"
   TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
   TRANSLATIONS["ru,warn_orig_install"]="⚠️ Введите 'n' когда появится вопрос:"
-  TRANSLATIONS["ru,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["ru,warn_orig_install_2"]="Add it to $HOME/.bash_profile to make the aztec binaries accessible?"
   TRANSLATIONS["ru,watchtower_exists"]="✅ Watchtower уже установлен"
   TRANSLATIONS["ru,installing_watchtower"]="⬇️ Установка Watchtower..."
   TRANSLATIONS["ru,creating_watchtower_compose"]="🛠️ Создание Watchtower docker-compose.yml"
@@ -181,6 +184,9 @@ init_languages() {
   TRANSLATIONS["ru,single_validator_bls_private"]="Введите приватный BLS ключ валидатора:"
   TRANSLATIONS["ru,single_validator_bls_public"]="Введите публичный BLS ключ валидатора:"
   TRANSLATIONS["ru,bls_keys_added"]="BLS ключи добавлены в конфигурацию валидатора"
+  TRANSLATIONS["ru,select_network"]="Выберите сеть"
+  TRANSLATIONS["ru,enter_choice"]="Введите:"
+  TRANSLATIONS["ru,selected_network"]="Выбрана сеть:"
 
   # Turkish translations
   TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
@@ -235,7 +241,7 @@ init_languages() {
   TRANSLATIONS["tr,node_deleted"]="✅ Aztec node başarıyla silindi"
   TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
   TRANSLATIONS["tr,warn_orig_install"]="⚠️ Şu soru çıktığında 'n' yazın:"
-  TRANSLATIONS["tr,warn_orig_install_2"]="Add it to /root/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["tr,warn_orig_install_2"]="Add it to $HOME/.bash_profile to make the aztec binaries accessible?"
   TRANSLATIONS["tr,watchtower_exists"]="✅ Watchtower zaten yüklü"
   TRANSLATIONS["tr,installing_watchtower"]="⬇️ Watchtower yükleniyor..."
   TRANSLATIONS["tr,creating_watchtower_compose"]="🛠️ Watchtower docker-compose.yml oluşturuluyor"
@@ -258,6 +264,9 @@ init_languages() {
   TRANSLATIONS["tr,single_validator_bls_private"]="Validator BLS özel anahtarını girin:"
   TRANSLATIONS["tr,single_validator_bls_public"]="Validator BLS genel anahtarını girin:"
   TRANSLATIONS["tr,bls_keys_added"]="BLS anahtarları validator konfigürasyonuna eklendi"
+  TRANSLATIONS["tr,select_network"]="Ağ seçin"
+  TRANSLATIONS["tr,enter_choice"]="Seçimi girin:"
+  TRANSLATIONS["tr,selected_network"]="Seçilen ağ:"
 }
 
 # Colors

@@ -37,6 +37,36 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ## 📌 Son Güncellemeler 20-11-2025
 
+⚠️ **Eğer script sürümünüz 2.3.2 veya daha eski ise node'u tamamen yeniden yüklemeniz gerekecektir. Kurulumdan önce verileri hazırlayın!**
+
+BLS anahtarlarıyla multivalidator modu için format: `private_key,address,private_bls,public_bls`
+
+BLS anahtarları olmadan multivalidator modu için format: `private_key,address`
+
+Tek validator modu için aynı veriler ayrı ayrı sağlanır.
+
+- Betik işlevlerinin tümünde tam mainnet desteği
+- Tüm `/root` yolları `$HOME` ile değiştirildi
+- Ödül toplama fonksiyonu (Claim) eklendi
+  - Sözleşmede ödül toplama uygunluğunu kontrol eder
+  - Uygunsa en yakın ödül toplama zamanını gösterir
+  - Keystore içindeki birden fazla coinbase adresini destekler
+  - Sadece ödülü olan doğrulayıcılardan toplar
+  - Sadece benzersiz coinbase adreslerinden toplar
+  - Keystore üzerinden uygun imzayla işlemleri gerçekleştirir
+  - İşlem durumlarını kontrol eder ve başarılı şekilde tamamlandığını doğrular
+- İzleme güncellemeleri
+  - Önceden kurulmuş nodelarla çalışır (node konteyner adında aztec kelimesi bulunmalıdır ve sistemde aztec kelimesi geçen yalnızca bir konteyner olmalıdır)
+  - İlk çalıştırmada ağ türü sorusu eklendi ve değişken .env-aztec-agent dosyasına kaydedilir
+  - ALT_RPC değişkeni — .env-aztec-agent dosyasına manuel olarak ekleyebilir ve varsayılan RPC_URL üzerinde önceliğe sahip olur
+- Küçük iyileştirmeler
+
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 20-11-2025
+
 ⚠️ **Tam node yeniden kurulumu gereklidir. Kurulumdan önce verileri hazırlayın!**
 
 BLS anahtarlarıyla multivalidator modu için format: `private_key,address,private_bls,public_bls`
@@ -46,32 +76,29 @@ BLS anahtarları olmadan multivalidator modu için format: `private_key,address`
 Tek validator modu için aynı veriler ayrı ayrı sağlanır.
 
 - Node kurulumu sırasında testnet/mainnet ağı seçimi
-  - NETWORK değişkenine .env-aztec-agent dosyasında yazılır
-  - docker-compose.yml dosyasına eklenir
-  - Script parametreleri ağa göre değişir
+    - NETWORK değişkenine .env-aztec-agent dosyasında yazılır
+    - docker-compose.yml dosyasına eklenir
+    - Script parametreleri ağa göre değişir
 - BLS anahtarlarıyla validator eklemek için yeni yöntem
-  - web3signer için BN254 tipi yml dosyalarının otomatik oluşturulması
-  - Multi-validator ve solo mod desteği
+    - web3signer için BN254 tipi yml dosyalarının otomatik oluşturulması
+    - Multi-validator ve solo mod desteği
 - keystore.json yapısı güncellendi
-  - `slasher` kaldırıldı
-  - `attester`: basit bir string yerine eth alanı içeriyor
-  - `publisher`: Artık string dizisidir
-  - `coinbase`: artık keystore şemasında, env ve docker-compose.yml dosyalarından kaldırıldı
+    - `slasher` kaldırıldı
+    - `attester`: basit bir string yerine eth alanı içeriyor
+    - `publisher`: Artık string dizisidir
+    - `coinbase`: artık keystore şemasında, env ve docker-compose.yml dosyalarından kaldırıldı
 - Yeni keystore.json yapısına göre BLS oluşturma fonksiyonları güncellendi
-  - Public BLS anahtarlarının kaydedilmesi uyarısı
+    - Public BLS anahtarlarının kaydedilmesi uyarısı
 - BLS'yi keystore’a taşımak için fonksiyon eklendi – Seçenek 18-3
-  - bls-filtered-pk.json dosyasından göç verilerinin alınması, karşılaştırılması ve private BLS anahtarının kendi attester’ına eklenmesi
+    - bls-filtered-pk.json dosyasından göç verilerinin alınması, karşılaştırılması ve private BLS anahtarının kendi attester’ına eklenmesi
 - Yeni Docker sürümlerini desteklemek için watchtower imaj URL’si güncellendi
 - Sözleşmeden validator istatistikleri alma fonksiyonu güncellendi
-  - Reward gösterimi eklendi
+    - Reward gösterimi eklendi
 - Validator kuyruğu izleme fonksiyonu güncellendi (izlemeyi yeniden oluşturun)
-  - Aktif sette bulunma kontrolü eklendi
-  - API sorunları veya kuyruktan çıkma ile ilgili diğer sebepler için bildirim eklendi
-  - İndeks eklendi
+    - Aktif sette bulunma kontrolü eklendi
+    - API sorunları veya kuyruktan çıkma ile ilgili diğer sebepler için bildirim eklendi
+    - İndeks eklendi
 - İlk RPC isteğinde çeviriye eklendi – Ethereum RPC URL’sini girin
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 13-11-2025
 
