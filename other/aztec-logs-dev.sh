@@ -115,7 +115,7 @@ init_languages() {
   TRANSLATIONS["en,bls_new_operator_title"]="New Operator Address Method"
   TRANSLATIONS["en,bls_old_validator_info"]="Please provide your old validator info:"
   TRANSLATIONS["en,bls_old_private_key_prompt"]="Copy and paste one or more OLD private keys, separated by commas without spaces, and press Enter (the input is hidden, but pasted): "
-  TRANSLATIONS["en,bls_sepolia_rpc_prompt"]="Enter your sepolia RPC URL: "
+  TRANSLATIONS["en,bls_sepolia_rpc_prompt"]="Enter your Sepolia RPC URL: "
   TRANSLATIONS["en,bls_starting_generation"]="Starting generation process..."
   TRANSLATIONS["en,bls_ready_to_generate"]="⚠️ ATTENTION: BE READY to write down all the new operator's details: the mnemonic phrase, public address and public BLS key. The private key and private BLS key will be saved in the file /root/aztec/bls-filtered-pk.json"
   TRANSLATIONS["en,bls_press_enter_to_generate"]="Press [Enter] to generate your new keys..."
@@ -158,7 +158,7 @@ init_languages() {
   TRANSLATIONS["en,bls_new_operator_success"]="All done! You have successfully joined the new testnet"
   TRANSLATIONS["en,bls_restart_node_notice"]="Now restart your node, check that YML files with new private keys have been added to /aztec/keys, and that /aztec/config/keystore.json has been replaced with the new eth addresses of the validators."
   TRANSLATIONS["en,bls_key_extraction_failed"]="Failed to extract keys from generated file"
-  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 18)"
+  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 18) or add "
   TRANSLATIONS["en,staking_invalid_bls_file"]="Invalid BLS keys file format"
   TRANSLATIONS["en,staking_failed_generate_address"]="Failed to generate address from private key"
   TRANSLATIONS["en,staking_found_single_validator"]="Found single validator for new operator method"
@@ -201,8 +201,11 @@ init_languages() {
   TRANSLATIONS["en,install_prompt"]="Do you want to install them now? (Y/n):"
   TRANSLATIONS["en,missing_required"]="⚠️ Script cannot work without required components. Exiting."
   TRANSLATIONS["en,rpc_prompt"]="Enter Ethereum RPC URL:"
+  TRANSLATIONS["en,network_prompt"]="Enter network type (e.g. testnet or mainnet):"
   TRANSLATIONS["en,env_created"]="✅ Created .env file with RPC URL"
   TRANSLATIONS["en,env_exists"]="✅ Using existing .env file with RPC URL:"
+  TRANSLATIONS["en,rpc_empty_error"]="RPC URL cannot be empty. Please enter a valid URL."
+  TRANSLATIONS["en,network_empty_error"]="Network cannot be empty. Please enter a network name."
   TRANSLATIONS["en,search_container"]="🔍 Searching for 'aztec' container..."
   TRANSLATIONS["en,container_not_found"]="❌ Container 'aztec' not found."
   TRANSLATIONS["en,container_found"]="✅ Container found:"
@@ -636,8 +639,11 @@ init_languages() {
   TRANSLATIONS["ru,install_prompt"]="Хотите установить их сейчас? (Y/n):"
   TRANSLATIONS["ru,missing_required"]="⚠️ Без необходимых компонентов скрипт не сможет работать. Завершение."
   TRANSLATIONS["ru,rpc_prompt"]="Введите Ethereum RPC URL:"
+  TRANSLATIONS["ru,network_prompt"]="Введите тип сети (например: testnet или mainnet):"
   TRANSLATIONS["ru,env_created"]="✅ Создан файл .env с RPC URL"
   TRANSLATIONS["ru,env_exists"]="✅ Используется существующий .env файл с RPC URL:"
+  TRANSLATIONS["ru,rpc_empty_error"]="RPC URL не может быть пустым. Пожалуйста, введите действительный URL."
+  TRANSLATIONS["ru,network_empty_error"]="Название сети не может быть пустым. Пожалуйста, введите название сети."
   TRANSLATIONS["ru,search_container"]="🔍 Поиск контейнера с именем 'aztec'..."
   TRANSLATIONS["ru,container_not_found"]="❌ Контейнер с именем 'aztec' не найден."
   TRANSLATIONS["ru,container_found"]="✅ Найден контейнер:"
@@ -1071,8 +1077,11 @@ init_languages() {
   TRANSLATIONS["tr,install_prompt"]="Şimdi yüklemek istiyor musunuz? (Y/n):"
   TRANSLATIONS["tr,missing_required"]="⚠️ Betik, gerekli bileşenler olmadan çalışamaz. Çıkılıyor."
   TRANSLATIONS["tr,rpc_prompt"]="Ethereum RPC URL'sini girin:"
+  TRANSLATIONS["tr,network_prompt"]="Ağ türünü girin (örneğin testnet veya mainnet):"
   TRANSLATIONS["tr,env_created"]="✅ RPC URL'si ile .env dosyası oluşturuldu"
   TRANSLATIONS["tr,env_exists"]="✅ Mevcut .env dosyası kullanılıyor, RPC URL:"
+  TRANSLATIONS["tr,rpc_empty_error"]="RPC URL boş olamaz. Lütfen geçerli bir URL girin."
+  TRANSLATIONS["tr,network_empty_error"]="Ağ adı boş olamaz. Lütfen bir ağ adı girin."
   TRANSLATIONS["tr,search_container"]="🔍 'aztec' konteyneri aranıyor..."
   TRANSLATIONS["tr,container_not_found"]="❌ 'aztec' konteyneri bulunamadı."
   TRANSLATIONS["tr,container_found"]="✅ Konteyner bulundu:"
@@ -1553,13 +1562,40 @@ check_dependencies() {
 
   # Request RPC URL from user and create .env file
   if [ ! -f .env-aztec-agent ]; then
-    echo -e "\n${BLUE}$(t "rpc_prompt")${NC}"
-    read -p "> " RPC_URL
-    echo "RPC_URL=$RPC_URL" > .env-aztec-agent
-    echo -e "\n${GREEN}$(t "env_created")${NC}"
+      echo -e "\n${BLUE}$(t "rpc_prompt")${NC}"
+
+      # Запрос RPC URL с проверкой
+      while true; do
+          read -p "> " RPC_URL
+          if [ -n "$RPC_URL" ]; then
+              break
+          else
+              echo -e "${RED}$(t "rpc_empty_error")${NC}"
+          fi
+      done
+
+      echo -e "\n${BLUE}$(t "network_prompt")${NC}"
+
+      # Запрос сети с проверкой
+      while true; do
+          read -p "> " NETWORK
+          if [ -n "$NETWORK" ]; then
+              break
+          else
+              echo -e "${RED}$(t "network_empty_error")${NC}"
+          fi
+      done
+
+      # Создание файла с обеими переменными
+      {
+          echo "RPC_URL=$RPC_URL"
+          echo "NETWORK=$NETWORK"
+      } > .env-aztec-agent
+
+      echo -e "\n${GREEN}$(t "env_created")${NC}"
   else
-    source .env-aztec-agent
-    echo -e "\n${GREEN}$(t "env_exists") $RPC_URL${NC}"
+      source .env-aztec-agent
+      echo -e "\n${GREEN}$(t "env_exists") RPC_URL: $RPC_URL, NETWORK: $NETWORK${NC}"
   fi
 
   # === Проверяем и добавляем ключ VERSION в ~/.env-aztec-agent ===
