@@ -71,7 +71,7 @@ init_languages() {
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
   TRANSLATIONS["en,bls_invalid_number"]="Invalid number. Please enter a positive integer."
-  TRANSLATIONS["en,bls_keystore_not_found"]="❌ keystore.json not found at /root/aztec/config/keystore.json"
+  TRANSLATIONS["en,bls_keystore_not_found"]="❌ keystore.json not found at $HOME/aztec/config/keystore.json"
   TRANSLATIONS["en,bls_fee_recipient_not_found"]="❌ feeRecipient not found in keystore.json"
   TRANSLATIONS["en,bls_generating_keys"]="🔑 Generating BLS keys..."
   TRANSLATIONS["en,bls_generation_success"]="✅ BLS keys generated successfully"
@@ -117,11 +117,11 @@ init_languages() {
   TRANSLATIONS["en,bls_old_private_key_prompt"]="Copy and paste one or more OLD private keys, separated by commas without spaces, and press Enter (the input is hidden, but pasted): "
   TRANSLATIONS["en,bls_sepolia_rpc_prompt"]="Enter your Sepolia RPC URL: "
   TRANSLATIONS["en,bls_starting_generation"]="Starting generation process..."
-  TRANSLATIONS["en,bls_ready_to_generate"]="⚠️ ATTENTION: BE READY to write down all the new operator's details: the mnemonic phrase, public address and public BLS key. The private key and private BLS key will be saved in the file /root/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["en,bls_ready_to_generate"]="⚠️ ATTENTION: BE READY to write down all the new operator's details: the mnemonic phrase, public address and public BLS key. The private key and private BLS key will be saved in the file $HOME/aztec/bls-filtered-pk.json"
   TRANSLATIONS["en,bls_press_enter_to_generate"]="Press [Enter] to generate your new keys..."
   TRANSLATIONS["en,bls_add_to_keystore_title"]="Add BLS Keys to Keystore"
-  TRANSLATIONS["en,bls_pk_file_not_found"]="BLS keys file not found: /root/aztec/bls-filtered-pk.json"
-  TRANSLATIONS["en,bls_keystore_not_found"]="Keystore file not found: /root/aztec/config/keystore.json"
+  TRANSLATIONS["en,bls_pk_file_not_found"]="BLS keys file not found: $HOME/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["en,bls_keystore_not_found"]="Keystore file not found: $HOME/aztec/config/keystore.json"
   TRANSLATIONS["en,bls_creating_backup"]="Creating backup of keystore.json..."
   TRANSLATIONS["en,bls_backup_created"]="Backup created"
   TRANSLATIONS["en,bls_processing_validators"]="Processing validators"
@@ -298,7 +298,7 @@ init_languages() {
   TRANSLATIONS["en,installation_cancelled_by_user"]="✖ Installation cancelled by user"
   TRANSLATIONS["en,unknown_error_occurred"]="⚠ An unknown error occurred during installation"
   TRANSLATIONS["en,stop_method_prompt"]="Choose method to stop Aztec node (docker-compose / cli): "
-  TRANSLATIONS["en,enter_compose_path"]="Enter full path to folder with docker-compose.yml (/root/your_path or ./your_path): "
+  TRANSLATIONS["en,enter_compose_path"]="Enter full path to folder with docker-compose.yml ($HOME/your_path or ./your_path): "
   TRANSLATIONS["en,docker_stop_success"]="Containers stopped and docker path saved to .env-aztec-agent"
   TRANSLATIONS["en,no_aztec_screen"]="No active Aztec screen sessions found."
   TRANSLATIONS["en,cli_stop_success"]="Aztec CLI node stopped and session saved to .env-aztec-agent"
@@ -509,7 +509,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
   TRANSLATIONS["ru,bls_invalid_number"]="Неверное число. Введите положительное целое число."
-  TRANSLATIONS["ru,bls_keystore_not_found"]="❌ Файл keystore.json не найден в /root/aztec/config/keystore.json"
+  TRANSLATIONS["ru,bls_keystore_not_found"]="❌ Файл keystore.json не найден в $HOME/aztec/config/keystore.json"
   TRANSLATIONS["ru,bls_fee_recipient_not_found"]="❌ feeRecipient не найден в keystore.json"
   TRANSLATIONS["ru,bls_generating_keys"]="🔑 Генерация BLS ключей..."
   TRANSLATIONS["ru,bls_generation_success"]="✅ BLS ключи успешно сгенерированы"
@@ -555,11 +555,11 @@ init_languages() {
   TRANSLATIONS["ru,bls_old_private_key_prompt"]="Скопируйте и вставьте один или несколько СТАРЫХ приватных ключей через запятую без пробелов и нажмите Enter (ввод скрыт, но вставлен): "
   TRANSLATIONS["ru,bls_sepolia_rpc_prompt"]="Введите ваш Sepolia RPC URL: "
   TRANSLATIONS["ru,bls_starting_generation"]="Запуск процесса генерации..."
-  TRANSLATIONS["ru,bls_ready_to_generate"]="⚠️ ATTENTION: БУДЬТЕ ГОТОВЫ записать все данные нового оператора: мнемоническую фразу, публичный адрес и публичный BLS-ключ. Приватный ключ и приватный BLS-ключ буду сохранены в файл /root/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["ru,bls_ready_to_generate"]="⚠️ ATTENTION: БУДЬТЕ ГОТОВЫ записать все данные нового оператора: мнемоническую фразу, публичный адрес и публичный BLS-ключ. Приватный ключ и приватный BLS-ключ буду сохранены в файл $HOME/aztec/bls-filtered-pk.json"
   TRANSLATIONS["ru,bls_press_enter_to_generate"]="Нажмите [Enter] для генерации новых ключей..."
   TRANSLATIONS["ru,bls_add_to_keystore_title"]="Добавление BLS ключей в Keystore"
-  TRANSLATIONS["ru,bls_pk_file_not_found"]="Файл BLS ключей не найден: /root/aztec/bls-filtered-pk.json"
-  TRANSLATIONS["ru,bls_keystore_not_found"]="Файл keystore не найден: /root/aztec/config/keystore.json"
+  TRANSLATIONS["ru,bls_pk_file_not_found"]="Файл BLS ключей не найден: $HOME/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["ru,bls_keystore_not_found"]="Файл keystore не найден: $HOME/aztec/config/keystore.json"
   TRANSLATIONS["ru,bls_creating_backup"]="Создание резервной копии keystore.json..."
   TRANSLATIONS["ru,bls_backup_created"]="Резервная копия создана"
   TRANSLATIONS["ru,bls_processing_validators"]="Обработка валидаторов"
@@ -736,7 +736,7 @@ init_languages() {
   TRANSLATIONS["ru,installation_cancelled_by_user"]="✖ Установка отменена пользователем"
   TRANSLATIONS["ru,unknown_error_occurred"]="⚠ Произошла неизвестная ошибка при установке"
   TRANSLATIONS["ru,stop_method_prompt"]="Выберите способ остановки ноды Aztec (docker-compose / cli): "
-  TRANSLATIONS["ru,enter_compose_path"]="Введите полный путь к папке с docker-compose.yml (/root/your_path or ./your_path): "
+  TRANSLATIONS["ru,enter_compose_path"]="Введите полный путь к папке с docker-compose.yml ($HOME/your_path or ./your_path): "
   TRANSLATIONS["ru,docker_stop_success"]="Контейнеры остановлены, путь сохранён в .env-aztec-agent"
   TRANSLATIONS["ru,no_aztec_screen"]="Активных screen-сессий с Aztec не найдено."
   TRANSLATIONS["ru,cli_stop_success"]="Нода Aztec CLI остановлена, сессия сохранена в .env-aztec-agent"
@@ -947,7 +947,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
   TRANSLATIONS["tr,bls_invalid_number"]="Geçersiz sayı. Lütfen pozitif bir tam sayı girin."
-  TRANSLATIONS["tr,bls_keystore_not_found"]="❌ /root/aztec/config/keystore.json konumunda keystore.json bulunamadı"
+  TRANSLATIONS["tr,bls_keystore_not_found"]="❌ $HOME/aztec/config/keystore.json konumunda keystore.json bulunamadı"
   TRANSLATIONS["tr,bls_fee_recipient_not_found"]="❌ keystore.json dosyasında feeRecipient bulunamadı"
   TRANSLATIONS["tr,bls_generating_keys"]="🔑 BLS anahtarları oluşturuluyor..."
   TRANSLATIONS["tr,bls_generation_success"]="✅ BLS anahtarları başarıyla oluşturuldu"
@@ -993,11 +993,11 @@ init_languages() {
   TRANSLATIONS["tr,bls_old_private_key_prompt"]="Bir veya daha fazla ESKİ özel anahtarı, aralarında boşluk olmadan virgülle ayırarak kopyalayıp yapıştırın ve Enter'a basın (giriş gizlidir, ancak yapıştırılır): "
   TRANSLATIONS["tr,bls_sepolia_rpc_prompt"]="Sepolia RPC URL'nizi girin: "
   TRANSLATIONS["tr,bls_starting_generation"]="Oluşturma süreci başlatılıyor..."
-  TRANSLATIONS["tr,bls_ready_to_generate"]="⚠️ DİKKAT: Yeni operatörün tüm bilgilerini yazmaya HAZIR OLUN: anımsatıcı ifade, genel adres ve genel BLS anahtarı. Özel anahtar ve özel BLS anahtarı /root/aztec/bls-filtered-pk.json dosyasına kaydedilecektir."
+  TRANSLATIONS["tr,bls_ready_to_generate"]="⚠️ DİKKAT: Yeni operatörün tüm bilgilerini yazmaya HAZIR OLUN: anımsatıcı ifade, genel adres ve genel BLS anahtarı. Özel anahtar ve özel BLS anahtarı $HOME/aztec/bls-filtered-pk.json dosyasına kaydedilecektir."
   TRANSLATIONS["tr,bls_press_enter_to_generate"]="Yeni anahtarlarınızı oluşturmak için [Enter] tuşuna basın..."
   TRANSLATIONS["tr,bls_add_to_keystore_title"]="Keystore'a BLS Anahtarları Ekleme"
-  TRANSLATIONS["tr,bls_pk_file_not_found"]="BLS anahtar dosyası bulunamadı: /root/aztec/bls-filtered-pk.json"
-  TRANSLATIONS["tr,bls_keystore_not_found"]="Keystore dosyası bulunamadı: /root/aztec/config/keystore.json"
+  TRANSLATIONS["tr,bls_pk_file_not_found"]="BLS anahtar dosyası bulunamadı: $HOME/aztec/bls-filtered-pk.json"
+  TRANSLATIONS["tr,bls_keystore_not_found"]="Keystore dosyası bulunamadı: $HOME/aztec/config/keystore.json"
   TRANSLATIONS["tr,bls_creating_backup"]="keystore.json yedekleniyor..."
   TRANSLATIONS["tr,bls_backup_created"]="Yedek oluşturuldu"
   TRANSLATIONS["tr,bls_processing_validators"]="Validatörler işleniyor"
@@ -1174,7 +1174,7 @@ init_languages() {
   TRANSLATIONS["tr,installation_cancelled_by_user"]="✖ Kurulum kullanıcı tarafından iptal edildi"
   TRANSLATIONS["tr,unknown_error_occurred"]="⚠ Kurulum sırasında bilinmeyen bir hata oluştu"
   TRANSLATIONS["tr,stop_method_prompt"]="Aztec düğümünü durdurma yöntemi seçin (docker-compose / cli): "
-  TRANSLATIONS["tr,enter_compose_path"]="docker-compose.yml dosyasının bulunduğu klasörün tam yolunu girin  (/root/your_path veya ./your_path): "
+  TRANSLATIONS["tr,enter_compose_path"]="docker-compose.yml dosyasının bulunduğu klasörün tam yolunu girin  ($HOME/your_path veya ./your_path): "
   TRANSLATIONS["tr,docker_stop_success"]="Konteynerler durduruldu ve yol .env-aztec-agent dosyasına kaydedildi"
   TRANSLATIONS["tr,no_aztec_screen"]="Aktif Aztec screen oturumu bulunamadı."
   TRANSLATIONS["tr,cli_stop_success"]="Aztec CLI düğümü durduruldu ve oturum .env-aztec-agent dosyasına kaydedildi"
@@ -1751,7 +1751,7 @@ check_aztec_container_logs() {
             ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
         )
         error_solutions=(
-            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/testnet/data/\n3. Run the container. Use option 14"
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 14"
         )
     fi
 
@@ -2092,20 +2092,20 @@ create_systemd_agent() {
   fi
 
   # === Проверка и получение VALIDATORS (если NOTIFICATION_TYPE == 2) ===
-  if [ "$NOTIFICATION_TYPE" -eq 2 ] && [ ! -f "/root/.env-aztec-agent" ] || ! grep -q "^VALIDATORS=" "/root/.env-aztec-agent"; then
+  if [ "$NOTIFICATION_TYPE" -eq 2 ] && [ ! -f "$HOME/.env-aztec-agent" ] || ! grep -q "^VALIDATORS=" "$HOME/.env-aztec-agent"; then
     echo -e "\n${BLUE}$(t "validators_prompt")${NC}"
     echo -e "${YELLOW}$(t "validators_format")${NC}"
     while true; do
       read -p "> " VALIDATORS
       if [[ -n "$VALIDATORS" ]]; then
-        if [ -f "/root/.env-aztec-agent" ]; then
-          if grep -q "^VALIDATORS=" "/root/.env-aztec-agent"; then
-            sed -i "s/^VALIDATORS=.*/VALIDATORS=\"$VALIDATORS\"/" "/root/.env-aztec-agent"
+        if [ -f "$HOME/.env-aztec-agent" ]; then
+          if grep -q "^VALIDATORS=" "$HOME/.env-aztec-agent"; then
+            sed -i "s/^VALIDATORS=.*/VALIDATORS=\"$VALIDATORS\"/" "$HOME/.env-aztec-agent"
           else
-            echo "VALIDATORS=\"$VALIDATORS\"" >> "/root/.env-aztec-agent"
+            echo "VALIDATORS=\"$VALIDATORS\"" >> "$HOME/.env-aztec-agent"
           fi
         else
-          echo "VALIDATORS=\"$VALIDATORS\"" > "/root/.env-aztec-agent"
+          echo "VALIDATORS=\"$VALIDATORS\"" > "$HOME/.env-aztec-agent"
         fi
         break
       else
@@ -2119,7 +2119,7 @@ create_systemd_agent() {
   # Генерация скрипта агента
   cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
-export PATH="\$PATH:/root/.foundry/bin"
+export PATH="\$PATH:\$HOME/.foundry/bin"
 
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
@@ -2378,7 +2378,7 @@ find_last_log_line() {
 
 # === Функция для проверки и добавления переменной DEBUG ===
 ensure_debug_variable() {
-  local env_file="/root/.env-aztec-agent"
+  local env_file="\$HOME/.env-aztec-agent"
   if [ ! -f "\$env_file" ]; then
     return
   fi
@@ -2396,12 +2396,12 @@ ensure_debug_variable
 
 # === Функция для проверки отладочного режима ===
 is_debug_enabled() {
-  if [ ! -f "/root/.env-aztec-agent" ]; then
+  if [ ! -f "\$HOME/.env-aztec-agent" ]; then
     return 1
   fi
 
   # Загружаем только переменную DEBUG
-  debug_value=\$(grep "^DEBUG=" "/root/.env-aztec-agent" | cut -d'=' -f2 | tr -d '"' | tr -d "'" | tr '[:upper:]' '[:lower:]')
+  debug_value=\$(grep "^DEBUG=" "\$HOME/.env-aztec-agent" | cut -d'=' -f2 | tr -d '"' | tr -d "'" | tr '[:upper:]' '[:lower:]')
 
   if [ "\$debug_value" = "true" ] || [ "\$debug_value" = "1" ] || [ "\$debug_value" = "yes" ]; then
     return 0
@@ -2427,12 +2427,12 @@ check_committee() {
   fi
 
   # Загружаем список валидаторов
-  if [ ! -f "/root/.env-aztec-agent" ]; then
-    log "Validator file /root/.env-aztec-agent not found"
+  if [ ! -f "\$HOME/.env-aztec-agent" ]; then
+    log "Validator file \$HOME/.env-aztec-agent not found"
     return
   fi
 
-  source /root/.env-aztec-agent
+  source \$HOME/.env-aztec-agent
   if [ -z "\$VALIDATORS" ]; then
     log "No validators defined in VALIDATORS variable"
     return
@@ -2819,7 +2819,7 @@ remove_systemd_agent() {
 
 # === Check Proven L2 Block and Sync Proof ===
 check_proven_block() {
-    ENV_FILE="/root/.env-aztec-agent"
+    ENV_FILE="$HOME/.env-aztec-agent"
 
     # Get network settings
     local settings
@@ -3336,9 +3336,9 @@ approve_with_all_keys() {
     local current_rpc_url
 
     # Find all YML key files
-    key_files=$(find /root/aztec/keys/ -name "*.yml" -type f)
+    key_files=$(find $HOME/aztec/keys/ -name "*.yml" -type f)
     if [ -z "$key_files" ]; then
-        echo "Error: No YML key files found in /root/aztec/keys/"
+        echo "Error: No YML key files found in $HOME/aztec/keys/"
         return 1
     fi
 
@@ -3378,8 +3378,8 @@ add_bls_to_keystore() {
     echo -e "\n${BLUE}=== $(t "bls_add_to_keystore_title") ===${NC}"
 
     # Файлы
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
     local KEYSTORE_BACKUP="${KEYSTORE_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
 
     # Проверка существования файлов
@@ -3572,7 +3572,7 @@ generate_bls_existing_method() {
     fi
 
     # 3. Получение feeRecipient из keystore.json
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
     if [ ! -f "$KEYSTORE_FILE" ]; then
         echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
         return 1
@@ -3811,7 +3811,7 @@ generate_bls_new_operator_method() {
     done
 
     # Получаем порядок адресов из keystore.json
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
     if [ ! -f "$KEYSTORE_FILE" ]; then
         echo -e "${RED}$(t "bls_keystore_not_found")${NC}"
         return 1
@@ -4014,8 +4014,8 @@ stake_validators() {
     local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
     # Проверяем существование необходимых файлов
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
     if [ ! -f "$BLS_PK_FILE" ]; then
         printf "${RED}❌ $(t "file_not_found")${NC}\n" "bls-filtered-pk.json" "$BLS_PK_FILE"
@@ -4041,8 +4041,8 @@ stake_validators_old_format() {
     local rpc_url="$2"
     local contract_address="$3"
 
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
 
     if [ ! -f "$KEYSTORE_FILE" ]; then
         printf "${RED}❌ $(t "file_not_found")${NC}\n" "keystore.json" "$KEYSTORE_FILE"
@@ -4224,8 +4224,8 @@ stake_validators_new_format() {
     local rpc_url="$2"
     local contract_address="$3"
 
-    local BLS_PK_FILE="/root/aztec/bls-filtered-pk.json"
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local BLS_PK_FILE="$HOME/aztec/bls-filtered-pk.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
 
     # Получаем количество валидаторов
     local VALIDATOR_COUNT=$(jq -r '.validators | length' "$BLS_PK_FILE" 2>/dev/null)
@@ -4238,7 +4238,7 @@ stake_validators_new_format() {
     echo ""
 
     # Создаем папку для ключей если не существует
-    local KEYS_DIR="/root/aztec/keys"
+    local KEYS_DIR="$HOME/aztec/keys"
     mkdir -p "$KEYS_DIR"
 
     printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$contract_address"
@@ -4488,7 +4488,7 @@ claim_rewards() {
     local rpc_url=$(echo "$settings" | cut -d'|' -f2)
     local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
-    local KEYSTORE_FILE="/root/aztec/config/keystore.json"
+    local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
 
     echo -e "${CYAN}$(t "using_contract") $contract_address${NC}"
     echo -e "${CYAN}$(t "using_rpc") $rpc_url${NC}"

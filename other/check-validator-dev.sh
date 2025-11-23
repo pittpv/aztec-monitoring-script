@@ -50,8 +50,8 @@ init_languages() {
     TRANSLATIONS["en,status_1"]="VALIDATING - The validator is currently in the validator set"
     TRANSLATIONS["en,status_2"]="ZOMBIE - Not participating as validator, but have funds in setup, hit if slashes and going below the minimum"
     TRANSLATIONS["en,status_3"]="EXITING - In the process of exiting the system"
-    TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in /root/.env-aztec-agent"
-    TRANSLATIONS["en,error_file_missing"]="Error: /root/.env-aztec-agent file not found"
+    TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in $HOME/.env-aztec-agent"
+    TRANSLATIONS["en,error_file_missing"]="Error: $HOME/.env-aztec-agent file not found"
     TRANSLATIONS["en,select_mode"]="Select loading mode:"
     TRANSLATIONS["en,mode_fast"]="1. Fast mode (high CPU load)"
     TRANSLATIONS["en,mode_slow"]="2. Slow mode (low CPU load)"
@@ -120,8 +120,8 @@ init_languages() {
     TRANSLATIONS["ru,status_1"]="VALIDATING - Валидатор в настоящее время в наборе валидаторов"
     TRANSLATIONS["ru,status_2"]="ZOMBIE - Не участвует в качестве валидатора, но есть средства в стейкинге, получает штраф за слэшинг, баланс снижается до минимума"
     TRANSLATIONS["ru,status_3"]="EXITING - В процессе выхода из системы"
-    TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в /root/.env-aztec-agent"
-    TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл /root/.env-aztec-agent не найден"
+    TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в $HOME/.env-aztec-agent"
+    TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл $HOME/.env-aztec-agent не найден"
     TRANSLATIONS["ru,select_mode"]="Выберите режим загрузки:"
     TRANSLATIONS["ru,mode_fast"]="1. Быстрый режим (высокая нагрузка на CPU)"
     TRANSLATIONS["ru,mode_slow"]="2. Медленный режим (низкая нагрузка на CPU)"
@@ -190,8 +190,8 @@ init_languages() {
     TRANSLATIONS["tr,status_1"]="VALIDATING - Doğrulayıcı şu anda doğrulayıcı setinde"
     TRANSLATIONS["tr,status_2"]="ZOMBIE - Doğrulayıcı (validator) olarak katılmıyor, ancak staking'te fonları bulunuyor. Slashing (kesinti) cezası alıyor и bakiyesi minimum seviyeye düşüyor."
     TRANSLATIONS["tr,status_3"]="EXITING - Sistemden çıkış sürecinde"
-    TRANSLATIONS["tr,error_rpc_missing"]="Hata: /root/.env-aztec-agent dosyasında RPC_URL bulunamadı"
-    TRANSLATIONS["tr,error_file_missing"]="Hata: /root/.env-aztec-agent dosyası bulunamadı"
+    TRANSLATIONS["tr,error_rpc_missing"]="Hata: $HOME/.env-aztec-agent dosyasında RPC_URL bulunamadı"
+    TRANSLATIONS["tr,error_file_missing"]="Hata: $HOME/.env-aztec-agent dosyası bulunamadı"
     TRANSLATIONS["tr,select_mode"]="Yükleme modunu seçin:"
     TRANSLATIONS["tr,mode_fast"]="1. Hızlı mod (yüksek CPU yükü)"
     TRANSLATIONS["tr,mode_slow"]="2. Yavaş mod (düşük CPU yükü)"
@@ -274,20 +274,7 @@ else
     QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
 fi
 
-MONITOR_DIR="/root/aztec-monitor-agent"
-
-##ROLLUP_ADDRESS="0x1bb7836854ce5dc7d84a32cb75c7480c72767132"
-#ROLLUP_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
-#GSE_ADDRESS="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
-#ROLLUP_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
-#GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
-
-#if [[ "$NETWORK" == "mainnet" ]]; then
-#    QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
-#else
-#    QUEUE_URL="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
-#fi
-#MONITOR_DIR="/root/aztec-monitor-agent"
+MONITOR_DIR="$HOME/aztec-monitor-agent"
 
 # ========= HTTP via curl_cffi =========
 # cffi_http_get <url>
@@ -330,14 +317,14 @@ PY
 
 # Функция загрузки RPC URL с обработкой ошибок
 load_rpc_config() {
-    if [ -f "/root/.env-aztec-agent" ]; then
-        source "/root/.env-aztec-agent"
+    if [ -f "$HOME/.env-aztec-agent" ]; then
+        source "$HOME/.env-aztec-agent"
         if [ -z "$RPC_URL" ]; then
             echo -e "${RED}$(t "error_rpc_missing")${RESET}"
             exit 1
         fi
         if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
-            echo -e "${YELLOW}Warning: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in /root/.env-aztec-agent${RESET}"
+            echo -e "${YELLOW}Warning: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in $HOME/.env-aztec-agent${RESET}"
         fi
 
         # Если есть резервный RPC, используем его
@@ -386,10 +373,10 @@ get_new_rpc_url() {
                 echo -e "${GREEN}RPC is working properly: $rpc_url${RESET}"
 
                 # Добавляем новый RPC в файл конфигурации
-                if grep -q "ALT_RPC=" "/root/.env-aztec-agent"; then
-                    sed -i "s|ALT_RPC=.*|ALT_RPC=$rpc_url|" "/root/.env-aztec-agent"
+                if grep -q "ALT_RPC=" "$HOME/.env-aztec-agent"; then
+                    sed -i "s|ALT_RPC=.*|ALT_RPC=$rpc_url|" "$HOME/.env-aztec-agent"
                 else
-                    echo "ALT_RPC=$rpc_url" >> "/root/.env-aztec-agent"
+                    echo "ALT_RPC=$rpc_url" >> "$HOME/.env-aztec-agent"
                 fi
 
                 # Обновляем текущую переменную
@@ -397,7 +384,7 @@ get_new_rpc_url() {
                 USING_BACKUP_RPC=true
 
                 # Перезагружаем конфигурацию, чтобы обновить переменные
-                source "/root/.env-aztec-agent"
+                source "$HOME/.env-aztec-agent"
 
                 return 0
             else
