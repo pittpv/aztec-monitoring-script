@@ -1,4 +1,4 @@
-# Aztec - cкрипт установки и мониторинга ноды (новый testnet)
+# Aztec - cкрипт установки и мониторинга ноды (mainnet и testnet)
 
 **Описание на:**
 - [🌐 English Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/ "English version of description")

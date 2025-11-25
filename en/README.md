@@ -1,4 +1,4 @@
-# Aztec Node Install & Monitoring script (new testnet)
+# Aztec Node Install & Monitoring script (mainnet & testnet)
 
 **Description in:**
 - [🇷🇺 Russian Version](https://github.com/pittpv/aztec-monitoring-script/blob/main/ "Русская версия описания")
