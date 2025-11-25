@@ -321,7 +321,8 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
 3. **Talimatları izleyin**:
 
   * Bir dil seçin
-  * RPC URL'sini girin
+  * RPC URL'sini girin (RPC'ye `http://localhost:8545` veya `http://127.0.0.1:8545` veya `http://YOUR_EXTERNAL_IP:PORT` adresinden erişilebilir olmalıdır)
+  * Ağ türünü girin (mainnet, testnet)
   * Telegram botunu yapılandırın
   * İzlemeyi etkinleştirin (seçenek 2)
 

@@ -321,7 +321,8 @@ Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone
 3. **Follow the instructions** to:
 
    * Select a language
-   * Enter RPC URL
+   * Enter RPC URL (RPC must be available at `http://localhost:8545` or `http://127.0.0.1:8545` or `http://YOUR_EXTERNAL_IP:PORT`)
+   * Enter the network type (mainnet, testnet)
    * Configure the Telegram bot
    * Enable monitoring (option 2)
 
