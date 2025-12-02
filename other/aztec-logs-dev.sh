@@ -2760,6 +2760,107 @@ EOF
 
   chmod +x "$AGENT_SCRIPT_PATH/agent.sh"
 
+  # Функция для валидации и очистки файла окружения для systemd
+  validate_and_clean_env_file() {
+    local env_file="$1"
+    local temp_file=$(mktemp)
+    
+    # Очищаем файл: удаляем пустые строки, строки без знака равенства,
+    # пробелы вокруг знака равенства, и оставляем только валидные строки
+    while IFS= read -r line || [ -n "$line" ]; do
+      # Удаляем начальные и конечные пробелы
+      line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      
+      # Пропускаем пустые строки
+      [[ -z "$line" ]] && continue
+      
+      # Пропускаем комментарии (строки, начинающиеся с #)
+      [[ "$line" =~ ^# ]] && continue
+      
+      # Проверяем, что строка содержит знак равенства
+      if [[ "$line" =~ = ]]; then
+        # Удаляем пробелы вокруг знака равенства (но сохраняем пробелы в значениях)
+        # Разделяем на ключ и значение
+        local key=$(echo "$line" | cut -d'=' -f1 | sed 's/[[:space:]]*$//')
+        local value=$(echo "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*//')
+        
+        # Пропускаем строки с пустым ключом
+        [[ -z "$key" ]] && continue
+        
+        # Проверяем, что ключ начинается с буквы или подчеркивания
+        if [[ "$key" =~ ^[A-Za-z_] ]]; then
+          # Если значение пустое, оставляем как есть (KEY=)
+          if [[ -z "$value" ]]; then
+            echo "${key}=" >> "$temp_file"
+          else
+            # Если значение уже в кавычках (одинарных или двойных), оставляем как есть
+            if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
+              echo "${key}=${value}" >> "$temp_file"
+            # Если значение содержит пробелы, специальные символы или начинается с цифры, добавляем кавычки
+            elif [[ "$value" =~ [[:space:]] ]] || [[ "$value" =~ [^A-Za-z0-9_./-] ]] || [[ "$value" =~ ^[0-9] ]]; then
+              # Экранируем двойные кавычки в значении
+              value=$(echo "$value" | sed 's/"/\\"/g')
+              echo "${key}=\"${value}\"" >> "$temp_file"
+            else
+              # Значение не требует кавычек
+              echo "${key}=${value}" >> "$temp_file"
+            fi
+          fi
+        fi
+      fi
+    done < "$env_file"
+    
+    # Заменяем оригинальный файл очищенной версией
+    mv "$temp_file" "$env_file"
+    chmod 600 "$env_file"
+  }
+
+  # Валидируем и очищаем файл окружения перед использованием
+  validate_and_clean_env_file "$env_file"
+  
+  # Проверяем, что файл не пустой и содержит валидные переменные
+  if [ ! -s "$env_file" ]; then
+    echo -e "\n${RED}Error: Environment file is empty or invalid${NC}"
+    return 1
+  fi
+  
+  # Проверяем, что файл содержит хотя бы одну валидную переменную
+  if ! grep -qE '^[A-Za-z_][A-Za-z0-9_]*=' "$env_file"; then
+    echo -e "\n${RED}Error: Environment file does not contain valid variables${NC}"
+    return 1
+  fi
+  
+  # Убеждаемся, что путь к файлу абсолютный (systemd требует абсолютные пути)
+  env_file=$(readlink -f "$env_file" 2>/dev/null || realpath "$env_file" 2>/dev/null || echo "$env_file")
+  if [[ ! "$env_file" =~ ^/ ]]; then
+    # Если путь не абсолютный, делаем его абсолютным
+    env_file="$HOME/.env-aztec-agent"
+  fi
+  
+  # Проверяем, что файл окружения существует и доступен для чтения
+  if [ ! -r "$env_file" ]; then
+    echo -e "\n${RED}Error: Environment file $env_file does not exist or is not readable${NC}"
+    return 1
+  fi
+  
+  # Убеждаемся, что путь к скрипту абсолютный
+  local agent_script_path=$(readlink -f "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || echo "$AGENT_SCRIPT_PATH/agent.sh")
+  if [[ ! "$agent_script_path" =~ ^/ ]]; then
+    agent_script_path="$HOME/aztec-monitor-agent/agent.sh"
+  fi
+  
+  # Убеждаемся, что рабочая директория абсолютная
+  local working_dir=$(readlink -f "$AGENT_SCRIPT_PATH" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH" 2>/dev/null || echo "$AGENT_SCRIPT_PATH")
+  if [[ ! "$working_dir" =~ ^/ ]]; then
+    working_dir="$HOME/aztec-monitor-agent"
+  fi
+  
+  # Проверяем, что скрипт существует
+  if [ ! -f "$agent_script_path" ]; then
+    echo -e "\n${RED}Error: Agent script $agent_script_path does not exist${NC}"
+    return 1
+  fi
+
   # Создаем systemd сервис
   cat > /etc/systemd/system/aztec-agent.service <<EOF
 [Unit]
@@ -2769,9 +2870,9 @@ After=network.target
 [Service]
 Type=oneshot
 EnvironmentFile=$env_file
-ExecStart=$AGENT_SCRIPT_PATH/agent.sh
+ExecStart=$agent_script_path
 User=root
-WorkingDirectory=$AGENT_SCRIPT_PATH
+WorkingDirectory=$working_dir
 LimitNOFILE=65535
 
 [Install]
@@ -2793,10 +2894,35 @@ AccuracySec=1us
 WantedBy=timers.target
 EOF
 
+  # Проверяем валидность systemd сервиса перед активацией
+  if ! systemd-analyze verify /etc/systemd/system/aztec-agent.service 2>/dev/null; then
+    echo -e "\n${YELLOW}Warning: systemd-analyze verify failed, but continuing...${NC}"
+  fi
+  
   # Активируем и запускаем timer
-  systemctl daemon-reload
-  systemctl enable aztec-agent.timer
-  systemctl start aztec-agent.timer
+  if ! systemctl daemon-reload; then
+    echo -e "\n${RED}Error: Failed to reload systemd daemon${NC}"
+    return 1
+  fi
+  
+  # Проверяем, что сервис может быть загружен
+  if ! systemctl show aztec-agent.service &>/dev/null; then
+    echo -e "\n${RED}Error: Failed to load aztec-agent.service${NC}"
+    echo -e "${YELLOW}Checking service file syntax...${NC}"
+    systemctl cat aztec-agent.service 2>&1 | head -20
+    return 1
+  fi
+  
+  if ! systemctl enable aztec-agent.timer; then
+    echo -e "\n${RED}Error: Failed to enable aztec-agent.timer${NC}"
+    return 1
+  fi
+  
+  if ! systemctl start aztec-agent.timer; then
+    echo -e "\n${RED}Error: Failed to start aztec-agent.timer${NC}"
+    systemctl status aztec-agent.timer --no-pager
+    return 1
+  fi
 
   # Проверяем статус
   if systemctl is-active --quiet aztec-agent.timer; then
@@ -2805,6 +2931,7 @@ EOF
   else
     echo -e "\n${RED}$(t "agent_timer_error")${NC}"
     systemctl status aztec-agent.timer --no-pager
+    return 1
   fi
 }
 
