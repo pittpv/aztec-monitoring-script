@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.4.0"
+SCRIPT_VERSION="2.5.0"
 
 function show_logo() {
     echo -e " "
@@ -2120,6 +2120,7 @@ create_systemd_agent() {
   cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
 export PATH="\$PATH:\$HOME/.foundry/bin"
+export FOUNDRY_DISABLE_NIGHTLY_WARNING=1
 
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
@@ -2134,12 +2135,16 @@ LANG="$LANG"
 get_network_settings() {
     local env_file="\$HOME/.env-aztec-agent"
     local network="testnet"
-    local rpc_url="\$RPC_URL"
+    local rpc_url=""
 
     if [[ -f "\$env_file" ]]; then
         source "\$env_file"
         [[ -n "\$NETWORK" ]] && network="\$NETWORK"
-        [[ -n "\$ALT_RPC" ]] && rpc_url="\$ALT_RPC"
+        if [[ -n "\$ALT_RPC" ]]; then
+            rpc_url="\$ALT_RPC"
+        elif [[ -n "\$RPC_URL" ]]; then
+            rpc_url="\$RPC_URL"
+        fi
     fi
 
     # Determine contract address based on network
@@ -2651,7 +2656,12 @@ check_blocks() {
 
   # Получаем текущий блок из контракта
   debug_log "Getting block from contract: \$CONTRACT_ADDRESS"
-  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
+  debug_log "Using RPC: \$RPC_URL"
+  debug_log "Using RPC: \$FUNCTION_SIG"
+  debug_log "Command: \$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)"
+  # Выполняем cast call и фильтруем предупреждения, оставляя только hex-значение
+  # Фильтруем строки, начинающиеся с "Warning:", и извлекаем hex-значение (0x...)
+  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
   if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
     log "Block Fetch Error. Check RPC or cast: \$block_hex"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
@@ -2942,7 +2952,7 @@ change_rpc_url() {
 
 # === Check validator ===
 function check_validator {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator-dev.sh"
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
@@ -2953,7 +2963,7 @@ function check_validator {
 
 # === Install Aztec node ===
 function install_aztec {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_install_node")${NC}"
   echo -e ""
@@ -3003,7 +3013,7 @@ function install_aztec {
 
 # === Delete Aztec node ===
 function delete_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
     local FUNCTION_NAME="delete_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
@@ -3012,7 +3022,7 @@ function delete_aztec() {
 
 # === Update Aztec node ===
 function update_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
     local FUNCTION_NAME="update_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
@@ -3021,7 +3031,7 @@ function update_aztec() {
 
 # === Downgrade Aztec node ===
 function downgrade_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec-dev.sh"
+    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
     local FUNCTION_NAME="downgrade_aztec_node"
 
     # Загружаем скрипт во временную переменную и выполняем функцию
