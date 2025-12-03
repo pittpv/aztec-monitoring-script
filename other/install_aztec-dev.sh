@@ -886,11 +886,11 @@ if [ -f "$ENV_FILE" ]; then
         sed -i "s/^NETWORK=.*/NETWORK=$NETWORK/" "$ENV_FILE"
     else
         # Если NETWORK нет, добавляем в конец файла
-        echo "NETWORK=$NETWORK" >> "$ENV_FILE"
+        printf 'NETWORK=%s\n' "$NETWORK" >> "$ENV_FILE"
     fi
 else
     # Если файла нет, создаем его с переменной NETWORK
-    echo "NETWORK=$NETWORK" > "$ENV_FILE"
+    printf 'NETWORK=%s\n' "$NETWORK" > "$ENV_FILE"
 fi
 
 echo -e "${GREEN}Network saved to $ENV_FILE${NC}"

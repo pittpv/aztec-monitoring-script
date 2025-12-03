@@ -1588,8 +1588,8 @@ check_dependencies() {
 
       # Создание файла с обеими переменными
       {
-          echo "RPC_URL=$RPC_URL"
-          echo "NETWORK=$NETWORK"
+          printf 'RPC_URL=%s\n' "$RPC_URL"
+          printf 'NETWORK=%s\n' "$NETWORK"
       } > .env-aztec-agent
 
       echo -e "\n${GREEN}$(t "env_created")${NC}"
@@ -1604,7 +1604,7 @@ check_dependencies() {
   INSTALLED_VERSION=$(grep '^VERSION=' ~/.env-aztec-agent | cut -d'=' -f2)
 
   if [ -z "$INSTALLED_VERSION" ]; then
-    echo "VERSION=$SCRIPT_VERSION" >> ~/.env-aztec-agent
+    printf 'VERSION=%s\n' "$SCRIPT_VERSION" >> ~/.env-aztec-agent
     INSTALLED_VERSION="$SCRIPT_VERSION"
   elif [ "$INSTALLED_VERSION" != "$SCRIPT_VERSION" ]; then
   # Обновляем строку VERSION в .env-aztec-agent
@@ -2102,10 +2102,10 @@ create_systemd_agent() {
           if grep -q "^VALIDATORS=" "$HOME/.env-aztec-agent"; then
             sed -i "s/^VALIDATORS=.*/VALIDATORS=\"$VALIDATORS\"/" "$HOME/.env-aztec-agent"
           else
-            echo "VALIDATORS=\"$VALIDATORS\"" >> "$HOME/.env-aztec-agent"
+            printf 'VALIDATORS="%s"\n' "$VALIDATORS" >> "$HOME/.env-aztec-agent"
           fi
         else
-          echo "VALIDATORS=\"$VALIDATORS\"" > "$HOME/.env-aztec-agent"
+          printf 'VALIDATORS="%s"\n' "$VALIDATORS" > "$HOME/.env-aztec-agent"
         fi
         break
       else
@@ -2765,11 +2765,21 @@ EOF
     local env_file="$1"
     local temp_file=$(mktemp)
     
+    # Сначала нормализуем окончания строк: конвертируем CRLF в LF и исправляем битые символы
+    # Используем sed для замены CRLF на LF, затем удаляем любые оставшиеся CR
+    # Также исправляем случаи, когда точка (0x2E) стоит вместо перевода строки (0x0A)
+    # Заменяем точки, которые стоят перед началом новой строки с переменной (т.е. перед [A-Z_])
+    # на переводы строк
+    sed 's/\r$//' "$env_file" | \
+      sed 's/\r/\n/g' | \
+      sed 's/\.\([A-Z_]\)/\n\1/g' | \
+      sed 's/\.$/\n/' > "${temp_file}.normalized"
+    
     # Очищаем файл: удаляем пустые строки, строки без знака равенства,
     # пробелы вокруг знака равенства, и оставляем только валидные строки
     while IFS= read -r line || [ -n "$line" ]; do
-      # Удаляем начальные и конечные пробелы
-      line=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+      # Удаляем начальные и конечные пробелы, включая возможные точки вместо переводов строк
+      line=$(printf '%s\n' "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr -d '\r' | sed 's/\.$//' | sed 's/^\.//')
       
       # Пропускаем пустые строки
       [[ -z "$line" ]] && continue
@@ -2781,8 +2791,8 @@ EOF
       if [[ "$line" =~ = ]]; then
         # Удаляем пробелы вокруг знака равенства (но сохраняем пробелы в значениях)
         # Разделяем на ключ и значение
-        local key=$(echo "$line" | cut -d'=' -f1 | sed 's/[[:space:]]*$//')
-        local value=$(echo "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*//')
+        local key=$(printf '%s\n' "$line" | cut -d'=' -f1 | sed 's/[[:space:]]*$//' | tr -d '\r')
+        local value=$(printf '%s\n' "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*//' | tr -d '\r')
         
         # Пропускаем строки с пустым ключом
         [[ -z "$key" ]] && continue
@@ -2791,28 +2801,37 @@ EOF
         if [[ "$key" =~ ^[A-Za-z_] ]]; then
           # Если значение пустое, оставляем как есть (KEY=)
           if [[ -z "$value" ]]; then
-            echo "${key}=" >> "$temp_file"
+            printf '%s\n' "${key}=" >> "$temp_file"
           else
             # Если значение уже в кавычках (одинарных или двойных), оставляем как есть
             if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
-              echo "${key}=${value}" >> "$temp_file"
+              printf '%s\n' "${key}=${value}" >> "$temp_file"
             # Если значение содержит пробелы, специальные символы или начинается с цифры, добавляем кавычки
             elif [[ "$value" =~ [[:space:]] ]] || [[ "$value" =~ [^A-Za-z0-9_./-] ]] || [[ "$value" =~ ^[0-9] ]]; then
               # Экранируем двойные кавычки в значении
-              value=$(echo "$value" | sed 's/"/\\"/g')
-              echo "${key}=\"${value}\"" >> "$temp_file"
+              value=$(printf '%s\n' "$value" | sed 's/"/\\"/g')
+              printf '%s\n' "${key}=\"${value}\"" >> "$temp_file"
             else
               # Значение не требует кавычек
-              echo "${key}=${value}" >> "$temp_file"
+              printf '%s\n' "${key}=${value}" >> "$temp_file"
             fi
           fi
         fi
       fi
-    done < "$env_file"
+    done < "${temp_file}.normalized"
+    
+    # Убеждаемся, что файл заканчивается переводом строки (LF, не CRLF)
+    # Удаляем все CR и добавляем финальный LF если его нет
+    if [ -s "$temp_file" ]; then
+      # Удаляем все CR и убеждаемся, что файл заканчивается LF
+      sed 's/\r$//' "$temp_file" | sed -e '$a\' > "${temp_file}.final"
+      mv "${temp_file}.final" "$temp_file"
+    fi
     
     # Заменяем оригинальный файл очищенной версией
     mv "$temp_file" "$env_file"
     chmod 600 "$env_file"
+    rm -f "${temp_file}.normalized"
   }
 
   # Валидируем и очищаем файл окружения перед использованием
@@ -2861,38 +2880,44 @@ EOF
     return 1
   fi
 
-  # Создаем systemd сервис
-  cat > /etc/systemd/system/aztec-agent.service <<EOF
-[Unit]
-Description=Aztec Monitoring Agent
-After=network.target
+  # Создаем systemd сервис с правильными переводами строк (LF)
+  {
+    printf '[Unit]\n'
+    printf 'Description=Aztec Monitoring Agent\n'
+    printf 'After=network.target\n'
+    printf '\n'
+    printf '[Service]\n'
+    printf 'Type=oneshot\n'
+    printf 'EnvironmentFile=%s\n' "$env_file"
+    printf 'ExecStart=%s\n' "$agent_script_path"
+    printf 'User=root\n'
+    printf 'WorkingDirectory=%s\n' "$working_dir"
+    printf 'LimitNOFILE=65535\n'
+    printf '\n'
+    printf '[Install]\n'
+    printf 'WantedBy=multi-user.target\n'
+  } > /etc/systemd/system/aztec-agent.service
+  
+  # Нормализуем окончания строк в systemd unit-файле (удаляем CR, гарантируем LF)
+  sed -i 's/\r$//' /etc/systemd/system/aztec-agent.service
 
-[Service]
-Type=oneshot
-EnvironmentFile=$env_file
-ExecStart=$agent_script_path
-User=root
-WorkingDirectory=$working_dir
-LimitNOFILE=65535
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-  # Создаем systemd timer
-  cat > /etc/systemd/system/aztec-agent.timer <<EOF
-[Unit]
-Description=Run Aztec Agent every 37 seconds
-Requires=aztec-agent.service
-
-[Timer]
-OnBootSec=37
-OnUnitActiveSec=37
-AccuracySec=1us
-
-[Install]
-WantedBy=timers.target
-EOF
+  # Создаем systemd timer с правильными переводами строк (LF)
+  {
+    printf '[Unit]\n'
+    printf 'Description=Run Aztec Agent every 37 seconds\n'
+    printf 'Requires=aztec-agent.service\n'
+    printf '\n'
+    printf '[Timer]\n'
+    printf 'OnBootSec=37\n'
+    printf 'OnUnitActiveSec=37\n'
+    printf 'AccuracySec=1us\n'
+    printf '\n'
+    printf '[Install]\n'
+    printf 'WantedBy=timers.target\n'
+  } > /etc/systemd/system/aztec-agent.timer
+  
+  # Нормализуем окончания строк в systemd timer-файле (удаляем CR, гарантируем LF)
+  sed -i 's/\r$//' /etc/systemd/system/aztec-agent.timer
 
   # Проверяем валидность systemd сервиса перед активацией
   if ! systemd-analyze verify /etc/systemd/system/aztec-agent.service 2>/dev/null; then
@@ -3178,7 +3203,7 @@ function _update_env_var() {
   if grep -q "^$key=" "$env_file"; then
     sed -i "s|^$key=.*|$key=$value|" "$env_file"
   else
-    echo "$key=$value" >> "$env_file"
+    printf '%s=%s\n' "$key" "$value" >> "$env_file"
   fi
 }
 
@@ -4973,3 +4998,4 @@ main_menu() {
 init_languages
 check_dependencies
 main_menu
+

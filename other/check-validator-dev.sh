@@ -376,7 +376,7 @@ get_new_rpc_url() {
                 if grep -q "ALT_RPC=" "$HOME/.env-aztec-agent"; then
                     sed -i "s|ALT_RPC=.*|ALT_RPC=$rpc_url|" "$HOME/.env-aztec-agent"
                 else
-                    echo "ALT_RPC=$rpc_url" >> "$HOME/.env-aztec-agent"
+                    printf 'ALT_RPC=%s\n' "$rpc_url" >> "$HOME/.env-aztec-agent"
                 fi
 
                 # Обновляем текущую переменную
