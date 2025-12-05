@@ -37,7 +37,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ## 📌 Son Güncellemeler 05-12-2025
 
-Bu düzeltme, çeşitli systemd sürümleriyle uyumluluğu artırır. Herhangi bir sorunla karşılaşırsanız, en son sürüme güncellemenizi öneririz.
+Bu düzeltme, çeşitli Ubuntu ve systemd sürümleriyle uyumluluğu artırır. Herhangi bir sorunla karşılaşırsanız, en son sürüme güncellemenizi öneririz.
 
 - systemd unit dosyalarında ve .env-aztec-agent dosyasında satır sonu sorunları düzeltildi
   - Farklı systemd sürümleriyle tam uyumluluk (satır sonları yerine bozuk karakterler düzeltildi)

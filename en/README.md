@@ -37,7 +37,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 ## 📌 Latest Updates 05-12-2025
 
-This fix improves compatibility with various systemd versions. If you encounter any issues, we recommend updating to the latest version.
+This fix improves compatibility with various systemd and Ubuntu versions. If you encounter any issues, we recommend updating to the latest version.
 
 - Fixed line break issues in systemd unit files and .env-aztec-agent
   - Full compatibility with different systemd versions (fixed broken characters instead of line breaks)
