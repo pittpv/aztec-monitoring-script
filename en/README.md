@@ -27,15 +27,36 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 ## 🛠️ Functionality
 
-| Feature          | Description                                       |
-| ---------------- | ------------------------------------------------- |
-| ✅ **Container**  | Monitors the status of the Aztec Docker container |
-| 🔄 **Blocks**    | Compares local block height with on-chain height  |
-| 🤖 **Telegram**  | Instant issue alerts via Telegram                 |
-| 🌐 **Languages** | Language support English/Russian/Turkish                  |
-| ⚙️ **RPC**       | Flexible RPC endpoint configuration               |
+| Feature          | Description                                              |
+| ---------------- |----------------------------------------------------------|
+| ✅ **Container**  | Monitors the status of the Aztec Docker container        |
+| 🔄 **Blocks**    | Compares local block height with on-chain height         |
+| 🤖 **Telegram**  | Instant notifications about problems and slot statistics |
+| 🌐 **Languages** | Language support English/Russian/Turkish                 |
+| ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 23-11-2025
+## 📌 Latest Updates 05-12-2025
+
+This fix improves compatibility with various systemd versions. If you encounter any issues, we recommend updating to the latest version.
+
+- Fixed line break issues in systemd unit files and .env-aztec-agent
+  - Full compatibility with different systemd versions (fixed broken characters instead of line breaks)
+  - All files are now created with correct line breaks (LF)
+  - Added validation and cleanup function for .env-aztec-agent before creating systemd service
+- Monitoring agent improvements
+  - Log file size now depends on DEBUG mode: 10 MB when DEBUG=true, 1 MB when DEBUG=false
+  - Improved RPC URL handling (ALT_RPC priority over RPC_URL)
+  - Added FOUNDRY_DISABLE_NIGHTLY_WARNING=1 to suppress Foundry warnings
+  - Improved warning filtering when executing cast call
+- Improvements in monitoring agent creation function
+  - Added validation check for systemd unit files before activation
+  - Improved error handling when creating and starting systemd service
+- Minor improvements
+
+<details>
+<summary>📅 Version History</summary>
+
+### 23-11-2025
 
 ⚠️ **If your script version is 2.3.2 or lower, you will need to completely reinstall the node. Prepare the data before installation!**
 
@@ -48,21 +69,18 @@ For single-validator mode the same data is required but provided separately.
 - Full mainnet support in all script functions
 - All `/root` replaced with `$HOME`
 - Added reward collection function (Claim)
-  - Checks availability of reward collection in the contract
-  - Displays the nearest reward collection time, if available
-  - Supports multiple coinbase addresses from the keystore
-  - Collects only from validators that have rewards
-  - Collects only from unique coinbase addresses
-  - Processes transactions through the keystore with the appropriate signature
-  - Checks transaction statuses and confirms successful execution
+    - Checks availability of reward collection in the contract
+    - Displays the nearest reward collection time, if available
+    - Supports multiple coinbase addresses from the keystore
+    - Collects only from validators that have rewards
+    - Collects only from unique coinbase addresses
+    - Processes transactions through the keystore with the appropriate signature
+    - Checks transaction statuses and confirms successful execution
 - Monitoring updates
-  - Works with previously installed nodes (the node container name must contain the word aztec, and there must be only one container in the system containing the word aztec)
-  - Added network type request on first launch and saving the variable to .env-aztec-agent
-  - ALT_RPC variable — you can manually add the ALT_RPC variable to .env-aztec-agent, which will take priority over the default RPC_URL
+    - Works with previously installed nodes (the node container name must contain the word aztec, and there must be only one container in the system containing the word aztec)
+    - Added network type request on first launch and saving the variable to .env-aztec-agent
+    - ALT_RPC variable — you can manually add the ALT_RPC variable to .env-aztec-agent, which will take priority over the default RPC_URL
 - Minor improvements
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 20-11-2025
 
@@ -326,6 +344,8 @@ Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone
    * Configure the Telegram bot
    * Enable monitoring (option 2)
 
+❗️To obtain slot statistics, the node **must** have the log level set to: `info;debug:node:sentinel` or `debug`
+
 ## 🖥️ Usage
 
 Main menu:
@@ -351,6 +371,7 @@ Main menu:
 18. Generate BLS keys
 19. Approve
 20. Stake
+21. Claim rewards
 
 0. 🚪 Exit
 
@@ -360,8 +381,9 @@ After running the script, select the option to `Install node monitoring agent wi
 
 - Creates an agent at `~/aztec-monitor-agent`
 - Set up a systemd service and timer (run every 37 seconds)
-- Sends an initial status update to Telegram
+- Sends two messages to Telegram: about connecting your ChatID to monitoring and the initial status of the node
 - Continuously monitors the node and logs to `~/aztec-monitor-agent/agent.log`
+  - You can enable extended logging with `DEBUG=true` in the `/.env-aztec-agent` file
 - Sends Telegram alerts if:
   - The Aztec container is not found
   - There is a mismatch between the latest block in the logs and in the smart contract **> 3 blocks**
@@ -369,7 +391,7 @@ After running the script, select the option to `Install node monitoring agent wi
   - Critical errors found
   - Selected for committee
   - Statistics for each slot while validator to the committee (successful/missed attestation, proposed/mined/missed block)
-- Clears the log file when it reaches 1 MB in size, saving the very first report.
+- Clears the log file when it reaches 1 MB in normal mode and 10 MB in `DEBUG=true` mode, saving the very first report.
 
 ### Requirements for Monitoring Agent:
 
@@ -382,7 +404,7 @@ After running the script, select the option to `Install node monitoring agent wi
 
 If there is an update for the cron-agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
 
-## 🚀 Installing the Aztec node v 2.1.7
+## 🚀 Installing the Aztec node v 2.1.8
 
 To install the Aztec node, select **option 11** and follow the script instructions.
 

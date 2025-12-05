@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.5.0"
+SCRIPT_VERSION="2.5.2"
 
 function show_logo() {
     echo -e " "
@@ -1588,8 +1588,8 @@ check_dependencies() {
 
       # Создание файла с обеими переменными
       {
-          echo "RPC_URL=$RPC_URL"
-          echo "NETWORK=$NETWORK"
+          printf 'RPC_URL=%s\n' "$RPC_URL"
+          printf 'NETWORK=%s\n' "$NETWORK"
       } > .env-aztec-agent
 
       echo -e "\n${GREEN}$(t "env_created")${NC}"
@@ -1604,7 +1604,7 @@ check_dependencies() {
   INSTALLED_VERSION=$(grep '^VERSION=' ~/.env-aztec-agent | cut -d'=' -f2)
 
   if [ -z "$INSTALLED_VERSION" ]; then
-    echo "VERSION=$SCRIPT_VERSION" >> ~/.env-aztec-agent
+    printf 'VERSION=%s\n' "$SCRIPT_VERSION" >> ~/.env-aztec-agent
     INSTALLED_VERSION="$SCRIPT_VERSION"
   elif [ "$INSTALLED_VERSION" != "$SCRIPT_VERSION" ]; then
   # Обновляем строку VERSION в .env-aztec-agent
@@ -2102,10 +2102,10 @@ create_systemd_agent() {
           if grep -q "^VALIDATORS=" "$HOME/.env-aztec-agent"; then
             sed -i "s/^VALIDATORS=.*/VALIDATORS=\"$VALIDATORS\"/" "$HOME/.env-aztec-agent"
           else
-            echo "VALIDATORS=\"$VALIDATORS\"" >> "$HOME/.env-aztec-agent"
+            printf 'VALIDATORS="%s"\n' "$VALIDATORS" >> "$HOME/.env-aztec-agent"
           fi
         else
-          echo "VALIDATORS=\"$VALIDATORS\"" > "$HOME/.env-aztec-agent"
+          printf 'VALIDATORS="%s"\n' "$VALIDATORS" > "$HOME/.env-aztec-agent"
         fi
         break
       else
@@ -2120,6 +2120,7 @@ create_systemd_agent() {
   cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
 export PATH="\$PATH:\$HOME/.foundry/bin"
+export FOUNDRY_DISABLE_NIGHTLY_WARNING=1
 
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
@@ -2134,12 +2135,16 @@ LANG="$LANG"
 get_network_settings() {
     local env_file="\$HOME/.env-aztec-agent"
     local network="testnet"
-    local rpc_url="\$RPC_URL"
+    local rpc_url=""
 
     if [[ -f "\$env_file" ]]; then
         source "\$env_file"
         [[ -n "\$NETWORK" ]] && network="\$NETWORK"
-        [[ -n "\$ALT_RPC" ]] && rpc_url="\$ALT_RPC"
+        if [[ -n "\$ALT_RPC" ]]; then
+            rpc_url="\$ALT_RPC"
+        elif [[ -n "\$RPC_URL" ]]; then
+            rpc_url="\$RPC_URL"
+        fi
     fi
 
     # Determine contract address based on network
@@ -2226,7 +2231,20 @@ if [ ! -w "\$LOG_FILE" ]; then
 fi
 
 # === Проверка размера файла и очистка, если больше 1 МБ ===
-MAX_SIZE=1048576
+# Устанавливаем MAX_SIZE в зависимости от DEBUG
+# Если DEBUG=true, то MAX_SIZE=10 МБ (10485760 байт)
+# Если DEBUG=false или не установлен, то MAX_SIZE=1 МБ (1048576 байт)
+if [ -n "\$DEBUG" ]; then
+  debug_value=\$(echo "\$DEBUG" | tr '[:upper:]' '[:lower:]' | tr -d '"' | tr -d "'")
+  if [ "\$debug_value" = "true" ] || [ "\$debug_value" = "1" ] || [ "\$debug_value" = "yes" ]; then
+    MAX_SIZE=10485760  # 10 МБ
+  else
+    MAX_SIZE=1048576   # 1 МБ
+  fi
+else
+  MAX_SIZE=1048576    # 1 МБ по умолчанию
+fi
+
 current_size=\$(stat -c%s "\$LOG_FILE")
 
 if [ "\$current_size" -gt "\$MAX_SIZE" ]; then
@@ -2651,7 +2669,12 @@ check_blocks() {
 
   # Получаем текущий блок из контракта
   debug_log "Getting block from contract: \$CONTRACT_ADDRESS"
-  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)
+  debug_log "Using RPC: \$RPC_URL"
+  debug_log "Using RPC: \$FUNCTION_SIG"
+  debug_log "Command: \$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1)"
+  # Выполняем cast call и фильтруем предупреждения, оставляя только hex-значение
+  # Фильтруем строки, начинающиеся с "Warning:", и извлекаем hex-значение (0x...)
+  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
   if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
     log "Block Fetch Error. Check RPC or cast: \$block_hex"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
@@ -2750,43 +2773,157 @@ EOF
 
   chmod +x "$AGENT_SCRIPT_PATH/agent.sh"
 
-  # Создаем systemd сервис
-  cat > /etc/systemd/system/aztec-agent.service <<EOF
-[Unit]
-Description=Aztec Monitoring Agent
-After=network.target
+  # Функция для валидации и очистки файла окружения для systemd
+  validate_and_clean_env_file() {
+    local env_file="$1"
+    local temp_file=$(mktemp)
 
-[Service]
-Type=oneshot
-EnvironmentFile=$env_file
-ExecStart=$AGENT_SCRIPT_PATH/agent.sh
-User=root
-WorkingDirectory=$AGENT_SCRIPT_PATH
-LimitNOFILE=65535
+    sed 's/\r$//' "$env_file" | \
+      sed 's/\r/\n/g' | \
+      sed 's/\.\([A-Z_]\)/\n\1/g' | \
+      sed 's/\.$/\n/' > "${temp_file}.normalized"
 
-[Install]
-WantedBy=multi-user.target
-EOF
+    while IFS= read -r line || [ -n "$line" ]; do
 
-  # Создаем systemd timer
-  cat > /etc/systemd/system/aztec-agent.timer <<EOF
-[Unit]
-Description=Run Aztec Agent every 37 seconds
-Requires=aztec-agent.service
+      line=$(printf '%s\n' "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr -d '\r' | sed 's/\.$//' | sed 's/^\.//')
 
-[Timer]
-OnBootSec=37
-OnUnitActiveSec=37
-AccuracySec=1us
+      [[ -z "$line" ]] && continue
 
-[Install]
-WantedBy=timers.target
-EOF
+      [[ "$line" =~ ^# ]] && continue
+
+      if [[ "$line" =~ = ]]; then
+        local key=$(printf '%s\n' "$line" | cut -d'=' -f1 | sed 's/[[:space:]]*$//' | tr -d '\r')
+        local value=$(printf '%s\n' "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*//' | tr -d '\r')
+
+        [[ -z "$key" ]] && continue
+
+        if [[ "$key" =~ ^[A-Za-z_] ]]; then
+          if [[ -z "$value" ]]; then
+            printf '%s\n' "${key}=" >> "$temp_file"
+          else
+            if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
+              printf '%s\n' "${key}=${value}" >> "$temp_file"
+            elif [[ "$value" =~ [[:space:]] ]] || [[ "$value" =~ [^A-Za-z0-9_./-] ]] || [[ "$value" =~ ^[0-9] ]]; then
+              value=$(printf '%s\n' "$value" | sed 's/"/\\"/g')
+              printf '%s\n' "${key}=\"${value}\"" >> "$temp_file"
+            else
+              printf '%s\n' "${key}=${value}" >> "$temp_file"
+            fi
+          fi
+        fi
+      fi
+    done < "${temp_file}.normalized"
+
+    if [ -s "$temp_file" ]; then
+      sed 's/\r$//' "$temp_file" | sed -e '$a\' > "${temp_file}.final"
+      mv "${temp_file}.final" "$temp_file"
+    fi
+
+    mv "$temp_file" "$env_file"
+    chmod 600 "$env_file"
+    rm -f "${temp_file}.normalized"
+  }
+
+  validate_and_clean_env_file "$env_file"
+
+  if [ ! -s "$env_file" ]; then
+    echo -e "\n${RED}Error: Environment file is empty or invalid${NC}"
+    return 1
+  fi
+
+  if ! grep -qE '^[A-Za-z_][A-Za-z0-9_]*=' "$env_file"; then
+    echo -e "\n${RED}Error: Environment file does not contain valid variables${NC}"
+    return 1
+  fi
+
+  env_file=$(readlink -f "$env_file" 2>/dev/null || realpath "$env_file" 2>/dev/null || echo "$env_file")
+  if [[ ! "$env_file" =~ ^/ ]]; then
+    env_file="$HOME/.env-aztec-agent"
+  fi
+
+  if [ ! -r "$env_file" ]; then
+    echo -e "\n${RED}Error: Environment file $env_file does not exist or is not readable${NC}"
+    return 1
+  fi
+
+  local agent_script_path=$(readlink -f "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || echo "$AGENT_SCRIPT_PATH/agent.sh")
+  if [[ ! "$agent_script_path" =~ ^/ ]]; then
+    agent_script_path="$HOME/aztec-monitor-agent/agent.sh"
+  fi
+
+  local working_dir=$(readlink -f "$AGENT_SCRIPT_PATH" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH" 2>/dev/null || echo "$AGENT_SCRIPT_PATH")
+  if [[ ! "$working_dir" =~ ^/ ]]; then
+    working_dir="$HOME/aztec-monitor-agent"
+  fi
+
+  if [ ! -f "$agent_script_path" ]; then
+    echo -e "\n${RED}Error: Agent script $agent_script_path does not exist${NC}"
+    return 1
+  fi
+
+  {
+    printf '[Unit]\n'
+    printf 'Description=Aztec Monitoring Agent\n'
+    printf 'After=network.target\n'
+    printf '\n'
+    printf '[Service]\n'
+    printf 'Type=oneshot\n'
+    printf 'EnvironmentFile=%s\n' "$env_file"
+    printf 'ExecStart=%s\n' "$agent_script_path"
+    printf 'User=root\n'
+    printf 'WorkingDirectory=%s\n' "$working_dir"
+    printf 'LimitNOFILE=65535\n'
+    printf '\n'
+    printf '[Install]\n'
+    printf 'WantedBy=multi-user.target\n'
+  } > /etc/systemd/system/aztec-agent.service
+
+  sed -i 's/\r$//' /etc/systemd/system/aztec-agent.service
+
+  {
+    printf '[Unit]\n'
+    printf 'Description=Run Aztec Agent every 37 seconds\n'
+    printf 'Requires=aztec-agent.service\n'
+    printf '\n'
+    printf '[Timer]\n'
+    printf 'OnBootSec=37\n'
+    printf 'OnUnitActiveSec=37\n'
+    printf 'AccuracySec=1us\n'
+    printf '\n'
+    printf '[Install]\n'
+    printf 'WantedBy=timers.target\n'
+  } > /etc/systemd/system/aztec-agent.timer
+
+  sed -i 's/\r$//' /etc/systemd/system/aztec-agent.timer
+
+  if ! systemd-analyze verify /etc/systemd/system/aztec-agent.service 2>/dev/null; then
+    echo -e "\n${YELLOW}Warning: systemd-analyze verify failed, but continuing...${NC}"
+  fi
 
   # Активируем и запускаем timer
-  systemctl daemon-reload
-  systemctl enable aztec-agent.timer
-  systemctl start aztec-agent.timer
+  if ! systemctl daemon-reload; then
+    echo -e "\n${RED}Error: Failed to reload systemd daemon${NC}"
+    return 1
+  fi
+
+  # Проверяем, что сервис может быть загружен
+  if ! systemctl show aztec-agent.service &>/dev/null; then
+    echo -e "\n${RED}Error: Failed to load aztec-agent.service${NC}"
+    echo -e "${YELLOW}Checking service file syntax...${NC}"
+    systemctl cat aztec-agent.service 2>&1 | head -20
+    return 1
+  fi
+
+  if ! systemctl enable aztec-agent.timer; then
+    echo -e "\n${RED}Error: Failed to enable aztec-agent.timer${NC}"
+    return 1
+  fi
+
+  if ! systemctl start aztec-agent.timer; then
+    echo -e "\n${RED}Error: Failed to start aztec-agent.timer${NC}"
+    systemctl status aztec-agent.timer --no-pager
+    return 1
+  fi
 
   # Проверяем статус
   if systemctl is-active --quiet aztec-agent.timer; then
@@ -2795,6 +2932,7 @@ EOF
   else
     echo -e "\n${RED}$(t "agent_timer_error")${NC}"
     systemctl status aztec-agent.timer --no-pager
+    return 1
   fi
 }
 
@@ -3041,7 +3179,7 @@ function _update_env_var() {
   if grep -q "^$key=" "$env_file"; then
     sed -i "s|^$key=.*|$key=$value|" "$env_file"
   else
-    echo "$key=$value" >> "$env_file"
+    printf '%s=%s\n' "$key" "$value" >> "$env_file"
   fi
 }
 
@@ -4836,3 +4974,4 @@ main_menu() {
 init_languages
 check_dependencies
 main_menu
+

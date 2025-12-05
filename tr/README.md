@@ -31,11 +31,33 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | ---------------- | ------------------------------------------------- |
 | ✅ **Konteyner**  | Aztec Docker konteynerının durumunu izler |
 | 🔄 **Bloklar**    | Yerel blok yüksekliğini zincir üzerindeki yükseklikle karşılaştırır  |
-| 🤖 **Telegram**  | Telegram üzerinden anlık sorun uyarıları                 |
+| 🤖 **Telegram**  | Sorunlar ve slot istatistikleri hakkında anında bildirimler                |
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 20-11-2025
+## 📌 Son Güncellemeler 05-12-2025
+
+Bu düzeltme, çeşitli systemd sürümleriyle uyumluluğu artırır. Herhangi bir sorunla karşılaşırsanız, en son sürüme güncellemenizi öneririz.
+
+- systemd unit dosyalarında ve .env-aztec-agent dosyasında satır sonu sorunları düzeltildi
+  - Farklı systemd sürümleriyle tam uyumluluk (satır sonları yerine bozuk karakterler düzeltildi)
+  - Tüm dosyalar artık doğru satır sonları (LF) ile oluşturuluyor
+  - systemd servisi oluşturulmadan önce .env-aztec-agent dosyasını doğrulama ve temizleme fonksiyonu eklendi
+- İzleme aracında iyileştirmeler
+  - Log dosyası boyutu artık DEBUG moduna bağlı: DEBUG=true iken 10 MB, DEBUG=false iken 1 MB
+  - RPC URL işleme iyileştirildi (ALT_RPC'nin RPC_URL üzerinde önceliği)
+  - Foundry uyarılarını bastırmak için FOUNDRY_DISABLE_NIGHTLY_WARNING=1 eklendi
+  - cast call yürütülürken uyarı filtreleme iyileştirildi
+- İzleme aracı oluşturma fonksiyonunda iyileştirmeler
+  - Etkinleştirmeden önce systemd unit dosyalarının geçerliliğini kontrol etme eklendi
+  - systemd servisi oluşturma ve başlatmada hata işleme iyileştirildi
+- Küçük iyileştirmeler
+
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 23-11-2025
 
 ⚠️ **Eğer script sürümünüz 2.3.2 veya daha eski ise node'u tamamen yeniden yüklemeniz gerekecektir. Kurulumdan önce verileri hazırlayın!**
 
@@ -48,22 +70,18 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
 - Betik işlevlerinin tümünde tam mainnet desteği
 - Tüm `/root` yolları `$HOME` ile değiştirildi
 - Ödül toplama fonksiyonu (Claim) eklendi
-  - Sözleşmede ödül toplama uygunluğunu kontrol eder
-  - Uygunsa en yakın ödül toplama zamanını gösterir
-  - Keystore içindeki birden fazla coinbase adresini destekler
-  - Sadece ödülü olan doğrulayıcılardan toplar
-  - Sadece benzersiz coinbase adreslerinden toplar
-  - Keystore üzerinden uygun imzayla işlemleri gerçekleştirir
-  - İşlem durumlarını kontrol eder ve başarılı şekilde tamamlandığını doğrular
+    - Sözleşmede ödül toplama uygunluğunu kontrol eder
+    - Uygunsa en yakın ödül toplama zamanını gösterir
+    - Keystore içindeki birden fazla coinbase adresini destekler
+    - Sadece ödülü olan doğrulayıcılardan toplar
+    - Sadece benzersiz coinbase adreslerinden toplar
+    - Keystore üzerinden uygun imzayla işlemleri gerçekleştirir
+    - İşlem durumlarını kontrol eder ve başarılı şekilde tamamlandığını doğrular
 - İzleme güncellemeleri
-  - Önceden kurulmuş nodelarla çalışır (node konteyner adında aztec kelimesi bulunmalıdır ve sistemde aztec kelimesi geçen yalnızca bir konteyner olmalıdır)
-  - İlk çalıştırmada ağ türü sorusu eklendi ve değişken .env-aztec-agent dosyasına kaydedilir
-  - ALT_RPC değişkeni — .env-aztec-agent dosyasına manuel olarak ekleyebilir ve varsayılan RPC_URL üzerinde önceliğe sahip olur
+    - Önceden kurulmuş nodelarla çalışır (node konteyner adında aztec kelimesi bulunmalıdır ve sistemde aztec kelimesi geçen yalnızca bir konteyner olmalıdır)
+    - İlk çalıştırmada ağ türü sorusu eklendi ve değişken .env-aztec-agent dosyasına kaydedilir
+    - ALT_RPC değişkeni — .env-aztec-agent dosyasına manuel olarak ekleyebilir ve varsayılan RPC_URL üzerinde önceliğe sahip olur
 - Küçük iyileştirmeler
-
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 20-11-2025
 
@@ -326,6 +344,8 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
   * Telegram botunu yapılandırın
   * İzlemeyi etkinleştirin (seçenek 2)
 
+❗️Yuva istatistiklerini elde etmek için, düğümün günlük düzeyinin şu şekilde ayarlanmış olması **gerekir**: `info;debug:node:sentinel` veya `debug`
+
 ## 🖥️ Kullanım
 
 Ana menü:
@@ -351,6 +371,7 @@ Ana menü:
 18. BLS anahtarları oluştur
 19. Approve
 20. Stake
+21. Ödülleri talep edin
 
 0. 🚪 Çıkış
 
@@ -360,8 +381,9 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
 
 - `~/aztec-monitor-agent` konumunda bir aracı oluşturur
 - Bir systemd servisi ve zamanlayıcısı kurar (her 37 saniyede bir çalışır)
-- Telegram'a bir başlangıç durum güncellemesi gönderir
+- Telegram'a iki mesaj gönderir: ChatID'nizi izlemeye bağlama ve düğümün ilk durumu hakkında
 - Düğümü sürekli izler ve günlükleri `~/aztec-monitor-agent/agent.log` dosyasına kaydeder
+  - `/.env-aztec-agent` dosyasındaki `DEBUG=true` ile genişletilmiş günlük kaydını etkinleştirebilirsiniz
 - Aşağıdaki durumlarda Telegram uyarıları gönderir:
   - Aztec konteyneri bulunamazsa
   - Günlüklerdeki en son blok ile akıllı sözleşmedeki blok arasında **> 3 blok** uyuşmazlık varsa
@@ -369,7 +391,7 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
   - Kritik hatalar bulunursa
   - Komiteye seçilirse
   - Doğrulayıcı komitedeyken her slot için istatistikler (başarılı/kaçırılmış onaylama, önerilen/kazılmış/kaçırılmış blok)
-- Günlük dosyası boyutu 1 MB'a ulaştığında temizler, en ilk raporu kaydeder.
+- Normal modda 1 MB'a, `DEBUG=true` modunda ise 10 MB'a ulaştığında günlük dosyasını temizler ve ilk raporu kaydeder.
 
 ### İzleme Aracı Gereksinimleri:
 
@@ -382,7 +404,7 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
 
 Cron-agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
 
-## 🚀 Aztec v 2.1.7 düğümünü kurma
+## 🚀 Aztec v 2.1.8 düğümünü kurma
 
 Aztec düğümünü kurmak için **seçenek 11**'i seçin ve betik talimatlarını izleyin.
 

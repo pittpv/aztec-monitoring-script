@@ -213,5 +213,15 @@
     "VERSION": "2.5.0",
     "UPDATE_DATE": "23.11.2025",
     "CHANGES": ["Full mainnet support in all script functions", "All /root replaced with $HOME", "Added reward collection function (Claim)", "Monitoring updates", "Minor improvements"]
+  },
+  {
+    "VERSION": "2.5.1",
+    "UPDATE_DATE": "02.12.2025",
+    "CHANGES": ["Partial fix for RPC URL in monitoring agent creation function"]
+  },
+  {
+    "VERSION": "2.5.2",
+    "UPDATE_DATE": "05.12.2025",
+    "CHANGES": ["Full mainnet support in all script functions", "Fixed line break issues in systemd unit files and .env-aztec-agent for different systemd compatibility", "Log file size now depends on DEBUG mode (10 MB when DEBUG=true, 1 MB when DEBUG=false)", "Improved RPC URL handling with ALT_RPC priority", "Added FOUNDRY_DISABLE_NIGHTLY_WARNING=1", "Improved systemd service validation and error handling"]
   }
 ]
