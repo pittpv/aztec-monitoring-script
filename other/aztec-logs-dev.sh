@@ -2231,7 +2231,20 @@ if [ ! -w "\$LOG_FILE" ]; then
 fi
 
 # === Проверка размера файла и очистка, если больше 1 МБ ===
-MAX_SIZE=1048576
+# Устанавливаем MAX_SIZE в зависимости от DEBUG
+# Если DEBUG=true, то MAX_SIZE=10 МБ (10485760 байт)
+# Если DEBUG=false или не установлен, то MAX_SIZE=1 МБ (1048576 байт)
+if [ -n "\$DEBUG" ]; then
+  debug_value=\$(echo "\$DEBUG" | tr '[:upper:]' '[:lower:]' | tr -d '"' | tr -d "'")
+  if [ "\$debug_value" = "true" ] || [ "\$debug_value" = "1" ] || [ "\$debug_value" = "yes" ]; then
+    MAX_SIZE=10485760  # 10 МБ
+  else
+    MAX_SIZE=1048576   # 1 МБ
+  fi
+else
+  MAX_SIZE=1048576    # 1 МБ по умолчанию
+fi
+
 current_size=\$(stat -c%s "\$LOG_FILE")
 
 if [ "\$current_size" -gt "\$MAX_SIZE" ]; then
