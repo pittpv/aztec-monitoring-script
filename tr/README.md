@@ -18,8 +18,8 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ## 🌟 Temel Özellikler
 
-* 🏃🏻‍ Düğüm başlatma (docker-compose veya CLI)
 * 🐳 Aztec düğümünün çalışmasının izlenmesi
+* 🏃🏻‍ Düğüm başlatma (docker-compose veya CLI)
 * 🔗 Blok tazelik kontrolleri (akıllı sözleşmeyle karşılaştırmalı)
 * 🔍 Kritik parametreler için günlük ayrıştırma
 * 📨 Sorunlar ve doğrulayıcı aktivitesi hakkında Telegram uyarıları

@@ -18,8 +18,8 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 ## 🌟 Key Features
 
-* 🏃🏻‍ Node launch (docker-compose or CLI)
 * 🐳 Monitoring the operation of the Aztec node
+* 🏃🏻‍ Node launch (docker-compose or CLI)
 * 🔗 Block freshness checks (compared to the smart contract)
 * 🔍 Log parsing for critical parameters
 * 📨 Telegram alerts on issues and validator activity
