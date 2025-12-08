@@ -39,7 +39,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ⚠️ Betiği güncelledikten sonra eski aracı silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2)
 
-- İzleme temizleme işlevinde küçük bir düzeltme, /aztec-monitor-agent/agent.log
+- İzleme günlüğü dosyası temizleme işlevine (/aztec-monitor-agent/agent.log) ilişkin küçük bir düzeltme
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
