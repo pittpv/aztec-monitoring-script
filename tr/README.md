@@ -35,27 +35,32 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 05-12-2025
+## 📌 Son Güncellemeler 08-12-2025
+
+⚠️ Betiği güncelledikten sonra eski aracı silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2)
+
+- İzleme temizleme işlevinde küçük bir düzeltme, /aztec-monitor-agent/agent.log
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 05-12-2025
 
 Bu düzeltme, çeşitli Ubuntu ve systemd sürümleriyle uyumluluğu artırır. Herhangi bir sorunla karşılaşırsanız, en son sürüme güncellemenizi öneririz.
 
 - systemd unit dosyalarında ve .env-aztec-agent dosyasında satır sonu sorunları düzeltildi
-  - Farklı systemd sürümleriyle tam uyumluluk (satır sonları yerine bozuk karakterler düzeltildi)
-  - Tüm dosyalar artık doğru satır sonları (LF) ile oluşturuluyor
-  - systemd servisi oluşturulmadan önce .env-aztec-agent dosyasını doğrulama ve temizleme fonksiyonu eklendi
+    - Farklı systemd sürümleriyle tam uyumluluk (satır sonları yerine bozuk karakterler düzeltildi)
+    - Tüm dosyalar artık doğru satır sonları (LF) ile oluşturuluyor
+    - systemd servisi oluşturulmadan önce .env-aztec-agent dosyasını doğrulama ve temizleme fonksiyonu eklendi
 - İzleme aracında iyileştirmeler
-  - Log dosyası boyutu artık DEBUG moduna bağlı: DEBUG=true iken 10 MB, DEBUG=false iken 1 MB
-  - RPC URL işleme iyileştirildi (ALT_RPC'nin RPC_URL üzerinde önceliği)
-  - Foundry uyarılarını bastırmak için FOUNDRY_DISABLE_NIGHTLY_WARNING=1 eklendi
-  - cast call yürütülürken uyarı filtreleme iyileştirildi
+    - Log dosyası boyutu artık DEBUG moduna bağlı: DEBUG=true iken 10 MB, DEBUG=false iken 1 MB
+    - RPC URL işleme iyileştirildi (ALT_RPC'nin RPC_URL üzerinde önceliği)
+    - Foundry uyarılarını bastırmak için FOUNDRY_DISABLE_NIGHTLY_WARNING=1 eklendi
+    - cast call yürütülürken uyarı filtreleme iyileştirildi
 - İzleme aracı oluşturma fonksiyonunda iyileştirmeler
-  - Etkinleştirmeden önce systemd unit dosyalarının geçerliliğini kontrol etme eklendi
-  - systemd servisi oluşturma ve başlatmada hata işleme iyileştirildi
+    - Etkinleştirmeden önce systemd unit dosyalarının geçerliliğini kontrol etme eklendi
+    - systemd servisi oluşturma ve başlatmada hata işleme iyileştirildi
 - Küçük iyileştirmeler
-
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 23-11-2025
 

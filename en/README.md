@@ -35,26 +35,32 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 05-12-2025
+## 📌 Latest Updates 08-12-2025
+
+⚠️ After updating the script, delete the old agent (option 3) and create a new agent (option 2)
+
+- Minor fix to the monitoring clearing function, /aztec-monitor-agent/agent.log
+
+<details>
+<summary>📅 Version History</summary>
+
+### 05-12-2025
 
 This update improves compatibility with various systemd and Ubuntu versions. If you encounter any issues, we recommend updating to the latest version.
 
 - Fixed line break issues in systemd unit files and .env-aztec-agent
-  - Full compatibility with different systemd versions (fixed broken characters instead of line breaks)
-  - All files are now created with correct line breaks (LF)
-  - Added validation and cleanup function for .env-aztec-agent before creating systemd service
+    - Full compatibility with different systemd versions (fixed broken characters instead of line breaks)
+    - All files are now created with correct line breaks (LF)
+    - Added validation and cleanup function for .env-aztec-agent before creating systemd service
 - Monitoring agent improvements
-  - Log file size now depends on DEBUG mode: 10 MB when DEBUG=true, 1 MB when DEBUG=false
-  - Improved RPC URL handling (ALT_RPC priority over RPC_URL)
-  - Added FOUNDRY_DISABLE_NIGHTLY_WARNING=1 to suppress Foundry warnings
-  - Improved warning filtering when executing cast call
+    - Log file size now depends on DEBUG mode: 10 MB when DEBUG=true, 1 MB when DEBUG=false
+    - Improved RPC URL handling (ALT_RPC priority over RPC_URL)
+    - Added FOUNDRY_DISABLE_NIGHTLY_WARNING=1 to suppress Foundry warnings
+    - Improved warning filtering when executing cast call
 - Improvements in monitoring agent creation function
-  - Added validation check for systemd unit files before activation
-  - Improved error handling when creating and starting systemd service
+    - Added validation check for systemd unit files before activation
+    - Improved error handling when creating and starting systemd service
 - Minor improvements
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 23-11-2025
 

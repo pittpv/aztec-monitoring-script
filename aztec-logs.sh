@@ -2249,7 +2249,11 @@ current_size=\$(stat -c%s "\$LOG_FILE")
 
 if [ "\$current_size" -gt "\$MAX_SIZE" ]; then
   temp_file=\$(mktemp)
-  awk '/INITIALIZED/ {print; exit} {print}' "\$LOG_FILE" > "\$temp_file"
+  if grep -q "INITIALIZED" "\$LOG_FILE"; then
+    awk '/INITIALIZED/ {print; exit} {print}' "\$LOG_FILE" > "\$temp_file"
+  else
+    head -n 8 "\$LOG_FILE" > "\$temp_file"
+  fi
   mv "\$temp_file" "\$LOG_FILE"
   chmod 644 "\$LOG_FILE"
 

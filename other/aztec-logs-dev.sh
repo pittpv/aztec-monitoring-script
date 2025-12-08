@@ -2249,7 +2249,11 @@ current_size=\$(stat -c%s "\$LOG_FILE")
 
 if [ "\$current_size" -gt "\$MAX_SIZE" ]; then
   temp_file=\$(mktemp)
-  awk '/INITIALIZED/ {print; exit} {print}' "\$LOG_FILE" > "\$temp_file"
+  if grep -q "INITIALIZED" "\$LOG_FILE"; then
+    awk '/INITIALIZED/ {print; exit} {print}' "\$LOG_FILE" > "\$temp_file"
+  else
+    head -n 8 "\$LOG_FILE" > "\$temp_file"
+  fi
   mv "\$temp_file" "\$LOG_FILE"
   chmod 644 "\$LOG_FILE"
 
@@ -2777,7 +2781,7 @@ EOF
   validate_and_clean_env_file() {
     local env_file="$1"
     local temp_file=$(mktemp)
-    
+
     # Сначала нормализуем окончания строк: конвертируем CRLF в LF и исправляем битые символы
     # Используем sed для замены CRLF на LF, затем удаляем любые оставшиеся CR
     # Также исправляем случаи, когда точка (0x2E) стоит вместо перевода строки (0x0A)
@@ -2787,29 +2791,29 @@ EOF
       sed 's/\r/\n/g' | \
       sed 's/\.\([A-Z_]\)/\n\1/g' | \
       sed 's/\.$/\n/' > "${temp_file}.normalized"
-    
+
     # Очищаем файл: удаляем пустые строки, строки без знака равенства,
     # пробелы вокруг знака равенства, и оставляем только валидные строки
     while IFS= read -r line || [ -n "$line" ]; do
       # Удаляем начальные и конечные пробелы, включая возможные точки вместо переводов строк
       line=$(printf '%s\n' "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr -d '\r' | sed 's/\.$//' | sed 's/^\.//')
-      
+
       # Пропускаем пустые строки
       [[ -z "$line" ]] && continue
-      
+
       # Пропускаем комментарии (строки, начинающиеся с #)
       [[ "$line" =~ ^# ]] && continue
-      
+
       # Проверяем, что строка содержит знак равенства
       if [[ "$line" =~ = ]]; then
         # Удаляем пробелы вокруг знака равенства (но сохраняем пробелы в значениях)
         # Разделяем на ключ и значение
         local key=$(printf '%s\n' "$line" | cut -d'=' -f1 | sed 's/[[:space:]]*$//' | tr -d '\r')
         local value=$(printf '%s\n' "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*//' | tr -d '\r')
-        
+
         # Пропускаем строки с пустым ключом
         [[ -z "$key" ]] && continue
-        
+
         # Проверяем, что ключ начинается с буквы или подчеркивания
         if [[ "$key" =~ ^[A-Za-z_] ]]; then
           # Если значение пустое, оставляем как есть (KEY=)
@@ -2832,7 +2836,7 @@ EOF
         fi
       fi
     done < "${temp_file}.normalized"
-    
+
     # Убеждаемся, что файл заканчивается переводом строки (LF, не CRLF)
     # Удаляем все CR и добавляем финальный LF если его нет
     if [ -s "$temp_file" ]; then
@@ -2840,7 +2844,7 @@ EOF
       sed 's/\r$//' "$temp_file" | sed -e '$a\' > "${temp_file}.final"
       mv "${temp_file}.final" "$temp_file"
     fi
-    
+
     # Заменяем оригинальный файл очищенной версией
     mv "$temp_file" "$env_file"
     chmod 600 "$env_file"
@@ -2849,44 +2853,44 @@ EOF
 
   # Валидируем и очищаем файл окружения перед использованием
   validate_and_clean_env_file "$env_file"
-  
+
   # Проверяем, что файл не пустой и содержит валидные переменные
   if [ ! -s "$env_file" ]; then
     echo -e "\n${RED}Error: Environment file is empty or invalid${NC}"
     return 1
   fi
-  
+
   # Проверяем, что файл содержит хотя бы одну валидную переменную
   if ! grep -qE '^[A-Za-z_][A-Za-z0-9_]*=' "$env_file"; then
     echo -e "\n${RED}Error: Environment file does not contain valid variables${NC}"
     return 1
   fi
-  
+
   # Убеждаемся, что путь к файлу абсолютный (systemd требует абсолютные пути)
   env_file=$(readlink -f "$env_file" 2>/dev/null || realpath "$env_file" 2>/dev/null || echo "$env_file")
   if [[ ! "$env_file" =~ ^/ ]]; then
     # Если путь не абсолютный, делаем его абсолютным
     env_file="$HOME/.env-aztec-agent"
   fi
-  
+
   # Проверяем, что файл окружения существует и доступен для чтения
   if [ ! -r "$env_file" ]; then
     echo -e "\n${RED}Error: Environment file $env_file does not exist or is not readable${NC}"
     return 1
   fi
-  
+
   # Убеждаемся, что путь к скрипту абсолютный
   local agent_script_path=$(readlink -f "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || echo "$AGENT_SCRIPT_PATH/agent.sh")
   if [[ ! "$agent_script_path" =~ ^/ ]]; then
     agent_script_path="$HOME/aztec-monitor-agent/agent.sh"
   fi
-  
+
   # Убеждаемся, что рабочая директория абсолютная
   local working_dir=$(readlink -f "$AGENT_SCRIPT_PATH" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH" 2>/dev/null || echo "$AGENT_SCRIPT_PATH")
   if [[ ! "$working_dir" =~ ^/ ]]; then
     working_dir="$HOME/aztec-monitor-agent"
   fi
-  
+
   # Проверяем, что скрипт существует
   if [ ! -f "$agent_script_path" ]; then
     echo -e "\n${RED}Error: Agent script $agent_script_path does not exist${NC}"
@@ -2910,7 +2914,7 @@ EOF
     printf '[Install]\n'
     printf 'WantedBy=multi-user.target\n'
   } > /etc/systemd/system/aztec-agent.service
-  
+
   # Нормализуем окончания строк в systemd unit-файле (удаляем CR, гарантируем LF)
   sed -i 's/\r$//' /etc/systemd/system/aztec-agent.service
 
@@ -2928,7 +2932,7 @@ EOF
     printf '[Install]\n'
     printf 'WantedBy=timers.target\n'
   } > /etc/systemd/system/aztec-agent.timer
-  
+
   # Нормализуем окончания строк в systemd timer-файле (удаляем CR, гарантируем LF)
   sed -i 's/\r$//' /etc/systemd/system/aztec-agent.timer
 
@@ -2936,13 +2940,13 @@ EOF
   if ! systemd-analyze verify /etc/systemd/system/aztec-agent.service 2>/dev/null; then
     echo -e "\n${YELLOW}Warning: systemd-analyze verify failed, but continuing...${NC}"
   fi
-  
+
   # Активируем и запускаем timer
   if ! systemctl daemon-reload; then
     echo -e "\n${RED}Error: Failed to reload systemd daemon${NC}"
     return 1
   fi
-  
+
   # Проверяем, что сервис может быть загружен
   if ! systemctl show aztec-agent.service &>/dev/null; then
     echo -e "\n${RED}Error: Failed to load aztec-agent.service${NC}"
@@ -2950,12 +2954,12 @@ EOF
     systemctl cat aztec-agent.service 2>&1 | head -20
     return 1
   fi
-  
+
   if ! systemctl enable aztec-agent.timer; then
     echo -e "\n${RED}Error: Failed to enable aztec-agent.timer${NC}"
     return 1
   fi
-  
+
   if ! systemctl start aztec-agent.timer; then
     echo -e "\n${RED}Error: Failed to start aztec-agent.timer${NC}"
     systemctl status aztec-agent.timer --no-pager
