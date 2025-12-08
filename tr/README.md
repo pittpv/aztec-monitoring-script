@@ -40,6 +40,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 ⚠️ Betiği güncelledikten sonra eski aracı silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2)
 
 - İzleme günlüğü dosyası temizleme işlevine (/aztec-monitor-agent/agent.log) ilişkin küçük bir düzeltme
+- İstisnalara yeni konteynerler eklendi: watchtower, otel, prometheus, grafana
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>

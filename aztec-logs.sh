@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.5.3"
+SCRIPT_VERSION="2.5.4"
 
 function show_logo() {
     echo -e " "
@@ -1757,7 +1757,7 @@ check_aztec_container_logs() {
 
     echo -e "\n${BLUE}$(t "search_container")${NC}"
     container_id=$(docker ps --format "{{.ID}} {{.Names}}" \
-                   | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+                   | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
     if [ -z "$container_id" ]; then
         echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1843,7 +1843,7 @@ check_aztec_container_logs() {
 view_container_logs() {
 
   echo -e "\n${BLUE}$(t "search_container")${NC}"
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1871,7 +1871,7 @@ view_container_logs() {
 find_rollup_address() {
   echo -e "\n${BLUE}$(t "search_rollup")${NC}"
 
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1907,7 +1907,7 @@ find_rollup_address() {
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1945,7 +1945,7 @@ find_governance_proposer_payload() {
   echo -e "\n${BLUE}$(t "search_gov")${NC}"
 
   # Получаем ID контейнера
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -2463,7 +2463,7 @@ check_committee() {
   IFS=',' read -ra VALIDATOR_ARRAY <<< "\$VALIDATORS"
   debug_log "Validators loaded: \${VALIDATOR_ARRAY[*]}"
 
-  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
+  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then
     debug_log "No aztec container found"
     return
@@ -2657,7 +2657,7 @@ check_committee() {
 check_blocks() {
   debug_log "check_blocks started at \$(date)"
 
-  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
+  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then
     log "Container 'aztec' not found."
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
@@ -3428,7 +3428,7 @@ function check_aztec_version() {
 
     echo -e "\n${CYAN}$(t "checking_aztec_version")${NC}"
     container_id=$(docker ps --format "{{.ID}} {{.Names}}" \
-                   | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+                   | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
     if [ -z "$container_id" ]; then
         echo -e "${RED}$(t "container_not_found")${NC}"
@@ -4978,4 +4978,3 @@ main_menu() {
 init_languages
 check_dependencies
 main_menu
-

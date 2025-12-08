@@ -40,6 +40,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 ⚠️ After updating the script, delete the old agent (option 3) and create a new agent (option 2)
 
 - Minor fix to the monitoring log file clearing function, /aztec-monitor-agent/agent.log
+- New containers have been added to exceptions: watchtower, otel, prometheus, grafana
 
 <details>
 <summary>📅 Version History</summary>
