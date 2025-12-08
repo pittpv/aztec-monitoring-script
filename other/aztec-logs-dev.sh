@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.5.0"
+SCRIPT_VERSION="2.5.3"
 
 function show_logo() {
     echo -e " "
@@ -1757,7 +1757,7 @@ check_aztec_container_logs() {
 
     echo -e "\n${BLUE}$(t "search_container")${NC}"
     container_id=$(docker ps --format "{{.ID}} {{.Names}}" \
-                   | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+                   | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
     if [ -z "$container_id" ]; then
         echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1843,7 +1843,7 @@ check_aztec_container_logs() {
 view_container_logs() {
 
   echo -e "\n${BLUE}$(t "search_container")${NC}"
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1871,7 +1871,7 @@ view_container_logs() {
 find_rollup_address() {
   echo -e "\n${BLUE}$(t "search_rollup")${NC}"
 
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1907,7 +1907,7 @@ find_rollup_address() {
 find_peer_id() {
   echo -e "\n${BLUE}$(t "search_peer")${NC}"
 
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -1945,7 +1945,7 @@ find_governance_proposer_payload() {
   echo -e "\n${BLUE}$(t "search_gov")${NC}"
 
   # Получаем ID контейнера
-  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
   if [ -z "$container_id" ]; then
     echo -e "\n${RED}$(t "container_not_found")${NC}"
@@ -2463,7 +2463,7 @@ check_committee() {
   IFS=',' read -ra VALIDATOR_ARRAY <<< "\$VALIDATORS"
   debug_log "Validators loaded: \${VALIDATOR_ARRAY[*]}"
 
-  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
+  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then
     debug_log "No aztec container found"
     return
@@ -2657,7 +2657,7 @@ check_committee() {
 check_blocks() {
   debug_log "check_blocks started at \$(date)"
 
-  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -v watchtower | head -n 1 | awk '{print \$1}')
+  container_id=\$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print \$1}')
   if [ -z "\$container_id" ]; then
     log "Container 'aztec' not found."
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
@@ -2782,54 +2782,35 @@ EOF
     local env_file="$1"
     local temp_file=$(mktemp)
 
-    # Сначала нормализуем окончания строк: конвертируем CRLF в LF и исправляем битые символы
-    # Используем sed для замены CRLF на LF, затем удаляем любые оставшиеся CR
-    # Также исправляем случаи, когда точка (0x2E) стоит вместо перевода строки (0x0A)
-    # Заменяем точки, которые стоят перед началом новой строки с переменной (т.е. перед [A-Z_])
-    # на переводы строк
     sed 's/\r$//' "$env_file" | \
       sed 's/\r/\n/g' | \
       sed 's/\.\([A-Z_]\)/\n\1/g' | \
       sed 's/\.$/\n/' > "${temp_file}.normalized"
 
-    # Очищаем файл: удаляем пустые строки, строки без знака равенства,
-    # пробелы вокруг знака равенства, и оставляем только валидные строки
     while IFS= read -r line || [ -n "$line" ]; do
-      # Удаляем начальные и конечные пробелы, включая возможные точки вместо переводов строк
+
       line=$(printf '%s\n' "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr -d '\r' | sed 's/\.$//' | sed 's/^\.//')
 
-      # Пропускаем пустые строки
       [[ -z "$line" ]] && continue
 
-      # Пропускаем комментарии (строки, начинающиеся с #)
       [[ "$line" =~ ^# ]] && continue
 
-      # Проверяем, что строка содержит знак равенства
       if [[ "$line" =~ = ]]; then
-        # Удаляем пробелы вокруг знака равенства (но сохраняем пробелы в значениях)
-        # Разделяем на ключ и значение
         local key=$(printf '%s\n' "$line" | cut -d'=' -f1 | sed 's/[[:space:]]*$//' | tr -d '\r')
         local value=$(printf '%s\n' "$line" | cut -d'=' -f2- | sed 's/^[[:space:]]*//' | tr -d '\r')
 
-        # Пропускаем строки с пустым ключом
         [[ -z "$key" ]] && continue
 
-        # Проверяем, что ключ начинается с буквы или подчеркивания
         if [[ "$key" =~ ^[A-Za-z_] ]]; then
-          # Если значение пустое, оставляем как есть (KEY=)
           if [[ -z "$value" ]]; then
             printf '%s\n' "${key}=" >> "$temp_file"
           else
-            # Если значение уже в кавычках (одинарных или двойных), оставляем как есть
             if [[ "$value" =~ ^\".*\"$ ]] || [[ "$value" =~ ^\'.*\'$ ]]; then
               printf '%s\n' "${key}=${value}" >> "$temp_file"
-            # Если значение содержит пробелы, специальные символы или начинается с цифры, добавляем кавычки
             elif [[ "$value" =~ [[:space:]] ]] || [[ "$value" =~ [^A-Za-z0-9_./-] ]] || [[ "$value" =~ ^[0-9] ]]; then
-              # Экранируем двойные кавычки в значении
               value=$(printf '%s\n' "$value" | sed 's/"/\\"/g')
               printf '%s\n' "${key}=\"${value}\"" >> "$temp_file"
             else
-              # Значение не требует кавычек
               printf '%s\n' "${key}=${value}" >> "$temp_file"
             fi
           fi
@@ -2837,67 +2818,53 @@ EOF
       fi
     done < "${temp_file}.normalized"
 
-    # Убеждаемся, что файл заканчивается переводом строки (LF, не CRLF)
-    # Удаляем все CR и добавляем финальный LF если его нет
     if [ -s "$temp_file" ]; then
-      # Удаляем все CR и убеждаемся, что файл заканчивается LF
       sed 's/\r$//' "$temp_file" | sed -e '$a\' > "${temp_file}.final"
       mv "${temp_file}.final" "$temp_file"
     fi
 
-    # Заменяем оригинальный файл очищенной версией
     mv "$temp_file" "$env_file"
     chmod 600 "$env_file"
     rm -f "${temp_file}.normalized"
   }
 
-  # Валидируем и очищаем файл окружения перед использованием
   validate_and_clean_env_file "$env_file"
 
-  # Проверяем, что файл не пустой и содержит валидные переменные
   if [ ! -s "$env_file" ]; then
     echo -e "\n${RED}Error: Environment file is empty or invalid${NC}"
     return 1
   fi
 
-  # Проверяем, что файл содержит хотя бы одну валидную переменную
   if ! grep -qE '^[A-Za-z_][A-Za-z0-9_]*=' "$env_file"; then
     echo -e "\n${RED}Error: Environment file does not contain valid variables${NC}"
     return 1
   fi
 
-  # Убеждаемся, что путь к файлу абсолютный (systemd требует абсолютные пути)
   env_file=$(readlink -f "$env_file" 2>/dev/null || realpath "$env_file" 2>/dev/null || echo "$env_file")
   if [[ ! "$env_file" =~ ^/ ]]; then
-    # Если путь не абсолютный, делаем его абсолютным
     env_file="$HOME/.env-aztec-agent"
   fi
 
-  # Проверяем, что файл окружения существует и доступен для чтения
   if [ ! -r "$env_file" ]; then
     echo -e "\n${RED}Error: Environment file $env_file does not exist or is not readable${NC}"
     return 1
   fi
 
-  # Убеждаемся, что путь к скрипту абсолютный
   local agent_script_path=$(readlink -f "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH/agent.sh" 2>/dev/null || echo "$AGENT_SCRIPT_PATH/agent.sh")
   if [[ ! "$agent_script_path" =~ ^/ ]]; then
     agent_script_path="$HOME/aztec-monitor-agent/agent.sh"
   fi
 
-  # Убеждаемся, что рабочая директория абсолютная
   local working_dir=$(readlink -f "$AGENT_SCRIPT_PATH" 2>/dev/null || realpath "$AGENT_SCRIPT_PATH" 2>/dev/null || echo "$AGENT_SCRIPT_PATH")
   if [[ ! "$working_dir" =~ ^/ ]]; then
     working_dir="$HOME/aztec-monitor-agent"
   fi
 
-  # Проверяем, что скрипт существует
   if [ ! -f "$agent_script_path" ]; then
     echo -e "\n${RED}Error: Agent script $agent_script_path does not exist${NC}"
     return 1
   fi
 
-  # Создаем systemd сервис с правильными переводами строк (LF)
   {
     printf '[Unit]\n'
     printf 'Description=Aztec Monitoring Agent\n'
@@ -2915,10 +2882,8 @@ EOF
     printf 'WantedBy=multi-user.target\n'
   } > /etc/systemd/system/aztec-agent.service
 
-  # Нормализуем окончания строк в systemd unit-файле (удаляем CR, гарантируем LF)
   sed -i 's/\r$//' /etc/systemd/system/aztec-agent.service
 
-  # Создаем systemd timer с правильными переводами строк (LF)
   {
     printf '[Unit]\n'
     printf 'Description=Run Aztec Agent every 37 seconds\n'
@@ -2933,10 +2898,8 @@ EOF
     printf 'WantedBy=timers.target\n'
   } > /etc/systemd/system/aztec-agent.timer
 
-  # Нормализуем окончания строк в systemd timer-файле (удаляем CR, гарантируем LF)
   sed -i 's/\r$//' /etc/systemd/system/aztec-agent.timer
 
-  # Проверяем валидность systemd сервиса перед активацией
   if ! systemd-analyze verify /etc/systemd/system/aztec-agent.service 2>/dev/null; then
     echo -e "\n${YELLOW}Warning: systemd-analyze verify failed, but continuing...${NC}"
   fi
@@ -3465,7 +3428,7 @@ function check_aztec_version() {
 
     echo -e "\n${CYAN}$(t "checking_aztec_version")${NC}"
     container_id=$(docker ps --format "{{.ID}} {{.Names}}" \
-                   | grep aztec | grep -v watchtower | head -n 1 | awk '{print $1}')
+                   | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
 
     if [ -z "$container_id" ]; then
         echo -e "${RED}$(t "container_not_found")${NC}"
