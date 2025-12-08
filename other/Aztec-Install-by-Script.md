@@ -80,7 +80,7 @@ Do you want to run multiple validators?
 
 После этого скрипт запросит **Aztec L2 адрес**, который вы можете создать на сайте: https://app.obsidion.xyz/ или в расширении https://azguardwallet.io/.
 
-Если по каким-то причинам вы не можете создать Aztec L2 адрес, то вставьте любой приватный ключ, с 0x вначале, от eth кошелька, он по длине такой же, как и Aztec L2 адрес. 
+Если по каким-то причинам вы не можете создать Aztec L2 адрес, то вставьте `0x0000000000000000000000000000000000000000000000000000000000000000` 
 
 При желании потом сможете заменить на реальный L2 адрес.
 
@@ -92,12 +92,27 @@ Do you want to run multiple validators?
 
 Для финальной настройки ноды скрипт запросит у вас данные для генерации файла `docker-compose.yml`:
 
-*   **`ETHEREUM_RPC_URL`** — ваш RPC-адрес для Ethereum L1.
-*   **`CONSENSUS_BEACON_URL`** — ваш RPC-адрес для Beacon Chain.
+*   **`ETHEREUM_RPC_URL`** — ваш RPC-адрес для Ethereum L1. **Важно:** Для mainnet используйте mainnet RPC, для testnet — Sepolia testnet RPC.
+*   **`CONSENSUS_BEACON_URL`** — ваш RPC-адрес для Beacon Chain. **Важно:** Для mainnet используйте mainnet Beacon Chain RPC, для testnet — Sepolia testnet Beacon Chain RPC.
 *   **`COINBASE`** — адрес eth кошелька. Введите адрес вашего валидатора.
 *   **`P2P_IP`** — этот параметр скрипт определит автоматически. **Если вы используете VPN на сервере**, то после завершения установки ноды необходимо ввести реальный ip-адрес **вручную** в файле `.env` в папке `/root/aztec`
 
     ![Ввод RPC и других данных](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
+
+## Выбор сети (Mainnet/Testnet)
+
+После ввода RPC-адресов скрипт предложит выбрать сеть для работы ноды:
+
+1.  **Mainnet** — основная сеть Aztec
+2.  **Testnet** — тестовая сеть Aztec
+
+Выберите нужную сеть, введя соответствующую цифру (1 или 2).
+
+> **Важно:** 
+> *   Выбранная сеть определяет, в какой сети будет работать ваша нода
+> *   Данные ноды будут храниться в разных директориях: `/root/.aztec/mainnet/data/` для mainnet и `/root/.aztec/testnet/data/` для testnet
+> *   Убедитесь, что используете правильные RPC-адреса для выбранной сети
+> *   Выбранная сеть сохраняется в файле `~/.env-aztec-agent` в переменной `NETWORK`
 
 ## Установка Watchtower
 

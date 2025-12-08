@@ -80,7 +80,7 @@ Eğer tüm adreslerde Sepolia ETH varsa, **`n`** seçebilirsiniz.
 
 Bundan sonra, betik resmi web sitesinde oluşturabileceğiniz **Aztec L2 adresinizi** isteyecektir: https://app.obsidion.xyz/.
 
-Herhangi bir nedenden dolayı bir Aztec L2 adresi oluşturamıyorsanız, bir eth cüzdanından 0x ile herhangi bir özel anahtar ekleyin, Aztec L2 adresiyle aynı uzunluğa sahip olur.
+Herhangi bir nedenden dolayı bir Aztec L2 adresi oluşturamıyorsanız, `0x0000000000000000000000000000000000000000000000000000000000000000` ekleyin
 
 İsterseniz bunu daha sonra gerçek bir L2 adresiyle değiştirebilirsiniz.
 
@@ -92,13 +92,28 @@ Herhangi bir nedenden dolayı bir Aztec L2 adresi oluşturamıyorsanız, bir eth
 
 Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak üzere veri isteyecektir:
 
-*   **`ETHEREUM_RPC_URL`** — Ethereum L1 için RPC URL'niz.
-*   **`CONSENSUS_BEACON_URL`** — Beacon Chain için RPC URL'niz.
+*   **`ETHEREUM_RPC_URL`** — Ethereum L1 için RPC URL'niz. **Önemli:** Mainnet için mainnet RPC kullanın, testnet için Sepolia testnet RPC kullanın.
+*   **`CONSENSUS_BEACON_URL`** — Beacon Chain için RPC URL'niz. **Önemli:** Mainnet için mainnet Beacon Chain RPC kullanın, testnet için Sepolia testnet Beacon Chain RPC kullanın.
 *   **`COINBASE`** — Ethereum cüzdan adresiniz. Doğrulayıcınızın adresini girin.
 *   **`P2P_IP`** — Bu parametre betik tarafından otomatik olarak belirlenecektir.
     **Sunucuda VPN kullanıyorsanız**, node kurulumunu tamamladıktan sonra gerçek IP adresini `/root/aztec` klasöründeki `.env` dosyasına **manuel olarak** girmelisiniz.
 
     ![RPC ve diğer verileri girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
+
+## Ağ Seçimi (Mainnet/Testnet)
+
+RPC adreslerini girdikten sonra betik, düğüm için ağ seçimi yapmanızı isteyecektir:
+
+1.  **Mainnet** — Aztec ana ağı
+2.  **Testnet** — Aztec test ağı
+
+İlgili numarayı (1 veya 2) girerek istediğiniz ağı seçin.
+
+> **Önemli:** 
+> *   Seçilen ağ, düğümünüzün hangi ağda çalışacağını belirler
+> *   Düğüm verileri farklı dizinlerde saklanacaktır: mainnet için `/root/.aztec/mainnet/data/` ve testnet için `/root/.aztec/testnet/data/`
+> *   Seçilen ağ için doğru RPC adreslerini kullandığınızdan emin olun
+> *   Seçilen ağ, `~/.env-aztec-agent` dosyasındaki `NETWORK` değişkenine kaydedilir
 
 ## Watchtower Kurulumu
 
