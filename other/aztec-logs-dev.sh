@@ -2898,11 +2898,9 @@ check_publisher_balances() {
       bal="\${low_balance_values[\$idx]}"
       # Format: Address in monospace (copyable), Balance on new line
       # Use backticks for Markdown monospace formatting in Telegram
-      message+="\${BT}\$addr\${BT}%0ABalance: \$bal ETH"
+      message+="\${BT}\$addr\${BT}%0ABalance: \$bal ETH%0A"
       # Add empty line between addresses (except for the last one)
       if [ \$idx -lt \$((${#low_balance_addresses[@]} - 1)) ]; then
-        message+="%0A%0A"
-      else
         message+="%0A"
       fi
     done
