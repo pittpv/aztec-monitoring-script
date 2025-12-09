@@ -3137,7 +3137,9 @@ manage_publisher_balance_monitoring() {
               # Save to .env-aztec-agent (append or update)
               if [ -f "$env_file" ]; then
                 if grep -q "^PUBLISHERS=" "$env_file"; then
-                  sed -i "s|^PUBLISHERS=.*|PUBLISHERS=\"$PUBLISHERS\"|" "$env_file"
+                  # Escape special characters in PUBLISHERS for sed (using | as delimiter)
+                  PUBLISHERS_ESCAPED=$(printf '%s\n' "$PUBLISHERS" | sed 's/[[\.*^$()+?{|]/\\&/g' | sed 's/|/\\|/g')
+                  sed -i "s|^PUBLISHERS=.*|PUBLISHERS=\"$PUBLISHERS_ESCAPED\"|" "$env_file"
                 else
                   printf 'PUBLISHERS="%s"\n' "$PUBLISHERS" >> "$env_file"
                 fi
@@ -3148,7 +3150,7 @@ manage_publisher_balance_monitoring() {
               if grep -q "^MONITORING_PUBLISHERS=" "$env_file"; then
                 sed -i "s|^MONITORING_PUBLISHERS=.*|MONITORING_PUBLISHERS=true|" "$env_file"
               else
-                echo 'MONITORING_PUBLISHERS=true' >> "$env_file"
+                printf 'MONITORING_PUBLISHERS=true\n' >> "$env_file"
               fi
               echo -e "\n${GREEN}$(t "publisher_monitoring_enabled")${NC}"
               break
@@ -3171,7 +3173,9 @@ manage_publisher_balance_monitoring() {
             # Save to .env-aztec-agent (append or update)
             if [ -f "$env_file" ]; then
               if grep -q "^MIN_BALANCE_FOR_WARNING=" "$env_file"; then
-                sed -i "s|^MIN_BALANCE_FOR_WARNING=.*|MIN_BALANCE_FOR_WARNING=\"$min_balance\"|" "$env_file"
+                # Escape special characters in min_balance for sed (using | as delimiter)
+                MIN_BALANCE_ESCAPED=$(printf '%s\n' "$min_balance" | sed 's/[[\.*^$()+?{|]/\\&/g' | sed 's/|/\\|/g')
+                sed -i "s|^MIN_BALANCE_FOR_WARNING=.*|MIN_BALANCE_FOR_WARNING=\"$MIN_BALANCE_ESCAPED\"|" "$env_file"
               else
                 printf 'MIN_BALANCE_FOR_WARNING="%s"\n' "$min_balance" >> "$env_file"
               fi
@@ -3191,7 +3195,7 @@ manage_publisher_balance_monitoring() {
           if grep -q "^MONITORING_PUBLISHERS=" "$env_file"; then
             sed -i "s|^MONITORING_PUBLISHERS=.*|MONITORING_PUBLISHERS=false|" "$env_file"
           else
-            echo 'MONITORING_PUBLISHERS=false' >> "$env_file"
+            printf 'MONITORING_PUBLISHERS=false\n' >> "$env_file"
           fi
         else
           printf 'MONITORING_PUBLISHERS=false\n' > "$env_file"
