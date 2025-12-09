@@ -2892,7 +2892,7 @@ check_publisher_balances() {
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     # Define backtick character for Markdown formatting
     BT='\`'
-    message="\$(t "publisher_balance_warning")%0A"
+    message="\$(t "publisher_balance_warning")%0A%0A"
     for idx in "\${!low_balance_addresses[@]}"; do
       addr="\${low_balance_addresses[\$idx]}"
       bal="\${low_balance_values[\$idx]}"
