@@ -2892,14 +2892,13 @@ check_publisher_balances() {
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     # Define backtick character for Markdown formatting
     BT='\`'
-    message="\$(t "publisher_balance_warning")%0A%0A"
+    message="\$(t "publisher_balance_warning")%0A"
     for idx in "\${!low_balance_addresses[@]}"; do
       addr="\${low_balance_addresses[\$idx]}"
       bal="\${low_balance_values[\$idx]}"
       # Format: Address in monospace (copyable), Balance on new line
       # Use backticks for Markdown monospace formatting in Telegram
-      message+="\${BT}\$addr\${BT}%0ABalance: \$bal ETH%0A"
-      # Add empty line between addresses (except for the last one)
+      message+="\${BT}\$addr\${BT}%0ABalance: \$bal ETH%0A%0A"
     done
     message+="\$(t "server_info" "\$ip")%0A"
     message+="\$(t "time_info" "\$current_time")"
