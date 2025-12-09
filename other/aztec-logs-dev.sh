@@ -339,7 +339,7 @@ init_languages() {
   TRANSLATIONS["en,status_block_missed"]="🟨 Block missed"
   TRANSLATIONS["en,status_block_proposed"]="🟪 Block proposed"
   TRANSLATIONS["en,publisher_monitoring_title"]="=== Publisher Balance Monitoring ==="
-  TRANSLATIONS["en,publisher_monitoring_option1"]="1. Configure balance monitoring"
+  TRANSLATIONS["en,publisher_monitoring_option1"]="1. Add addresses and start balance monitoring"
   TRANSLATIONS["en,publisher_monitoring_option2"]="2. Configure minimum balance threshold"
   TRANSLATIONS["en,publisher_monitoring_option3"]="3. Stop balance monitoring"
   TRANSLATIONS["en,publisher_monitoring_choose"]="Choose option (1/2/3):"
@@ -792,7 +792,7 @@ init_languages() {
   TRANSLATIONS["ru,status_block_missed"]="🟨 Блок пропущен"
   TRANSLATIONS["ru,status_block_proposed"]="🟪 Блок предложен"
   TRANSLATIONS["ru,publisher_monitoring_title"]="=== Мониторинг баланса publisher ==="
-  TRANSLATIONS["ru,publisher_monitoring_option1"]="1. Настроить мониторинг баланса"
+  TRANSLATIONS["ru,publisher_monitoring_option1"]="1. Добавить адреса и запустить мониторинг баланса"
   TRANSLATIONS["ru,publisher_monitoring_option2"]="2. Настроить значение минимального баланса"
   TRANSLATIONS["ru,publisher_monitoring_option3"]="3. Остановить мониторинг балансов"
   TRANSLATIONS["ru,publisher_monitoring_choose"]="Выберите опцию (1/2/3):"
@@ -1245,7 +1245,7 @@ init_languages() {
   TRANSLATIONS["tr,status_block_missed"]="🟨 Blok kaçırıldı"
   TRANSLATIONS["tr,status_block_proposed"]="🟪 Blok önerildi"
   TRANSLATIONS["tr,publisher_monitoring_title"]="=== Publisher Bakiye İzleme ==="
-  TRANSLATIONS["tr,publisher_monitoring_option1"]="1. Bakiye izlemeyi yapılandır"
+  TRANSLATIONS["tr,publisher_monitoring_option1"]="1. Adresleri ekleyin ve bakiye izlemeyi başlatın"
   TRANSLATIONS["tr,publisher_monitoring_option2"]="2. Minimum bakiye eşiğini yapılandır"
   TRANSLATIONS["tr,publisher_monitoring_option3"]="3. Bakiye izlemeyi durdur"
   TRANSLATIONS["tr,publisher_monitoring_choose"]="Seçenek seçin (1/2/3):"
@@ -2890,13 +2890,15 @@ check_publisher_balances() {
   # Send notification if any addresses have low balance
   if [ \${#low_balance_addresses[@]} -gt 0 ]; then
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    # Define backtick character for Markdown formatting
+    BT='\`'
     message="\$(t "publisher_balance_warning")%0A%0A"
     for idx in "\${!low_balance_addresses[@]}"; do
       addr="\${low_balance_addresses[\$idx]}"
       bal="\${low_balance_values[\$idx]}"
       # Format: Address in monospace (copyable), Balance on new line
-      # Use backticks for monospace formatting in Telegram Markdown
-      message+="\`\$addr\`%0ABalance: \$bal ETH"
+      # Use backticks for Markdown monospace formatting in Telegram
+      message+="\${BT}\$addr\${BT}%0ABalance: \$bal ETH"
       # Add empty line between addresses (except for the last one)
       if [ \$idx -lt \$((${#low_balance_addresses[@]} - 1)) ]; then
         message+="%0A%0A"
