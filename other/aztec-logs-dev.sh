@@ -3113,7 +3113,8 @@ manage_publisher_balance_monitoring() {
   echo -e "${NC}$(t "publisher_monitoring_option3")${NC}"
 
   while true; do
-    read -p "\n$(t "publisher_monitoring_choose") " choice
+    echo ""
+    read -p "$(t "publisher_monitoring_choose") " choice
     case "$choice" in
       1)
         # Configure balance monitoring
