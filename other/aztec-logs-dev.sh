@@ -2900,11 +2900,8 @@ check_publisher_balances() {
       # Use backticks for Markdown monospace formatting in Telegram
       message+="\${BT}\$addr\${BT}%0ABalance: \$bal ETH%0A"
       # Add empty line between addresses (except for the last one)
-      if [ \$idx -lt \$((${#low_balance_addresses[@]} - 1)) ]; then
-        message+="%0A"
-      fi
     done
-    message+="%0A\$(t "server_info" "\$ip")%0A"
+    message+="\$(t "server_info" "\$ip")%0A"
     message+="\$(t "time_info" "\$current_time")"
     send_telegram_message "\$message"
   else
