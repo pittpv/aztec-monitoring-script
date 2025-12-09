@@ -55,19 +55,19 @@ init_languages() {
   TRANSLATIONS["en,option7"]="7. Find governanceProposerPayload"
   TRANSLATIONS["en,option8"]="8. Check Proven L2 Block"
   TRANSLATIONS["en,option9"]="9. Validator search, status check and queue monitoring"
-  TRANSLATIONS["en,option10"]="10. Install Aztec Node with Watchtower"
-  TRANSLATIONS["en,option11"]="11. Delete Aztec node"
-  TRANSLATIONS["en,option12"]="12. Start Aztec node containers"
-  TRANSLATIONS["en,option13"]="13. Stop Aztec node containers"
-  TRANSLATIONS["en,option14"]="14. Update Aztec node"
-  TRANSLATIONS["en,option15"]="15. Downgrade Aztec node"
-  TRANSLATIONS["en,option16"]="16. Check Aztec version"
-  TRANSLATIONS["en,option17"]="17. Generate BLS keys from mnemonic"
-  TRANSLATIONS["en,option18"]="18. Approve"
-  TRANSLATIONS["en,option19"]="19. Stake"
-  TRANSLATIONS["en,option20"]="20. Claim rewards"
-  TRANSLATIONS["en,option21"]="21. Change RPC URL"
-  TRANSLATIONS["en,option22"]="22. Publisher balance monitoring"
+  TRANSLATIONS["en,option10"]="10. Publisher balance monitoring"
+  TRANSLATIONS["en,option11"]="11. Install Aztec Node with Watchtower"
+  TRANSLATIONS["en,option12"]="12. Delete Aztec node"
+  TRANSLATIONS["en,option13"]="13. Start Aztec node containers"
+  TRANSLATIONS["en,option14"]="14. Stop Aztec node containers"
+  TRANSLATIONS["en,option15"]="15. Update Aztec node"
+  TRANSLATIONS["en,option16"]="16. Downgrade Aztec node"
+  TRANSLATIONS["en,option17"]="17. Check Aztec version"
+  TRANSLATIONS["en,option18"]="18. Generate BLS keys from mnemonic"
+  TRANSLATIONS["en,option19"]="19. Approve"
+  TRANSLATIONS["en,option20"]="20. Stake"
+  TRANSLATIONS["en,option21"]="21. Claim rewards"
+  TRANSLATIONS["en,option22"]="22. Change RPC URL"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
@@ -159,7 +159,7 @@ init_languages() {
   TRANSLATIONS["en,bls_new_operator_success"]="All done! You have successfully joined the new testnet"
   TRANSLATIONS["en,bls_restart_node_notice"]="Now restart your node, check that YML files with new private keys have been added to /aztec/keys, and that /aztec/config/keystore.json has been replaced with the new eth addresses of the validators."
   TRANSLATIONS["en,bls_key_extraction_failed"]="Failed to extract keys from generated file"
-  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 17) or add "
+  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 18) or add "
   TRANSLATIONS["en,staking_invalid_bls_file"]="Invalid BLS keys file format"
   TRANSLATIONS["en,staking_failed_generate_address"]="Failed to generate address from private key"
   TRANSLATIONS["en,staking_found_single_validator"]="Found single validator for new operator method"
@@ -180,8 +180,8 @@ init_languages() {
   TRANSLATIONS["en,bls_keys_saved_success"]="BLS keys successfully generated and saved"
   TRANSLATIONS["en,bls_next_steps"]="Next steps:"
   TRANSLATIONS["en,bls_send_eth_step"]="Send 0.1-0.3 Sepolia ETH to the address above"
-  TRANSLATIONS["en,bls_run_approve_step"]="Run option 18 (Approve) to approve stake spending"
-  TRANSLATIONS["en,bls_run_stake_step"]="Run option 19 (Stake) to complete validator staking"
+  TRANSLATIONS["en,bls_run_approve_step"]="Run option 19 (Approve) to approve stake spending"
+  TRANSLATIONS["en,bls_run_stake_step"]="Run option 20 (Stake) to complete validator staking"
   TRANSLATIONS["en,staking_missing_new_operator_info"]="Missing new operator information in BLS file"
   TRANSLATIONS["en,staking_found_validators_new_operator"]="Found validators for new operator method:"
   TRANSLATIONS["en,staking_processing_new_operator"]="Processing validator %s/%s (new operator method)"
@@ -508,19 +508,19 @@ init_languages() {
   TRANSLATIONS["ru,option7"]="7. Найти governanceProposerPayload"
   TRANSLATIONS["ru,option8"]="8. Проверить Proven L2 блок"
   TRANSLATIONS["ru,option9"]="9. Поиск валидатора, проверка статуса и мониторинг очереди"
-  TRANSLATIONS["ru,option10"]="10. Установить Aztec ноду с Watchtower"
-  TRANSLATIONS["ru,option11"]="11. Удалить ноду Aztec"
-  TRANSLATIONS["ru,option12"]="12. Запустить контейнеры ноды Aztec"
-  TRANSLATIONS["ru,option13"]="13. Остановить контейнеры ноды Aztec"
-  TRANSLATIONS["ru,option14"]="14. Обновить ноду Aztec"
-  TRANSLATIONS["ru,option15"]="15. Сделать даунгрейд ноды Aztec"
-  TRANSLATIONS["ru,option16"]="16. Проверить версию ноды Aztec"
-  TRANSLATIONS["ru,option17"]="17. Сгенерировать BLS ключи из мнемоники"
-  TRANSLATIONS["ru,option18"]="18. Апрув"
-  TRANSLATIONS["ru,option19"]="19. Стейк"
-  TRANSLATIONS["ru,option20"]="20. Получить награды"
-  TRANSLATIONS["ru,option21"]="21. Изменить RPC URL"
-  TRANSLATIONS["ru,option22"]="22. Мониторинг баланса publisher"
+  TRANSLATIONS["ru,option10"]="10. Мониторинг баланса publisher"
+  TRANSLATIONS["ru,option11"]="11. Установить Aztec ноду с Watchtower"
+  TRANSLATIONS["ru,option12"]="12. Удалить ноду Aztec"
+  TRANSLATIONS["ru,option13"]="13. Запустить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option14"]="14. Остановить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option15"]="15. Обновить ноду Aztec"
+  TRANSLATIONS["ru,option16"]="16. Сделать даунгрейд ноды Aztec"
+  TRANSLATIONS["ru,option17"]="17. Проверить версию ноды Aztec"
+  TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи из мнемоники"
+  TRANSLATIONS["ru,option19"]="19. Апрув"
+  TRANSLATIONS["ru,option20"]="20. Стейк"
+  TRANSLATIONS["ru,option21"]="21. Получить награды"
+  TRANSLATIONS["ru,option22"]="22. Изменить RPC URL"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
@@ -612,7 +612,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_new_operator_success"]="Все готово! Вы успешно присоединились к новой тестовой сети"
   TRANSLATIONS["ru,bls_restart_node_notice"]="Теперь перезапустите вашу ноду, проверьте что в /aztec/keys добавились YML-файлы с новыми приватными ключами, а в /aztec/config/keystore.json заменились на новые eth адреса валидаторов"
   TRANSLATIONS["ru,bls_key_extraction_failed"]="Не удалось извлечь ключи из сгенерированного файла"
-  TRANSLATIONS["ru,staking_run_bls_generation_first"]="Пожалуйста, сначала запустите генерацию BLS ключей (опция 17)"
+  TRANSLATIONS["ru,staking_run_bls_generation_first"]="Пожалуйста, сначала запустите генерацию BLS ключей (опция 18)"
   TRANSLATIONS["ru,staking_invalid_bls_file"]="Неверный формат файла BLS ключей"
   TRANSLATIONS["ru,staking_failed_generate_address"]="Не удалось сгенерировать адрес из приватного ключа"
   TRANSLATIONS["ru,staking_found_single_validator"]="Найден один валидатор для метода нового оператора"
@@ -633,8 +633,8 @@ init_languages() {
   TRANSLATIONS["ru,bls_keys_saved_success"]="BLS ключи успешно сгенерированы и сохранены"
   TRANSLATIONS["ru,bls_next_steps"]="Следующие шаги:"
   TRANSLATIONS["ru,bls_send_eth_step"]="Отправьте 0.1-0.3 Sepolia ETH на указанный выше адрес"
-  TRANSLATIONS["ru,bls_run_approve_step"]="Запустите опцию 18 (Approve) для подтверждения расходов стейкинга"
-  TRANSLATIONS["ru,bls_run_stake_step"]="Запустите опцию 19 (Stake) для завершения стейкинга валидатора"
+  TRANSLATIONS["ru,bls_run_approve_step"]="Запустите опцию 19 (Approve) для подтверждения расходов стейкинга"
+  TRANSLATIONS["ru,bls_run_stake_step"]="Запустите опцию 20 (Stake) для завершения стейкинга валидатора"
   TRANSLATIONS["ru,staking_missing_new_operator_info"]="Отсутствует информация о новом операторе в BLS файле"
   TRANSLATIONS["ru,staking_found_validators_new_operator"]="Найдено валидаторов для метода нового оператора:"
   TRANSLATIONS["ru,staking_processing_new_operator"]="Обработка валидатора %s/%s (метод нового оператора)"
@@ -961,19 +961,19 @@ init_languages() {
   TRANSLATIONS["tr,option7"]="7. governanceProposerPayload bul"
   TRANSLATIONS["tr,option8"]="8. Kanıtlanmış L2 Bloğunu Kontrol Et"
   TRANSLATIONS["tr,option9"]="9. Validator arama, durum kontrolü ve sıra izleme"
-  TRANSLATIONS["tr,option10"]="10. Watchtower ile birlikte Aztec Node Kurulumu"
-  TRANSLATIONS["tr,option11"]="11. Aztec düğümünü sil"
-  TRANSLATIONS["tr,option12"]="12. Aztec düğüm konteynerlerini başlat"
-  TRANSLATIONS["tr,option13"]="13. Aztec düğüm konteynerlerini durdur"
-  TRANSLATIONS["tr,option14"]="14. Aztec düğümünü güncelle"
-  TRANSLATIONS["tr,option15"]="15. Aztec düğümünü eski sürüme düşür"
-  TRANSLATIONS["tr,option16"]="16. Aztek sürümünü kontrol edin"
-  TRANSLATIONS["tr,option17"]="17. Mnemonic'ten BLS anahtarları oluştur"
-  TRANSLATIONS["tr,option18"]="18. Approve"
-  TRANSLATIONS["tr,option19"]="19. Stake"
-  TRANSLATIONS["tr,option20"]="20. Ödülleri talep edin"
-  TRANSLATIONS["tr,option21"]="21. RPC URL'sini değiştir"
-  TRANSLATIONS["tr,option22"]="22. Publisher bakiye izleme"
+  TRANSLATIONS["tr,option10"]="10. Publisher bakiye izleme"
+  TRANSLATIONS["tr,option11"]="11. Watchtower ile birlikte Aztec Node Kurulumu"
+  TRANSLATIONS["tr,option12"]="12. Aztec düğümünü sil"
+  TRANSLATIONS["tr,option13"]="13. Aztec düğüm konteynerlerini başlat"
+  TRANSLATIONS["tr,option14"]="14. Aztec düğüm konteynerlerini durdur"
+  TRANSLATIONS["tr,option15"]="15. Aztec düğümünü güncelle"
+  TRANSLATIONS["tr,option16"]="16. Aztec düğümünü eski sürüme düşür"
+  TRANSLATIONS["tr,option17"]="17. Aztek sürümünü kontrol edin"
+  TRANSLATIONS["tr,option18"]="18. Mnemonic'ten BLS anahtarları oluştur"
+  TRANSLATIONS["tr,option19"]="19. Approve"
+  TRANSLATIONS["tr,option20"]="20. Stake"
+  TRANSLATIONS["tr,option21"]="21. Ödülleri talep edin"
+  TRANSLATIONS["tr,option22"]="22. RPC URL'sini değiştir"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
@@ -1065,7 +1065,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_new_operator_success"]="Hepsi tamam! Yeni test ağına başarıyla katıldınız"
   TRANSLATIONS["tr,bls_restart_node_notice"]="Şimdi düğümünüzü yeniden başlatın, yeni özel anahtarlara sahip YML dosyalarının /aztec/keys'e eklendiğini ve /aztec/config/keystore.json'un doğrulayıcıların yeni eth adresleriyle değiştirildiğini kontrol edin."
   TRANSLATIONS["tr,bls_key_extraction_failed"]="Oluşturulan dosyadan anahtarlar çıkarılamadı"
-  TRANSLATIONS["tr,staking_run_bls_generation_first"]="Lütfen önce BLS anahtarı oluşturmayı çalıştırın (seçenek 17)"
+  TRANSLATIONS["tr,staking_run_bls_generation_first"]="Lütfen önce BLS anahtarı oluşturmayı çalıştırın (seçenek 18)"
   TRANSLATIONS["tr,staking_invalid_bls_file"]="Geçersiz BLS anahtar dosyası formatı"
   TRANSLATIONS["tr,staking_failed_generate_address"]="Özel anahtardan adres oluşturulamadı"
   TRANSLATIONS["tr,staking_found_single_validator"]="Yeni operatör yöntemi için tek validatör bulundu"
@@ -1796,7 +1796,7 @@ check_aztec_container_logs() {
             ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
         )
         error_solutions=(
-            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 12"
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 14\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 13"
         )
     fi
 
@@ -5182,13 +5182,13 @@ main_menu() {
     echo -e "${RED}$(t "option12")${NC}"
     echo -e "${CYAN}$(t "option13")${NC}"
     echo -e "${CYAN}$(t "option14")${NC}"
-    echo -e "${YELLOW}$(t "option15")${NC}"
-    echo -e "${CYAN}$(t "option16")${NC}"
-    echo -e "${NC}$(t "option17")${NC}"
+    echo -e "${CYAN}$(t "option15")${NC}"
+    echo -e "${YELLOW}$(t "option16")${NC}"
+    echo -e "${CYAN}$(t "option17")${NC}"
     echo -e "${NC}$(t "option18")${NC}"
     echo -e "${NC}$(t "option19")${NC}"
     echo -e "${NC}$(t "option20")${NC}"
-    echo -e "${CYAN}$(t "option21")${NC}"
+    echo -e "${NC}$(t "option21")${NC}"
     echo -e "${CYAN}$(t "option22")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
@@ -5205,19 +5205,19 @@ main_menu() {
       7) find_governance_proposer_payload ;;
       8) check_proven_block ;;
       9) check_validator ;;
-      10) install_aztec ;;
-      11) delete_aztec ;;
-      12) start_aztec_containers ;;
-      13) stop_aztec_containers ;;
-      14) update_aztec ;;
-      15) downgrade_aztec ;;
-      16) check_aztec_version ;;
-      17) generate_bls_keys ;;
-      18) approve_with_all_keys ;;
-      19) stake_validators ;;
-      20) claim_rewards ;;
-      21) change_rpc_url ;;
-      22) manage_publisher_balance_monitoring ;;
+      10) manage_publisher_balance_monitoring ;;
+      11) install_aztec ;;
+      12) delete_aztec ;;
+      13) start_aztec_containers ;;
+      14) stop_aztec_containers ;;
+      15) update_aztec ;;
+      16) downgrade_aztec ;;
+      17) check_aztec_version ;;
+      18) generate_bls_keys ;;
+      19) approve_with_all_keys ;;
+      20) stake_validators ;;
+      21) claim_rewards ;;
+      22) change_rpc_url ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
