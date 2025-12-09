@@ -2874,11 +2874,8 @@ check_publisher_balances() {
     fi
 
     # Convert wei to ETH (1 ETH = 10^18 wei)
-    local balance_eth=\$(echo "scale=6; \$balance_wei / 1000000000000000000" | bc 2>/dev/null)
-    if [ -z "\$balance_eth" ]; then
-      # Fallback if bc is not available
-      balance_eth=\$(awk "BEGIN {printf \"%.6f\", \$balance_wei / 1000000000000000000}")
-    fi
+    # Use awk for reliable formatting with leading zero
+    local balance_eth=\$(awk -v wei="\$balance_wei" "BEGIN {printf \"%.6f\", wei / 1000000000000000000}")
 
     debug_log "Publisher \$publisher balance: \$balance_eth ETH"
 
@@ -2897,8 +2894,15 @@ check_publisher_balances() {
     for idx in "\${!low_balance_addresses[@]}"; do
       addr="\${low_balance_addresses[\$idx]}"
       bal="\${low_balance_values[\$idx]}"
-      # Format: Address: <addr>, Balance: <bal> ETH
-      message+="Address: \$addr, Balance: \$bal ETH%0A"
+      # Format: Address in monospace (copyable), Balance on new line
+      # Use backticks for monospace formatting in Telegram Markdown
+      message+="\`\$addr\`%0ABalance: \$bal ETH"
+      # Add empty line between addresses (except for the last one)
+      if [ \$idx -lt \$((${#low_balance_addresses[@]} - 1)) ]; then
+        message+="%0A%0A"
+      else
+        message+="%0A"
+      fi
     done
     message+="%0A\$(t "server_info" "\$ip")%0A"
     message+="\$(t "time_info" "\$current_time")"
