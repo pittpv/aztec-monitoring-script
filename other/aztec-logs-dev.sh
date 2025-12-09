@@ -338,7 +338,7 @@ init_languages() {
   TRANSLATIONS["en,status_block_mined"]="🟦 Block mined"
   TRANSLATIONS["en,status_block_missed"]="🟨 Block missed"
   TRANSLATIONS["en,status_block_proposed"]="🟪 Block proposed"
-  TRANSLATIONS["en,publisher_monitoring_title"]="Publisher Balance Monitoring"
+  TRANSLATIONS["en,publisher_monitoring_title"]="=== Publisher Balance Monitoring ==="
   TRANSLATIONS["en,publisher_monitoring_option1"]="1. Configure balance monitoring"
   TRANSLATIONS["en,publisher_monitoring_option2"]="2. Configure minimum balance threshold"
   TRANSLATIONS["en,publisher_monitoring_option3"]="3. Stop balance monitoring"
@@ -791,7 +791,7 @@ init_languages() {
   TRANSLATIONS["ru,status_block_mined"]="🟦 Блок добыт"
   TRANSLATIONS["ru,status_block_missed"]="🟨 Блок пропущен"
   TRANSLATIONS["ru,status_block_proposed"]="🟪 Блок предложен"
-  TRANSLATIONS["ru,publisher_monitoring_title"]="Мониторинг баланса publisher"
+  TRANSLATIONS["ru,publisher_monitoring_title"]="=== Мониторинг баланса publisher ==="
   TRANSLATIONS["ru,publisher_monitoring_option1"]="1. Настроить мониторинг баланса"
   TRANSLATIONS["ru,publisher_monitoring_option2"]="2. Настроить значение минимального баланса"
   TRANSLATIONS["ru,publisher_monitoring_option3"]="3. Остановить мониторинг балансов"
@@ -1244,7 +1244,7 @@ init_languages() {
   TRANSLATIONS["tr,status_block_mined"]="🟦 Blok çıkarıldı"
   TRANSLATIONS["tr,status_block_missed"]="🟨 Blok kaçırıldı"
   TRANSLATIONS["tr,status_block_proposed"]="🟪 Blok önerildi"
-  TRANSLATIONS["tr,publisher_monitoring_title"]="Publisher Bakiye İzleme"
+  TRANSLATIONS["tr,publisher_monitoring_title"]="=== Publisher Bakiye İzleme ==="
   TRANSLATIONS["tr,publisher_monitoring_option1"]="1. Bakiye izlemeyi yapılandır"
   TRANSLATIONS["tr,publisher_monitoring_option2"]="2. Minimum bakiye eşiğini yapılandır"
   TRANSLATIONS["tr,publisher_monitoring_option3"]="3. Bakiye izlemeyi durdur"
@@ -1641,7 +1641,7 @@ check_dependencies() {
   else
       source .env-aztec-agent
       DISPLAY_NETWORK="${NETWORK:-testnet}"
-      echo -e "\n${GREEN}$(t "env_exists") RPC_URL: $RPC_URL, NETWORK: $DISPLAY_NETWORK${NC}"
+      echo -e "\n${GREEN}$(t "env_exists") $RPC_URL, NETWORK: $DISPLAY_NETWORK${NC}"
   fi
 
   # === Проверяем и добавляем ключ VERSION в ~/.env-aztec-agent ===
@@ -3108,12 +3108,12 @@ manage_publisher_balance_monitoring() {
   source "$env_file"
 
   echo -e "\n${BLUE}$(t "publisher_monitoring_title")${NC}"
-  echo -e "${CYAN}$(t "publisher_monitoring_option1")${NC}"
-  echo -e "${CYAN}$(t "publisher_monitoring_option2")${NC}"
-  echo -e "${RED}$(t "publisher_monitoring_option3")${NC}"
+  echo -e "\n${NC}$(t "publisher_monitoring_option1")${NC}"
+  echo -e "${NC}$(t "publisher_monitoring_option2")${NC}"
+  echo -e "${NC}$(t "publisher_monitoring_option3")${NC}"
 
   while true; do
-    read -p "$(t "publisher_monitoring_choose") " choice
+    read -p "\n$(t "publisher_monitoring_choose") " choice
     case "$choice" in
       1)
         # Configure balance monitoring
@@ -3150,11 +3150,11 @@ manage_publisher_balance_monitoring() {
               else
                 echo 'MONITORING_PUBLISHERS=true' >> "$env_file"
               fi
-              echo -e "${GREEN}$(t "publisher_monitoring_enabled")${NC}"
+              echo -e "\n${GREEN}$(t "publisher_monitoring_enabled")${NC}"
               break
             fi
           else
-            echo -e "${RED}$(t "publisher_addresses_empty")${NC}"
+            echo -e "\n${RED}$(t "publisher_addresses_empty")${NC}"
           fi
         done
         ;;
@@ -3178,10 +3178,10 @@ manage_publisher_balance_monitoring() {
             else
               printf 'MIN_BALANCE_FOR_WARNING="%s"\n' "$min_balance" > "$env_file"
             fi
-            echo -e "${GREEN}Minimum balance threshold set to $min_balance ETH${NC}"
+            echo -e "\n${GREEN}Minimum balance threshold set to $min_balance ETH${NC}"
             break
           else
-            echo -e "${RED}$(t "publisher_min_balance_invalid")${NC}"
+            echo -e "\n${RED}$(t "publisher_min_balance_invalid")${NC}"
           fi
         done
         ;;
@@ -3196,10 +3196,10 @@ manage_publisher_balance_monitoring() {
         else
           printf 'MONITORING_PUBLISHERS=false\n' > "$env_file"
         fi
-        echo -e "${GREEN}$(t "publisher_monitoring_disabled")${NC}"
+        echo -e "\n${GREEN}$(t "publisher_monitoring_disabled")${NC}"
         ;;
       *)
-        echo -e "${RED}$(t "invalid_choice")${NC}"
+        echo -e "\n${RED}$(t "invalid_choice")${NC}"
         continue
         ;;
     esac
