@@ -35,15 +35,51 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 08-12-2025
+## 📌 Son Güncellemeler 10-12-2025
+
+⚠️ Betiği güncelledikten sonra eski aracı silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2)
+
+- **Menü Seçenekleri Yeniden Sıralandı**
+
+- **Publisher Bakiye İzleme (Seçenek 10)**
+  - Üç alt seçenekli izleme yönetim fonksiyonu eklendi:
+    - Alt seçenek 1: Adresleri ekleyin ve bakiye izlemeyi başlatın
+    - Alt seçenek 2: Minimum bakiye eşiğini yapılandır (varsayılan: 0.15 ETH)
+    - Alt seçenek 3: Bakiye izlemeyi durdur
+  - Adresler `.env-aztec-agent` dosyasına `PUBLISHERS` değişkeninde kaydedilir
+  - Minimum bakiye `MIN_BALANCE_FOR_WARNING` değişkenine kaydedilir
+  - Aracı script'inde otomatik bakiye kontrolü uygulandı:
+    - İzleme etkinleştirildiğinde (`MONITORING_PUBLISHERS=true`), aracı `PUBLISHERS` içindeki tüm adreslerin bakiyelerini kontrol eder
+    - Bakiye kontrolü `RPC_URL` kullanılarak `cast balance` ile yapılır
+    - Bakiye `MIN_BALANCE_FOR_WARNING` eşiğine ulaştığında Telegram bildirimi gönderilir
+  - Bakiye mesaj formatlaması:
+    - Adresler monospace formatında gösterilir (kopyalanabilir)
+    - Bakiye adresin altında yeni bir satırda gösterilir
+    - Daha iyi okunabilirlik için adresler arasına boş satır eklendi
+    - Önde sıfırlı bakiye gösterimi düzeltildi (örn., .000001 yerine 0.000001)
+
+- **Menü Fonksiyonu Çalıştırıldıktan Sonra Enter Tuşu Beklemesi**
+  - Herhangi bir fonksiyon çalıştırıldıktan sonra "Press Enter to continue..." mesajı gösterilir
+  - Enter'a basıldıktan sonra ekran temizlenir ve logo ile ana menü tekrar gösterilir
+  - Geçersiz seçim ve program çıkışı için uygulanmaz
+
+- **Çeviriler ve Mesajlar Güncellendi**
+  - Üç dil için çeviriler güncellendi (İngilizce, Rusça, Türkçe)
+  - İpuçlarındaki seçenek numarası referansları düzeltildi (BLS oluşturma - seçenek 18, Approve - seçenek 19, Stake - seçenek 20)
+  - Senkronizasyon hata mesajı güncellendi (başlat/durdur için seçenekler 13 ve 14)
+  - Menü seçenek ifadeleri iyileştirildi
+
+- Düzeltmeler ve İyileştirmeler
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 08-12-2025
 
 ⚠️ Betiği güncelledikten sonra eski aracı silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2)
 
 - İzleme günlüğü dosyası temizleme işlevine (/aztec-monitor-agent/agent.log) ilişkin küçük bir düzeltme
 - İstisnalara yeni konteynerler eklendi: watchtower, otel, prometheus, grafana
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 05-12-2025
 
@@ -356,30 +392,30 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
 
 Ana menü:
 
-1. 🔍 Konteyner ve düğüm senkronizasyonunun kontrol et
-2. ⚙️ Bildirimlerle düğüm izleme aracısını yükleyin
-3. 🗑️ Düğüm izleme aracısını ve dosyalarını kaldırın
-4. 🏷️ Loglarda rollupAddress bul
-5. 👥 Loglarda PeerID bul
-6. 🏛️ Loglarda governanceProposerPayload bul
-7. 🔗 Kanıtlanmış L2 Bloğunu ve Sync Proof'u Kontrol Et *(daha önce Discord'da Çırak rolü almak için gereken veriler)*
-   - Artık kendi portunuzu ayarlayabilirsiniz (varsayılan port 8080). Yeni port numarası .env-aztec-agent ortam dosyasına kaydedilecektir.
-8. 🔌 RPC URL'sini değiştir
-9. 🔍 Validator ara ve durumunu kontrol et
-10. Aztec loglarını görüntüle
+1. Konteyner ve düğüm senkronizasyonunun kontrol et
+2. Bildirimlerle düğüm izleme aracısını yükleyin
+3. İzleme aracısını kaldır
+4. Aztec loglarını görüntüle
+5. rollupAddress bul
+6. PeerID bul
+7. governanceProposerPayload bul
+8. Kanıtlanmış L2 Bloğunu Kontrol Et
+9. Validator arama, durum kontrolü ve sıra izleme
+10. Publisher bakiye izleme
 11. Watchtower ile birlikte Aztec Node Kurulumu
 12. Aztec düğümünü sil
-13. Aztec düğüm konteynerlerini durdur
-14. Aztec düğüm konteynerlerini başlat
+13. Aztec düğüm konteynerlerini başlat
+14. Aztec düğüm konteynerlerini durdur
 15. Aztec düğümünü güncelle
 16. Aztec düğümünü eski sürüme düşür
 17. Aztek sürümünü kontrol edin
-18. BLS anahtarları oluştur
+18. Mnemonic'ten BLS anahtarları oluştur
 19. Approve
 20. Stake
 21. Ödülleri talep edin
+22. RPC URL'sini değiştir
 
-0. 🚪 Çıkış
+`0.` 🚪 Çıkış
 
 ## 🚀 Düğüm İzleme Aracını Kullanma
 

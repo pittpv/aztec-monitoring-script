@@ -233,5 +233,10 @@
     "VERSION": "2.5.4",
     "UPDATE_DATE": "08.12.2025",
     "CHANGES": ["New containers have been added to exceptions: watchtower, otel, prometheus, grafana", "After updating the script, delete the old agent (option 3) and create a new agent (option 2)"]
+  },
+  {
+    "VERSION": "2.6.0",
+    "UPDATE_DATE": "10.12.2025",
+    "CHANGES": ["New Publisher balance monitoring (Option 10)", "Main menu options reordered", "Enter key wait after menu function execution", "Updated Translations and Messages", "Fixes and Improvements", "After updating the script, delete the old agent (option 3) and create a new agent (option 2)"]
   }
 ]

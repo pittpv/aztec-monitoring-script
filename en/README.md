@@ -35,15 +35,52 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 08-12-2025
+## 📌 Latest Updates 10-12-2025
+
+⚠️ After updating the script, delete the old agent (option 3) and create a new agent (option 2)
+
+- **Menu Options Reordered**
+  - Options have been reordered according to new requirements
+
+- **Publisher Balance Monitoring (Option 10)**
+  - Added monitoring management function with three sub-options:
+    - Sub-option 1: Add addresses and start balance monitoring
+    - Sub-option 2: Configure minimum balance threshold (default: 0.15 ETH)
+    - Sub-option 3: Stop balance monitoring
+  - Addresses are saved to `.env-aztec-agent` in the `PUBLISHERS` variable
+  - Minimum balance is saved to the `MIN_BALANCE_FOR_WARNING` variable
+  - Implemented automatic balance checking in agent script:
+    - When monitoring is enabled (`MONITORING_PUBLISHERS=true`), the agent checks balances of all addresses from `PUBLISHERS`
+    - Balance checking is performed via `cast balance` using `RPC_URL`
+    - When balance reaches the `MIN_BALANCE_FOR_WARNING` threshold, a Telegram notification is sent
+  - Balance message formatting:
+    - Addresses are displayed in monospace format (copyable)
+    - Balance is shown on a new line below the address
+    - Empty line added between addresses for better readability
+    - Fixed balance display with leading zero (e.g., 0.000001 instead of .000001)
+
+- **Enter Key Wait After Menu Function Execution**
+  - After executing any function, "Press Enter to continue..." message is shown
+  - After pressing Enter, the screen is cleared and logo with main menu is shown again
+  - Not applied for invalid choice and program exit
+
+- **Updated Translations and Messages**
+  - Updated translations for all three languages (English, Russian, Turkish)
+  - Fixed option number references in hints (BLS generation - option 18, Approve - option 19, Stake - option 20)
+  - Updated sync error message (options 13 and 14 for start/stop)
+  - Improved menu option wording
+
+- Fixes and Improvements
+
+<details>
+<summary>📅 Version History</summary>
+
+### 08-12-2025
 
 ⚠️ After updating the script, delete the old agent (option 3) and create a new agent (option 2)
 
 - Minor fix to the monitoring log file clearing function, /aztec-monitor-agent/agent.log
 - New containers have been added to exceptions: watchtower, otel, prometheus, grafana
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 05-12-2025
 
@@ -357,30 +394,30 @@ Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone
 
 Main menu:
 
-1. 🔍 Check container and node synchronization 
-2. ⚙️ Install node monitoring agent with notifications
-3. 🗑️ Remove monitoring agent
-4. 🏷️ Find rollupAddress
-5. 👥 Find PeerID
-6. 🏛️ Find governanceProposerPayload
-7. 🔗 Check Proven L2 Block *(the data that was previously required to obtain the Apprentice role in Discord)*
-   - Now you can set your own port (default port 8080). The new port number will be saved in the environment file .env-aztec-agent
-8. 🔌 Change RPC URL
-9. 🔍 Search for validator and check status
-10. View Aztec logs
+1. Check container and node synchronization
+2. Install node monitoring agent with notifications
+3. Remove monitoring agent
+4. View Aztec logs
+5. Find rollupAddress
+6. Find PeerID
+7. Find governanceProposerPayload
+8. Check Proven L2 Block
+9. Validator search, status check and queue monitoring
+10. Publisher balance monitoring
 11. Install Aztec Node with Watchtower
 12. Delete Aztec node
-13. Stop Aztec node containers
-14. Start Aztec node containers
+13. Start Aztec node containers
+14. Stop Aztec node containers
 15. Update Aztec node
 16. Downgrade Aztec node
 17. Check Aztec version
-18. Generate BLS keys
+18. Generate BLS keys from mnemonic
 19. Approve
 20. Stake
 21. Claim rewards
+22. Change RPC URL
 
-0. 🚪 Exit
+`0.` 🚪 Exit
 
 ## 🚀 Using the Node Monitoring Agent
 

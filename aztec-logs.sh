@@ -9,7 +9,7 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.5.4"
+SCRIPT_VERSION="2.6.0"
 
 function show_logo() {
     echo -e " "
@@ -48,25 +48,26 @@ init_languages() {
   TRANSLATIONS["en,title"]="========= Main Menu ========="
   TRANSLATIONS["en,option1"]="1. Check container and node synchronization"
   TRANSLATIONS["en,option2"]="2. Install node monitoring agent with notifications"
-  TRANSLATIONS["en,option3"]="3. Remove node monitoring agent and files"
-  TRANSLATIONS["en,option4"]="4. Find rollupAddress in logs"
-  TRANSLATIONS["en,option5"]="5. Find PeerID in logs"
-  TRANSLATIONS["en,option6"]="6. Find governanceProposerPayload in logs"
-  TRANSLATIONS["en,option7"]="7. Check Proven L2 Block and Sync Proof"
-  TRANSLATIONS["en,option8"]="8. Change RPC URL"
-  TRANSLATIONS["en,option9"]="9. Search for validator and check status"
-  TRANSLATIONS["en,option10"]="10. View Aztec logs"
+  TRANSLATIONS["en,option3"]="3. Remove monitoring agent"
+  TRANSLATIONS["en,option4"]="4. View Aztec logs"
+  TRANSLATIONS["en,option5"]="5. Find rollupAddress"
+  TRANSLATIONS["en,option6"]="6. Find PeerID"
+  TRANSLATIONS["en,option7"]="7. Find governanceProposerPayload"
+  TRANSLATIONS["en,option8"]="8. Check Proven L2 Block"
+  TRANSLATIONS["en,option9"]="9. Validator search, status check and queue monitoring"
+  TRANSLATIONS["en,option10"]="10. Publisher balance monitoring"
   TRANSLATIONS["en,option11"]="11. Install Aztec Node with Watchtower"
   TRANSLATIONS["en,option12"]="12. Delete Aztec node"
-  TRANSLATIONS["en,option13"]="13. Stop Aztec node containers"
-  TRANSLATIONS["en,option14"]="14. Start Aztec node containers"
+  TRANSLATIONS["en,option13"]="13. Start Aztec node containers"
+  TRANSLATIONS["en,option14"]="14. Stop Aztec node containers"
   TRANSLATIONS["en,option15"]="15. Update Aztec node"
   TRANSLATIONS["en,option16"]="16. Downgrade Aztec node"
   TRANSLATIONS["en,option17"]="17. Check Aztec version"
-  TRANSLATIONS["en,option18"]="18. Generate BLS keys"
+  TRANSLATIONS["en,option18"]="18. Generate BLS keys from mnemonic"
   TRANSLATIONS["en,option19"]="19. Approve"
   TRANSLATIONS["en,option20"]="20. Stake"
   TRANSLATIONS["en,option21"]="21. Claim rewards"
+  TRANSLATIONS["en,option22"]="22. Change RPC URL"
   TRANSLATIONS["en,option0"]="0. Exit"
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
@@ -109,7 +110,7 @@ init_languages() {
   TRANSLATIONS["en,bls_key"]="BLS Key"
   TRANSLATIONS["en,bls_method_existing"]="Generate using existing addresses (from mnemonic, only if all validator addresses are from the same seed phrase)"
   TRANSLATIONS["en,bls_method_new_operator"]="Generate new operator address (recommended)"
-  TRANSLATIONS["en,bls_method_prompt"]="Choose method [1-2]: "
+  TRANSLATIONS["en,bls_method_prompt"]="Choose method (1/2): "
   TRANSLATIONS["en,bls_invalid_method"]="Invalid method selected"
   TRANSLATIONS["en,bls_existing_method_title"]="Existing Address Method"
   TRANSLATIONS["en,bls_new_operator_title"]="New Operator Address Method"
@@ -269,7 +270,7 @@ init_languages() {
   TRANSLATIONS["en,agent_log_cleaned"]="✅ Log file cleaned."
   TRANSLATIONS["en,agent_container_not_found"]="❌ Aztec Container Not Found"
   TRANSLATIONS["en,agent_block_fetch_error"]="❌ Block Fetch Error"
-  TRANSLATIONS["en,agent_no_block_in_logs"]="❌ No 'Downloaded L2 block' found"
+  TRANSLATIONS["en,agent_no_block_in_logs"]="❌ Block number not found in node logs"
   TRANSLATIONS["en,agent_failed_extract_block"]="❌ Failed to extract blockNumber"
   TRANSLATIONS["en,agent_node_behind"]="⚠️ Node is behind by %d blocks"
   TRANSLATIONS["en,agent_started"]="🤖 Aztec Monitoring Agent Started"
@@ -337,6 +338,20 @@ init_languages() {
   TRANSLATIONS["en,status_block_mined"]="🟦 Block mined"
   TRANSLATIONS["en,status_block_missed"]="🟨 Block missed"
   TRANSLATIONS["en,status_block_proposed"]="🟪 Block proposed"
+  TRANSLATIONS["en,publisher_monitoring_title"]="=== Publisher Balance Monitoring ==="
+  TRANSLATIONS["en,publisher_monitoring_option1"]="1. Add addresses and start balance monitoring"
+  TRANSLATIONS["en,publisher_monitoring_option2"]="2. Configure minimum balance threshold"
+  TRANSLATIONS["en,publisher_monitoring_option3"]="3. Stop balance monitoring"
+  TRANSLATIONS["en,publisher_monitoring_choose"]="Choose option (1/2/3):"
+  TRANSLATIONS["en,publisher_addresses_prompt"]="Enter publisher addresses for balance monitoring (comma separated, without spaces):"
+  TRANSLATIONS["en,publisher_addresses_format"]="Example: 0x123...,0x456...,0x789..."
+  TRANSLATIONS["en,publisher_addresses_empty"]="Error: Publisher addresses list cannot be empty"
+  TRANSLATIONS["en,publisher_min_balance_prompt"]="Enter minimum balance threshold for notification (default: 0.15 ETH):"
+  TRANSLATIONS["en,publisher_min_balance_invalid"]="Error: Invalid balance value. Please enter a positive number."
+  TRANSLATIONS["en,publisher_monitoring_enabled"]="Publisher balance monitoring enabled"
+  TRANSLATIONS["en,publisher_monitoring_disabled"]="Publisher balance monitoring disabled"
+  TRANSLATIONS["en,publisher_balance_warning"]="⚠️ Low balance detected on publisher addresses"
+  TRANSLATIONS["en,publisher_balance_address"]="Address: %s, Balance: %s ETH"
   TRANSLATIONS["en,current_slot"]="Current slot: %s"
   TRANSLATIONS["en,agent_notifications_full_info"]="ℹ️ Notifications will be sent for issues, committee, slot stats"
   TRANSLATIONS["en,attestation_status"]="ℹ️ Slot stats"
@@ -486,25 +501,26 @@ init_languages() {
   TRANSLATIONS["ru,title"]="========= Главное меню ========="
   TRANSLATIONS["ru,option1"]="1. Проверить контейнер и синхронизацию ноды"
   TRANSLATIONS["ru,option2"]="2. Установить агент мониторинга ноды с уведомлениями"
-  TRANSLATIONS["ru,option3"]="3. Удалить агент мониторинга и файлы"
-  TRANSLATIONS["ru,option4"]="4. Найти адрес rollupAddress в логах"
-  TRANSLATIONS["ru,option5"]="5. Найти PeerID в логах"
-  TRANSLATIONS["ru,option6"]="6. Найти governanceProposerPayload в логах"
-  TRANSLATIONS["ru,option7"]="7. Проверить Proven L2 блок и Sync Proof"
-  TRANSLATIONS["ru,option8"]="8. Изменить RPC URL"
-  TRANSLATIONS["ru,option9"]="9. Поиск валидатора и проверка статуса"
-  TRANSLATIONS["ru,option10"]="10. Просмотреть логи Aztec"
+  TRANSLATIONS["ru,option3"]="3. Удалить агент мониторинга"
+  TRANSLATIONS["ru,option4"]="4. Просмотреть логи Aztec"
+  TRANSLATIONS["ru,option5"]="5. Найти rollupAddress"
+  TRANSLATIONS["ru,option6"]="6. Найти PeerID"
+  TRANSLATIONS["ru,option7"]="7. Найти governanceProposerPayload"
+  TRANSLATIONS["ru,option8"]="8. Проверить Proven L2 блок"
+  TRANSLATIONS["ru,option9"]="9. Поиск валидатора, проверка статуса и мониторинг очереди"
+  TRANSLATIONS["ru,option10"]="10. Мониторинг баланса publisher"
   TRANSLATIONS["ru,option11"]="11. Установить Aztec ноду с Watchtower"
   TRANSLATIONS["ru,option12"]="12. Удалить ноду Aztec"
-  TRANSLATIONS["ru,option13"]="13. Остановить контейнеры ноды Aztec"
-  TRANSLATIONS["ru,option14"]="14. Запустить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option13"]="13. Запустить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option14"]="14. Остановить контейнеры ноды Aztec"
   TRANSLATIONS["ru,option15"]="15. Обновить ноду Aztec"
   TRANSLATIONS["ru,option16"]="16. Сделать даунгрейд ноды Aztec"
   TRANSLATIONS["ru,option17"]="17. Проверить версию ноды Aztec"
-  TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи"
+  TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи из мнемоники"
   TRANSLATIONS["ru,option19"]="19. Апрув"
   TRANSLATIONS["ru,option20"]="20. Стейк"
   TRANSLATIONS["ru,option21"]="21. Получить награды"
+  TRANSLATIONS["ru,option22"]="22. Изменить RPC URL"
   TRANSLATIONS["ru,option0"]="0. Выход"
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
@@ -547,7 +563,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_key"]="BLS ключ"
   TRANSLATIONS["ru,bls_method_existing"]="Сгенерировать используя существующие адреса (из mnemonic, только если все адреса валидаторов из одной сид фразы)"
   TRANSLATIONS["ru,bls_method_new_operator"]="Сгенерировать новый адрес оператора (рекомендуется)"
-  TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод [1-2]: "
+  TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод (1/2): "
   TRANSLATIONS["ru,bls_invalid_method"]="Выбран неверный метод"
   TRANSLATIONS["ru,bls_existing_method_title"]="Метод существующих адресов"
   TRANSLATIONS["ru,bls_new_operator_title"]="Метод нового адреса оператора"
@@ -707,7 +723,7 @@ init_languages() {
   TRANSLATIONS["ru,agent_log_cleaned"]="✅ Лог-файл очищен."
   TRANSLATIONS["ru,agent_container_not_found"]="❌ Контейнер Aztec не найден"
   TRANSLATIONS["ru,agent_block_fetch_error"]="❌ Ошибка получения блока"
-  TRANSLATIONS["ru,agent_no_block_in_logs"]="❌ Блок 'Downloaded L2 block' не найден"
+  TRANSLATIONS["ru,agent_no_block_in_logs"]="❌ Номер блока не найден в логах ноды"
   TRANSLATIONS["ru,agent_failed_extract_block"]="❌ Не удалось извлечь номер блока"
   TRANSLATIONS["ru,agent_node_behind"]="⚠️ Узел отстает на %d блоков"
   TRANSLATIONS["ru,agent_started"]="🤖 Агент мониторинга Aztec запущен"
@@ -775,6 +791,20 @@ init_languages() {
   TRANSLATIONS["ru,status_block_mined"]="🟦 Блок добыт"
   TRANSLATIONS["ru,status_block_missed"]="🟨 Блок пропущен"
   TRANSLATIONS["ru,status_block_proposed"]="🟪 Блок предложен"
+  TRANSLATIONS["ru,publisher_monitoring_title"]="=== Мониторинг баланса publisher ==="
+  TRANSLATIONS["ru,publisher_monitoring_option1"]="1. Добавить адреса и запустить мониторинг баланса"
+  TRANSLATIONS["ru,publisher_monitoring_option2"]="2. Настроить значение минимального баланса"
+  TRANSLATIONS["ru,publisher_monitoring_option3"]="3. Остановить мониторинг балансов"
+  TRANSLATIONS["ru,publisher_monitoring_choose"]="Выберите опцию (1/2/3):"
+  TRANSLATIONS["ru,publisher_addresses_prompt"]="Введите адреса publisher для мониторинга баланса (через запятую, без пробелов):"
+  TRANSLATIONS["ru,publisher_addresses_format"]="Пример: 0x123...,0x456...,0x789..."
+  TRANSLATIONS["ru,publisher_addresses_empty"]="Ошибка: Список адресов publisher не может быть пустым"
+  TRANSLATIONS["ru,publisher_min_balance_prompt"]="Введите минимальное значение баланса для уведомления (по умолчанию: 0.15 ETH):"
+  TRANSLATIONS["ru,publisher_min_balance_invalid"]="Ошибка: Неверное значение баланса. Введите положительное число."
+  TRANSLATIONS["ru,publisher_monitoring_enabled"]="Мониторинг баланса publisher включен"
+  TRANSLATIONS["ru,publisher_monitoring_disabled"]="Мониторинг баланса publisher отключен"
+  TRANSLATIONS["ru,publisher_balance_warning"]="⚠️ Обнаружен низкий баланс на адресах publisher"
+  TRANSLATIONS["ru,publisher_balance_address"]="Адрес: %s, Баланс: %s ETH"
   TRANSLATIONS["ru,current_slot"]="Текущий слот: %s"
   TRANSLATIONS["ru,agent_notifications_full_info"]="ℹ️ Уведомления будут отправляться при проблемах, выборе в комитет, статистике слотов"
   TRANSLATIONS["ru,attestation_status"]="ℹ️ Статистика слота"
@@ -924,25 +954,26 @@ init_languages() {
   TRANSLATIONS["tr,title"]="========= Ana Menü ========="
   TRANSLATIONS["tr,option1"]="1. Konteyner ve düğüm senkronizasyonunun kontrol et"
   TRANSLATIONS["tr,option2"]="2. Bildirimlerle düğüm izleme aracısını yükleyin"
-  TRANSLATIONS["tr,option3"]="3. Düğüm izleme aracısını ve dosyalarını kaldırın"
-  TRANSLATIONS["tr,option4"]="4. Loglarda rollupAddress bul"
-  TRANSLATIONS["tr,option5"]="5. Loglarda PeerID bul"
-  TRANSLATIONS["tr,option6"]="6. Loglarda governanceProposerPayload bul"
-  TRANSLATIONS["tr,option7"]="7. Kanıtlanmış L2 Bloğunu ve Sync Proof'u Kontrol Et"
-  TRANSLATIONS["tr,option8"]="8. RPC URL'sini değiştir"
-  TRANSLATIONS["tr,option9"]="9. Validator ara ve durumunu kontrol et"
-  TRANSLATIONS["tr,option10"]="10. Aztec loglarını görüntüle"
+  TRANSLATIONS["tr,option3"]="3. İzleme aracısını kaldır"
+  TRANSLATIONS["tr,option4"]="4. Aztec loglarını görüntüle"
+  TRANSLATIONS["tr,option5"]="5. rollupAddress bul"
+  TRANSLATIONS["tr,option6"]="6. PeerID bul"
+  TRANSLATIONS["tr,option7"]="7. governanceProposerPayload bul"
+  TRANSLATIONS["tr,option8"]="8. Kanıtlanmış L2 Bloğunu Kontrol Et"
+  TRANSLATIONS["tr,option9"]="9. Validator arama, durum kontrolü ve sıra izleme"
+  TRANSLATIONS["tr,option10"]="10. Publisher bakiye izleme"
   TRANSLATIONS["tr,option11"]="11. Watchtower ile birlikte Aztec Node Kurulumu"
   TRANSLATIONS["tr,option12"]="12. Aztec düğümünü sil"
-  TRANSLATIONS["tr,option13"]="13. Aztec düğüm konteynerlerini durdur"
-  TRANSLATIONS["tr,option14"]="14. Aztec düğüm konteynerlerini başlat"
+  TRANSLATIONS["tr,option13"]="13. Aztec düğüm konteynerlerini başlat"
+  TRANSLATIONS["tr,option14"]="14. Aztec düğüm konteynerlerini durdur"
   TRANSLATIONS["tr,option15"]="15. Aztec düğümünü güncelle"
   TRANSLATIONS["tr,option16"]="16. Aztec düğümünü eski sürüme düşür"
   TRANSLATIONS["tr,option17"]="17. Aztek sürümünü kontrol edin"
-  TRANSLATIONS["tr,option18"]="18. BLS anahtarları oluştur"
+  TRANSLATIONS["tr,option18"]="18. Mnemonic'ten BLS anahtarları oluştur"
   TRANSLATIONS["tr,option19"]="19. Approve"
   TRANSLATIONS["tr,option20"]="20. Stake"
   TRANSLATIONS["tr,option21"]="21. Ödülleri talep edin"
+  TRANSLATIONS["tr,option22"]="22. RPC URL'sini değiştir"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
@@ -985,7 +1016,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_key"]="BLS Anahtarı"
   TRANSLATIONS["tr,bls_method_existing"]="Mevcut adresleri kullanarak üret (yalnızca tüm doğrulayıcı adresleri aynı başlangıç ​​ifadesinden geliyorsa, anımsatıcıdan)"
   TRANSLATIONS["tr,bls_method_new_operator"]="Yeni operatör adresi oluştur (tavsiye edilen)"
-  TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin [1-2]: "
+  TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin (1/2): "
   TRANSLATIONS["tr,bls_invalid_method"]="Geçersiz yöntem seçildi"
   TRANSLATIONS["tr,bls_existing_method_title"]="Mevcut Adres Yöntemi"
   TRANSLATIONS["tr,bls_new_operator_title"]="Yeni Operatör Adresi Yöntemi"
@@ -1145,7 +1176,7 @@ init_languages() {
   TRANSLATIONS["tr,agent_log_cleaned"]="✅ Log dosyası temizlendi."
   TRANSLATIONS["tr,agent_container_not_found"]="❌ Aztec Konteyneri Bulunamadı"
   TRANSLATIONS["tr,agent_block_fetch_error"]="❌ Blok Alma Hatası"
-  TRANSLATIONS["tr,agent_no_block_in_logs"]="❌ 'Downloaded L2 block' bulunamadı"
+  TRANSLATIONS["tr,agent_no_block_in_logs"]="❌ Düğüm günlüklerinde blok numarası bulunamadı"
   TRANSLATIONS["tr,agent_failed_extract_block"]="❌ Blok numarası çıkarılamadı"
   TRANSLATIONS["tr,agent_node_behind"]="⚠️ Düğüm %d blok geride"
   TRANSLATIONS["tr,agent_started"]="🤖 Aztec İzleme Aracı Başlatıldı"
@@ -1213,6 +1244,20 @@ init_languages() {
   TRANSLATIONS["tr,status_block_mined"]="🟦 Blok çıkarıldı"
   TRANSLATIONS["tr,status_block_missed"]="🟨 Blok kaçırıldı"
   TRANSLATIONS["tr,status_block_proposed"]="🟪 Blok önerildi"
+  TRANSLATIONS["tr,publisher_monitoring_title"]="=== Publisher Bakiye İzleme ==="
+  TRANSLATIONS["tr,publisher_monitoring_option1"]="1. Adresleri ekleyin ve bakiye izlemeyi başlatın"
+  TRANSLATIONS["tr,publisher_monitoring_option2"]="2. Minimum bakiye eşiğini yapılandır"
+  TRANSLATIONS["tr,publisher_monitoring_option3"]="3. Bakiye izlemeyi durdur"
+  TRANSLATIONS["tr,publisher_monitoring_choose"]="Seçenek seçin (1/2/3):"
+  TRANSLATIONS["tr,publisher_addresses_prompt"]="Bakiye izleme için publisher adreslerini girin (virgülle ayırarak, boşluk olmadan):"
+  TRANSLATIONS["tr,publisher_addresses_format"]="Örnek: 0x123...,0x456...,0x789..."
+  TRANSLATIONS["tr,publisher_addresses_empty"]="Hata: Publisher adres listesi boş olamaz"
+  TRANSLATIONS["tr,publisher_min_balance_prompt"]="Bildirim için minimum bakiye eşiğini girin (varsayılan: 0.15 ETH):"
+  TRANSLATIONS["tr,publisher_min_balance_invalid"]="Hata: Geçersiz bakiye değeri. Lütfen pozitif bir sayı girin."
+  TRANSLATIONS["tr,publisher_monitoring_enabled"]="Publisher bakiye izleme etkinleştirildi"
+  TRANSLATIONS["tr,publisher_monitoring_disabled"]="Publisher bakiye izleme devre dışı bırakıldı"
+  TRANSLATIONS["tr,publisher_balance_warning"]="⚠️ Publisher adreslerinde düşük bakiye tespit edildi"
+  TRANSLATIONS["tr,publisher_balance_address"]="Adres: %s, Bakiye: %s ETH"
   TRANSLATIONS["tr,current_slot"]="Mevcut slot: %s"
   TRANSLATIONS["tr,agent_notifications_full_info"]="ℹ️ Sorunlar, komite ve slot istatistikleri için bildirimler gönderilecektir"
   TRANSLATIONS["tr,attestation_status"]="ℹ️ Slot istatistik"
@@ -1596,7 +1641,7 @@ check_dependencies() {
   else
       source .env-aztec-agent
       DISPLAY_NETWORK="${NETWORK:-testnet}"
-      echo -e "\n${GREEN}$(t "env_exists") RPC_URL: $RPC_URL, NETWORK: $DISPLAY_NETWORK${NC}"
+      echo -e "\n${GREEN}$(t "env_exists") $RPC_URL, NETWORK: $DISPLAY_NETWORK${NC}"
   fi
 
   # === Проверяем и добавляем ключ VERSION в ~/.env-aztec-agent ===
@@ -1751,7 +1796,7 @@ check_aztec_container_logs() {
             ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
         )
         error_solutions=(
-            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 14"
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 14\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 13"
         )
     fi
 
@@ -2213,6 +2258,7 @@ t() {
     "status_block_missed") echo "$(t "status_block_missed")" ;;
     "status_block_proposed") echo "$(t "status_block_proposed")" ;;
     "current_slot") printf "$(t "current_slot")" "\$value1" ;;
+    "publisher_balance_warning") echo "$(t "publisher_balance_warning")" ;;
     *) echo "\$key" ;;
   esac
 }
@@ -2772,6 +2818,94 @@ check_blocks() {
   debug_log "check_blocks completed at \$(date)"
 }
 
+# === Function to check publisher balances ===
+check_publisher_balances() {
+  # Check if monitoring is enabled
+  if [ ! -f "\$HOME/.env-aztec-agent" ]; then
+    return
+  fi
+
+  source \$HOME/.env-aztec-agent
+
+  # Check if monitoring is enabled
+  if [ -z "\$MONITORING_PUBLISHERS" ] || [ "\$MONITORING_PUBLISHERS" != "true" ]; then
+    debug_log "Publisher balance monitoring is disabled"
+    return
+  fi
+
+  # Check if publishers are defined
+  if [ -z "\$PUBLISHERS" ]; then
+    debug_log "No publishers defined for balance monitoring"
+    return
+  fi
+
+  # Get minimum balance threshold (default 0.15 ETH)
+  local min_balance="0.15"
+  if [ -n "\$MIN_BALANCE_FOR_WARNING" ]; then
+    min_balance="\$MIN_BALANCE_FOR_WARNING"
+  fi
+
+  # Get RPC URL from environment
+  if [ -z "\$RPC_URL" ]; then
+    debug_log "RPC_URL not set, cannot check publisher balances"
+    return
+  fi
+
+  debug_log "Checking publisher balances (threshold: \$min_balance ETH)"
+
+  # Parse publisher addresses
+  IFS=',' read -ra PUBLISHER_ARRAY <<< "\$PUBLISHERS"
+  local low_balance_addresses=()
+  local low_balance_values=()
+
+  for publisher in "\${PUBLISHER_ARRAY[@]}"; do
+    publisher=\$(echo "\$publisher" | xargs | tr '[:upper:]' '[:lower:]') # trim and lowercase
+    if [ -z "\$publisher" ]; then
+      continue
+    fi
+
+    debug_log "Checking balance for publisher: \$publisher"
+
+    # Get balance using cast
+    local balance_wei=\$(cast balance "\$publisher" --rpc-url "\$RPC_URL" 2>/dev/null)
+    if [ -z "\$balance_wei" ] || [[ "\$balance_wei" == *"Error"* ]]; then
+      log "Failed to get balance for publisher \$publisher: \$balance_wei"
+      continue
+    fi
+
+    local balance_eth=\$(awk -v wei="\$balance_wei" "BEGIN {printf \"%.6f\", wei / 1000000000000000000}")
+
+    debug_log "Publisher \$publisher balance: \$balance_eth ETH"
+
+    # Compare with threshold
+    if awk -v balance="\$balance_eth" -v threshold="\$min_balance" "BEGIN {exit !(balance < threshold)}"; then
+      low_balance_addresses+=("\$publisher")
+      low_balance_values+=("\$balance_eth")
+      log "Low balance detected for publisher \$publisher: \$balance_eth ETH (threshold: \$min_balance ETH)"
+    fi
+  done
+
+  # Send notification if any addresses have low balance
+  if [ \${#low_balance_addresses[@]} -gt 0 ]; then
+    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+    BT='\`'
+    message="\$(t "publisher_balance_warning")%0A%0A"
+    for idx in "\${!low_balance_addresses[@]}"; do
+      addr="\${low_balance_addresses[\$idx]}"
+      bal="\${low_balance_values[\$idx]}"
+      message+="\${BT}\$addr\${BT}%0ABalance: \$bal ETH%0A%0A"
+    done
+    message+="\$(t "server_info" "\$ip")%0A"
+    message+="\$(t "time_info" "\$current_time")"
+    send_telegram_message "\$message"
+  else
+    debug_log "All publisher balances are above threshold"
+  fi
+}
+
+# Check publisher balances if monitoring is enabled
+check_publisher_balances
+
 check_blocks
 EOF
 
@@ -2958,6 +3092,116 @@ remove_systemd_agent() {
   echo -e "\n${GREEN}$(t "agent_systemd_removed")${NC}"
 }
 
+# === Publisher Balance Monitoring Management ===
+manage_publisher_balance_monitoring() {
+  local env_file
+  env_file=$(_ensure_env_file)
+  source "$env_file"
+
+  echo -e "\n${BLUE}$(t "publisher_monitoring_title")${NC}"
+  echo -e "\n${NC}$(t "publisher_monitoring_option1")${NC}"
+  echo -e "${NC}$(t "publisher_monitoring_option2")${NC}"
+  echo -e "${NC}$(t "publisher_monitoring_option3")${NC}"
+
+  while true; do
+    echo ""
+    read -p "$(t "publisher_monitoring_choose") " choice
+    case "$choice" in
+      1)
+        # Configure balance monitoring
+        echo -e "\n${BLUE}$(t "publisher_addresses_prompt")${NC}"
+        echo -e "${YELLOW}$(t "publisher_addresses_format")${NC}"
+        while true; do
+          read -p "> " PUBLISHERS
+          if [[ -n "$PUBLISHERS" ]]; then
+            # Validate addresses format (basic check for 0x prefix)
+            local valid=true
+            IFS=',' read -ra ADDR_ARRAY <<< "$PUBLISHERS"
+            for addr in "${ADDR_ARRAY[@]}"; do
+              addr=$(echo "$addr" | xargs) # trim whitespace
+              if [[ ! "$addr" =~ ^0x[0-9a-fA-F]{40}$ ]]; then
+                echo -e "${RED}Invalid address format: $addr${NC}"
+                valid=false
+                break
+              fi
+            done
+            if [ "$valid" = true ]; then
+              # Save to .env-aztec-agent (append or update)
+              if [ -f "$env_file" ]; then
+                if grep -q "^PUBLISHERS=" "$env_file"; then
+                  # Escape special characters in PUBLISHERS for sed (using | as delimiter)
+                  PUBLISHERS_ESCAPED=$(printf '%s\n' "$PUBLISHERS" | sed 's/[[\.*^$()+?{|]/\\&/g' | sed 's/|/\\|/g')
+                  sed -i "s|^PUBLISHERS=.*|PUBLISHERS=\"$PUBLISHERS_ESCAPED\"|" "$env_file"
+                else
+                  printf 'PUBLISHERS="%s"\n' "$PUBLISHERS" >> "$env_file"
+                fi
+              else
+                printf 'PUBLISHERS="%s"\n' "$PUBLISHERS" > "$env_file"
+              fi
+              # Enable monitoring
+              if grep -q "^MONITORING_PUBLISHERS=" "$env_file"; then
+                sed -i "s|^MONITORING_PUBLISHERS=.*|MONITORING_PUBLISHERS=true|" "$env_file"
+              else
+                printf 'MONITORING_PUBLISHERS=true\n' >> "$env_file"
+              fi
+              echo -e "\n${GREEN}$(t "publisher_monitoring_enabled")${NC}"
+              break
+            fi
+          else
+            echo -e "\n${RED}$(t "publisher_addresses_empty")${NC}"
+          fi
+        done
+        ;;
+      2)
+        # Configure minimum balance threshold
+        echo -e "\n${BLUE}$(t "publisher_min_balance_prompt")${NC}"
+        while true; do
+          read -p "> " min_balance
+          if [[ -z "$min_balance" ]]; then
+            min_balance="0.15"
+          fi
+          # Validate that it's a positive number
+          if [[ "$min_balance" =~ ^[0-9]+\.?[0-9]*$ ]] && awk "BEGIN {exit !($min_balance > 0)}"; then
+            # Save to .env-aztec-agent (append or update)
+            if [ -f "$env_file" ]; then
+              if grep -q "^MIN_BALANCE_FOR_WARNING=" "$env_file"; then
+                # Escape special characters in min_balance for sed (using | as delimiter)
+                MIN_BALANCE_ESCAPED=$(printf '%s\n' "$min_balance" | sed 's/[[\.*^$()+?{|]/\\&/g' | sed 's/|/\\|/g')
+                sed -i "s|^MIN_BALANCE_FOR_WARNING=.*|MIN_BALANCE_FOR_WARNING=\"$MIN_BALANCE_ESCAPED\"|" "$env_file"
+              else
+                printf 'MIN_BALANCE_FOR_WARNING="%s"\n' "$min_balance" >> "$env_file"
+              fi
+            else
+              printf 'MIN_BALANCE_FOR_WARNING="%s"\n' "$min_balance" > "$env_file"
+            fi
+            echo -e "\n${GREEN}Minimum balance threshold set to $min_balance ETH${NC}"
+            break
+          else
+            echo -e "\n${RED}$(t "publisher_min_balance_invalid")${NC}"
+          fi
+        done
+        ;;
+      3)
+        # Stop balance monitoring
+        if [ -f "$env_file" ]; then
+          if grep -q "^MONITORING_PUBLISHERS=" "$env_file"; then
+            sed -i "s|^MONITORING_PUBLISHERS=.*|MONITORING_PUBLISHERS=false|" "$env_file"
+          else
+            printf 'MONITORING_PUBLISHERS=false\n' >> "$env_file"
+          fi
+        else
+          printf 'MONITORING_PUBLISHERS=false\n' > "$env_file"
+        fi
+        echo -e "\n${GREEN}$(t "publisher_monitoring_disabled")${NC}"
+        ;;
+      *)
+        echo -e "\n${RED}$(t "invalid_choice")${NC}"
+        continue
+        ;;
+    esac
+    break
+  done
+}
 
 # === Check Proven L2 Block and Sync Proof ===
 check_proven_block() {
@@ -3676,6 +3920,7 @@ generate_bls_keys() {
     echo -e "1) $(t "bls_method_new_operator")"
     echo -e "2) $(t "bls_method_existing")"
     echo -e "3) $(t "bls_to_keystore")"
+    echo ""
     read -p "$(t "bls_method_prompt") " GENERATION_METHOD
 
     case $GENERATION_METHOD in
@@ -4941,36 +5186,50 @@ main_menu() {
     echo -e "${NC}$(t "option19")${NC}"
     echo -e "${NC}$(t "option20")${NC}"
     echo -e "${NC}$(t "option21")${NC}"
+    echo -e "${CYAN}$(t "option22")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
     read -p "$(t "choose_option") " choice
 
+    # Flag to track if a valid command was executed
+    command_executed=false
+
     case "$choice" in
-      1) check_aztec_container_logs ;;
-      2) create_systemd_agent ;;
-      3) remove_systemd_agent ;;
-      4) find_rollup_address ;;
-      5) find_peer_id ;;
-      6) find_governance_proposer_payload ;;
-      7) check_proven_block ;;
-      8) change_rpc_url ;;
-      9) check_validator ;;
-      10) view_container_logs ;;
-      11) install_aztec ;;
-      12) delete_aztec ;;
-      13) stop_aztec_containers ;;
-      14) start_aztec_containers ;;
-      15) update_aztec ;;
-      16) downgrade_aztec ;;
-      17) check_aztec_version ;;
-      18) generate_bls_keys ;;
-      19) approve_with_all_keys ;;
-      20) stake_validators ;;
-      21) claim_rewards ;;
+      1) check_aztec_container_logs; command_executed=true ;;
+      2) create_systemd_agent; command_executed=true ;;
+      3) remove_systemd_agent; command_executed=true ;;
+      4) view_container_logs; command_executed=true ;;
+      5) find_rollup_address; command_executed=true ;;
+      6) find_peer_id; command_executed=true ;;
+      7) find_governance_proposer_payload; command_executed=true ;;
+      8) check_proven_block; command_executed=true ;;
+      9) check_validator; command_executed=true ;;
+      10) manage_publisher_balance_monitoring; command_executed=true ;;
+      11) install_aztec; command_executed=true ;;
+      12) delete_aztec; command_executed=true ;;
+      13) start_aztec_containers; command_executed=true ;;
+      14) stop_aztec_containers; command_executed=true ;;
+      15) update_aztec; command_executed=true ;;
+      16) downgrade_aztec; command_executed=true ;;
+      17) check_aztec_version; command_executed=true ;;
+      18) generate_bls_keys; command_executed=true ;;
+      19) approve_with_all_keys; command_executed=true ;;
+      20) stake_validators; command_executed=true ;;
+      21) claim_rewards; command_executed=true ;;
+      22) change_rpc_url; command_executed=true ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
+
+    # Wait for Enter before showing menu again (only for valid commands)
+    if [ "$command_executed" = true ]; then
+      echo ""
+      echo -e "${YELLOW}Press Enter to continue...${NC}"
+      read -r
+      clear
+      show_logo
+    fi
   done
 }
 
