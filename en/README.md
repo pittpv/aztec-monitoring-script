@@ -57,7 +57,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
     - Addresses are displayed in monospace format (copyable)
     - Balance is shown on a new line below the address
     - Empty line added between addresses for better readability
-    - Fixed balance display with leading zero (e.g., 0.000001 instead of .000001)
 
 - **Enter Key Wait After Menu Function Execution**
   - After executing any function, "Press Enter to continue..." message is shown
@@ -66,8 +65,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 - **Updated Translations and Messages**
   - Updated translations for all three languages (English, Russian, Turkish)
-  - Fixed option number references in hints (BLS generation - option 18, Approve - option 19, Stake - option 20)
-  - Updated sync error message (options 13 and 14 for start/stop)
   - Improved menu option wording
 
 - Fixes and Improvements

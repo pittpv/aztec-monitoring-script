@@ -56,7 +56,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
     - Adresler monospace formatında gösterilir (kopyalanabilir)
     - Bakiye adresin altında yeni bir satırda gösterilir
     - Daha iyi okunabilirlik için adresler arasına boş satır eklendi
-    - Önde sıfırlı bakiye gösterimi düzeltildi (örn., .000001 yerine 0.000001)
 
 - **Menü Fonksiyonu Çalıştırıldıktan Sonra Enter Tuşu Beklemesi**
   - Herhangi bir fonksiyon çalıştırıldıktan sonra "Press Enter to continue..." mesajı gösterilir
@@ -65,8 +64,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 - **Çeviriler ve Mesajlar Güncellendi**
   - Üç dil için çeviriler güncellendi (İngilizce, Rusça, Türkçe)
-  - İpuçlarındaki seçenek numarası referansları düzeltildi (BLS oluşturma - seçenek 18, Approve - seçenek 19, Stake - seçenek 20)
-  - Senkronizasyon hata mesajı güncellendi (başlat/durdur için seçenekler 13 ve 14)
   - Menü seçenek ifadeleri iyileştirildi
 
 - Düzeltmeler ve İyileştirmeler
