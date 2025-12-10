@@ -913,7 +913,7 @@ services:
       KEY_STORE_DIRECTORY: /config
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: info;debug:node:sentinel
-      AZTEC_PORT: 8080
+      AZTEC_PORT: ${http_port}
       AZTEC_ADMIN_PORT: 8880
     entrypoint: >
       sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --network $NETWORK'

@@ -902,7 +902,8 @@ cat > docker-compose.yml <<EOF
 services:
   aztec-node:
     container_name: aztec-sequencer
-    network_mode: host
+    networks:
+      - aztec
     image: aztecprotocol/aztec:latest
     restart: unless-stopped
     environment:
@@ -912,6 +913,8 @@ services:
       KEY_STORE_DIRECTORY: /config
       P2P_IP: \${P2P_IP}
       LOG_LEVEL: info;debug:node:sentinel
+      AZTEC_PORT: ${http_port}
+      AZTEC_ADMIN_PORT: 8880
     entrypoint: >
       sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --network $NETWORK'
     ports:
@@ -923,6 +926,9 @@ services:
       - $HOME/aztec/config:/config
     labels:
       - com.centurylinklabs.watchtower.enable=true
+networks:
+  aztec:
+    name: aztec
 EOF
 
 echo -e "\n${GREEN}$(t "compose_created")${NC}"
