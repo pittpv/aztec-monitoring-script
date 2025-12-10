@@ -110,7 +110,7 @@ init_languages() {
   TRANSLATIONS["en,bls_key"]="BLS Key"
   TRANSLATIONS["en,bls_method_existing"]="Generate using existing addresses (from mnemonic, only if all validator addresses are from the same seed phrase)"
   TRANSLATIONS["en,bls_method_new_operator"]="Generate new operator address (recommended)"
-  TRANSLATIONS["en,bls_method_prompt"]="Choose method [1-2]: "
+  TRANSLATIONS["en,bls_method_prompt"]="Choose method (1/2): "
   TRANSLATIONS["en,bls_invalid_method"]="Invalid method selected"
   TRANSLATIONS["en,bls_existing_method_title"]="Existing Address Method"
   TRANSLATIONS["en,bls_new_operator_title"]="New Operator Address Method"
@@ -563,7 +563,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_key"]="BLS ключ"
   TRANSLATIONS["ru,bls_method_existing"]="Сгенерировать используя существующие адреса (из mnemonic, только если все адреса валидаторов из одной сид фразы)"
   TRANSLATIONS["ru,bls_method_new_operator"]="Сгенерировать новый адрес оператора (рекомендуется)"
-  TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод [1-2]: "
+  TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод (1/2): "
   TRANSLATIONS["ru,bls_invalid_method"]="Выбран неверный метод"
   TRANSLATIONS["ru,bls_existing_method_title"]="Метод существующих адресов"
   TRANSLATIONS["ru,bls_new_operator_title"]="Метод нового адреса оператора"
@@ -1016,7 +1016,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_key"]="BLS Anahtarı"
   TRANSLATIONS["tr,bls_method_existing"]="Mevcut adresleri kullanarak üret (yalnızca tüm doğrulayıcı adresleri aynı başlangıç ​​ifadesinden geliyorsa, anımsatıcıdan)"
   TRANSLATIONS["tr,bls_method_new_operator"]="Yeni operatör adresi oluştur (tavsiye edilen)"
-  TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin [1-2]: "
+  TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin (1/2): "
   TRANSLATIONS["tr,bls_invalid_method"]="Geçersiz yöntem seçildi"
   TRANSLATIONS["tr,bls_existing_method_title"]="Mevcut Adres Yöntemi"
   TRANSLATIONS["tr,bls_new_operator_title"]="Yeni Operatör Adresi Yöntemi"
@@ -3925,6 +3925,7 @@ generate_bls_keys() {
     echo -e "1) $(t "bls_method_new_operator")"
     echo -e "2) $(t "bls_method_existing")"
     echo -e "3) $(t "bls_to_keystore")"
+    echo ""
     read -p "$(t "bls_method_prompt") " GENERATION_METHOD
 
     case $GENERATION_METHOD in
@@ -5222,6 +5223,10 @@ main_menu() {
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
+    echo ""
+    echo -e "${YELLOW}$(t "press_enter_to_continue")${NC}"
+    read -r
+    clear
   done
 }
 
