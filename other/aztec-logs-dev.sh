@@ -5197,36 +5197,44 @@ main_menu() {
 
     read -p "$(t "choose_option") " choice
 
+    # Flag to track if a valid command was executed
+    command_executed=false
+
     case "$choice" in
-      1) check_aztec_container_logs ;;
-      2) create_systemd_agent ;;
-      3) remove_systemd_agent ;;
-      4) view_container_logs ;;
-      5) find_rollup_address ;;
-      6) find_peer_id ;;
-      7) find_governance_proposer_payload ;;
-      8) check_proven_block ;;
-      9) check_validator ;;
-      10) manage_publisher_balance_monitoring ;;
-      11) install_aztec ;;
-      12) delete_aztec ;;
-      13) start_aztec_containers ;;
-      14) stop_aztec_containers ;;
-      15) update_aztec ;;
-      16) downgrade_aztec ;;
-      17) check_aztec_version ;;
-      18) generate_bls_keys ;;
-      19) approve_with_all_keys ;;
-      20) stake_validators ;;
-      21) claim_rewards ;;
-      22) change_rpc_url ;;
+      1) check_aztec_container_logs; command_executed=true ;;
+      2) create_systemd_agent; command_executed=true ;;
+      3) remove_systemd_agent; command_executed=true ;;
+      4) view_container_logs; command_executed=true ;;
+      5) find_rollup_address; command_executed=true ;;
+      6) find_peer_id; command_executed=true ;;
+      7) find_governance_proposer_payload; command_executed=true ;;
+      8) check_proven_block; command_executed=true ;;
+      9) check_validator; command_executed=true ;;
+      10) manage_publisher_balance_monitoring; command_executed=true ;;
+      11) install_aztec; command_executed=true ;;
+      12) delete_aztec; command_executed=true ;;
+      13) start_aztec_containers; command_executed=true ;;
+      14) stop_aztec_containers; command_executed=true ;;
+      15) update_aztec; command_executed=true ;;
+      16) downgrade_aztec; command_executed=true ;;
+      17) check_aztec_version; command_executed=true ;;
+      18) generate_bls_keys; command_executed=true ;;
+      19) approve_with_all_keys; command_executed=true ;;
+      20) stake_validators; command_executed=true ;;
+      21) claim_rewards; command_executed=true ;;
+      22) change_rpc_url; command_executed=true ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
-    echo ""
-    echo -e "${YELLOW}$(t "press_enter_to_continue")${NC}"
-    read -r
-    clear
+    
+    # Wait for Enter before showing menu again (only for valid commands)
+    if [ "$command_executed" = true ]; then
+      echo ""
+      echo -e "${YELLOW}Press Enter to continue...${NC}"
+      read -r
+      clear
+      show_logo
+    fi
   done
 }
 
