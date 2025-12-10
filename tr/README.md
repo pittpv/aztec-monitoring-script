@@ -44,7 +44,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 - **Publisher Bakiye İzleme (Seçenek 10)**
   - Üç alt seçenekli izleme yönetim fonksiyonu eklendi:
     - Alt seçenek 1: Adresleri ekleyin ve bakiye izlemeyi başlatın
-    - Alt seçenek 2: Minimum bakiye eşiğini yapılandır (varsayılan: 0.15 ETH)
+    - Alt seçenek 2: Minimum bakiye eşiğini varsayılan değerden farklı bir değere ayarlayın.
     - Alt seçenek 3: Bakiye izlemeyi durdur
   - Adresler `.env-aztec-agent` dosyasına `PUBLISHERS` değişkeninde kaydedilir
   - Minimum bakiye `MIN_BALANCE_FOR_WARNING` değişkenine kaydedilir

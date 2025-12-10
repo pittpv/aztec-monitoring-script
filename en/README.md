@@ -44,8 +44,8 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 - **Publisher Balance Monitoring (Option 10)**
   - Added monitoring management function with three sub-options:
-    - Sub-option 1: Add addresses and start balance monitoring
-    - Sub-option 2: Configure minimum balance threshold (default: 0.15 ETH)
+    - Sub-option 1: Add addresses and start balance monitoring (Varsayılan minimum tutar 0,15 ETH'dir)
+    - Sub-option 2: Configure minimum balance threshold to a value other than the default
     - Sub-option 3: Stop balance monitoring
   - Addresses are saved to `.env-aztec-agent` in the `PUBLISHERS` variable
   - Minimum balance is saved to the `MIN_BALANCE_FOR_WARNING` variable
