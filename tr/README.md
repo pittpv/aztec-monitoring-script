@@ -360,6 +360,8 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
 
 ## ⚙️ Kurulum ve Başlatma
 
+❗️Bu işlemi `root` kullanıcısı olarak ve root dizininde çalıştırmanız önerilir.
+
 1. **Gereksinimler**:
    Betik, gerekli bileşenleri kontrol edecek ve eksik olanları kurmayı teklif edecektir.
 

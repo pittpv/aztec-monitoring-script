@@ -362,6 +362,8 @@ Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone
 
 ## ⚙️ Installation and Launch
 
+❗️It is recommended to run as `root` user in the root directory.
+
 1. **Requirements**:
    The script will check for required components and offer to install any that are missing.
 
