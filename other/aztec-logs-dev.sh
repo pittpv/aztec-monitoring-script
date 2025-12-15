@@ -463,15 +463,15 @@ init_languages() {
   TRANSLATIONS["en,checking_address"]="Checking address"
   TRANSLATIONS["en,failed_get_rewards_for_address"]="Failed to get rewards for address"
   TRANSLATIONS["en,failed_convert_rewards_amount"]="Failed to convert rewards amount for address"
-  TRANSLATIONS["en,failed_convert_to_eth"]="Failed to convert to ETH for address"
-  TRANSLATIONS["en,rewards_amount"]="Rewards: %s ETH"
+  TRANSLATIONS["en,failed_convert_to_eth"]="Failed to convert amount for address"
+  TRANSLATIONS["en,rewards_amount"]="Rewards: %s"
   TRANSLATIONS["en,no_rewards"]="No rewards"
   TRANSLATIONS["en,no_rewards_to_claim"]="No rewards to claim at this time"
   TRANSLATIONS["en,found_unique_addresses_with_rewards"]="Found unique addresses with rewards to claim:"
   TRANSLATIONS["en,already_claimed_this_session"]="Already claimed address"
   TRANSLATIONS["en,skipping"]="skipping"
   TRANSLATIONS["en,address_label"]="Address:"
-  TRANSLATIONS["en,amount_eth"]="Amount: %s ETH"
+  TRANSLATIONS["en,amount_eth"]="Amount: %s"
   TRANSLATIONS["en,address_appears_times"]="This address appears %s times in keystore"
   TRANSLATIONS["en,claim_rewards_confirmation"]="Do you want to claim these rewards? (y/n/skip):"
   TRANSLATIONS["en,claiming_rewards"]="Claiming rewards..."
@@ -479,7 +479,7 @@ init_languages() {
   TRANSLATIONS["en,waiting_confirmation"]="Waiting for confirmation..."
   TRANSLATIONS["en,transaction_confirmed_successfully"]="Transaction confirmed successfully"
   TRANSLATIONS["en,rewards_successfully_claimed"]="Rewards successfully claimed"
-  TRANSLATIONS["en,rewards_claimed_balance_not_zero"]="Rewards claimed but balance not zero: %s ETH"
+  TRANSLATIONS["en,rewards_claimed_balance_not_zero"]="Rewards claimed but balance not zero: %s"
   TRANSLATIONS["en,claimed_rewards_for_address_appears_times"]="Claimed rewards for %s (appears %s times)"
   TRANSLATIONS["en,transaction_failed"]="Transaction failed"
   TRANSLATIONS["en,could_not_get_receipt_transaction_sent"]="Could not get receipt, but transaction was sent"
@@ -916,15 +916,15 @@ init_languages() {
   TRANSLATIONS["ru,checking_address"]="Проверка адреса"
   TRANSLATIONS["ru,failed_get_rewards_for_address"]="Не удалось получить награды для адреса"
   TRANSLATIONS["ru,failed_convert_rewards_amount"]="Не удалось конвертировать сумму наград для адреса"
-  TRANSLATIONS["ru,failed_convert_to_eth"]="Не удалось конвертировать в ETH для адреса"
-  TRANSLATIONS["ru,rewards_amount"]="Награды: %s ETH"
+  TRANSLATIONS["ru,failed_convert_to_eth"]="Не удалось конвертировать сумму для адреса"
+  TRANSLATIONS["ru,rewards_amount"]="Награды: %s"
   TRANSLATIONS["ru,no_rewards"]="Нет наград"
   TRANSLATIONS["ru,no_rewards_to_claim"]="Нет наград для получения в данный момент"
   TRANSLATIONS["ru,found_unique_addresses_with_rewards"]="Найдено уникальных адресов с наградами для получения:"
   TRANSLATIONS["ru,already_claimed_this_session"]="Уже получено для адреса"
   TRANSLATIONS["ru,skipping"]="пропускаем"
   TRANSLATIONS["ru,address_label"]="Адрес:"
-  TRANSLATIONS["ru,amount_eth"]="Сумма: %s ETH"
+  TRANSLATIONS["ru,amount_eth"]="Сумма: %s"
   TRANSLATIONS["ru,address_appears_times"]="Этот адрес появляется %s раз в keystore"
   TRANSLATIONS["ru,claim_rewards_confirmation"]="Хотите получить эти награды? (y/n/skip):"
   TRANSLATIONS["ru,claiming_rewards"]="Получение наград..."
@@ -932,7 +932,7 @@ init_languages() {
   TRANSLATIONS["ru,waiting_confirmation"]="Ожидание подтверждения..."
   TRANSLATIONS["ru,transaction_confirmed_successfully"]="Транзакция успешно подтверждена"
   TRANSLATIONS["ru,rewards_successfully_claimed"]="Награды успешно получены"
-  TRANSLATIONS["ru,rewards_claimed_balance_not_zero"]="Награды получены, но баланс не обнулен: %s ETH"
+  TRANSLATIONS["ru,rewards_claimed_balance_not_zero"]="Награды получены, но баланс не обнулен: %s"
   TRANSLATIONS["ru,claimed_rewards_for_address_appears_times"]="Получены награды для %s (появляется %s раз)"
   TRANSLATIONS["ru,transaction_failed"]="Транзакция не удалась"
   TRANSLATIONS["ru,could_not_get_receipt_transaction_sent"]="Не удалось получить квитанцию, но транзакция была отправлена"
@@ -1368,15 +1368,15 @@ init_languages() {
   TRANSLATIONS["tr,checking_address"]="Adres kontrol ediliyor"
   TRANSLATIONS["tr,failed_get_rewards_for_address"]="Adres için ödüller alınamadı"
   TRANSLATIONS["tr,failed_convert_rewards_amount"]="Adres için ödül miktarı dönüştürülemedi"
-  TRANSLATIONS["tr,failed_convert_to_eth"]="Adres için ETH'ye dönüştürülemedi"
-  TRANSLATIONS["tr,rewards_amount"]="Ödüller: %s ETH"
+  TRANSLATIONS["tr,failed_convert_to_eth"]="Adres için tutar dönüştürülemedi"
+  TRANSLATIONS["tr,rewards_amount"]="Ödüller: %s"
   TRANSLATIONS["tr,no_rewards"]="Ödül yok"
   TRANSLATIONS["tr,no_rewards_to_claim"]="Şu anda talep edilecek ödül yok"
   TRANSLATIONS["tr,found_unique_addresses_with_rewards"]="Talep edilecek ödülü olan benzersiz adresler bulundu:"
   TRANSLATIONS["tr,already_claimed_this_session"]="Bu oturumda zaten talep edildi"
   TRANSLATIONS["tr,skipping"]="atlanıyor"
   TRANSLATIONS["tr,address_label"]="Adres:"
-  TRANSLATIONS["tr,amount_eth"]="Miktar: %s ETH"
+  TRANSLATIONS["tr,amount_eth"]="Miktar: %s"
   TRANSLATIONS["tr,address_appears_times"]="Bu adres keystore'da %s kez görünüyor"
   TRANSLATIONS["tr,claim_rewards_confirmation"]="Bu ödülleri talep etmek istiyor musunuz? (y/n/skip):"
   TRANSLATIONS["tr,claiming_rewards"]="Ödüller talep ediliyor..."
@@ -1384,7 +1384,7 @@ init_languages() {
   TRANSLATIONS["tr,waiting_confirmation"]="Onay bekleniyor..."
   TRANSLATIONS["tr,transaction_confirmed_successfully"]="İşlem başarıyla onaylandı"
   TRANSLATIONS["tr,rewards_successfully_claimed"]="Ödüller başarıyla talep edildi"
-  TRANSLATIONS["tr,rewards_claimed_balance_not_zero"]="Ödüller talep edildi ancak bakiye sıfır değil: %s ETH"
+  TRANSLATIONS["tr,rewards_claimed_balance_not_zero"]="Ödüller talep edildi ancak bakiye sıfır değil: %s"
   TRANSLATIONS["tr,claimed_rewards_for_address_appears_times"]="%s için ödüller talep edildi (%s kez görünüyor)"
   TRANSLATIONS["tr,transaction_failed"]="İşlem başarısız oldu"
   TRANSLATIONS["tr,could_not_get_receipt_transaction_sent"]="Makbuz alınamadı, ancak işlem gönderildi"
@@ -4885,6 +4885,12 @@ claim_rewards() {
     local rpc_url=$(echo "$settings" | cut -d'|' -f2)
     local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
+    # Determine token symbol based on network
+    local TOKEN_SYMBOL="STK"
+    if [[ "$network" == "mainnet" ]]; then
+        TOKEN_SYMBOL="AZTEC"
+    fi
+
     local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
 
     echo -e "${CYAN}$(t "using_contract") $contract_address${NC}"
@@ -4933,13 +4939,23 @@ claim_rewards() {
 
     echo -e "\n${BLUE}📋 $(t "extracting_validator_addresses")${NC}"
 
-    # Extract coinbase addresses (they are the ones eligible for rewards)
+    # Extract payout addresses:
+    # - Prefer per-validator .coinbase
+    # - If .coinbase is missing/invalid, fall back to .attester.eth
     local coinbase_addresses=()
     while IFS= read -r address; do
         if [ -n "$address" ] && [ "$address" != "null" ] && [[ "$address" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
             coinbase_addresses+=("$address")
         fi
-    done < <(jq -r '.validators[].coinbase' "$KEYSTORE_FILE" 2>/dev/null)
+    done < <(jq -r '
+        .validators[]
+        | if (.coinbase != null and (.coinbase | test("^0x[0-9a-fA-F]{40}$")))
+          then .coinbase
+          elif (.attester.eth != null and (.attester.eth | test("^0x[0-9a-fA-F]{40}$")))
+          then .attester.eth
+          else empty
+          end
+    ' "$KEYSTORE_FILE" 2>/dev/null)
 
     if [ ${#coinbase_addresses[@]} -eq 0 ]; then
         echo -e "${YELLOW}⚠️ $(t "no_coinbase_addresses_found")${NC}"
@@ -5005,7 +5021,7 @@ claim_rewards() {
             continue
         fi
 
-        # Convert wei to ETH
+        # Convert wei to human-readable token amount (18 decimals)
         local rewards_eth
         rewards_eth=$(echo "scale=6; $rewards_wei / 1000000000000000000" | bc 2>/dev/null)
 
@@ -5016,7 +5032,7 @@ claim_rewards() {
 
         # Check if rewards > 0
         if (( $(echo "$rewards_eth > 0" | bc -l) )); then
-            printf "${GREEN}🎯 $(t "rewards_amount")${NC}\n" "$rewards_eth"
+            printf "${GREEN}🎯 $(t "rewards_amount") ${TOKEN_SYMBOL}${NC}\n" "$rewards_eth"
             addresses_with_rewards+=("$address")
             reward_amounts+=("$rewards_eth")
         else
@@ -5048,7 +5064,7 @@ claim_rewards() {
 
         echo -e "\n${BLUE}================================${NC}"
         echo -e "${CYAN}🎯 $(t "address_label") $address${NC}"
-        printf "${YELLOW}💰 $(t "amount_eth")${NC}\n" "$amount"
+        printf "${YELLOW}💰 $(t "amount_eth") ${TOKEN_SYMBOL}${NC}\n" "$amount"
 
         # Find how many times this address repeats
         local repeat_count=0
@@ -5108,7 +5124,7 @@ claim_rewards() {
                             if (( $(echo "$new_rewards_eth == 0" | bc -l) )); then
                                 echo -e "${GREEN}✅ $(t "rewards_successfully_claimed")${NC}"
                             else
-                                printf "${YELLOW}⚠️ $(t "rewards_claimed_balance_not_zero")${NC}\n" "$new_rewards_eth"
+                                printf "${YELLOW}⚠️ $(t "rewards_claimed_balance_not_zero") ${TOKEN_SYMBOL}${NC}\n" "$new_rewards_eth"
                             fi
 
                             ((claimed_count++))
