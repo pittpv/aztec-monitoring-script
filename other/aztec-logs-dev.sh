@@ -5570,7 +5570,7 @@ check_validator_main() {
                 echo -e "\n${YELLOW}${message}${NC}"
                 create_monitor_script "$validator" "$network" "$MONITOR_DIR" "$QUEUE_URL"
             done
-            echo -e "${GREEN}$(t "queue_validators_added")${NC}"
+            echo -e "\n${GREEN}$(t "queue_validators_added")${NC}"
         else
             echo -e "${YELLOW}$(t "skipping_queue_setup")${NC}"
         fi
