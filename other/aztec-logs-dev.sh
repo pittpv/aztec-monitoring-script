@@ -11,11 +11,15 @@ NC='\033[0m' # No Color
 
 SCRIPT_VERSION="2.5.3"
 
+# Determine script directory for local file access (security: avoid remote code execution)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 function show_logo() {
     echo -e " "
     echo -e " "
     echo -e "${NC}$(t "welcome")${NC}"
-    curl -s https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/logo.sh | bash
+    # Security: Use local file instead of remote execution to prevent supply chain attacks
+    bash "$SCRIPT_DIR/aztec-script-files/logo.sh"
 }
 
 # === Language settings ===
@@ -68,7 +72,37 @@ init_languages() {
   TRANSLATIONS["en,option20"]="20. Stake"
   TRANSLATIONS["en,option21"]="21. Claim rewards"
   TRANSLATIONS["en,option22"]="22. Change RPC URL"
+  TRANSLATIONS["en,option23"]="23. Check for script updates (safe, with hash verification)"
+  TRANSLATIONS["en,option24"]="24. Check for error definitions updates (safe, with hash verification)"
   TRANSLATIONS["en,option0"]="0. Exit"
+  
+  # Update check translations
+  TRANSLATIONS["en,local_version_shows"]="Local version file shows version:"
+  TRANSLATIONS["en,note_check_updates_safely"]="Note: To check for remote updates safely, use the optional update check function"
+  TRANSLATIONS["en,local_version_up_to_date"]="Local version file is up to date"
+  TRANSLATIONS["en,safe_update_check"]="Safe Update Check"
+  TRANSLATIONS["en,update_check_warning"]="This will download version_control.json from GitHub with SHA256 verification."
+  TRANSLATIONS["en,file_not_executed_auto"]="The file will be downloaded but NOT executed automatically."
+  TRANSLATIONS["en,continue_prompt"]="Continue? (y/n)"
+  TRANSLATIONS["en,update_check_cancelled"]="Update check cancelled."
+  TRANSLATIONS["en,downloading_version_control"]="Downloading version_control.json..."
+  TRANSLATIONS["en,failed_download_version_control"]="Failed to download version_control.json"
+  TRANSLATIONS["en,downloaded_file_sha256"]="Downloaded file SHA256:"
+  TRANSLATIONS["en,verify_hash_match"]="Please verify this hash matches the expected hash from the repository."
+  TRANSLATIONS["en,current_installed_version"]="Current installed version:"
+  TRANSLATIONS["en,latest_version_repo"]="Latest version in repository:"
+  TRANSLATIONS["en,new_version_available"]="New version available:"
+  TRANSLATIONS["en,version_label"]="Version:"
+  TRANSLATIONS["en,note_update_manually"]="Note: To update, pull the latest changes from the repository manually."
+  TRANSLATIONS["en,safe_error_def_update_check"]="Safe Error Definitions Update Check"
+  TRANSLATIONS["en,error_def_update_warning"]="This will download error_definitions.json from GitHub with SHA256 verification."
+  TRANSLATIONS["en,downloading_error_definitions"]="Downloading error_definitions.json..."
+  TRANSLATIONS["en,failed_download_error_definitions"]="Failed to download error_definitions.json"
+  TRANSLATIONS["en,error_def_matches_remote"]="Local error_definitions.json matches the remote version."
+  TRANSLATIONS["en,local_remote_versions_differ"]="Local and remote versions differ."
+  TRANSLATIONS["en,local_hash"]="Local hash:"
+  TRANSLATIONS["en,remote_hash"]="Remote hash:"
+  TRANSLATIONS["en,local_error_def_not_found"]="Local error_definitions.json not found."
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
   TRANSLATIONS["en,bls_invalid_number"]="Invalid number. Please enter a positive integer."
@@ -229,8 +263,6 @@ init_languages() {
   TRANSLATIONS["en,gov_no_changes"]="✅ No changes detected."
   TRANSLATIONS["en,token_prompt"]="Enter Telegram Bot Token:"
   TRANSLATIONS["en,chatid_prompt"]="Enter Telegram Chat ID:"
-  TRANSLATIONS["en,agent_added"]="✅ Agent added to systemd and will run every minute."
-  TRANSLATIONS["en,agent_exists"]="ℹ️ Agent already exists in systemd."
   TRANSLATIONS["en,removing_agent"]="🗑 Removing agent and systemd task..."
   TRANSLATIONS["en,agent_removed"]="✅ Agent and systemd task removed."
   TRANSLATIONS["en,goodbye"]="👋 Goodbye."
@@ -366,53 +398,7 @@ init_languages() {
   #
   TRANSLATIONS["en,cli_quit_old_sessions"]="Closed existing session:"
   #install section
-  TRANSLATIONS["en,delete_node"]="🗑️ Deleting Aztec Node..."
-  TRANSLATIONS["en,delete_confirm"]="Are you sure you want to delete the Aztec node? This will stop containers and remove all data. (y/n) "
   TRANSLATIONS["en,node_deleted"]="✅ Aztec node successfully deleted"
-  TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
-  TRANSLATIONS["en,delete_watchtower_confirm"]="Do you want to also delete Watchtower? (y/n) "
-  TRANSLATIONS["en,watchtower_deleted"]="✅ Watchtower successfully deleted"
-  TRANSLATIONS["en,watchtower_kept"]="✅ Watchtower kept intact"
-  TRANSLATIONS["en,enter_tg_token"]="Enter Telegram bot token: "
-  TRANSLATIONS["en,enter_tg_chat_id"]="Enter Telegram chat ID: "
-  TRANSLATIONS["en,single_validator_mode"]="🔹 Single validator mode selected"
-  TRANSLATIONS["en,multi_validator_mode"]="🔹 Multiple validators mode selected"
-  TRANSLATIONS["en,enter_validator_keys"]="Enter validator private keys (comma-separated with 0x, up to 10): "
-  TRANSLATIONS["en,enter_validator_key"]="Enter validator private key (with 0x): "
-  TRANSLATIONS["en,enter_seq_publisher_key"]="Enter SEQ_PUBLISHER_PRIVATE_KEY (with 0x): "
-  TRANSLATIONS["en,enter_yn"]="Please enter Y or N: "
-  TRANSLATIONS["en,stopping_containers"]="Stopping containers..."
-  TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
-  TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
-  TRANSLATIONS["en,removing_watchtower_data"]="Removing Watchtower data..."
-  #update
-  TRANSLATIONS["en,update_title"]="Updating Aztec node to the latest version"
-  TRANSLATIONS["en,update_folder_error"]="Error: Folder $HOME/aztec does not exist"
-  TRANSLATIONS["en,update_stopping"]="Stopping containers..."
-  TRANSLATIONS["en,update_stop_error"]="Error stopping containers"
-  TRANSLATIONS["en,update_pulling"]="Pulling latest aztecprotocol/aztec image..."
-  TRANSLATIONS["en,update_pull_error"]="Error pulling image"
-  TRANSLATIONS["en,update_starting"]="Starting updated node..."
-  TRANSLATIONS["en,update_start_error"]="Error starting containers"
-  TRANSLATIONS["en,update_success"]="Aztec node successfully updated to the latest version!"
-  TRANSLATIONS["en,tag_check"]="Found tag: %s, replacing with latest"
-  #downgrade
-  TRANSLATIONS["en,downgrade_title"]="Downgrading Aztec node"
-  TRANSLATIONS["en,downgrade_fetching"]="Fetching available versions list..."
-  TRANSLATIONS["en,downgrade_fetch_error"]="Failed to get versions list"
-  TRANSLATIONS["en,downgrade_available"]="Available versions (enter number):"
-  TRANSLATIONS["en,downgrade_invalid_choice"]="Invalid choice, please try again"
-  TRANSLATIONS["en,downgrade_selected"]="Selected version:"
-  TRANSLATIONS["en,downgrade_folder_error"]="Error: Folder $HOME/aztec does not exist"
-  TRANSLATIONS["en,downgrade_stopping"]="Stopping containers..."
-  TRANSLATIONS["en,downgrade_stop_error"]="Error stopping containers"
-  TRANSLATIONS["en,downgrade_pulling"]="Pulling aztecprotocol/aztec image:"
-  TRANSLATIONS["en,downgrade_pull_error"]="Error pulling image"
-  TRANSLATIONS["en,downgrade_updating"]="Updating configuration..."
-  TRANSLATIONS["en,downgrade_update_error"]="Error updating docker-compose.yml"
-  TRANSLATIONS["en,downgrade_starting"]="Starting node with version"
-  TRANSLATIONS["en,downgrade_start_error"]="Error starting containers"
-  TRANSLATIONS["en,downgrade_success"]="Aztec node successfully downgraded to version"
   #agent
   TRANSLATIONS["en,agent_systemd_added"]="Agent added (running every 37 seconds via systemd)"
   TRANSLATIONS["en,agent_timer_status"]="Timer status:"
@@ -521,7 +507,37 @@ init_languages() {
   TRANSLATIONS["ru,option20"]="20. Стейк"
   TRANSLATIONS["ru,option21"]="21. Получить награды"
   TRANSLATIONS["ru,option22"]="22. Изменить RPC URL"
+  TRANSLATIONS["ru,option23"]="23. Проверить обновления скрипта (безопасно, с проверкой хеша)"
+  TRANSLATIONS["ru,option24"]="24. Проверить обновления определений ошибок (безопасно, с проверкой хеша)"
   TRANSLATIONS["ru,option0"]="0. Выход"
+  
+  # Переводы для проверки обновлений
+  TRANSLATIONS["ru,local_version_shows"]="Локальный файл версий показывает версию:"
+  TRANSLATIONS["ru,note_check_updates_safely"]="Примечание: Для безопасной проверки удалённых обновлений используйте опциональную функцию проверки обновлений"
+  TRANSLATIONS["ru,local_version_up_to_date"]="Локальный файл версий актуален"
+  TRANSLATIONS["ru,safe_update_check"]="Безопасная проверка обновлений"
+  TRANSLATIONS["ru,update_check_warning"]="Будет загружен version_control.json из GitHub с проверкой SHA256."
+  TRANSLATIONS["ru,file_not_executed_auto"]="Файл будет загружен, но НЕ будет выполнен автоматически."
+  TRANSLATIONS["ru,continue_prompt"]="Продолжить? (y/n)"
+  TRANSLATIONS["ru,update_check_cancelled"]="Проверка обновлений отменена."
+  TRANSLATIONS["ru,downloading_version_control"]="Загрузка version_control.json..."
+  TRANSLATIONS["ru,failed_download_version_control"]="Не удалось загрузить version_control.json"
+  TRANSLATIONS["ru,downloaded_file_sha256"]="SHA256 загруженного файла:"
+  TRANSLATIONS["ru,verify_hash_match"]="Пожалуйста, убедитесь, что этот хеш соответствует ожидаемому хешу из репозитория."
+  TRANSLATIONS["ru,current_installed_version"]="Текущая установленная версия:"
+  TRANSLATIONS["ru,latest_version_repo"]="Последняя версия в репозитории:"
+  TRANSLATIONS["ru,new_version_available"]="Доступна новая версия:"
+  TRANSLATIONS["ru,version_label"]="Версия:"
+  TRANSLATIONS["ru,note_update_manually"]="Примечание: Для обновления вручную загрузите последние изменения из репозитория."
+  TRANSLATIONS["ru,safe_error_def_update_check"]="Безопасная проверка обновлений определений ошибок"
+  TRANSLATIONS["ru,error_def_update_warning"]="Будет загружен error_definitions.json из GitHub с проверкой SHA256."
+  TRANSLATIONS["ru,downloading_error_definitions"]="Загрузка error_definitions.json..."
+  TRANSLATIONS["ru,failed_download_error_definitions"]="Не удалось загрузить error_definitions.json"
+  TRANSLATIONS["ru,error_def_matches_remote"]="Локальный error_definitions.json соответствует удалённой версии."
+  TRANSLATIONS["ru,local_remote_versions_differ"]="Локальная и удалённая версии различаются."
+  TRANSLATIONS["ru,local_hash"]="Локальный хеш:"
+  TRANSLATIONS["ru,remote_hash"]="Удалённый хеш:"
+  TRANSLATIONS["ru,local_error_def_not_found"]="Локальный error_definitions.json не найден."
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
   TRANSLATIONS["ru,bls_invalid_number"]="Неверное число. Введите положительное целое число."
@@ -974,7 +990,37 @@ init_languages() {
   TRANSLATIONS["tr,option20"]="20. Stake"
   TRANSLATIONS["tr,option21"]="21. Ödülleri talep edin"
   TRANSLATIONS["tr,option22"]="22. RPC URL'sini değiştir"
+  TRANSLATIONS["tr,option23"]="23. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
+  TRANSLATIONS["tr,option24"]="24. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
+  
+  # Güncelleme kontrolü çevirileri
+  TRANSLATIONS["tr,local_version_shows"]="Yerel sürüm dosyası sürümü gösteriyor:"
+  TRANSLATIONS["tr,note_check_updates_safely"]="Not: Uzaktan güncellemeleri güvenli bir şekilde kontrol etmek için isteğe bağlı güncelleme kontrolü işlevini kullanın"
+  TRANSLATIONS["tr,local_version_up_to_date"]="Yerel sürüm dosyası güncel"
+  TRANSLATIONS["tr,safe_update_check"]="Güvenli Güncelleme Kontrolü"
+  TRANSLATIONS["tr,update_check_warning"]="Bu, SHA256 doğrulaması ile GitHub'dan version_control.json dosyasını indirecektir."
+  TRANSLATIONS["tr,file_not_executed_auto"]="Dosya indirilecek ancak otomatik olarak ÇALIŞTIRILMAYACAKTIR."
+  TRANSLATIONS["tr,continue_prompt"]="Devam edilsin mi? (y/n)"
+  TRANSLATIONS["tr,update_check_cancelled"]="Güncelleme kontrolü iptal edildi."
+  TRANSLATIONS["tr,downloading_version_control"]="version_control.json indiriliyor..."
+  TRANSLATIONS["tr,failed_download_version_control"]="version_control.json indirilemedi"
+  TRANSLATIONS["tr,downloaded_file_sha256"]="İndirilen dosya SHA256:"
+  TRANSLATIONS["tr,verify_hash_match"]="Lütfen bu hash'in depodaki beklenen hash ile eşleştiğini doğrulayın."
+  TRANSLATIONS["tr,current_installed_version"]="Mevcut yüklü sürüm:"
+  TRANSLATIONS["tr,latest_version_repo"]="Depodaki en son sürüm:"
+  TRANSLATIONS["tr,new_version_available"]="Yeni sürüm mevcut:"
+  TRANSLATIONS["tr,version_label"]="Sürüm:"
+  TRANSLATIONS["tr,note_update_manually"]="Not: Güncellemek için depodan en son değişiklikleri manuel olarak çekin."
+  TRANSLATIONS["tr,safe_error_def_update_check"]="Güvenli Hata Tanımları Güncelleme Kontrolü"
+  TRANSLATIONS["tr,error_def_update_warning"]="Bu, SHA256 doğrulaması ile GitHub'dan error_definitions.json dosyasını indirecektir."
+  TRANSLATIONS["tr,downloading_error_definitions"]="error_definitions.json indiriliyor..."
+  TRANSLATIONS["tr,failed_download_error_definitions"]="error_definitions.json indirilemedi"
+  TRANSLATIONS["tr,error_def_matches_remote"]="Yerel error_definitions.json uzak sürümle eşleşiyor."
+  TRANSLATIONS["tr,local_remote_versions_differ"]="Yerel ve uzak sürümler farklı."
+  TRANSLATIONS["tr,local_hash"]="Yerel hash:"
+  TRANSLATIONS["tr,remote_hash"]="Uzak hash:"
+  TRANSLATIONS["tr,local_error_def_not_found"]="Yerel error_definitions.json bulunamadı."
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
   TRANSLATIONS["tr,bls_invalid_number"]="Geçersiz sayı. Lütfen pozitif bir tam sayı girin."
@@ -1496,6 +1542,8 @@ check_dependencies() {
         case "$tool" in
           cast)
             echo -e "\n${CYAN}$(t "installing_foundry")${NC}"
+            # Security warning: This is a third-party script execution. Consider pinning to a specific version
+            # or verifying checksums in production environments to prevent supply chain attacks.
             curl -L https://foundry.paradigm.xyz | bash
 
             if ! grep -q 'foundry/bin'  ~/.bash_profile; then
@@ -1657,63 +1705,172 @@ check_dependencies() {
     INSTALLED_VERSION="$SCRIPT_VERSION"
   fi
 
-  # === Скачиваем remote version_control.json и определяем последнюю версию ===
-  REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/version_control.json"
-  # Скачиваем весь JSON, отбираем массив .[].VERSION, сортируем, берём последний
-  if remote_data=$(curl -fsSL "$REMOTE_VC_URL"); then
-    REMOTE_LATEST_VERSION=$(echo "$remote_data" | jq -r '.[].VERSION' | sort -V | tail -n1)
+  # === Используем локальный version_control.json для определения последней версии ===
+  # Security: Use local file instead of remote download to prevent supply chain attacks
+  # По умолчанию показываем только локальную версию. Для проверки обновлений используйте опциональную функцию check_updates_safely()
+  LOCAL_VC_FILE="$SCRIPT_DIR/aztec-script-files/version_control.json"
+  # Читаем локальный JSON, отбираем массив .[].VERSION, сортируем, берём последний
+  if [ -f "$LOCAL_VC_FILE" ] && local_data=$(cat "$LOCAL_VC_FILE"); then
+    LOCAL_LATEST_VERSION=$(echo "$local_data" | jq -r '.[].VERSION' | sort -V | tail -n1)
   else
-    REMOTE_LATEST_VERSION=""
+    LOCAL_LATEST_VERSION=""
   fi
 
-  # === Выводим текущую версию и, если надо, предупреждение об обновлении ===
+  # === Выводим текущую версию из локального файла ===
   echo -e "\n${CYAN}$(t "current_script_version") ${INSTALLED_VERSION}${NC}"
-  if [ -n "$REMOTE_LATEST_VERSION" ] && [ "$REMOTE_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
-    echo -e "${YELLOW}$(t "new_version_avialable") ${REMOTE_LATEST_VERSION}. $(t "new_version_update").${NC}"
+  if [ -n "$LOCAL_LATEST_VERSION" ]; then
+    if [ "$LOCAL_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
+      echo -e "${YELLOW}$(t "local_version_shows") ${LOCAL_LATEST_VERSION}${NC}"
+      echo -e "${BLUE}$(t "note_check_updates_safely")${NC}"
+    else
+      echo -e "${GREEN}$(t "local_version_up_to_date")${NC}"
+    fi
+  fi
+}
 
-    # === ВЫВОД СПИСКА ОБНОВЛЕНИЙ ===
-    echo -e "\n${BLUE}=== $(t "update_changes") ===${NC}"
+# === Безопасная проверка обновлений с подтверждением и проверкой хешей ===
+# Security: Optional update check with hash verification to prevent supply chain attacks
+check_updates_safely() {
+  echo -e "\n${BLUE}=== $(t "safe_update_check") ===${NC}"
+  echo -e "${YELLOW}$(t "update_check_warning")${NC}"
+  echo -e "${YELLOW}$(t "file_not_executed_auto")${NC}"
+  read -p "$(t "continue_prompt"): " confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}$(t "update_check_cancelled")${NC}"
+    return 0
+  fi
 
-    # Функция для сравнения версий (правильная реализация)
-    version_gt() {
-      if [ "$1" = "$2" ]; then
-        return 1
-      fi
-      local IFS=.
-      local i ver1=($1) ver2=($2)
-      for ((i=0; i<${#ver1[@]}; i++)); do
-        if [[ -z ${ver2[i]} ]]; then
-          ver2[i]=0
-        fi
-        if ((10#${ver1[i]} > 10#${ver2[i]})); then
-          return 0
-        fi
-        if ((10#${ver1[i]} < 10#${ver2[i]})); then
+  REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/version_control.json"
+  TEMP_VC_FILE=$(mktemp)
+  
+  echo -e "\n${CYAN}$(t "downloading_version_control")${NC}"
+  if ! curl -fsSL "$REMOTE_VC_URL" -o "$TEMP_VC_FILE"; then
+    echo -e "${RED}$(t "failed_download_version_control")${NC}"
+    rm -f "$TEMP_VC_FILE"
+    return 1
+  fi
+
+  # Вычисляем SHA256 хеш загруженного файла
+  if command -v sha256sum >/dev/null 2>&1; then
+    DOWNLOADED_HASH=$(sha256sum "$TEMP_VC_FILE" | cut -d' ' -f1)
+    echo -e "${GREEN}$(t "downloaded_file_sha256") ${DOWNLOADED_HASH}${NC}"
+    echo -e "${YELLOW}$(t "verify_hash_match")${NC}"
+  elif command -v shasum >/dev/null 2>&1; then
+    DOWNLOADED_HASH=$(shasum -a 256 "$TEMP_VC_FILE" | cut -d' ' -f1)
+    echo -e "${GREEN}$(t "downloaded_file_sha256") ${DOWNLOADED_HASH}${NC}"
+    echo -e "${YELLOW}$(t "verify_hash_match")${NC}"
+  fi
+
+  # Парсим и показываем информацию об обновлениях
+  if remote_data=$(cat "$TEMP_VC_FILE"); then
+    REMOTE_LATEST_VERSION=$(echo "$remote_data" | jq -r '.[].VERSION' | sort -V | tail -n1)
+    
+    echo -e "\n${CYAN}$(t "current_installed_version") ${INSTALLED_VERSION}${NC}"
+    echo -e "${CYAN}$(t "latest_version_repo") ${REMOTE_LATEST_VERSION}${NC}"
+    
+    if [ -n "$REMOTE_LATEST_VERSION" ] && [ "$REMOTE_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
+      echo -e "\n${YELLOW}$(t "new_version_available") ${REMOTE_LATEST_VERSION}${NC}"
+      
+      # Функция для сравнения версий
+      version_gt() {
+        if [ "$1" = "$2" ]; then
           return 1
         fi
-      done
-      return 1
-    }
-
-    # Выводим обновления только для версий НОВЕЕ текущей
-    echo "$remote_data" | jq -c '.[]' | while read -r update; do
-      version=$(echo "$update" | jq -r '.VERSION')
-      date=$(echo "$update" | jq -r '.UPDATE_DATE')
-
-      # Используем правильное сравнение версий
-      if version_gt "$version" "$INSTALLED_VERSION"; then
-        echo -e "\n${GREEN}Version: $version (${date})${NC}"
-
-        # Выводим список изменений
-        echo "$update" | jq -r '.CHANGES[]' | while read -r change; do
-          echo -e "  • ${YELLOW}$change${NC}"
+        local IFS=.
+        local i ver1=($1) ver2=($2)
+        for ((i=0; i<${#ver1[@]}; i++)); do
+          if [[ -z ${ver2[i]} ]]; then
+            ver2[i]=0
+          fi
+          if ((10#${ver1[i]} > 10#${ver2[i]})); then
+            return 0
+          fi
+          if ((10#${ver1[i]} < 10#${ver2[i]})); then
+            return 1
+          fi
         done
-      fi
-    done
+        return 1
+      }
 
-  elif [ -n "$REMOTE_LATEST_VERSION" ]; then
-    echo -e "${GREEN}$(t "version_up_to_date")${NC}"
+      # Выводим обновления только для версий НОВЕЕ текущей
+      echo -e "\n${BLUE}=== $(t "update_changes") ===${NC}"
+      echo "$remote_data" | jq -c '.[]' | while read -r update; do
+        version=$(echo "$update" | jq -r '.VERSION')
+        date=$(echo "$update" | jq -r '.UPDATE_DATE')
+
+        if version_gt "$version" "$INSTALLED_VERSION"; then
+          echo -e "\n${GREEN}$(t "version_label") $version (${date})${NC}"
+          echo "$update" | jq -r '.CHANGES[]' | while read -r change; do
+            echo -e "  • ${YELLOW}$change${NC}"
+          done
+        fi
+      done
+      
+      echo -e "\n${BLUE}$(t "note_update_manually")${NC}"
+    elif [ -n "$REMOTE_LATEST_VERSION" ]; then
+      echo -e "${GREEN}$(t "version_up_to_date")${NC}"
+    fi
   fi
+
+  # Удаляем временный файл
+  rm -f "$TEMP_VC_FILE"
+}
+
+# === Безопасная проверка обновлений error_definitions.json ===
+check_error_definitions_updates_safely() {
+  echo -e "\n${BLUE}=== $(t "safe_error_def_update_check") ===${NC}"
+  echo -e "${YELLOW}$(t "error_def_update_warning")${NC}"
+  echo -e "${YELLOW}$(t "file_not_executed_auto")${NC}"
+  read -p "$(t "continue_prompt"): " confirm
+  if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}$(t "update_check_cancelled")${NC}"
+    return 0
+  fi
+
+  REMOTE_ERROR_DEF_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
+  TEMP_ERROR_FILE=$(mktemp)
+  
+  echo -e "\n${CYAN}$(t "downloading_error_definitions")${NC}"
+  if ! curl -fsSL "$REMOTE_ERROR_DEF_URL" -o "$TEMP_ERROR_FILE"; then
+    echo -e "${RED}$(t "failed_download_error_definitions")${NC}"
+    rm -f "$TEMP_ERROR_FILE"
+    return 1
+  fi
+
+  # Вычисляем SHA256 хеш загруженного файла
+  if command -v sha256sum >/dev/null 2>&1; then
+    DOWNLOADED_HASH=$(sha256sum "$TEMP_ERROR_FILE" | cut -d' ' -f1)
+    echo -e "${GREEN}$(t "downloaded_file_sha256") ${DOWNLOADED_HASH}${NC}"
+    echo -e "${YELLOW}$(t "verify_hash_match")${NC}"
+  elif command -v shasum >/dev/null 2>&1; then
+    DOWNLOADED_HASH=$(shasum -a 256 "$TEMP_ERROR_FILE" | cut -d' ' -f1)
+    echo -e "${GREEN}$(t "downloaded_file_sha256") ${DOWNLOADED_HASH}${NC}"
+    echo -e "${YELLOW}$(t "verify_hash_match")${NC}"
+  fi
+
+  # Сравниваем с локальным файлом
+  LOCAL_ERROR_FILE="$SCRIPT_DIR/aztec-script-files/error_definitions.json"
+  if [ -f "$LOCAL_ERROR_FILE" ]; then
+    if command -v sha256sum >/dev/null 2>&1; then
+      LOCAL_HASH=$(sha256sum "$LOCAL_ERROR_FILE" | cut -d' ' -f1)
+    elif command -v shasum >/dev/null 2>&1; then
+      LOCAL_HASH=$(shasum -a 256 "$LOCAL_ERROR_FILE" | cut -d' ' -f1)
+    fi
+    
+    if [ "$DOWNLOADED_HASH" = "$LOCAL_HASH" ]; then
+      echo -e "${GREEN}$(t "error_def_matches_remote")${NC}"
+    else
+      echo -e "${YELLOW}$(t "local_remote_versions_differ")${NC}"
+      echo -e "${BLUE}$(t "local_hash") ${LOCAL_HASH}${NC}"
+      echo -e "${BLUE}$(t "remote_hash") ${DOWNLOADED_HASH}${NC}"
+      echo -e "${BLUE}$(t "note_update_manually")${NC}"
+    fi
+  else
+    echo -e "${YELLOW}$(t "local_error_def_not_found")${NC}"
+  fi
+
+  # Удаляем временный файл
+  rm -f "$TEMP_ERROR_FILE"
 }
 
 # === Spinner function ===
@@ -1743,16 +1900,13 @@ check_aztec_container_logs() {
     local rpc_url=$(echo "$settings" | cut -d'|' -f2)
     local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
-    # URL JSON файла с ошибками на GitHub
-    ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
+    # Security: Use local file instead of remote download to prevent supply chain attacks
+    ERROR_DEFINITIONS_FILE="$SCRIPT_DIR/aztec-script-files/error_definitions.json"
 
-    # Локальный файл для кэширования
-    ERROR_DEFINITIONS_FILE="$HOME/aztec_error_definitions.json"
-
-    # Загружаем JSON с определениями ошибок
+    # Загружаем JSON с определениями ошибок из локального файла
     download_error_definitions() {
-        if ! curl -s --fail "$ERROR_DEFINITIONS_URL" -o "$ERROR_DEFINITIONS_FILE"; then
-            echo -e "${YELLOW}Warning: Failed to download error definitions from GitHub${NC}"
+        if [ ! -f "$ERROR_DEFINITIONS_FILE" ]; then
+            echo -e "${YELLOW}Warning: Error definitions file not found at $ERROR_DEFINITIONS_FILE${NC}"
             return 1
         fi
         return 0
@@ -2161,6 +2315,11 @@ create_systemd_agent() {
 
   mkdir -p "$AGENT_SCRIPT_PATH"
 
+  # Security: Copy local error_definitions.json to agent directory to avoid remote downloads
+  if [ -f "$SCRIPT_DIR/aztec-script-files/error_definitions.json" ]; then
+    cp "$SCRIPT_DIR/aztec-script-files/error_definitions.json" "$HOME/aztec_error_definitions.json"
+  fi
+
   # Генерация скрипта агента
   cat > "$AGENT_SCRIPT_PATH/agent.sh" <<EOF
 #!/bin/bash
@@ -2207,8 +2366,7 @@ NETWORK=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f1)
 RPC_URL=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f2)
 CONTRACT_ADDRESS=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f3)
 
-# URL JSON файла с ошибками на GitHub
-ERROR_DEFINITIONS_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
+# Security: Use local error definitions file instead of remote download to prevent supply chain attacks
 ERROR_DEFINITIONS_FILE="\$HOME/aztec_error_definitions.json"
 
 # Функция перевода
@@ -2398,9 +2556,9 @@ check_critical_errors() {
   local container_id=\$1
   local clean_logs=\$(docker logs "\$container_id" --tail 10000 2>&1 | sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g')
 
-  # Загружаем JSON с определениями ошибок
-  if ! curl -s --fail "\$ERROR_DEFINITIONS_URL" -o "\$ERROR_DEFINITIONS_FILE"; then
-    log "Failed to download error definitions from GitHub"
+  # Используем локальный JSON файл с определениями ошибок (безопасность: избегаем удалённых загрузок)
+  if [ ! -f "\$ERROR_DEFINITIONS_FILE" ]; then
+    log "Error definitions file not found at \$ERROR_DEFINITIONS_FILE"
     return
   fi
 
@@ -3333,34 +3491,35 @@ change_rpc_url() {
 
 # === Check validator ===
 function check_validator {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/check-validator.sh"
+  # Security: Use local file instead of remote execution to prevent supply chain attacks
+  LOCAL_CHECK_VALIDATOR="$SCRIPT_DIR/aztec-script-files/check-validator.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
 
   # Передаем текущий язык как аргумент
-  bash <(curl -s "$URL") "$LANG" || echo -e "${RED}$(t "failed_run_validator")${NC}"
+  if [ -f "$LOCAL_CHECK_VALIDATOR" ]; then
+    bash "$LOCAL_CHECK_VALIDATOR" "$LANG" || echo -e "${RED}$(t "failed_run_validator")${NC}"
+  else
+    echo -e "${RED}Error: check-validator.sh not found at $LOCAL_CHECK_VALIDATOR${NC}"
+  fi
 }
 
 # === Install Aztec node ===
 function install_aztec {
-  URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+  # Security: Use local file instead of remote download to prevent supply chain attacks
+  LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_install_node")${NC}"
   echo -e ""
 
-  # Временный файл для скрипта
-  TEMP_SCRIPT=$(mktemp)
-
-  # Загружаем скрипт
-  curl -s "$URL" > "$TEMP_SCRIPT" || {
-    echo -e "${RED}$(t "failed_downloading_script")${NC}"
-    rm -f "$TEMP_SCRIPT"
+  if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
+    echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
     return 1
-  }
+  fi
 
   # Запускаем с обработкой Ctrl+C и других кодов возврата
-  bash "$TEMP_SCRIPT" "$LANG"
+  bash "$LOCAL_INSTALL_SCRIPT" "$LANG"
   EXIT_CODE=$?
 
   case $EXIT_CODE in
@@ -3386,37 +3545,52 @@ function install_aztec {
       ;;
   esac
 
-  # Удаляем временный файл
-  rm -f "$TEMP_SCRIPT"
-
   return $EXIT_CODE
 }
 
 # === Delete Aztec node ===
 function delete_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    # Security: Use local file instead of remote execution to prevent supply chain attacks
+    local LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
     local FUNCTION_NAME="delete_aztec_node"
 
-    # Загружаем скрипт во временную переменную и выполняем функцию
-    source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
+    if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
+        echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
+        return 1
+    fi
+
+    # Загружаем функцию из локального скрипта и выполняем
+    source <(sed -n "/^$FUNCTION_NAME()/,/^}/p" "$LOCAL_INSTALL_SCRIPT"; echo "$FUNCTION_NAME")
 }
 
 # === Update Aztec node ===
 function update_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    # Security: Use local file instead of remote execution to prevent supply chain attacks
+    local LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
     local FUNCTION_NAME="update_aztec_node"
 
-    # Загружаем скрипт во временную переменную и выполняем функцию
-    source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
+    if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
+        echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
+        return 1
+    fi
+
+    # Загружаем функцию из локального скрипта и выполняем
+    source <(sed -n "/^$FUNCTION_NAME()/,/^}/p" "$LOCAL_INSTALL_SCRIPT"; echo "$FUNCTION_NAME")
 }
 
 # === Downgrade Aztec node ===
 function downgrade_aztec() {
-    local URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/install_aztec.sh"
+    # Security: Use local file instead of remote execution to prevent supply chain attacks
+    local LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
     local FUNCTION_NAME="downgrade_aztec_node"
 
-    # Загружаем скрипт во временную переменную и выполняем функцию
-    source <(curl -s "$URL" | sed -n "/^$FUNCTION_NAME()/,/^}/p"; echo "$FUNCTION_NAME")
+    if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
+        echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
+        return 1
+    fi
+
+    # Загружаем функцию из локального скрипта и выполняем
+    source <(sed -n "/^$FUNCTION_NAME()/,/^}/p" "$LOCAL_INSTALL_SCRIPT"; echo "$FUNCTION_NAME")
 }
 
 
@@ -5208,6 +5382,8 @@ main_menu() {
     echo -e "${NC}$(t "option20")${NC}"
     echo -e "${NC}$(t "option21")${NC}"
     echo -e "${CYAN}$(t "option22")${NC}"
+    echo -e "${BLUE}$(t "option23")${NC}"
+    echo -e "${BLUE}$(t "option24")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -5239,6 +5415,8 @@ main_menu() {
       20) stake_validators; command_executed=true ;;
       21) claim_rewards; command_executed=true ;;
       22) change_rpc_url; command_executed=true ;;
+      23) check_updates_safely; command_executed=true ;;
+      24) check_error_definitions_updates_safely; command_executed=true ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

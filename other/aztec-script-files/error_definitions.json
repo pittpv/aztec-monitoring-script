@@ -1,0 +1,42 @@
+[
+  {
+    "pattern": "ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync",
+    "message": "World state trees are out of sync - node needs resync",
+    "solution": "1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/testnet/data/\n3. Run the container. Use option 14"
+  },
+  {
+    "pattern": "ERROR: Database corruption detected",
+    "message": "Database corruption error",
+    "solution": "1. Stop node\n2. Remove database files\n3. Restart node"
+  },
+  {
+    "pattern": "ERROR: sequencer Error building/enqueuing block: InsufficientFundsError",
+    "message": "Insufficient funds for gas * price + value",
+    "solution": "Fill funds in the publisher address"
+  },
+  {
+    "pattern": "ERROR: sequencer Error in running promise: Error: Failed to find an available publisher",
+    "message": "Failed to find an available publisher",
+    "solution": "Put private key for publisher in keystore.json"
+  },
+  {
+    "pattern": "ERROR: world-state:database Call SYNC_BLOCK failed: Error: Can't synch block: block state does not match world state",
+    "message": "Can't sync block: block state does not match world state",
+    "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data"
+  },
+  {
+    "pattern": "ERROR: world-state:database Call SYNC_BLOCK failed: Error: Can't sync block: block state does not match world state",
+    "message": "Can't sync block: block state does not match world state",
+    "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data"
+  },
+  {
+    "pattern": "WARN: node:blob-sink:client Failed to fetch blobs",
+    "message": "Failed to fetch blobs from BEACON. Sync wıll not complete!",
+    "solution": "1. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
+  },
+  {
+    "pattern": "ERROR: cli KeystoreError: Duplicate attester address found",
+    "message": "Cli Error in command execution - Duplicate attester address found",
+    "solution": "1. Run this command in terminal: mv /root/aztec/config/bls-filtered-pk.json /root/aztec/ \n2. Stop/Start node container"
+  }
+]
