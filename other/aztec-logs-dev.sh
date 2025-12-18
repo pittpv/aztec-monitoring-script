@@ -272,7 +272,7 @@ init_languages() {
   TRANSLATIONS["en,chatid_valid"]="✅ ChatID is valid and bot has access"
   TRANSLATIONS["en,chatid_invalid"]="❌ Invalid ChatID or bot has no access"
   TRANSLATIONS["en,agent_created"]="✅ Agent successfully created and configured!"
-  TRANSLATIONS["en,running_validator_script"]="Running Check Validator script from GitHub..."
+  TRANSLATIONS["en,running_validator_script"]="Running Check Validator script locally..."
   TRANSLATIONS["en,failed_run_validator"]="Failed to run Check Validator script."
   TRANSLATIONS["en,enter_aztec_port_prompt"]="Enter Aztec node port number"
   TRANSLATIONS["en,port_saved_successfully"]="✅ Port saved successfully"
@@ -527,6 +527,11 @@ init_languages() {
   TRANSLATIONS["en,enter_option"]="Select option:"
   TRANSLATIONS["en,enter_address"]="Enter the validator address:"
   TRANSLATIONS["en,validator_info"]="Validator information:"
+  TRANSLATIONS["en,address"]="Address"
+  TRANSLATIONS["en,stake"]="Stake"
+  TRANSLATIONS["en,withdrawer"]="Withdrawer"
+  TRANSLATIONS["en,rewards"]="Rewards"
+  TRANSLATIONS["en,status"]="Status"
   TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
   TRANSLATIONS["en,exiting"]="Exiting."
   TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 0."
@@ -876,7 +881,7 @@ init_languages() {
   TRANSLATIONS["ru,chatid_valid"]="✅ ChatID действителен и бот имеет доступ"
   TRANSLATIONS["ru,chatid_invalid"]="❌ Неверный ChatID или бот не имеет доступа"
   TRANSLATIONS["ru,agent_created"]="✅ Агент успешно создан и настроен!"
-  TRANSLATIONS["ru,running_validator_script"]="Запуск скрипта проверки валидатора из GitHub..."
+  TRANSLATIONS["ru,running_validator_script"]="Запуск скрипта проверки валидатора локально..."
   TRANSLATIONS["ru,failed_run_validator"]="Не удалось запустить скрипт проверки валидатора."
   TRANSLATIONS["ru,enter_aztec_port_prompt"]="Введите номер порта Aztec"
   TRANSLATIONS["ru,port_saved_successfully"]="✅ Порт успешно сохранен"
@@ -1146,6 +1151,11 @@ init_languages() {
   TRANSLATIONS["ru,enter_option"]="Выберите опцию:"
   TRANSLATIONS["ru,enter_address"]="Введите адрес валидатора:"
   TRANSLATIONS["ru,validator_info"]="Информация о валидаторе:"
+  TRANSLATIONS["ru,address"]="Адрес"
+  TRANSLATIONS["ru,stake"]="Стейк"
+  TRANSLATIONS["ru,withdrawer"]="Withdrawer адрес"
+  TRANSLATIONS["ru,rewards"]="Реварды"
+  TRANSLATIONS["ru,status"]="Статус"
   TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
   TRANSLATIONS["ru,exiting"]="Выход."
   TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 0."
@@ -1495,7 +1505,7 @@ init_languages() {
   TRANSLATIONS["tr,chatid_valid"]="✅ ChatID geçerli ve bota erişim var"
   TRANSLATIONS["tr,chatid_invalid"]="❌ Geçersiz ChatID veya bota erişim yok"
   TRANSLATIONS["tr,agent_created"]="✅ Aracı başarıyla oluşturuldu ve yapılandırıldı!"
-  TRANSLATIONS["tr,running_validator_script"]="GitHub'dan Check Validator betiği çalıştırılıyor..."
+  TRANSLATIONS["tr,running_validator_script"]="Check Validator betiği yerel olarak çalıştırılıyor..."
   TRANSLATIONS["tr,failed_run_validator"]="Check Validator betiği çalıştırılamadı."
   TRANSLATIONS["tr,enter_aztec_port_prompt"]="Aztec düğüm port numarasını girin"
   TRANSLATIONS["tr,port_saved_successfully"]="✅ Port başarıyla kaydedildi"
@@ -1769,6 +1779,11 @@ init_languages() {
   TRANSLATIONS["tr,enter_option"]="Seçenek seçin:"
   TRANSLATIONS["tr,enter_address"]="Doğrulayıcı adresini girin:"
   TRANSLATIONS["tr,validator_info"]="Doğrulayıcı bilgisi:"
+  TRANSLATIONS["tr,address"]="Adres"
+  TRANSLATIONS["tr,stake"]="Stake"
+  TRANSLATIONS["tr,withdrawer"]="Çekici"
+  TRANSLATIONS["tr,rewards"]="Ödüller"
+  TRANSLATIONS["tr,status"]="Durum"
   TRANSLATIONS["tr,validator_not_found"]="%s adresli doğrulayıcı bulunamadı."
   TRANSLATIONS["tr,exiting"]="Çıkılıyor."
   TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2, 3 veya 0 seçin."
@@ -5343,14 +5358,14 @@ check_validator_main() {
     # Глобальный массив для хранения адресов валидаторов, найденных в очереди
     declare -a QUEUE_FOUND_ADDRESSES=()
 
-    declare -A STATUS_MAP=(
+    declare -gA STATUS_MAP=(
         [0]=$(t "status_0")
         [1]=$(t "status_1")
         [2]=$(t "status_2")
         [3]=$(t "status_3")
     )
 
-    declare -A STATUS_COLOR=(
+    declare -gA STATUS_COLOR=(
         [0]="$GRAY"
         [1]="$GREEN"
         [2]="$YELLOW"
@@ -5447,15 +5462,18 @@ check_validator_main() {
         echo ""
         echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${NC}"
         echo "----------------------------------------"
+        local validator_num=1
         for line in "${RESULTS[@]}"; do
             IFS='|' read -r validator stake withdrawer rewards status status_text status_color <<< "$line"
-            echo -e "${BOLD}$(t "address"):${NC} $validator"
+            echo -e "${BOLD}Validator #$validator_num${NC}"
+            echo -e "  ${BOLD}$(t "address"):${NC} $validator"
             echo -e "  ${BOLD}$(t "stake"):${NC} $stake STK"
             echo -e "  ${BOLD}$(t "withdrawer"):${NC} $withdrawer"
             echo -e "  ${BOLD}$(t "rewards"):${NC} $rewards STK"
-            echo -e "  ${BOLD}$(t "status"):${NC} ${status_color}$status ($status_text)${NC}"
+            echo -e "  ${BOLD}$(t "status"):${NC} ${status_color}$status - $status_text${NC}"
             echo -e ""
             echo "----------------------------------------"
+            validator_num=$((validator_num + 1))
         done
     fi
 
@@ -7836,8 +7854,8 @@ main_menu() {
     echo -e "${NC}$(t "option20")${NC}"
     echo -e "${NC}$(t "option21")${NC}"
     echo -e "${CYAN}$(t "option22")${NC}"
-    echo -e "${BLUE}$(t "option23")${NC}"
-    echo -e "${BLUE}$(t "option24")${NC}"
+    echo -e "${CYAN}$(t "option23")${NC}"
+    echo -e "${CYAN}$(t "option24")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
