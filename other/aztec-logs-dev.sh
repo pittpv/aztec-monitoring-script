@@ -20,18 +20,13 @@ function show_logo() {
     local y=$'\033[33m' # Yellow
     local r=$'\033[0m'  # Reset
     
-    # Function to highlight "█" blocks
-    local print_colored() {
-      echo "${b}$(echo "$1" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    }
-    
     echo
-    print_colored "  █████╗ ███████╗████████╗███████╗ ██████╗"
-    print_colored " ██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝"
-    print_colored " ███████║  ███╔╝    ██║   █████╗  ██║"
-    print_colored " ██╔══██║ ███╔╝     ██║   ██╔══╝  ██║"
-    print_colored " ██║  ██║███████╗   ██║   ███████╗╚██████╗"
-    print_colored " ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝"
+    echo "${b}$(echo "  █████╗ ███████╗████████╗███████╗ ██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ███████║  ███╔╝    ██║   █████╗  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ██╔══██║ ███╔╝     ██║   ██╔══╝  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ██║  ██║███████╗   ██║   ███████╗╚██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
     echo
     
     # Information in frame
