@@ -14,54 +14,6 @@ SCRIPT_VERSION="2.5.3"
 # Determine script directory for local file access (security: avoid remote code execution)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-function show_logo() {
-    # Inline logo function (merged from logo.sh)
-    local b=$'\033[34m' # Blue
-    local y=$'\033[33m' # Yellow
-    local r=$'\033[0m'  # Reset
-    
-    echo
-    echo "${b}$(echo "  █████╗ ███████╗████████╗███████╗ ██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ███████║  ███╔╝    ██║   █████╗  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ██╔══██║ ███╔╝     ██║   ██╔══╝  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ██║  ██║███████╗   ██║   ███████╗╚██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo
-    
-    # Information in frame
-    local info_lines=(
-      " Made by Pittpv"
-      " Feedback & Support in Tg: https://t.me/+DLsyG6ol3SFjM2Vk"
-      " Donate"
-      "  EVM: 0x4FD5eC033BA33507E2dbFE57ca3ce0A6D70b48Bf"
-      "  SOL: C9TV7Q4N77LrKJx4njpdttxmgpJ9HGFmQAn7GyDebH4R"
-    )
-    
-    # Calculate maximum line length (accounting for Unicode, without colors)
-    local max_len=0
-    for line in "${info_lines[@]}"; do
-      local clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
-      local line_length=$(echo -n "$clean_line" | wc -m)
-      (( line_length > max_len )) && max_len=$line_length
-    done
-    
-    # Frames
-    local top_border="╔$(printf '═%.0s' $(seq 1 $((max_len + 2))))╗"
-    local bottom_border="╚$(printf '═%.0s' $(seq 1 $((max_len + 2))))╝"
-    
-    # Print frame
-    echo -e "${b}${top_border}${r}"
-    for line in "${info_lines[@]}"; do
-      local clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
-      local line_length=$(echo -n "$clean_line" | wc -m)
-      local padding=$((max_len - line_length))
-      printf "${b}║ ${y}%s%*s ${b}║\n" "$line" "$padding" ""
-    done
-    echo -e "${b}${bottom_border}${r}"
-    echo
-}
-
 # === Language settings ===
 LANG=""
 declare -A TRANSLATIONS
@@ -115,7 +67,7 @@ init_languages() {
   TRANSLATIONS["en,option23"]="23. Check for script updates (safe, with hash verification)"
   TRANSLATIONS["en,option24"]="24. Check for error definitions updates (safe, with hash verification)"
   TRANSLATIONS["en,option0"]="0. Exit"
-  
+
   # Update check translations
   TRANSLATIONS["en,local_version_shows"]="Local version file shows version:"
   TRANSLATIONS["en,note_check_updates_safely"]="Note: To check for remote updates safely, use the optional update check function"
@@ -565,7 +517,7 @@ init_languages() {
   TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
   TRANSLATIONS["en,removing_watchtower_data"]="Removing Watchtower data..."
   TRANSLATIONS["en,enter_yn"]="Please enter Y or N: "
-  
+
   # Translations from check-validator.sh
   TRANSLATIONS["en,fetching_validators"]="Fetching validator list from contract"
   TRANSLATIONS["en,found_validators"]="Found validators:"
@@ -717,7 +669,7 @@ init_languages() {
   TRANSLATIONS["ru,option23"]="23. Проверить обновления скрипта (безопасно, с проверкой хеша)"
   TRANSLATIONS["ru,option24"]="24. Проверить обновления определений ошибок (безопасно, с проверкой хеша)"
   TRANSLATIONS["ru,option0"]="0. Выход"
-  
+
   # Переводы для проверки обновлений
   TRANSLATIONS["ru,local_version_shows"]="Локальный файл версий показывает версию:"
   TRANSLATIONS["ru,note_check_updates_safely"]="Примечание: Для безопасной проверки удалённых обновлений используйте опциональную функцию проверки обновлений"
@@ -1184,7 +1136,7 @@ init_languages() {
   TRANSLATIONS["ru,selected_network"]="Выбрана сеть:"
   TRANSLATIONS["ru,mainnet"]="mainnet"
   TRANSLATIONS["ru,testnet"]="testnet"
-  
+
   # Translations from check-validator.sh (Russian)
   TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
   TRANSLATIONS["ru,found_validators"]="Найдено валидаторов:"
@@ -1336,7 +1288,7 @@ init_languages() {
   TRANSLATIONS["tr,option23"]="23. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
   TRANSLATIONS["tr,option24"]="24. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
   TRANSLATIONS["tr,option0"]="0. Çıkış"
-  
+
   # Güncelleme kontrolü çevirileri
   TRANSLATIONS["tr,local_version_shows"]="Yerel sürüm dosyası sürümü gösteriyor:"
   TRANSLATIONS["tr,note_check_updates_safely"]="Not: Uzaktan güncellemeleri güvenli bir şekilde kontrol etmek için isteğe bağlı güncelleme kontrolü işlevini kullanın"
@@ -1807,7 +1759,7 @@ init_languages() {
   TRANSLATIONS["tr,stopping_watchtower"]="Watchtower durduruluyor..."
   TRANSLATIONS["tr,removing_watchtower_data"]="Watchtower verileri kaldırılıyor..."
   TRANSLATIONS["tr,enter_yn"]="Lütfen Y veya N girin: "
-  
+
   # Translations from check-validator.sh (Turkish)
   TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
   TRANSLATIONS["tr,found_validators"]="Bulunan doğrulayıcılar:"
@@ -1940,6 +1892,54 @@ FUNCTION_SIG="getPendingBlockNumber()"
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
+
+function show_logo() {
+    # Inline logo function (merged from logo.sh)
+    local b=$'\033[34m' # Blue
+    local y=$'\033[33m' # Yellow
+    local r=$'\033[0m'  # Reset
+
+    echo
+    echo "${b}$(echo "  █████╗ ███████╗████████╗███████╗ ██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ███████║  ███╔╝    ██║   █████╗  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ██╔══██║ ███╔╝     ██║   ██╔══╝  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ██║  ██║███████╗   ██║   ███████╗╚██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo "${b}$(echo " ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    echo
+
+    # Information in frame
+    local info_lines=(
+      " Made by Pittpv"
+      " Feedback & Support in Tg: https://t.me/+DLsyG6ol3SFjM2Vk"
+      " Donate"
+      "  EVM: 0x4FD5eC033BA33507E2dbFE57ca3ce0A6D70b48Bf"
+      "  SOL: C9TV7Q4N77LrKJx4njpdttxmgpJ9HGFmQAn7GyDebH4R"
+    )
+
+    # Calculate maximum line length (accounting for Unicode, without colors)
+    local max_len=0
+    for line in "${info_lines[@]}"; do
+      local clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
+      local line_length=$(echo -n "$clean_line" | wc -m)
+      (( line_length > max_len )) && max_len=$line_length
+    done
+
+    # Frames
+    local top_border="╔$(printf '═%.0s' $(seq 1 $((max_len + 2))))╗"
+    local bottom_border="╚$(printf '═%.0s' $(seq 1 $((max_len + 2))))╝"
+
+    # Print frame
+    echo -e "${b}${top_border}${r}"
+    for line in "${info_lines[@]}"; do
+      local clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
+      local line_length=$(echo -n "$clean_line" | wc -m)
+      local padding=$((max_len - line_length))
+      printf "${b}║ ${y}%s%*s ${b}║\n" "$line" "$padding" ""
+    done
+    echo -e "${b}${bottom_border}${r}"
+    echo
+}
 
 # === Helper function to get network and RPC settings ===
 get_network_settings() {
@@ -2226,7 +2226,7 @@ check_updates_safely() {
 
   REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/version_control.json"
   TEMP_VC_FILE=$(mktemp)
-  
+
   echo -e "\n${CYAN}$(t "downloading_version_control")${NC}"
   if ! curl -fsSL "$REMOTE_VC_URL" -o "$TEMP_VC_FILE"; then
     echo -e "${RED}$(t "failed_download_version_control")${NC}"
@@ -2248,13 +2248,13 @@ check_updates_safely() {
   # Парсим и показываем информацию об обновлениях
   if remote_data=$(cat "$TEMP_VC_FILE"); then
     REMOTE_LATEST_VERSION=$(echo "$remote_data" | jq -r '.[].VERSION' | sort -V | tail -n1)
-    
+
     echo -e "\n${CYAN}$(t "current_installed_version") ${INSTALLED_VERSION}${NC}"
     echo -e "${CYAN}$(t "latest_version_repo") ${REMOTE_LATEST_VERSION}${NC}"
-    
+
     if [ -n "$REMOTE_LATEST_VERSION" ] && [ "$REMOTE_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
       echo -e "\n${YELLOW}$(t "new_version_available") ${REMOTE_LATEST_VERSION}${NC}"
-      
+
       # Функция для сравнения версий
       version_gt() {
         if [ "$1" = "$2" ]; then
@@ -2289,7 +2289,7 @@ check_updates_safely() {
           done
         fi
       done
-      
+
       echo -e "\n${BLUE}$(t "note_update_manually")${NC}"
     elif [ -n "$REMOTE_LATEST_VERSION" ]; then
       echo -e "${GREEN}$(t "version_up_to_date")${NC}"
@@ -2313,7 +2313,7 @@ check_error_definitions_updates_safely() {
 
   REMOTE_ERROR_DEF_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
   TEMP_ERROR_FILE=$(mktemp)
-  
+
   echo -e "\n${CYAN}$(t "downloading_error_definitions")${NC}"
   if ! curl -fsSL "$REMOTE_ERROR_DEF_URL" -o "$TEMP_ERROR_FILE"; then
     echo -e "${RED}$(t "failed_download_error_definitions")${NC}"
@@ -2340,7 +2340,7 @@ check_error_definitions_updates_safely() {
     elif command -v shasum >/dev/null 2>&1; then
       LOCAL_HASH=$(shasum -a 256 "$LOCAL_ERROR_FILE" | cut -d' ' -f1)
     fi
-    
+
     if [ "$DOWNLOADED_HASH" = "$LOCAL_HASH" ]; then
       echo -e "${GREEN}$(t "error_def_matches_remote")${NC}"
     else
@@ -4452,7 +4452,7 @@ check_validator_queue(){
     local results=()
     local found_count=0
     local not_found_count=0
-    
+
     # Выбор адресов в зависимости от сети
     local QUEUE_URL
     if [[ "$network" == "mainnet" ]]; then
@@ -4460,7 +4460,7 @@ check_validator_queue(){
     else
         QUEUE_URL="https://${network}.dashtec.xyz/api/sequencers/queue"
     fi
-    
+
     echo -e "${YELLOW}$(t "fetching_queue")${NC}"
     echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${NC}"
     local temp_file
@@ -5001,7 +5001,7 @@ get_validators_via_gse() {
     local network="$1"
     local ROLLUP_ADDRESS="$2"
     local GSE_ADDRESS="$3"
-    
+
     echo -e "${YELLOW}$(t "getting_validator_count")${NC}"
 
     # Используем правильный RPC URL в зависимости от сети
@@ -5167,7 +5167,7 @@ get_validators_via_gse() {
 fast_load_validators() {
     local network="$1"
     local ROLLUP_ADDRESS="$2"
-    
+
     echo -e "\n${YELLOW}$(t "loading_validators")${NC}"
 
     # Используем правильный RPC URL в зависимости от сети
@@ -5309,7 +5309,7 @@ remove_monitor_scripts() {
 # Основная функция для запуска check-validator (merged from check-validator.sh main code)
 check_validator_main() {
     local network=$(get_network_for_validator)
-    
+
     # Выбор адресов в зависимости от сети
     local ROLLUP_ADDRESS
     local GSE_ADDRESS
@@ -5323,67 +5323,67 @@ check_validator_main() {
         GSE_ADDRESS="$GSE_ADDRESS_TESTNET"
         QUEUE_URL="https://${network}.dashtec.xyz/api/sequencers/queue"
     fi
-    
+
     local MONITOR_DIR="$HOME/aztec-monitor-agent"
-    
+
     # Загружаем конфигурацию RPC
     if ! load_rpc_config; then
         return 1
     fi
-    
+
     # Глобальная переменная для отслеживания использования резервного RPC
     USING_BACKUP_RPC=false
-    
+
     # Глобальная переменная для хранения количества найденных в очереди валидаторов
     QUEUE_FOUND_COUNT=0
-    
+
     # Глобальный массив для хранения адресов валидаторов, найденных в очереди
     declare -a QUEUE_FOUND_ADDRESSES=()
-    
+
     declare -A STATUS_MAP=(
         [0]=$(t "status_0")
         [1]=$(t "status_1")
         [2]=$(t "status_2")
         [3]=$(t "status_3")
     )
-    
+
     declare -A STATUS_COLOR=(
         [0]="$GRAY"
         [1]="$GREEN"
         [2]="$YELLOW"
         [3]="$RED"
     )
-    
+
     echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${NC}..."
-    
+
     # Используем функцию для получения списка валидаторов через GSE контракт
     if ! get_validators_via_gse "$network" "$ROLLUP_ADDRESS" "$GSE_ADDRESS"; then
         echo -e "${RED}Error: Failed to fetch validators using GSE contract method${NC}"
         return 1
     fi
-    
+
     echo "----------------------------------------"
-    
+
     # Запрашиваем адреса валидаторов для проверки
     echo ""
     echo -e "${BOLD}Enter validator addresses to check (comma separated):${NC}"
     read -p "> " input_addresses
-    
+
     # Парсим введенные адреса
     IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
-    
+
     # Очищаем адреса от пробелов и проверяем их наличие в общем списке
     declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
     declare -a QUEUE_VALIDATORS=()
     declare -a NOT_FOUND_ADDRESSES=()
     found_count=0
     not_found_count=0
-    
+
     # Сначала проверяем все адреса в активных валидаторах
     for address in "${INPUT_ADDRESSES[@]}"; do
         # Очищаем адрес от пробелов
         clean_address=$(echo "$address" | tr -d ' ')
-        
+
         # Проверяем, есть ли адрес в общем списке
         found=false
         for validator in "${VALIDATOR_ADDRESSES[@]}"; do
@@ -5395,51 +5395,51 @@ check_validator_main() {
                 break
             fi
         done
-        
+
         if ! $found; then
             NOT_FOUND_ADDRESSES+=("$clean_address")
         fi
     done
-    
+
     # Теперь проверяем не найденные адреса в очереди (пакетно)
     found_in_queue_count=0
     if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
         echo -e "\n${YELLOW}$(t "validator_not_in_set")${NC}"
-        
+
         # Используем новую функцию для пакетной проверки в очереди
         check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"
         # Функция устанавливает глобальную переменную QUEUE_FOUND_COUNT
         found_in_queue_count=$QUEUE_FOUND_COUNT
-        
+
         not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
     fi
-    
+
     # Показываем общую сводку
     echo -e "\n${CYAN}=== Search Summary ===${NC}"
     echo -e "Found in active validators: ${GREEN}$found_count${NC}"
     echo -e "Found in queue: ${YELLOW}$found_in_queue_count${NC}"
     echo -e "Not found anywhere: ${RED}$not_found_count${NC}"
-    
+
     # Обрабатываем активных валидаторов
     if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
         echo -e "\n${GREEN}=== Active Validators Details ===${NC}"
-        
+
         # Запускаем быструю загрузку для активных валидаторов
         declare -a RESULTS
-        
+
         # Временно заменяем массив для обработки только выбранных валидаторов
         ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
         ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
         VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
         VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
-        
+
         # Запускаем быструю загрузку
         fast_load_validators "$network" "$ROLLUP_ADDRESS"
-        
+
         # Восстанавливаем оригинальный массив
         VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
         VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
-        
+
         # Показываем результат
         echo ""
         echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${NC}"
@@ -5455,15 +5455,15 @@ check_validator_main() {
             echo "----------------------------------------"
         done
     fi
-    
+
     # Обрабатываем валидаторов из очереди (только если они не были уже показаны)
     if [[ ${#QUEUE_FOUND_ADDRESSES[@]} -gt 0 ]]; then
         echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${NC}"
-        
+
         # Предлагаем добавить в мониторинг
         echo -e "${BOLD}Would you like to add these validators to queue monitoring?${NC}"
         read -p "Enter 'yes' to add all, or 'no' to skip: " add_to_monitor
-        
+
         if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
             # Создаем мониторы для всех валидаторов из очереди
             for validator in "${QUEUE_FOUND_ADDRESSES[@]}"; do
@@ -5475,7 +5475,7 @@ check_validator_main() {
             echo -e "${YELLOW}Skipping queue monitoring setup.${NC}"
         fi
     fi
-    
+
     if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_FOUND_ADDRESSES[@]} -eq 0 ]]; then
         echo -e "${RED}No valid addresses to check.${NC}"
     fi
@@ -5486,14 +5486,14 @@ function check_validator {
   echo -e ""
   echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
-  
+
   check_validator_main || echo -e "${RED}$(t "failed_run_validator")${NC}"
 }
 
 # === Main installation function (merged from install_aztec.sh) ===
 install_aztec_node_main() {
     set -e
-    
+
     # Вызываем проверку портов
     check_and_set_ports || return 2
 
@@ -5989,7 +5989,7 @@ EOF
     echo -e ""
     cd "$HOME/aztec"
     docker compose logs -fn 200
-    
+
     set +e
 }
 
@@ -7871,7 +7871,7 @@ main_menu() {
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
-    
+
     # Wait for Enter before showing menu again (only for valid commands)
     if [ "$command_executed" = true ]; then
       echo ""
