@@ -2262,7 +2262,7 @@ check_dependencies() {
   # === Используем локальный version_control.json для определения последней версии ===
   # Security: Use local file instead of remote download to prevent supply chain attacks
   # По умолчанию показываем только локальную версию. Для проверки обновлений используйте опциональную функцию check_updates_safely()
-  LOCAL_VC_FILE="$SCRIPT_DIR/aztec-script-files/version_control.json"
+  LOCAL_VC_FILE="$SCRIPT_DIR/version_control.json"
   # Читаем локальный JSON, отбираем массив .[].VERSION, сортируем, берём последний
   if [ -f "$LOCAL_VC_FILE" ] && local_data=$(cat "$LOCAL_VC_FILE"); then
     LOCAL_LATEST_VERSION=$(echo "$local_data" | jq -r '.[].VERSION' | sort -V | tail -n1)
@@ -2403,7 +2403,7 @@ check_error_definitions_updates_safely() {
   fi
 
   # Сравниваем с локальным файлом
-  LOCAL_ERROR_FILE="$SCRIPT_DIR/aztec-script-files/error_definitions.json"
+  LOCAL_ERROR_FILE="$SCRIPT_DIR/error_definitions.json"
   if [ -f "$LOCAL_ERROR_FILE" ]; then
     if command -v sha256sum >/dev/null 2>&1; then
       LOCAL_HASH=$(sha256sum "$LOCAL_ERROR_FILE" | cut -d' ' -f1)
@@ -2455,7 +2455,7 @@ check_aztec_container_logs() {
     local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
     # Security: Use local file instead of remote download to prevent supply chain attacks
-    ERROR_DEFINITIONS_FILE="$SCRIPT_DIR/aztec-script-files/error_definitions.json"
+    ERROR_DEFINITIONS_FILE="$SCRIPT_DIR/error_definitions.json"
 
     # Загружаем JSON с определениями ошибок из локального файла
     download_error_definitions() {
@@ -2870,8 +2870,8 @@ create_systemd_agent() {
   mkdir -p "$AGENT_SCRIPT_PATH"
 
   # Security: Copy local error_definitions.json to agent directory to avoid remote downloads
-  if [ -f "$SCRIPT_DIR/aztec-script-files/error_definitions.json" ]; then
-    cp "$SCRIPT_DIR/aztec-script-files/error_definitions.json" "$HOME/aztec_error_definitions.json"
+  if [ -f "$SCRIPT_DIR/error_definitions.json" ]; then
+    cp "$SCRIPT_DIR/error_definitions.json" "$HOME/aztec_error_definitions.json"
   fi
 
   # Генерация скрипта агента
