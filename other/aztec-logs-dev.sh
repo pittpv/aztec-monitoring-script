@@ -528,6 +528,11 @@ init_languages() {
   TRANSLATIONS["en,checking_validators"]="Checking validators..."
   TRANSLATIONS["en,check_completed"]="Check completed."
   TRANSLATIONS["en,select_action"]="Select an action:"
+  TRANSLATIONS["en,validator_submenu_option1"]="1. Check another set of validators"
+  TRANSLATIONS["en,validator_submenu_option2"]="2. Set up queue position notification for validator"
+  TRANSLATIONS["en,validator_submenu_option3"]="3. Check validator in queue"
+  TRANSLATIONS["en,validator_submenu_option4"]="4. List active monitors"
+  TRANSLATIONS["en,validator_submenu_option5"]="5. Remove existing monitoring"
   TRANSLATIONS["en,enter_option"]="Select option:"
   TRANSLATIONS["en,enter_address"]="Enter the validator address:"
   TRANSLATIONS["en,validator_info"]="Validator information:"
@@ -567,6 +572,14 @@ init_languages() {
   TRANSLATIONS["en,enter_multiple_addresses"]="Enter validator addresses to monitor (comma separated):"
   TRANSLATIONS["en,invalid_address_format"]="Invalid address format: %s"
   TRANSLATIONS["en,processing_address"]="Processing address: %s"
+  TRANSLATIONS["en,add_validators_to_queue_prompt"]="Would you like to add these validators to queue monitoring?"
+  TRANSLATIONS["en,enter_yes_to_add"]="Enter 'yes' to add all, or 'no' to skip:"
+  TRANSLATIONS["en,queue_validators_added"]="All queue validators added to monitoring."
+  TRANSLATIONS["en,skipping_queue_setup"]="Skipping queue monitoring setup."
+  TRANSLATIONS["en,queue_validators_available"]="Queue Validators Available for Monitoring"
+  TRANSLATIONS["en,initial_notification_note"]="Note: Initial notification sent. Script includes safety timeouts."
+  TRANSLATIONS["en,running_initial_test"]="Running initial test..."
+  TRANSLATIONS["en,no_valid_addresses"]="No valid addresses to check."
   TRANSLATIONS["en,fetching_page"]="Fetching page %d of %d..."
   TRANSLATIONS["en,loading_validators"]="Loading validator data..."
   TRANSLATIONS["en,validators_loaded"]="Validator data loaded successfully"
@@ -1155,6 +1168,11 @@ init_languages() {
   TRANSLATIONS["ru,checking_validators"]="Проверка валидаторов..."
   TRANSLATIONS["ru,check_completed"]="Проверка завершена."
   TRANSLATIONS["ru,select_action"]="Выберите действие:"
+  TRANSLATIONS["ru,validator_submenu_option1"]="1. Проверить другой набор валидаторов"
+  TRANSLATIONS["ru,validator_submenu_option2"]="2. Настроить уведомление о позиции в очереди для валидатора"
+  TRANSLATIONS["ru,validator_submenu_option3"]="3. Проверить валидатора в очереди"
+  TRANSLATIONS["ru,validator_submenu_option4"]="4. Список активных мониторов"
+  TRANSLATIONS["ru,validator_submenu_option5"]="5. Удалить существующий мониторинг"
   TRANSLATIONS["ru,enter_option"]="Выберите опцию:"
   TRANSLATIONS["ru,enter_address"]="Введите адрес валидатора:"
   TRANSLATIONS["ru,validator_info"]="Информация о валидаторе:"
@@ -1194,6 +1212,14 @@ init_languages() {
   TRANSLATIONS["ru,enter_multiple_addresses"]="Введите адреса валидаторов для мониторинга (через запятую):"
   TRANSLATIONS["ru,invalid_address_format"]="Неверный формат адреса: %s"
   TRANSLATIONS["ru,processing_address"]="Обработка адреса: %s"
+  TRANSLATIONS["ru,add_validators_to_queue_prompt"]="Хотите добавить этих валидаторов в мониторинг очереди?"
+  TRANSLATIONS["ru,enter_yes_to_add"]="Введите 'yes' для добавления всех, или 'no' для пропуска:"
+  TRANSLATIONS["ru,queue_validators_added"]="Все валидаторы из очереди добавлены в мониторинг."
+  TRANSLATIONS["ru,skipping_queue_setup"]="Пропуск настройки мониторинга очереди."
+  TRANSLATIONS["ru,queue_validators_available"]="Валидаторы из очереди доступны для мониторинга"
+  TRANSLATIONS["ru,initial_notification_note"]="Примечание: Начальное уведомление отправлено. Скрипт включает защитные таймауты."
+  TRANSLATIONS["ru,running_initial_test"]="Запуск начального теста..."
+  TRANSLATIONS["ru,no_valid_addresses"]="Нет действительных адресов для проверки."
   TRANSLATIONS["ru,fetching_page"]="Получение страницы %d из %d..."
   TRANSLATIONS["ru,loading_validators"]="Загрузка данных валидаторов..."
   TRANSLATIONS["ru,validators_loaded"]="Данные валидаторов успешно загружены"
@@ -1786,6 +1812,11 @@ init_languages() {
   TRANSLATIONS["tr,checking_validators"]="Doğrulayıcılar kontrol ediliyor..."
   TRANSLATIONS["tr,check_completed"]="Kontrol tamamlandı."
   TRANSLATIONS["tr,select_action"]="Bir işlem seçin:"
+  TRANSLATIONS["tr,validator_submenu_option1"]="1. Başka bir doğrulayıcı setini kontrol et"
+  TRANSLATIONS["tr,validator_submenu_option2"]="2. Doğrulayıcı için kuyruk pozisyon bildirimi ayarla"
+  TRANSLATIONS["tr,validator_submenu_option3"]="3. Kuyruktaki doğrulayıcıyı kontrol et"
+  TRANSLATIONS["tr,validator_submenu_option4"]="4. Aktif izleyicileri listele"
+  TRANSLATIONS["tr,validator_submenu_option5"]="5. Mevcut izlemeyi kaldır"
   TRANSLATIONS["tr,enter_option"]="Seçenek seçin:"
   TRANSLATIONS["tr,enter_address"]="Doğrulayıcı adresini girin:"
   TRANSLATIONS["tr,validator_info"]="Doğrulayıcı bilgisi:"
@@ -1825,6 +1856,14 @@ init_languages() {
   TRANSLATIONS["tr,enter_multiple_addresses"]="İzlemek için doğrulayıcı adreslerini girin (virgülle ayrılmış):"
   TRANSLATIONS["tr,invalid_address_format"]="Geçersiz adres formatı: %s"
   TRANSLATIONS["tr,processing_address"]="Adres işleniyor: %s"
+  TRANSLATIONS["tr,add_validators_to_queue_prompt"]="Bu doğrulayıcıları kuyruk izlemeye eklemek ister misiniz?"
+  TRANSLATIONS["tr,enter_yes_to_add"]="Tümünü eklemek için 'yes' veya atlamak için 'no' girin:"
+  TRANSLATIONS["tr,queue_validators_added"]="Tüm kuyruk doğrulayıcıları izlemeye eklendi."
+  TRANSLATIONS["tr,skipping_queue_setup"]="Kuyruk izleme kurulumu atlanıyor."
+  TRANSLATIONS["tr,queue_validators_available"]="İzleme için Kuyruk Doğrulayıcıları Mevcut"
+  TRANSLATIONS["tr,initial_notification_note"]="Not: İlk bildirim gönderildi. Betik güvenlik zaman aşımlarını içerir."
+  TRANSLATIONS["tr,running_initial_test"]="İlk test çalıştırılıyor..."
+  TRANSLATIONS["tr,no_valid_addresses"]="Kontrol edilecek geçerli adres yok."
   TRANSLATIONS["tr,fetching_page"]="Sayfa %d/%d alınıyor..."
   TRANSLATIONS["tr,loading_validators"]="Doğrulayıcı verileri yükleniyor..."
   TRANSLATIONS["tr,validators_loaded"]="Doğrulayıcı verileri başarıyla yüklendi"
@@ -5005,8 +5044,8 @@ EOF
         (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
     fi
     echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${NC}"
-    echo -e "${YELLOW}Note: Initial notification sent. Script includes safety timeouts.${NC}"
-    echo -e "${CYAN}Running initial test...${NC}"
+    echo -e "${YELLOW}$(t "initial_notification_note")${NC}"
+    echo -e "${CYAN}$(t "running_initial_test")${NC}"
     timeout 60 "$MONITOR_DIR/$script_name" >/dev/null 2>&1 || true
 }
 
@@ -5294,7 +5333,7 @@ fast_load_validators() {
     echo -e "${GREEN}Successfully loaded: ${#RESULTS[@]}/$VALIDATOR_COUNT validators${NC}"
 }
 
-# Функция для удаления мониторинга
+# Функция для удаления мониторинга очереди валидаторов
 remove_monitor_scripts() {
     local MONITOR_DIR="$1"
     local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
@@ -5515,11 +5554,11 @@ check_validator_main() {
 
     # Обрабатываем валидаторов из очереди (только если они не были уже показаны)
     if [[ ${#QUEUE_FOUND_ADDRESSES[@]} -gt 0 ]]; then
-        echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${NC}"
+        echo -e "\n${YELLOW}=== $(t "queue_validators_available") ===${NC}"
 
         # Предлагаем добавить в мониторинг
-        echo -e "${BOLD}Would you like to add these validators to queue monitoring?${NC}"
-        read -p "Enter 'yes' to add all, or 'no' to skip: " add_to_monitor
+        echo -e "${BOLD}$(t "add_validators_to_queue_prompt")${NC}"
+        read -p "$(t "enter_yes_to_add") " add_to_monitor
 
         if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
             # Создаем мониторы для всех валидаторов из очереди
@@ -5527,15 +5566,107 @@ check_validator_main() {
                 echo -e "\n${YELLOW}$(t "processing_address" "$validator")${NC}"
                 create_monitor_script "$validator" "$network" "$MONITOR_DIR" "$QUEUE_URL"
             done
-            echo -e "${GREEN}All queue validators added to monitoring.${NC}"
+            echo -e "${GREEN}$(t "queue_validators_added")${NC}"
         else
-            echo -e "${YELLOW}Skipping queue monitoring setup.${NC}"
+            echo -e "${YELLOW}$(t "skipping_queue_setup")${NC}"
         fi
     fi
 
     if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_FOUND_ADDRESSES[@]} -eq 0 ]]; then
-        echo -e "${RED}No valid addresses to check.${NC}"
+        echo -e "${RED}$(t "no_valid_addresses")${NC}"
     fi
+}
+
+# === Validator submenu ===
+validator_submenu() {
+    local MONITOR_DIR="$HOME/aztec-monitor-agent"
+    local network=$(get_network_for_validator)
+    
+    # Выбор адресов в зависимости от сети
+    local QUEUE_URL
+    if [[ "$network" == "mainnet" ]]; then
+        QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
+    else
+        QUEUE_URL="https://${network}.dashtec.xyz/api/sequencers/queue"
+    fi
+
+    while true; do
+        echo ""
+        echo -e "${BOLD}$(t "select_action")${NC}"
+        echo -e "${CYAN}$(t "validator_submenu_option1")${NC}"
+        echo -e "${CYAN}$(t "validator_submenu_option2")${NC}"
+        echo -e "${CYAN}$(t "validator_submenu_option3")${NC}"
+        echo -e "${CYAN}$(t "validator_submenu_option4")${NC}"
+        echo -e "${CYAN}$(t "validator_submenu_option5")${NC}"
+        echo -e "${RED}$(t "option0")${NC}"
+        read -p "$(t "enter_option") " choice
+
+        case $choice in
+            1)
+                # Check another set of validators
+                check_validator_main
+                echo ""
+                echo -e "${YELLOW}Press Enter to continue...${NC}"
+                read -r
+                ;;
+            2)
+                # Set up queue position notification for validator
+                echo -e "\n${BOLD}$(t "queue_notification_title")${NC}"
+                list_monitor_scripts "$MONITOR_DIR"
+                echo ""
+                read -p "$(t "enter_multiple_addresses") " validator_addresses
+
+                # Создаем скрипты для всех указанных адресов
+                IFS=',' read -ra ADDRESSES_TO_MONITOR <<< "$validator_addresses"
+                for address in "${ADDRESSES_TO_MONITOR[@]}"; do
+                    clean_address=$(echo "$address" | tr -d ' ')
+                    echo -e "${YELLOW}$(t "processing_address" "$clean_address")${NC}"
+
+                    # Проверяем, есть ли валидатор хотя бы в очереди
+                    if check_validator_queue "$clean_address"; then
+                        create_monitor_script "$clean_address" "$network" "$MONITOR_DIR" "$QUEUE_URL"
+                    else
+                        echo -e "${RED}$(t "validator_not_in_queue")${NC}"
+                    fi
+                done
+                echo ""
+                echo -e "${YELLOW}Press Enter to continue...${NC}"
+                read -r
+                ;;
+            3)
+                # Check validator in queue
+                read -p "$(t "enter_address") " validator_address
+                check_validator_queue "$validator_address"
+                echo ""
+                echo -e "${YELLOW}Press Enter to continue...${NC}"
+                read -r
+                ;;
+            4)
+                # List active monitors
+                list_monitor_scripts "$MONITOR_DIR"
+                echo ""
+                echo -e "${YELLOW}Press Enter to continue...${NC}"
+                read -r
+                ;;
+            5)
+                # Remove existing monitoring
+                remove_monitor_scripts "$MONITOR_DIR"
+                echo ""
+                echo -e "${YELLOW}Press Enter to continue...${NC}"
+                read -r
+                ;;
+            0)
+                echo -e "\n${CYAN}$(t "exiting")${NC}"
+                break
+                ;;
+            *)
+                echo -e "\n${RED}$(t "invalid_input")${NC}"
+                echo ""
+                echo -e "${YELLOW}Press Enter to continue...${NC}"
+                read -r
+                ;;
+        esac
+    done
 }
 
 # === Check validator ===
@@ -5544,7 +5675,7 @@ function check_validator {
   echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
 
-  check_validator_main || echo -e "${RED}$(t "failed_run_validator")${NC}"
+  validator_submenu
 }
 
 # === Main installation function (merged from install_aztec.sh) ===
