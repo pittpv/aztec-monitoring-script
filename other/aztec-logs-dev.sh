@@ -85,6 +85,7 @@ init_languages() {
   TRANSLATIONS["en,failed_download_version_control"]="Failed to download version_control.json"
   TRANSLATIONS["en,downloaded_file_sha256"]="Downloaded file SHA256:"
   TRANSLATIONS["en,verify_hash_match"]="Please verify this hash matches the expected hash from the repository."
+  TRANSLATIONS["en,hash_verified_prompt"]="Have you verified the hash? (y/n)"
   TRANSLATIONS["en,current_installed_version"]="Current installed version:"
   TRANSLATIONS["en,latest_version_repo"]="Latest version in repository:"
   TRANSLATIONS["en,new_version_available"]="New version available:"
@@ -708,6 +709,7 @@ init_languages() {
   TRANSLATIONS["ru,failed_download_version_control"]="Не удалось загрузить version_control.json"
   TRANSLATIONS["ru,downloaded_file_sha256"]="SHA256 загруженного файла:"
   TRANSLATIONS["ru,verify_hash_match"]="Пожалуйста, убедитесь, что этот хеш соответствует ожидаемому хешу из репозитория."
+  TRANSLATIONS["ru,hash_verified_prompt"]="Вы проверили хеш? (y/n)"
   TRANSLATIONS["ru,current_installed_version"]="Текущая установленная версия:"
   TRANSLATIONS["ru,latest_version_repo"]="Последняя версия в репозитории:"
   TRANSLATIONS["ru,new_version_available"]="Доступна новая версия:"
@@ -1348,6 +1350,7 @@ init_languages() {
   TRANSLATIONS["tr,failed_download_version_control"]="version_control.json indirilemedi"
   TRANSLATIONS["tr,downloaded_file_sha256"]="İndirilen dosya SHA256:"
   TRANSLATIONS["tr,verify_hash_match"]="Lütfen bu hash'in depodaki beklenen hash ile eşleştiğini doğrulayın."
+  TRANSLATIONS["tr,hash_verified_prompt"]="Hash'i doğruladınız mı? (y/n)"
   TRANSLATIONS["tr,current_installed_version"]="Mevcut yüklü sürüm:"
   TRANSLATIONS["tr,latest_version_repo"]="Depodaki en son sürüm:"
   TRANSLATIONS["tr,new_version_available"]="Yeni sürüm mevcut:"
@@ -2286,7 +2289,7 @@ check_dependencies() {
 # Security: Optional update check with hash verification to prevent supply chain attacks
 check_updates_safely() {
   echo -e "\n${BLUE}=== $(t "safe_update_check") ===${NC}"
-  echo -e "${YELLOW}$(t "update_check_warning")${NC}"
+  echo -e "\n${YELLOW}$(t "update_check_warning")${NC}"
   echo -e "${YELLOW}$(t "file_not_executed_auto")${NC}"
   read -p "$(t "continue_prompt"): " confirm
   if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
@@ -2313,6 +2316,14 @@ check_updates_safely() {
     DOWNLOADED_HASH=$(shasum -a 256 "$TEMP_VC_FILE" | cut -d' ' -f1)
     echo -e "${GREEN}$(t "downloaded_file_sha256") ${DOWNLOADED_HASH}${NC}"
     echo -e "${YELLOW}$(t "verify_hash_match")${NC}"
+  fi
+
+  # Запрашиваем подтверждение проверки хеша
+  read -p "$(t "hash_verified_prompt"): " hash_verified
+  if [[ ! "$hash_verified" =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}$(t "update_check_cancelled")${NC}"
+    rm -f "$TEMP_VC_FILE"
+    return 0
   fi
 
   # Парсим и показываем информацию об обновлениях
@@ -2400,6 +2411,14 @@ check_error_definitions_updates_safely() {
     DOWNLOADED_HASH=$(shasum -a 256 "$TEMP_ERROR_FILE" | cut -d' ' -f1)
     echo -e "${GREEN}$(t "downloaded_file_sha256") ${DOWNLOADED_HASH}${NC}"
     echo -e "${YELLOW}$(t "verify_hash_match")${NC}"
+  fi
+
+  # Запрашиваем подтверждение проверки хеша
+  read -p "$(t "hash_verified_prompt"): " hash_verified
+  if [[ ! "$hash_verified" =~ ^[Yy]$ ]]; then
+    echo -e "${YELLOW}$(t "update_check_cancelled")${NC}"
+    rm -f "$TEMP_ERROR_FILE"
+    return 0
   fi
 
   # Сравниваем с локальным файлом
