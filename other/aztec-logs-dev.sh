@@ -2890,7 +2890,7 @@ create_systemd_agent() {
 
   # Security: Copy local error_definitions.json to agent directory to avoid remote downloads
   if [ -f "$SCRIPT_DIR/error_definitions.json" ]; then
-    cp "$SCRIPT_DIR/error_definitions.json" "$HOME/aztec_error_definitions.json"
+    cp "$SCRIPT_DIR/error_definitions.json" "$HOME/error_definitions.json"
   fi
 
   # Генерация скрипта агента
@@ -2940,7 +2940,7 @@ RPC_URL=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f2)
 CONTRACT_ADDRESS=\$(echo "\$NETWORK_SETTINGS" | cut -d'|' -f3)
 
 # Security: Use local error definitions file instead of remote download to prevent supply chain attacks
-ERROR_DEFINITIONS_FILE="\$HOME/aztec_error_definitions.json"
+ERROR_DEFINITIONS_FILE="\$HOME/error_definitions.json"
 
 # Функция перевода
 t() {
