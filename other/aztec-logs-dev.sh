@@ -18,6 +18,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LANG=""
 declare -A TRANSLATIONS
 
+# Global status maps (will be filled in check_validator_main)
+declare -gA STATUS_MAP
+declare -gA STATUS_COLOR
+
 # Translation function
 t() {
   local key=$1
@@ -532,6 +536,10 @@ init_languages() {
   TRANSLATIONS["en,withdrawer"]="Withdrawer"
   TRANSLATIONS["en,rewards"]="Rewards"
   TRANSLATIONS["en,status"]="Status"
+  TRANSLATIONS["en,status_0"]="NONE - The validator is not in the validator set"
+  TRANSLATIONS["en,status_1"]="VALIDATING - The validator is currently in the validator set"
+  TRANSLATIONS["en,status_2"]="ZOMBIE - Not participating as validator, but have funds in setup, hit if slashes and going below the minimum"
+  TRANSLATIONS["en,status_3"]="EXITING - In the process of exiting the system"
   TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
   TRANSLATIONS["en,exiting"]="Exiting."
   TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 0."
@@ -1156,6 +1164,10 @@ init_languages() {
   TRANSLATIONS["ru,withdrawer"]="Withdrawer адрес"
   TRANSLATIONS["ru,rewards"]="Реварды"
   TRANSLATIONS["ru,status"]="Статус"
+  TRANSLATIONS["ru,status_0"]="NONE - Валидатор не в наборе валидаторов"
+  TRANSLATIONS["ru,status_1"]="VALIDATING - Валидатор в настоящее время в наборе валидаторов"
+  TRANSLATIONS["ru,status_2"]="ZOMBIE - Не участвует в качестве валидатора, но есть средства в стейкинге, получает штраф за слэшинг, баланс снижается до минимума"
+  TRANSLATIONS["ru,status_3"]="EXITING - В процессе выхода из системы"
   TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
   TRANSLATIONS["ru,exiting"]="Выход."
   TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 0."
@@ -1784,6 +1796,10 @@ init_languages() {
   TRANSLATIONS["tr,withdrawer"]="Çekici"
   TRANSLATIONS["tr,rewards"]="Ödüller"
   TRANSLATIONS["tr,status"]="Durum"
+  TRANSLATIONS["tr,status_0"]="NONE - Doğrulayıcı, doğrulayıcı setinde değil"
+  TRANSLATIONS["tr,status_1"]="VALIDATING - Doğrulayıcı şu anda doğrulayıcı setinde"
+  TRANSLATIONS["tr,status_2"]="ZOMBIE - Doğrulayıcı (validator) olarak katılmıyor, ancak staking'te fonları bulunuyor. Slashing (kesinti) cezası alıyor ve bakiyesi minimum seviyeye düşüyor."
+  TRANSLATIONS["tr,status_3"]="EXITING - Sistemden çıkış sürecinde"
   TRANSLATIONS["tr,validator_not_found"]="%s adresli doğrulayıcı bulunamadı."
   TRANSLATIONS["tr,exiting"]="Çıkılıyor."
   TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2, 3 veya 0 seçin."
@@ -5241,12 +5257,38 @@ fast_load_validators() {
 
         # Преобразуем hex в decimal с использованием вспомогательных функций
         status=$(hex_to_dec "$status_hex")
+        # Убираем пробелы и лишние символы из статуса
+        status=$(echo "$status" | tr -d '[:space:]')
         stake_decimal=$(hex_to_dec "$stake_hex")
         stake=$(wei_to_token "$stake_decimal")
 
         # Безопасное получение статуса и цвета
-        local status_text="${STATUS_MAP[$status]:-UNKNOWN}"
-        local status_color="${STATUS_COLOR[$status]:-$NC}"
+        # Проверяем, что STATUS_MAP доступен и содержит нужный ключ
+        if [[ -n "${STATUS_MAP[$status]:-}" ]]; then
+            local status_text="${STATUS_MAP[$status]}"
+        else
+            # Если STATUS_MAP не доступен или ключ не найден, используем дефолтные значения
+            case "$status" in
+                0) local status_text="NONE - The validator is not in the validator set" ;;
+                1) local status_text="VALIDATING - The validator is currently in the validator set" ;;
+                2) local status_text="ZOMBIE - Not participating as validator, but have funds in setup" ;;
+                3) local status_text="EXITING - In the process of exiting the system" ;;
+                *) local status_text="UNKNOWN (status=$status)" ;;
+            esac
+        fi
+        
+        if [[ -n "${STATUS_COLOR[$status]:-}" ]]; then
+            local status_color="${STATUS_COLOR[$status]}"
+        else
+            # Дефолтные цвета для статусов
+            case "$status" in
+                0) local status_color="$GRAY" ;;
+                1) local status_color="$GREEN" ;;
+                2) local status_color="$YELLOW" ;;
+                3) local status_color="$RED" ;;
+                *) local status_color="$NC" ;;
+            esac
+        fi
 
         # Добавляем в результаты
         RESULTS+=("$validator|$stake|$withdrawer|$rewards|$status|$status_text|$status_color")
@@ -5358,19 +5400,16 @@ check_validator_main() {
     # Глобальный массив для хранения адресов валидаторов, найденных в очереди
     declare -a QUEUE_FOUND_ADDRESSES=()
 
-    declare -gA STATUS_MAP=(
-        [0]=$(t "status_0")
-        [1]=$(t "status_1")
-        [2]=$(t "status_2")
-        [3]=$(t "status_3")
-    )
+    # Заполняем глобальные массивы статусов (объявлены на уровне скрипта)
+    STATUS_MAP[0]=$(t "status_0")
+    STATUS_MAP[1]=$(t "status_1")
+    STATUS_MAP[2]=$(t "status_2")
+    STATUS_MAP[3]=$(t "status_3")
 
-    declare -gA STATUS_COLOR=(
-        [0]="$GRAY"
-        [1]="$GREEN"
-        [2]="$YELLOW"
-        [3]="$RED"
-    )
+    STATUS_COLOR[0]="$GRAY"
+    STATUS_COLOR[1]="$GREEN"
+    STATUS_COLOR[2]="$YELLOW"
+    STATUS_COLOR[3]="$RED"
 
     echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${NC}..."
 
