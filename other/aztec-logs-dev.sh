@@ -15,11 +15,56 @@ SCRIPT_VERSION="2.5.3"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 function show_logo() {
-    echo -e " "
-    echo -e " "
-    echo -e "${NC}$(t "welcome")${NC}"
-    # Security: Use local file instead of remote execution to prevent supply chain attacks
-    bash "$SCRIPT_DIR/aztec-script-files/logo.sh"
+    # Inline logo function (merged from logo.sh)
+    local b=$'\033[34m' # Blue
+    local y=$'\033[33m' # Yellow
+    local r=$'\033[0m'  # Reset
+    
+    # Function to highlight "█" blocks
+    local print_colored() {
+      echo "${b}$(echo "$1" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
+    }
+    
+    echo
+    print_colored "  █████╗ ███████╗████████╗███████╗ ██████╗"
+    print_colored " ██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝"
+    print_colored " ███████║  ███╔╝    ██║   █████╗  ██║"
+    print_colored " ██╔══██║ ███╔╝     ██║   ██╔══╝  ██║"
+    print_colored " ██║  ██║███████╗   ██║   ███████╗╚██████╗"
+    print_colored " ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝"
+    echo
+    
+    # Information in frame
+    local info_lines=(
+      " Made by Pittpv"
+      " Feedback & Support in Tg: https://t.me/+DLsyG6ol3SFjM2Vk"
+      " Donate"
+      "  EVM: 0x4FD5eC033BA33507E2dbFE57ca3ce0A6D70b48Bf"
+      "  SOL: C9TV7Q4N77LrKJx4njpdttxmgpJ9HGFmQAn7GyDebH4R"
+    )
+    
+    # Calculate maximum line length (accounting for Unicode, without colors)
+    local max_len=0
+    for line in "${info_lines[@]}"; do
+      local clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
+      local line_length=$(echo -n "$clean_line" | wc -m)
+      (( line_length > max_len )) && max_len=$line_length
+    done
+    
+    # Frames
+    local top_border="╔$(printf '═%.0s' $(seq 1 $((max_len + 2))))╗"
+    local bottom_border="╚$(printf '═%.0s' $(seq 1 $((max_len + 2))))╝"
+    
+    # Print frame
+    echo -e "${b}${top_border}${r}"
+    for line in "${info_lines[@]}"; do
+      local clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
+      local line_length=$(echo -n "$clean_line" | wc -m)
+      local padding=$((max_len - line_length))
+      printf "${b}║ ${y}%s%*s ${b}║\n" "$line" "$padding" ""
+    done
+    echo -e "${b}${bottom_border}${r}"
+    echo
 }
 
 # === Language settings ===
@@ -413,6 +458,173 @@ init_languages() {
   TRANSLATIONS["en,install_curl_cffi_prompt"]="Do you want to install curl_cffi now? (Y/n)"
   TRANSLATIONS["en,installing_curl_cffi"]="Installing curl_cffi..."
   TRANSLATIONS["en,curl_cffi_optional"]="curl_cffi installation skipped (optional)."
+
+  # Translations from install_aztec.sh
+  TRANSLATIONS["en,installing_deps"]="🔧 Installing system dependencies..."
+  TRANSLATIONS["en,deps_installed"]="✅ Dependencies installed"
+  TRANSLATIONS["en,checking_docker"]="🔍 Checking Docker and docker compose..."
+  TRANSLATIONS["en,docker_not_found"]="❌ Docker not installed"
+  TRANSLATIONS["en,docker_compose_not_found"]="❌ docker compose (v2+) not found"
+  TRANSLATIONS["en,install_docker_prompt"]="Install Docker? (y/n) "
+  TRANSLATIONS["en,install_compose_prompt"]="Install Docker Compose? (y/n) "
+  TRANSLATIONS["en,docker_required"]="❌ Docker is required for the script. Exiting."
+  TRANSLATIONS["en,compose_required"]="❌ Docker Compose is required for the script. Exiting."
+  TRANSLATIONS["en,installing_docker"]="Installing Docker..."
+  TRANSLATIONS["en,installing_compose"]="Installing Docker Compose..."
+  TRANSLATIONS["en,docker_installed"]="✅ Docker successfully installed"
+  TRANSLATIONS["en,compose_installed"]="✅ Docker Compose successfully installed"
+  TRANSLATIONS["en,docker_found"]="✅ Docker and docker compose found"
+  TRANSLATIONS["en,installing_aztec"]="⬇️ Installing Aztec node..."
+  TRANSLATIONS["en,aztec_not_installed"]="❌ Aztec node not installed. Check installation."
+  TRANSLATIONS["en,aztec_installed"]="✅ Aztec node installed"
+  TRANSLATIONS["en,running_aztec_up"]="🚀 Running aztec-up latest..."
+  TRANSLATIONS["en,opening_ports"]="🌐 Opening ports 40400 and 8080..."
+  TRANSLATIONS["en,ports_opened"]="✅ Ports opened"
+  TRANSLATIONS["en,creating_folder"]="📁 Creating ~/aztec folder..."
+  TRANSLATIONS["en,creating_env"]="📝 Creating .env file..."
+  TRANSLATIONS["en,env_created"]="✅ .env file created"
+  TRANSLATIONS["en,creating_compose"]="🛠️ Creating docker-compose.yml with Watchtower"
+  TRANSLATIONS["en,compose_created"]="✅ docker-compose.yml created"
+  TRANSLATIONS["en,starting_node"]="🚀 Starting Aztec node..."
+  TRANSLATIONS["en,showing_logs"]="📄 Showing last 200 lines of logs..."
+  TRANSLATIONS["en,logs_starting"]="Logs will start in 5 seconds... Press Ctrl+C to exit logs"
+  TRANSLATIONS["en,checking_ports"]="Checking ports..."
+  TRANSLATIONS["en,port_error"]="Error: Port $port is busy. The program cannot continue."
+  TRANSLATIONS["en,ports_free"]="All ports are free! Installation will start now...\n"
+  TRANSLATIONS["en,ports_busy"]="The following ports are busy:"
+  TRANSLATIONS["en,change_ports_prompt"]="Do you want to change ports? (y/n) "
+  TRANSLATIONS["en,enter_new_ports"]="Enter new port numbers:"
+  TRANSLATIONS["en,enter_http_port"]="Enter HTTP port"
+  TRANSLATIONS["en,enter_p2p_port"]="Enter P2P port"
+  TRANSLATIONS["en,installation_aborted"]="Installation aborted by user"
+  TRANSLATIONS["en,checking_ports_desc"]="Making sure ports are not used by other processes..."
+  TRANSLATIONS["en,scanning_ports"]="Scanning ports"
+  TRANSLATIONS["en,busy"]="busy"
+  TRANSLATIONS["en,free"]="free"
+  TRANSLATIONS["en,ports_free_success"]="All ports are available"
+  TRANSLATIONS["en,ports_busy_error"]="Some ports are already in use"
+  TRANSLATIONS["en,enter_new_ports_prompt"]="Please enter new port numbers"
+  TRANSLATIONS["en,ports_updated"]="Port numbers have been updated"
+  TRANSLATIONS["en,installing_ss"]="Installing iproute2 (contains ss utility)..."
+  TRANSLATIONS["en,ss_installed"]="iproute2 installed successfully"
+  TRANSLATIONS["en,delete_node"]="🗑️ Deleting Aztec Node..."
+  TRANSLATIONS["en,delete_confirm"]="Are you sure you want to delete the Aztec node? This will stop containers and remove all data. (y/n) "
+  TRANSLATIONS["en,delete_canceled"]="✖ Node deletion canceled"
+  TRANSLATIONS["en,warn_orig_install"]="⚠️ Type 'n' when prompted with the question:"
+  TRANSLATIONS["en,warn_orig_install_2"]="Add it to $HOME/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["en,watchtower_exists"]="✅ Watchtower is already installed"
+  TRANSLATIONS["en,installing_watchtower"]="⬇️ Installing Watchtower..."
+  TRANSLATIONS["en,creating_watchtower_compose"]="🛠️ Creating Watchtower docker-compose.yml"
+  TRANSLATIONS["en,delete_watchtower_confirm"]="Do you want to also delete Watchtower? (y/n) "
+  TRANSLATIONS["en,watchtower_deleted"]="✅ Watchtower successfully deleted"
+  TRANSLATIONS["en,watchtower_kept"]="✅ Watchtower kept intact"
+  TRANSLATIONS["en,enter_tg_token"]="Enter Telegram bot token: "
+  TRANSLATIONS["en,enter_tg_chat_id"]="Enter Telegram chat ID: "
+  TRANSLATIONS["en,single_validator_mode"]="🔹 Single validator mode selected"
+  TRANSLATIONS["en,multi_validator_mode"]="🔹 Multiple validators mode selected"
+  TRANSLATIONS["en,enter_validator_keys"]="Enter validator private keys (comma-separated with 0x, up to 10): "
+  TRANSLATIONS["en,enter_validator_key"]="Enter validator private key (with 0x): "
+  TRANSLATIONS["en,enter_seq_publisher_key"]="Enter SEQ_PUBLISHER_PRIVATE_KEY (with 0x): "
+  TRANSLATIONS["en,validator_setup_header"]="=== Validator Setup ==="
+  TRANSLATIONS["en,multiple_validators_prompt"]="Do you want to run multiple validators? (y/n) "
+  TRANSLATIONS["en,ufw_not_installed"]="⚠️ ufw is not installed"
+  TRANSLATIONS["en,ufw_not_active"]="⚠️ ufw is not active"
+  TRANSLATIONS["en,has_bls_keys"]="Do you have BLS keys? (y/n) "
+  TRANSLATIONS["en,multi_validator_format"]="Enter validator data (format: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["en,single_validator_bls_private"]="Enter validator BLS private key:"
+  TRANSLATIONS["en,single_validator_bls_public"]="Enter validator BLS public key:"
+  TRANSLATIONS["en,bls_keys_added"]="BLS keys added to validator configuration"
+  TRANSLATIONS["en,select_network"]="Select network"
+  TRANSLATIONS["en,enter_choice"]="Enter choice:"
+  TRANSLATIONS["en,selected_network"]="Selected network:"
+  TRANSLATIONS["en,mainnet"]="mainnet"
+  TRANSLATIONS["en,testnet"]="testnet"
+  TRANSLATIONS["en,update_title"]="Update Aztec node to latest version"
+  TRANSLATIONS["en,update_folder_error"]="Error: Folder $HOME/aztec does not exist"
+  TRANSLATIONS["en,update_stopping"]="Stopping containers..."
+  TRANSLATIONS["en,update_stop_error"]="Error stopping containers"
+  TRANSLATIONS["en,update_pulling"]="Pulling latest aztecprotocol/aztec image..."
+  TRANSLATIONS["en,update_pull_error"]="Error pulling image"
+  TRANSLATIONS["en,update_starting"]="Starting updated node..."
+  TRANSLATIONS["en,update_start_error"]="Error starting containers"
+  TRANSLATIONS["en,update_success"]="Aztec node successfully updated to latest version!"
+  TRANSLATIONS["en,tag_check"]="Found tag: %s, replacing with latest"
+  TRANSLATIONS["en,downgrade_title"]="Downgrade Aztec node"
+  TRANSLATIONS["en,downgrade_fetching"]="Fetching available versions..."
+  TRANSLATIONS["en,downgrade_fetch_error"]="Failed to fetch versions"
+  TRANSLATIONS["en,downgrade_available"]="Available versions (enter number):"
+  TRANSLATIONS["en,downgrade_invalid_choice"]="Invalid choice, please try again"
+  TRANSLATIONS["en,downgrade_selected"]="Selected version:"
+  TRANSLATIONS["en,downgrade_folder_error"]="Error: Folder $HOME/aztec does not exist"
+  TRANSLATIONS["en,downgrade_stopping"]="Stopping containers..."
+  TRANSLATIONS["en,downgrade_stop_error"]="Error stopping containers"
+  TRANSLATIONS["en,downgrade_pulling"]="Pulling aztecprotocol/aztec image:"
+  TRANSLATIONS["en,downgrade_pull_error"]="Error pulling image"
+  TRANSLATIONS["en,downgrade_updating"]="Updating configuration..."
+  TRANSLATIONS["en,downgrade_update_error"]="Error updating docker-compose.yml"
+  TRANSLATIONS["en,downgrade_starting"]="Starting downgraded node:"
+  TRANSLATIONS["en,downgrade_start_error"]="Error starting containers"
+  TRANSLATIONS["en,downgrade_success"]="Aztec node successfully downgraded to version"
+  TRANSLATIONS["en,stopping_containers"]="Stopping containers..."
+  TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
+  TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
+  TRANSLATIONS["en,removing_watchtower_data"]="Removing Watchtower data..."
+  TRANSLATIONS["en,enter_yn"]="Please enter Y or N: "
+  
+  # Translations from check-validator.sh
+  TRANSLATIONS["en,fetching_validators"]="Fetching validator list from contract"
+  TRANSLATIONS["en,found_validators"]="Found validators:"
+  TRANSLATIONS["en,checking_validators"]="Checking validators..."
+  TRANSLATIONS["en,check_completed"]="Check completed."
+  TRANSLATIONS["en,select_action"]="Select an action:"
+  TRANSLATIONS["en,enter_option"]="Select option:"
+  TRANSLATIONS["en,enter_address"]="Enter the validator address:"
+  TRANSLATIONS["en,validator_info"]="Validator information:"
+  TRANSLATIONS["en,validator_not_found"]="Validator with address %s not found."
+  TRANSLATIONS["en,exiting"]="Exiting."
+  TRANSLATIONS["en,invalid_input"]="Invalid input. Please choose 1, 2, 3 or 0."
+  TRANSLATIONS["en,error_rpc_missing"]="Error: RPC_URL not found in $HOME/.env-aztec-agent"
+  TRANSLATIONS["en,error_file_missing"]="Error: $HOME/.env-aztec-agent file not found"
+  TRANSLATIONS["en,select_mode"]="Select loading mode:"
+  TRANSLATIONS["en,mode_fast"]="1. Fast mode (high CPU load)"
+  TRANSLATIONS["en,mode_slow"]="2. Slow mode (low CPU load)"
+  TRANSLATIONS["en,mode_invalid"]="Invalid mode selected. Please choose 1 or 2."
+  TRANSLATIONS["en,checking_queue"]="Checking validator queue..."
+  TRANSLATIONS["en,validator_in_queue"]="Validator found in queue:"
+  TRANSLATIONS["en,position"]="Position"
+  TRANSLATIONS["en,queued_at"]="Queued at"
+  TRANSLATIONS["en,not_in_queue"]="Validator is not in the queue either."
+  TRANSLATIONS["en,fetching_queue"]="Fetching validator queue data..."
+  TRANSLATIONS["en,notification_script_created"]="Notification script created and scheduled. Monitoring validator: %s"
+  TRANSLATIONS["en,notification_exists"]="Notification for this validator already exists."
+  TRANSLATIONS["en,enter_validator_address"]="Enter validator address to monitor:"
+  TRANSLATIONS["en,notification_removed"]="Notification for validator %s has been removed."
+  TRANSLATIONS["en,no_notifications"]="No active notifications found."
+  TRANSLATIONS["en,validator_not_in_queue"]="Validator not found in queue either. Please check the address."
+  TRANSLATIONS["en,validator_not_in_set"]="Validator not found in current validator set. Checking queue..."
+  TRANSLATIONS["en,queue_notification_title"]="Validator queue position notification"
+  TRANSLATIONS["en,active_monitors"]="Active validator monitors:"
+  TRANSLATIONS["en,enter_multiple_addresses"]="Enter validator addresses to monitor (comma separated):"
+  TRANSLATIONS["en,invalid_address_format"]="Invalid address format: %s"
+  TRANSLATIONS["en,processing_address"]="Processing address: %s"
+  TRANSLATIONS["en,fetching_page"]="Fetching page %d of %d..."
+  TRANSLATIONS["en,loading_validators"]="Loading validator data..."
+  TRANSLATIONS["en,validators_loaded"]="Validator data loaded successfully"
+  TRANSLATIONS["en,rpc_error"]="RPC error occurred, trying alternative RPC"
+  TRANSLATIONS["en,getting_new_rpc"]="Getting new RPC URL..."
+  TRANSLATIONS["en,rate_limit_notice"]="Using backup RPC - rate limiting to 1 request per second"
+  TRANSLATIONS["en,getting_validator_count"]="Getting validator count..."
+  TRANSLATIONS["en,getting_current_slot"]="Getting current slot..."
+  TRANSLATIONS["en,deriving_timestamp"]="Deriving timestamp for slot..."
+  TRANSLATIONS["en,querying_attesters"]="Querying attesters from GSE contract..."
+  TRANSLATIONS["en,option5"]="5. Remove existing monitoring"
+  TRANSLATIONS["en,select_monitor_to_remove"]="Select monitor to remove:"
+  TRANSLATIONS["en,monitor_removed"]="Monitoring for validator %s has been removed."
+  TRANSLATIONS["en,all_monitors_removed"]="All monitoring scripts have been removed."
+  TRANSLATIONS["en,remove_all"]="Remove all monitoring scripts"
+  TRANSLATIONS["en,remove_specific"]="Remove specific monitor"
+  TRANSLATIONS["en,api_error"]="Possible problems with Dashtec API"
+  TRANSLATIONS["en,contact_developer"]="Contact developer: https://t.me/+zEaCtoXYYwIyZjQ0"
 
   TRANSLATIONS["en,installing_foundry"]="Installing Foundry..."
   TRANSLATIONS["en,installing_curl"]="Installing curl..."
@@ -897,6 +1109,142 @@ init_languages() {
   TRANSLATIONS["ru,installing_curl_cffi"]="Устанавливается curl_cffi..."
   TRANSLATIONS["ru,curl_cffi_optional"]="Установка curl_cffi пропущена (необязательно)."
 
+  # Translations from install_aztec.sh (Russian)
+  TRANSLATIONS["ru,installing_deps"]="🔧 Установка системных зависимостей..."
+  TRANSLATIONS["ru,deps_installed"]="✅ Зависимости установлены"
+  TRANSLATIONS["ru,checking_docker"]="🔍 Проверка Docker и docker compose..."
+  TRANSLATIONS["ru,docker_not_found"]="❌ Docker не установлен"
+  TRANSLATIONS["ru,docker_compose_not_found"]="❌ docker compose (v2+) не найден"
+  TRANSLATIONS["ru,install_docker_prompt"]="Установить Docker? (y/n) "
+  TRANSLATIONS["ru,install_compose_prompt"]="Установить Docker Compose? (y/n) "
+  TRANSLATIONS["ru,docker_required"]="❌ Docker необходим для работы скрипта. Выход."
+  TRANSLATIONS["ru,compose_required"]="❌ Docker Compose необходим для работы скрипта. Выход."
+  TRANSLATIONS["ru,installing_docker"]="Установка Docker..."
+  TRANSLATIONS["ru,installing_compose"]="Установка Docker Compose..."
+  TRANSLATIONS["ru,docker_installed"]="✅ Docker успешно установлен"
+  TRANSLATIONS["ru,compose_installed"]="✅ Docker Compose успешно установлен"
+  TRANSLATIONS["ru,docker_found"]="✅ Docker и docker compose найдены"
+  TRANSLATIONS["ru,installing_aztec"]="⬇️ Установка ноды Aztec..."
+  TRANSLATIONS["ru,aztec_not_installed"]="❌ Aztec нода не установлена. Проверьте установку."
+  TRANSLATIONS["ru,aztec_installed"]="✅ Aztec нода установлена"
+  TRANSLATIONS["ru,running_aztec_up"]="🚀 Запуск aztec-up latest..."
+  TRANSLATIONS["ru,opening_ports"]="🌐 Открытие портов 40400 и 8080..."
+  TRANSLATIONS["ru,ports_opened"]="✅ Порты открыты"
+  TRANSLATIONS["ru,creating_folder"]="📁 Создание папки ~/aztec..."
+  TRANSLATIONS["ru,creating_env"]="📝 Заполнение файла .env..."
+  TRANSLATIONS["ru,env_created"]="✅ Файл .env создан"
+  TRANSLATIONS["ru,creating_compose"]="🛠️ Создание docker-compose.yml c Watchtower"
+  TRANSLATIONS["ru,compose_created"]="✅ docker-compose.yml создан"
+  TRANSLATIONS["ru,starting_node"]="🚀 Запуск ноды Aztec..."
+  TRANSLATIONS["ru,showing_logs"]="📄 Показываю последние 200 строк логов..."
+  TRANSLATIONS["ru,logs_starting"]="Логи запустятся через 5 секунд... Нажмите Ctrl+C чтобы выйти из логов"
+  TRANSLATIONS["ru,checking_ports"]="Проверка портов..."
+  TRANSLATIONS["ru,port_error"]="Ошибка: Порт $port занят. Программа не сможет выполниться."
+  TRANSLATIONS["ru,ports_free"]="Все порты свободны! Сейчас начнется установка...\n"
+  TRANSLATIONS["ru,ports_busy"]="Следующие порты заняты:"
+  TRANSLATIONS["ru,change_ports_prompt"]="Хотите изменить порты? (y/n) "
+  TRANSLATIONS["ru,enter_new_ports"]="Введите новые номера портов:"
+  TRANSLATIONS["ru,enter_http_port"]="Введите HTTP порт"
+  TRANSLATIONS["ru,enter_p2p_port"]="Введите P2P порт"
+  TRANSLATIONS["ru,installation_aborted"]="Установка прервана пользователем"
+  TRANSLATIONS["ru,checking_ports_desc"]="Проверка, что порты не используются другим процессами..."
+  TRANSLATIONS["ru,scanning_ports"]="Сканирование портов"
+  TRANSLATIONS["ru,busy"]="занят"
+  TRANSLATIONS["ru,free"]="свободен"
+  TRANSLATIONS["ru,ports_free_success"]="Все порты доступны"
+  TRANSLATIONS["ru,ports_busy_error"]="Некоторые порты уже используются"
+  TRANSLATIONS["ru,enter_new_ports_prompt"]="Введите новые номера портов"
+  TRANSLATIONS["ru,ports_updated"]="Номера портов обновлены"
+  TRANSLATIONS["ru,installing_ss"]="Установка iproute2 (содержит утилиту ss)..."
+  TRANSLATIONS["ru,ss_installed"]="iproute2 успешно установлен"
+  TRANSLATIONS["ru,delete_node"]="🗑️ Удаление ноды Aztec..."
+  TRANSLATIONS["ru,delete_confirm"]="Вы уверены, что хотите удалить ноду Aztec? Это остановит контейнеры и удалит все данные. (y/n) "
+  TRANSLATIONS["ru,delete_canceled"]="✖ Удаление ноды отменено"
+  TRANSLATIONS["ru,warn_orig_install"]="⚠️ Введите 'n' когда появится вопрос:"
+  TRANSLATIONS["ru,warn_orig_install_2"]="Add it to $HOME/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["ru,watchtower_exists"]="✅ Watchtower уже установлен"
+  TRANSLATIONS["ru,installing_watchtower"]="⬇️ Установка Watchtower..."
+  TRANSLATIONS["ru,creating_watchtower_compose"]="🛠️ Создание Watchtower docker-compose.yml"
+  TRANSLATIONS["ru,delete_watchtower_confirm"]="Хотите также удалить Watchtower? (y/n) "
+  TRANSLATIONS["ru,watchtower_deleted"]="✅ Watchtower успешно удален"
+  TRANSLATIONS["ru,watchtower_kept"]="✅ Watchtower оставлен без изменений"
+  TRANSLATIONS["ru,enter_tg_token"]="Введите токен Telegram бота: "
+  TRANSLATIONS["ru,enter_tg_chat_id"]="Введите ID Telegram чата: "
+  TRANSLATIONS["ru,single_validator_mode"]="🔹 Выбран режим одного валидатора"
+  TRANSLATIONS["ru,multi_validator_mode"]="🔹 Выбран режим нескольких валидаторов"
+  TRANSLATIONS["ru,enter_validator_keys"]="Введите приватные ключи валидаторов (c 0x через запятую, до 10): "
+  TRANSLATIONS["ru,enter_validator_key"]="Введите приватный ключ валидатора (с 0x): "
+  TRANSLATIONS["ru,enter_seq_publisher_key"]="Введите SEQ_PUBLISHER_PRIVATE_KEY (с 0x): "
+  TRANSLATIONS["ru,validator_setup_header"]="=== Настройка валидатора ==="
+  TRANSLATIONS["ru,multiple_validators_prompt"]="Вы хотите запустить несколько валидаторов? (y/n)"
+  TRANSLATIONS["ru,ufw_not_installed"]="⚠️ ufw не установлен"
+  TRANSLATIONS["ru,ufw_not_active"]="⚠️ ufw не активен"
+  TRANSLATIONS["ru,has_bls_keys"]="У вас есть BLS ключи? (y/n) "
+  TRANSLATIONS["ru,multi_validator_format"]="Введите данные валидатора (формат: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["ru,single_validator_bls_private"]="Введите приватный BLS ключ валидатора:"
+  TRANSLATIONS["ru,single_validator_bls_public"]="Введите публичный BLS ключ валидатора:"
+  TRANSLATIONS["ru,bls_keys_added"]="BLS ключи добавлены в конфигурацию валидатора"
+  TRANSLATIONS["ru,select_network"]="Выберите сеть"
+  TRANSLATIONS["ru,enter_choice"]="Введите:"
+  TRANSLATIONS["ru,selected_network"]="Выбрана сеть:"
+  TRANSLATIONS["ru,mainnet"]="mainnet"
+  TRANSLATIONS["ru,testnet"]="testnet"
+  
+  # Translations from check-validator.sh (Russian)
+  TRANSLATIONS["ru,fetching_validators"]="Получение списка валидаторов из контракта"
+  TRANSLATIONS["ru,found_validators"]="Найдено валидаторов:"
+  TRANSLATIONS["ru,checking_validators"]="Проверка валидаторов..."
+  TRANSLATIONS["ru,check_completed"]="Проверка завершена."
+  TRANSLATIONS["ru,select_action"]="Выберите действие:"
+  TRANSLATIONS["ru,enter_option"]="Выберите опцию:"
+  TRANSLATIONS["ru,enter_address"]="Введите адрес валидатора:"
+  TRANSLATIONS["ru,validator_info"]="Информация о валидаторе:"
+  TRANSLATIONS["ru,validator_not_found"]="Валидатор с адресом %s не найден."
+  TRANSLATIONS["ru,exiting"]="Выход."
+  TRANSLATIONS["ru,invalid_input"]="Неверный ввод. Пожалуйста, выберите 1, 2, 3 или 0."
+  TRANSLATIONS["ru,error_rpc_missing"]="Ошибка: RPC_URL не найден в $HOME/.env-aztec-agent"
+  TRANSLATIONS["ru,error_file_missing"]="Ошибка: файл $HOME/.env-aztec-agent не найден"
+  TRANSLATIONS["ru,select_mode"]="Выберите режим загрузки:"
+  TRANSLATIONS["ru,mode_fast"]="1. Быстрый режим (высокая нагрузка на CPU)"
+  TRANSLATIONS["ru,mode_slow"]="2. Медленный режим (низкая нагрузка на CPU)"
+  TRANSLATIONS["ru,mode_invalid"]="Неверный режим. Пожалуйста, выберите 1 или 2."
+  TRANSLATIONS["ru,checking_queue"]="Проверка очереди валидаторов..."
+  TRANSLATIONS["ru,validator_in_queue"]="Валидатор найден в очереди:"
+  TRANSLATIONS["ru,position"]="Позиция"
+  TRANSLATIONS["ru,queued_at"]="Добавлен в очередь"
+  TRANSLATIONS["ru,not_in_queue"]="Валидатора нет и в очереди."
+  TRANSLATIONS["ru,fetching_queue"]="Получение данных очереди валидаторов..."
+  TRANSLATIONS["ru,notification_script_created"]="Скрипт уведомления создан и запланирован. Мониторинг валидатора: %s"
+  TRANSLATIONS["ru,notification_exists"]="Уведомление для этого валидатора уже существует."
+  TRANSLATIONS["ru,enter_validator_address"]="Введите адрес валидатора для мониторинга:"
+  TRANSLATIONS["ru,notification_removed"]="Уведомление для валидатора %s удалено."
+  TRANSLATIONS["ru,no_notifications"]="Активных уведомлений не найдено."
+  TRANSLATIONS["ru,validator_not_in_queue"]="Валидатор не найден и в очереди. Пожалуйста, проверьте адрес."
+  TRANSLATIONS["ru,validator_not_in_set"]="Валидатор не найден в текущем наборе. Проверяем очередь..."
+  TRANSLATIONS["ru,queue_notification_title"]="Уведомление о позиции в очереди валидаторов"
+  TRANSLATIONS["ru,active_monitors"]="Активные мониторы валидаторов:"
+  TRANSLATIONS["ru,enter_multiple_addresses"]="Введите адреса валидаторов для мониторинга (через запятую):"
+  TRANSLATIONS["ru,invalid_address_format"]="Неверный формат адреса: %s"
+  TRANSLATIONS["ru,processing_address"]="Обработка адреса: %s"
+  TRANSLATIONS["ru,fetching_page"]="Получение страницы %d из %d..."
+  TRANSLATIONS["ru,loading_validators"]="Загрузка данных валидаторов..."
+  TRANSLATIONS["ru,validators_loaded"]="Данные валидаторов успешно загружены"
+  TRANSLATIONS["ru,rpc_error"]="Произошла ошибка RPC, пробуем альтернативный RPC"
+  TRANSLATIONS["ru,getting_new_rpc"]="Получение нового RPC URL..."
+  TRANSLATIONS["ru,rate_limit_notice"]="Используется резервный RPC - ограничение скорости: 1 запрос в секунду"
+  TRANSLATIONS["ru,getting_validator_count"]="Получение количества валидаторов..."
+  TRANSLATIONS["ru,getting_current_slot"]="Получение текущего слота..."
+  TRANSLATIONS["ru,deriving_timestamp"]="Получение временной метки для слота..."
+  TRANSLATIONS["ru,querying_attesters"]="Запрос аттестующих из GSE контракта..."
+  TRANSLATIONS["ru,option5"]="5. Удалить существующий мониторинг"
+  TRANSLATIONS["ru,select_monitor_to_remove"]="Выберите монитор для удаления:"
+  TRANSLATIONS["ru,monitor_removed"]="Мониторинг для валидатора %s удален."
+  TRANSLATIONS["ru,all_monitors_removed"]="Все скрипты мониторинга удалены."
+  TRANSLATIONS["ru,remove_all"]="Удалить все скрипты мониторинга"
+  TRANSLATIONS["ru,remove_specific"]="Удалить конкретный монитор"
+  TRANSLATIONS["ru,api_error"]="Возможны проблемы с Dashtec API"
+  TRANSLATIONS["ru,contact_developer"]="Сообщите разработчику: https://t.me/+zEaCtoXYYwIyZjQ0"
+
   TRANSLATIONS["ru,installing_foundry"]="Устанавливается Foundry..."
   TRANSLATIONS["ru,installing_curl"]="Устанавливается curl..."
   TRANSLATIONS["ru,installing_utils"]="Устанавливаются утилиты (grep, sed)..."
@@ -1378,6 +1726,147 @@ init_languages() {
   TRANSLATIONS["tr,install_curl_cffi_prompt"]="curl_cffi şimdi yüklensin mi? (Y/n)"
   TRANSLATIONS["tr,installing_curl_cffi"]="curl_cffi yükleniyor..."
   TRANSLATIONS["tr,curl_cffi_optional"]="curl_cffi kurulumu atlandı (isteğe bağlı)."
+
+  # Translations from install_aztec.sh (Turkish)
+  TRANSLATIONS["tr,installing_deps"]="🔧 Sistem bağımlılıkları yükleniyor..."
+  TRANSLATIONS["tr,deps_installed"]="✅ Bağımlılıklar yüklendi"
+  TRANSLATIONS["tr,checking_docker"]="🔍 Docker ve docker compose kontrol ediliyor..."
+  TRANSLATIONS["tr,docker_not_found"]="❌ Docker yüklü değil"
+  TRANSLATIONS["tr,docker_compose_not_found"]="❌ docker compose (v2+) bulunamadı"
+  TRANSLATIONS["tr,install_docker_prompt"]="Docker yüklensin mi? (y/n) "
+  TRANSLATIONS["tr,install_compose_prompt"]="Docker Compose yüklensin mi? (y/n) "
+  TRANSLATIONS["tr,docker_required"]="❌ Scriptin çalışması için Docker gereklidir. Çıkılıyor."
+  TRANSLATIONS["tr,compose_required"]="❌ Scriptin çalışması için Docker Compose gereklidir. Çıkılıyor."
+  TRANSLATIONS["tr,installing_docker"]="Docker yükleniyor..."
+  TRANSLATIONS["tr,installing_compose"]="Docker Compose yükleniyor..."
+  TRANSLATIONS["tr,docker_installed"]="✅ Docker başarıyla yüklendi"
+  TRANSLATIONS["tr,compose_installed"]="✅ Docker Compose başarıyla yüklendi"
+  TRANSLATIONS["tr,docker_found"]="✅ Docker ve docker compose bulundu"
+  TRANSLATIONS["tr,installing_aztec"]="⬇️ Aztec yükleniyor..."
+  TRANSLATIONS["tr,aztec_not_installed"]="❌ Aztec yüklü değil. Kurulumu kontrol edin."
+  TRANSLATIONS["tr,aztec_installed"]="✅ Aztec yüklendi"
+  TRANSLATIONS["tr,running_aztec_up"]="🚀 aztec-up latest çalıştırılıyor..."
+  TRANSLATIONS["tr,opening_ports"]="🌐 40400 ve 8080 portları açılıyor..."
+  TRANSLATIONS["tr,ports_opened"]="✅ Portlar açıldı"
+  TRANSLATIONS["tr,creating_folder"]="📁 ~/aztec klasörü oluşturuluyor..."
+  TRANSLATIONS["tr,creating_env"]="📝 .env dosyası oluşturuluyor..."
+  TRANSLATIONS["tr,env_created"]="✅ .env dosyası oluşturuldu"
+  TRANSLATIONS["tr,creating_compose"]="🛠️ Watchtower ile docker-compose.yml oluşturuluyor"
+  TRANSLATIONS["tr,compose_created"]="✅ docker-compose.yml oluşturuldu"
+  TRANSLATIONS["tr,starting_node"]="🚀 Aztec node başlatılıyor..."
+  TRANSLATIONS["tr,showing_logs"]="📄 Son 200 log satırı gösteriliyor..."
+  TRANSLATIONS["tr,logs_starting"]="Loglar 5 saniye içinde başlayacak... Loglardan çıkmak için Ctrl+C'ye basın"
+  TRANSLATIONS["tr,checking_ports"]="Portlar kontrol ediliyor..."
+  TRANSLATIONS["tr,port_error"]="Hata: $port portu dolu. Program devam edemez."
+  TRANSLATIONS["tr,ports_free"]="Tüm portlar boş! Kurulum şimdi başlayacak...\n"
+  TRANSLATIONS["tr,ports_busy"]="Şu portlar dolu:"
+  TRANSLATIONS["tr,change_ports_prompt"]="Portları değiştirmek ister misiniz? (y/n) "
+  TRANSLATIONS["tr,enter_new_ports"]="Yeni port numaralarını girin:"
+  TRANSLATIONS["tr,enter_http_port"]="HTTP portunu girin"
+  TRANSLATIONS["tr,enter_p2p_port"]="P2P portunu girin"
+  TRANSLATIONS["tr,installation_aborted"]="Kurulum kullanıcı tarafından iptal edildi"
+  TRANSLATIONS["tr,checking_ports_desc"]="Başka süreçler tarafından kullanılmadığından emin olmak için portlar kontrol ediliyor..."
+  TRANSLATIONS["tr,scanning_ports"]="Portlar taranıyor"
+  TRANSLATIONS["tr,busy"]="meşgul"
+  TRANSLATIONS["tr,free"]="boşta"
+  TRANSLATIONS["tr,ports_free_success"]="Tüm portlar kullanıma hazır"
+  TRANSLATIONS["tr,ports_busy_error"]="Bazı portlar zaten kullanımda"
+  TRANSLATIONS["tr,enter_new_ports_prompt"]="Yeni port numaralarını girin"
+  TRANSLATIONS["tr,ports_updated"]="Port numaraları güncellendi"
+  TRANSLATIONS["tr,installing_ss"]="iproute2 yükleniyor (ss aracı içerir)..."
+  TRANSLATIONS["tr,ss_installed"]="iproute2 başarıyla yüklendi"
+  TRANSLATIONS["tr,delete_node"]="🗑️ Aztec Node siliniyor..."
+  TRANSLATIONS["tr,delete_confirm"]="Aztec node'u silmek istediğinize emin misiniz? Bu işlem konteynerleri durduracak ve tüm verileri silecektir. (y/n) "
+  TRANSLATIONS["tr,delete_canceled"]="✖ Node silme işlemi iptal edildi"
+  TRANSLATIONS["tr,warn_orig_install"]="⚠️ Şu soru çıktığında 'n' yazın:"
+  TRANSLATIONS["tr,warn_orig_install_2"]="Add it to $HOME/.bash_profile to make the aztec binaries accessible?"
+  TRANSLATIONS["tr,watchtower_exists"]="✅ Watchtower zaten yüklü"
+  TRANSLATIONS["tr,installing_watchtower"]="⬇️ Watchtower yükleniyor..."
+  TRANSLATIONS["tr,creating_watchtower_compose"]="🛠️ Watchtower docker-compose.yml oluşturuluyor"
+  TRANSLATIONS["tr,delete_watchtower_confirm"]="Watchtower'ı da silmek istiyor musunuz? (y/n) "
+  TRANSLATIONS["tr,watchtower_deleted"]="✅ Watchtower başarıyla silindi"
+  TRANSLATIONS["tr,watchtower_kept"]="✅ Watchtower korundu"
+  TRANSLATIONS["tr,enter_tg_token"]="Telegram bot tokenini girin: "
+  TRANSLATIONS["tr,enter_tg_chat_id"]="Telegram chat ID'sini girin: "
+  TRANSLATIONS["tr,single_validator_mode"]="🔹 Tek validatör modu seçildi"
+  TRANSLATIONS["tr,multi_validator_mode"]="🔹 Çoklu validatör modu seçildi"
+  TRANSLATIONS["tr,enter_validator_keys"]="Validatör özel anahtarlarını girin (0x ile virgülle ayrılmış, en fazla 10): "
+  TRANSLATIONS["tr,enter_validator_key"]="Validatör özel anahtar girin (0x ile): "
+  TRANSLATIONS["tr,enter_seq_publisher_key"]="SEQ_PUBLISHER_PRIVATE_KEY girin (0x ile): "
+  TRANSLATIONS["tr,validator_setup_header"]="=== Validator Kurulumu ==="
+  TRANSLATIONS["tr,multiple_validators_prompt"]="Birden fazla validator çalıştırmak istiyor musunuz? (y/n) "
+  TRANSLATIONS["tr,ufw_not_installed"]="⚠️ ufw yüklü değil"
+  TRANSLATIONS["tr,ufw_not_active"]="⚠️ ufw aktif değil"
+  TRANSLATIONS["tr,has_bls_keys"]="BLS anahtarlarınız var mı? (y/n) "
+  TRANSLATIONS["tr,multi_validator_format"]="Validator verilerini girin (format: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["tr,single_validator_bls_private"]="Validator BLS özel anahtarını girin:"
+  TRANSLATIONS["tr,single_validator_bls_public"]="Validator BLS genel anahtarını girin:"
+  TRANSLATIONS["tr,bls_keys_added"]="BLS anahtarları validator konfigürasyonuna eklendi"
+  TRANSLATIONS["tr,select_network"]="Ağ seçin"
+  TRANSLATIONS["tr,enter_choice"]="Seçimi girin:"
+  TRANSLATIONS["tr,selected_network"]="Seçilen ağ:"
+  TRANSLATIONS["tr,mainnet"]="mainnet"
+  TRANSLATIONS["tr,testnet"]="testnet"
+  TRANSLATIONS["tr,stopping_containers"]="Konteynerler durduruluyor..."
+  TRANSLATIONS["tr,removing_node_data"]="Aztec node verileri kaldırılıyor..."
+  TRANSLATIONS["tr,stopping_watchtower"]="Watchtower durduruluyor..."
+  TRANSLATIONS["tr,removing_watchtower_data"]="Watchtower verileri kaldırılıyor..."
+  TRANSLATIONS["tr,enter_yn"]="Lütfen Y veya N girin: "
+  
+  # Translations from check-validator.sh (Turkish)
+  TRANSLATIONS["tr,fetching_validators"]="Doğrulayıcı listesi kontrattan alınıyor"
+  TRANSLATIONS["tr,found_validators"]="Bulunan doğrulayıcılar:"
+  TRANSLATIONS["tr,checking_validators"]="Doğrulayıcılar kontrol ediliyor..."
+  TRANSLATIONS["tr,check_completed"]="Kontrol tamamlandı."
+  TRANSLATIONS["tr,select_action"]="Bir işlem seçin:"
+  TRANSLATIONS["tr,enter_option"]="Seçenek seçin:"
+  TRANSLATIONS["tr,enter_address"]="Doğrulayıcı adresini girin:"
+  TRANSLATIONS["tr,validator_info"]="Doğrulayıcı bilgisi:"
+  TRANSLATIONS["tr,validator_not_found"]="%s adresli doğrulayıcı bulunamadı."
+  TRANSLATIONS["tr,exiting"]="Çıkılıyor."
+  TRANSLATIONS["tr,invalid_input"]="Geçersiz giriş. Lütfen 1, 2, 3 veya 0 seçin."
+  TRANSLATIONS["tr,error_rpc_missing"]="Hata: $HOME/.env-aztec-agent dosyasında RPC_URL bulunamadı"
+  TRANSLATIONS["tr,error_file_missing"]="Hata: $HOME/.env-aztec-agent dosyası bulunamadı"
+  TRANSLATIONS["tr,select_mode"]="Yükleme modunu seçin:"
+  TRANSLATIONS["tr,mode_fast"]="1. Hızlı mod (yüksek CPU yükü)"
+  TRANSLATIONS["tr,mode_slow"]="2. Yavaş mod (düşük CPU yükü)"
+  TRANSLATIONS["tr,mode_invalid"]="Geçersiz mod. Lütfen 1 или 2 seçin."
+  TRANSLATIONS["tr,checking_queue"]="Doğrulayıcı kuyruğu kontrol ediliyor..."
+  TRANSLATIONS["tr,validator_in_queue"]="Doğrulayıcı kuyrukta bulundu:"
+  TRANSLATIONS["tr,position"]="Pozisyon"
+  TRANSLATIONS["tr,queued_at"]="Kuyruğa eklendi"
+  TRANSLATIONS["tr,not_in_queue"]="Doğrulayıcı kuyrukta da yok."
+  TRANSLATIONS["tr,fetching_queue"]="Doğrulayıcı kuyruk verileri alınıyor..."
+  TRANSLATIONS["tr,notification_script_created"]="Bildirim betiği oluşturuldu и zamanlandı. İzlenen doğrulayıcı: %s"
+  TRANSLATIONS["tr,notification_exists"]="Bu doğrulayıcı için zaten bir bildirim var."
+  TRANSLATIONS["tr,enter_validator_address"]="İzlemek için doğrulayıcı adresini girin:"
+  TRANSLATIONS["tr,notification_removed"]="%s doğrulayıcısı için bildirim kaldırıldı."
+  TRANSLATIONS["tr,no_notifications"]="Aktif bildirim bulunamadı."
+  TRANSLATIONS["tr,validator_not_in_queue"]="Doğrulayıcı kuyrukta da bulunamadı. Lütfen adresi kontrol edin."
+  TRANSLATIONS["tr,validator_not_in_set"]="Doğrulayıcı mevcut doğrulayıcı setinde bulunamadı. Kuyruk kontrol ediliyor..."
+  TRANSLATIONS["tr,queue_notification_title"]="Doğrulayıcı sıra pozisyon bildirimi"
+  TRANSLATIONS["tr,active_monitors"]="Aktif doğrulayıcı izleyicileri:"
+  TRANSLATIONS["tr,enter_multiple_addresses"]="İzlemek için doğrulayıcı adreslerini girin (virgülle ayrılmış):"
+  TRANSLATIONS["tr,invalid_address_format"]="Geçersiz adres formatı: %s"
+  TRANSLATIONS["tr,processing_address"]="Adres işleniyor: %s"
+  TRANSLATIONS["tr,fetching_page"]="Sayfa %d/%d alınıyor..."
+  TRANSLATIONS["tr,loading_validators"]="Doğrulayıcı verileri yükleniyor..."
+  TRANSLATIONS["tr,validators_loaded"]="Doğrulayıcı verileri başarıyla yüklendi"
+  TRANSLATIONS["tr,rpc_error"]="RPC hatası oluştu, alternatif RPC deneniyor"
+  TRANSLATIONS["tr,getting_new_rpc"]="Yeni RPC URL alınıyor..."
+  TRANSLATIONS["tr,rate_limit_notice"]="Yedek RPC kullanılıyor - hız sınırlaması: saniyede 1 istek"
+  TRANSLATIONS["tr,getting_validator_count"]="Doğrulayıcı sayısı alınıyor..."
+  TRANSLATIONS["tr,getting_current_slot"]="Mevcut slot alınıyor..."
+  TRANSLATIONS["tr,deriving_timestamp"]="Slot için zaman damgası türetiliyor..."
+  TRANSLATIONS["tr,querying_attesters"]="GSE kontratından onaylayıcılar sorgulanıyor..."
+  TRANSLATIONS["tr,option5"]="5. Mevcut izlemeyi kaldır"
+  TRANSLATIONS["tr,select_monitor_to_remove"]="Kaldırılacak izleyiciyi seçin:"
+  TRANSLATIONS["tr,monitor_removed"]="%s doğrulayıcısı için izleme kaldırıldı."
+  TRANSLATIONS["tr,all_monitors_removed"]="Tüm izleme betikleri kaldırıldı."
+  TRANSLATIONS["tr,remove_all"]="Tüm izleme betiklerini kaldır"
+  TRANSLATIONS["tr,remove_specific"]="Belirli izleyiciyi kaldır"
+  TRANSLATIONS["tr,api_error"]="Dashtec API'de olası sorunlar"
+  TRANSLATIONS["tr,contact_developer"]="Geliştiriciye bildirin: https://t.me/+zEaCtoXYYwIyZjQ0"
 
   TRANSLATIONS["tr,installing_foundry"]="Foundry yükleniyor..."
   TRANSLATIONS["tr,installing_curl"]="curl yükleniyor..."
@@ -3489,37 +3978,2034 @@ change_rpc_url() {
   source "$ENV_FILE"
 }
 
+# === Functions from install_aztec.sh (merged) ===
+# Инициализация портов по умолчанию
+http_port=8080
+p2p_port=40400
+
+check_and_set_ports() {
+    local new_http_port
+    local new_p2p_port
+
+    echo -e "\n${CYAN}=== $(t "checking_ports") ===${NC}"
+    echo -e "${GRAY}$(t "checking_ports_desc")${NC}\n"
+
+    # Установка iproute2 (если не установлен) - содержит утилиту ss
+    if ! command -v ss &> /dev/null; then
+        echo -e "${YELLOW}$(t "installing_ss")...${NC}"
+        sudo apt update -q > /dev/null 2>&1
+        sudo apt install -y iproute2 > /dev/null 2>&1
+        echo -e "${GREEN}$(t "ss_installed") ✔${NC}\n"
+    fi
+
+    while true; do
+        ports=("$http_port" "$p2p_port")
+        ports_busy=()
+
+        echo -e "${CYAN}$(t "scanning_ports")...${NC}"
+
+        # Проверка каждого порта с визуализацией (используем ss вместо lsof)
+        for port in "${ports[@]}"; do
+            echo -n -e "  ${YELLOW}Port $port:${NC} "
+            if sudo ss -tuln | grep -q ":${port}\b"; then
+                echo -e "${RED}$(t "busy") ✖${NC}"
+                ports_busy+=("$port")
+            else
+                echo -e "${GREEN}$(t "free") ✔${NC}"
+            fi
+            sleep 0.1  # Уменьшенная задержка, так как ss работает быстрее
+        done
+
+        # Все порты свободны → выход из цикла
+        if [ ${#ports_busy[@]} -eq 0 ]; then
+            echo -e "\n${GREEN}✓ $(t "ports_free_success")${NC}"
+            echo -e "  HTTP: ${GREEN}$http_port${NC}, P2P: ${GREEN}$p2p_port${NC}\n"
+            break
+        else
+            # Показать занятые порты
+            echo -e "\n${RED}⚠ $(t "ports_busy_error")${NC}"
+            echo -e "  ${RED}${ports_busy[*]}${NC}\n"
+
+            # Предложить изменить порты
+            read -p "$(t "change_ports_prompt") " -n 1 -r
+            echo
+
+            if [[ $REPLY =~ ^[Yy]$ || -z "$REPLY" ]]; then
+                echo -e "\n${YELLOW}$(t "enter_new_ports_prompt")${NC}"
+
+                # Запрос нового HTTP-порта
+                read -p "  $(t "enter_http_port") [${GRAY}by default: $http_port${NC}]: " new_http_port
+                http_port=${new_http_port:-$http_port}
+
+                # Запрос нового P2P-порта
+                read -p "  $(t "enter_p2p_port") [${GRAY}by default: $p2p_port${NC}]: " new_p2p_port
+                p2p_port=${new_p2p_port:-$p2p_port}
+
+                echo -e "\n${CYAN}$(t "ports_updated")${NC}"
+                echo -e "  HTTP: ${YELLOW}$http_port${NC}, P2P: ${YELLOW}$p2p_port${NC}\n"
+            else
+                # Отмена установки
+                return 2
+            fi
+        fi
+    done
+}
+
+install_docker() {
+    echo -e "\n${YELLOW}$(t "installing_docker")${NC}"
+    curl -fsSL https://get.docker.com -o get-docker.sh
+    sudo sh get-docker.sh
+    sudo usermod -aG docker $USER
+    echo -e "\n${GREEN}$(t "docker_installed")${NC}"
+}
+
+install_docker_compose() {
+    echo -e "\n${YELLOW}$(t "installing_compose")${NC}"
+    sudo curl -L "https://github.com/docker/compose/releases/download/$(curl -s https://api.github.com/repos/docker/compose/releases/latest | jq -r .tag_name)/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+    sudo chmod +x /usr/local/bin/docker-compose
+    echo -e "\n${GREEN}$(t "compose_installed")${NC}"
+}
+
+delete_aztec_node() {
+    echo -e "\n${RED}=== $(t "delete_node") ===${NC}"
+
+    # Основной запрос
+    while :; do
+        read -p "$(t "delete_confirm") " -n 1 -r
+        [[ $REPLY =~ ^[YyNn]$ ]] && break
+        echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
+    done
+    echo  # Фиксируем окончательный перевод строки
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}$(t "stopping_containers")${NC}"
+        docker compose -f "$HOME/aztec/docker-compose.yml" down || true
+
+        echo -e "${YELLOW}$(t "removing_node_data")${NC}"
+        sudo rm -rf "$HOME/.aztec" "$HOME/aztec"
+
+        echo -e "${GREEN}$(t "node_deleted")${NC}"
+
+        # Проверяем Watchtower
+        if [ -d "$HOME/watchtower" ] || docker ps -a --format '{{.Names}}' | grep -q 'watchtower'; then
+            while :; do
+                read -p "$(t "delete_watchtower_confirm") " -n 1 -r
+                [[ $REPLY =~ ^[YyNn]$ ]] && break
+                echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
+            done
+            echo
+
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo -e "${YELLOW}$(t "stopping_watchtower")${NC}"
+                docker stop watchtower 2>/dev/null || true
+                docker rm watchtower 2>/dev/null || true
+                [ -f "$HOME/watchtower/docker-compose.yml" ] && docker compose -f "$HOME/watchtower/docker-compose.yml" down || true
+
+                echo -e "${YELLOW}$(t "removing_watchtower_data")${NC}"
+                sudo rm -rf "$HOME/watchtower"
+                echo -e "${GREEN}$(t "watchtower_deleted")${NC}"
+            else
+                echo -e "${GREEN}$(t "watchtower_kept")${NC}"
+            fi
+        fi
+
+        return 0
+    else
+        echo -e "${YELLOW}$(t "delete_canceled")${NC}"
+        return 1
+    fi
+}
+
+# Функция для обновления ноды Aztec до последней версии
+update_aztec_node() {
+    echo -e "\n${GREEN}=== $(t "update_title") ===${NC}"
+
+    # Переходим в папку с нодой
+    cd "$HOME/aztec" || {
+        echo -e "${RED}$(t "update_folder_error")${NC}"
+        return 1
+    }
+
+    # Проверяем текущий тег в docker-compose.yml
+    CURRENT_TAG=$(grep -oP 'image: aztecprotocol/aztec:\K[^\s]+' docker-compose.yml || echo "")
+
+    if [[ "$CURRENT_TAG" != "latest" ]]; then
+        echo -e "${YELLOW}$(printf "$(t "tag_check")" "$CURRENT_TAG")${NC}"
+        sed -i 's|image: aztecprotocol/aztec:.*|image: aztecprotocol/aztec:latest|' docker-compose.yml
+    fi
+
+    # Обновляем образ
+    echo -e "${YELLOW}$(t "update_pulling")${NC}"
+    docker pull aztecprotocol/aztec:latest || {
+        echo -e "${RED}$(t "update_pull_error")${NC}"
+        return 1
+    }
+
+    # Останавливаем контейнеры
+    echo -e "${YELLOW}$(t "update_stopping")${NC}"
+    docker compose down || {
+        echo -e "${RED}$(t "update_stop_error")${NC}"
+        return 1
+    }
+
+    # Запускаем контейнеры
+    echo -e "${YELLOW}$(t "update_starting")${NC}"
+    docker compose up -d || {
+        echo -e "${RED}$(t "update_start_error")${NC}"
+        return 1
+    }
+
+    echo -e "${GREEN}$(t "update_success")${NC}"
+}
+
+# Функция для даунгрейда ноды Aztec
+downgrade_aztec_node() {
+    echo -e "\n${GREEN}=== $(t "downgrade_title") ===${NC}"
+
+    # Получаем список доступных тегов с Docker Hub
+    echo -e "${YELLOW}$(t "downgrade_fetching")${NC}"
+    TAGS=$(curl -s https://hub.docker.com/v2/repositories/aztecprotocol/aztec/tags/?page_size=100 | jq -r '.results[].name' | sort -Vr)
+
+    if [ -z "$TAGS" ]; then
+        echo -e "${RED}$(t "downgrade_fetch_error")${NC}"
+        return 1
+    fi
+
+    # Выводим список тегов с нумерацией
+    echo -e "\n${CYAN}$(t "downgrade_available")${NC}"
+    select TAG in $TAGS; do
+        if [ -n "$TAG" ]; then
+            break
+        else
+            echo -e "${RED}$(t "downgrade_invalid_choice")${NC}"
+        fi
+    done
+
+    echo -e "\n${YELLOW}$(t "downgrade_selected") $TAG${NC}"
+
+    # Переходим в папку с нодой
+    cd "$HOME/aztec" || {
+        echo -e "${RED}$(t "downgrade_folder_error")${NC}"
+        return 1
+    }
+
+    # Обновляем образ до выбранной версии
+    echo -e "${YELLOW}$(t "downgrade_pulling")$TAG...${NC}"
+    docker pull aztecprotocol/aztec:"$TAG" || {
+        echo -e "${RED}$(t "downgrade_pull_error")${NC}"
+        return 1
+    }
+
+    # Останавливаем контейнеры
+    echo -e "${YELLOW}$(t "downgrade_stopping")${NC}"
+    docker compose down || {
+        echo -e "${RED}$(t "downgrade_stop_error")${NC}"
+        return 1
+    }
+
+    # Изменяем версию в docker-compose.yml
+    echo -e "${YELLOW}$(t "downgrade_updating")${NC}"
+    sed -i "s|image: aztecprotocol/aztec:.*|image: aztecprotocol/aztec:$TAG|" docker-compose.yml || {
+        echo -e "${RED}$(t "downgrade_update_error")${NC}"
+        return 1
+    }
+
+    # Запускаем контейнеры
+    echo -e "${YELLOW}$(t "downgrade_starting") $TAG...${NC}"
+    docker compose up -d || {
+        echo -e "${RED}$(t "downgrade_start_error")${NC}"
+        return 1
+    }
+
+    echo -e "${GREEN}$(t "downgrade_success") $TAG!${NC}"
+}
+
+# === Functions from check-validator.sh (merged) ===
+# Получаем значение NETWORK из env-aztec-agent
+get_network_for_validator() {
+    local network="testnet"
+    if [[ -f "$HOME/.env-aztec-agent" ]]; then
+        source "$HOME/.env-aztec-agent"
+        [[ -n "$NETWORK" ]] && network="$NETWORK"
+    fi
+    echo "$network"
+}
+
+# === Адреса контрактов в зависимости от сети ===
+# Testnet адреса
+ROLLUP_ADDRESS_TESTNET="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
+GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
+
+# Mainnet адреса
+ROLLUP_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
+GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
+
+# ========= HTTP via curl_cffi =========
+# cffi_http_get <url>
+cffi_http_get() {
+  local url="$1"
+  local network="$2"
+  python3 - "$url" "$network" <<'PY'
+import sys, json
+from curl_cffi import requests
+u = sys.argv[1]
+network = sys.argv[2]
+
+# Формируем origin и referer в зависимости от сети
+if network == "mainnet":
+    base_url = "https://dashtec.xyz"
+else:
+    base_url = f"https://{network}.dashtec.xyz"
+
+headers = {
+  "accept": "application/json, text/plain, */*",
+  "origin": base_url,
+  "referer": base_url + "/",
+}
+try:
+    r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
+    ct = (r.headers.get("content-type") or "").lower()
+    txt = r.text
+    if "application/json" in ct:
+        sys.stdout.write(txt)
+    else:
+        i, j = txt.find("{"), txt.rfind("}")
+        if i != -1 and j != -1 and j > i:
+            sys.stdout.write(txt[i:j+1])
+        else:
+            sys.stdout.write(txt)
+except Exception as e:
+    sys.stdout.write("")
+    sys.stderr.write(f"{e}")
+PY
+}
+
+# Функция загрузки RPC URL с обработкой ошибок
+load_rpc_config() {
+    if [ -f "$HOME/.env-aztec-agent" ]; then
+        source "$HOME/.env-aztec-agent"
+        if [ -z "$RPC_URL" ]; then
+            echo -e "${RED}$(t "error_rpc_missing")${NC}"
+            return 1
+        fi
+        if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo -e "${YELLOW}Warning: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not found in $HOME/.env-aztec-agent${NC}"
+        fi
+
+        # Если есть резервный RPC, используем его
+        if [ -n "$ALT_RPC" ]; then
+            echo -e "${YELLOW}Using backup RPC to load the list of validators: $ALT_RPC${NC}"
+            USING_BACKUP_RPC=true
+        else
+            USING_BACKUP_RPC=false
+        fi
+    else
+        echo -e "${RED}$(t "error_file_missing")${NC}"
+        return 1
+    fi
+}
+
+# Функция для получения нового RPC URL
+get_new_rpc_url() {
+    local network="$1"
+    echo -e "${YELLOW}$(t "getting_new_rpc")${NC}"
+
+    # Список возможных RPC провайдеров в зависимости от сети
+    local rpc_providers=()
+
+    if [[ "$network" == "mainnet" ]]; then
+        rpc_providers=(
+            "https://ethereum-rpc.publicnode.com"
+            "https://eth.llamarpc.com"
+        )
+    else
+        rpc_providers=(
+            "https://ethereum-sepolia-rpc.publicnode.com"
+            "https://1rpc.io/sepolia"
+            "https://sepolia.drpc.org"
+        )
+    fi
+
+    # Пробуем каждый RPC пока не найдем рабочий
+    for rpc_url in "${rpc_providers[@]}"; do
+        echo -e "${YELLOW}Trying RPC: $rpc_url${NC}"
+
+        # Проверяем доступность RPC
+        if curl -s --head --connect-timeout 5 "$rpc_url" >/dev/null; then
+            echo -e "${GREEN}RPC is available: $rpc_url${NC}"
+
+            # Проверяем, что RPC может отвечать на запросы
+            if cast block latest --rpc-url "$rpc_url" >/dev/null 2>&1; then
+                echo -e "${GREEN}RPC is working properly: $rpc_url${NC}"
+
+                # Добавляем новый RPC в файл конфигурации
+                if grep -q "ALT_RPC=" "$HOME/.env-aztec-agent"; then
+                    sed -i "s|ALT_RPC=.*|ALT_RPC=$rpc_url|" "$HOME/.env-aztec-agent"
+                else
+                    printf 'ALT_RPC=%s\n' "$rpc_url" >> "$HOME/.env-aztec-agent"
+                fi
+
+                # Обновляем текущую переменную
+                ALT_RPC="$rpc_url"
+                USING_BACKUP_RPC=true
+
+                # Перезагружаем конфигурацию, чтобы обновить переменные
+                source "$HOME/.env-aztec-agent"
+
+                return 0
+            else
+                echo -e "${RED}RPC is not responding properly: $rpc_url${NC}"
+            fi
+        else
+            echo -e "${RED}RPC is not available: $rpc_url${NC}"
+        fi
+    done
+
+    echo -e "${RED}Failed to find a working RPC URL${NC}"
+    return 1
+}
+
+## Функция для выполнения cast call с обработкой ошибок RPC
+cast_call_with_fallback() {
+    local contract_address=$1
+    local function_signature=$2
+    local max_retries=3
+    local retry_count=0
+    local use_validator_rpc=${3:-false}  # По умолчанию используем основной RPC
+    local network="$4"
+
+    while [ $retry_count -lt $max_retries ]; do
+        # Определяем какой RPC использовать
+        local current_rpc
+        if [ "$use_validator_rpc" = true ] && [ -n "$ALT_RPC" ]; then
+            current_rpc="$ALT_RPC"
+            echo -e "${YELLOW}Using validator RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${NC}"
+        else
+            current_rpc="$RPC_URL"
+            echo -e "${YELLOW}Using main RPC: $current_rpc (attempt $((retry_count + 1))/$max_retries)${NC}"
+        fi
+
+        local response=$(cast call "$contract_address" "$function_signature" --rpc-url "$current_rpc" 2>&1)
+
+        # Проверяем на ошибки RPC (но игнорируем успешные ответы, которые могут содержать текст)
+        if echo "$response" | grep -q -E "^(Error|error|timed out|connection refused|connection reset)"; then
+            echo -e "${RED}RPC error: $response${NC}"
+
+            # Если это запрос валидаторов, получаем новый RPC URL
+            if [ "$use_validator_rpc" = true ]; then
+                if get_new_rpc_url "$network"; then
+                    retry_count=$((retry_count + 1))
+                    sleep 2
+                    continue
+                else
+                    echo -e "${RED}All RPC attempts failed${NC}"
+                    return 1
+                fi
+            else
+                # Для других запросов просто увеличиваем счетчик попыток
+                retry_count=$((retry_count + 1))
+                sleep 2
+                continue
+            fi
+        fi
+
+        # Если нет ошибки, возвращаем ответ
+        echo "$response"
+        return 0
+    done
+
+    echo -e "${RED}Maximum retries exceeded${NC}"
+    return 1
+}
+
+hex_to_dec() {
+    local hex=${1^^}
+    echo "ibase=16; $hex" | bc
+}
+
+wei_to_token() {
+    local wei_value=$1
+    local int_part=$(echo "$wei_value / 1000000000000000000" | bc)
+    local frac_part=$(echo "$wei_value % 1000000000000000000" | bc)
+    local frac_str=$(printf "%018d" $frac_part)
+    frac_str=$(echo "$frac_str" | sed 's/0*$//')
+    if [[ -z "$frac_str" ]]; then
+        echo "$int_part"
+    else
+        echo "$int_part.$frac_str"
+    fi
+}
+
+# Функция для отправки уведомления в Telegram
+send_telegram_notification() {
+    local message="$1"
+    if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+        echo -e "${YELLOW}Telegram notification not sent: missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID${NC}"
+        return 1
+    fi
+
+    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+        -d chat_id="$TELEGRAM_CHAT_ID" \
+        -d text="$message" \
+        -d parse_mode="Markdown" > /dev/null
+}
+
+# Функция для проверки очереди валидаторов (пакетная обработка)
+check_validator_queue(){
+    local validator_addresses=("$@")
+    local network="${NETWORK:-$(get_network_for_validator)}"
+    local results=()
+    local found_count=0
+    local not_found_count=0
+    
+    # Выбор адресов в зависимости от сети
+    local QUEUE_URL
+    if [[ "$network" == "mainnet" ]]; then
+        QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
+    else
+        QUEUE_URL="https://${network}.dashtec.xyz/api/sequencers/queue"
+    fi
+    
+    echo -e "${YELLOW}$(t "fetching_queue")${NC}"
+    echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${NC}"
+    local temp_file
+    temp_file=$(mktemp)
+
+    # Функция для отправки уведомления об ошибке API
+    send_api_error_notification() {
+        local error_type="$1"
+        local validator_address="$2"
+        local message="🚨 *Dashtec API Error*
+
+🔧 *Error Type:* $error_type
+🔍 *Validator:* \`${validator_address:-"Batch check"}\`
+⏰ *Time:* $(date '+%d.%m.%Y %H:%M UTC')
+⚠️ *Issue:* Possible problems with Dashtec API
+
+📞 *Contact developer:* https://t.me/+zEaCtoXYYwIyZjQ0"
+
+        if [ -n "${TELEGRAM_BOT_TOKEN-}" ] && [ -n "${TELEGRAM_CHAT_ID-}" ]; then
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null 2>&1
+        fi
+    }
+
+    check_single_validator(){
+        local validator_address=$1
+        local temp_file=$2
+        local search_address_lower=${validator_address,,}
+        local search_url="${QUEUE_URL}?page=1&limit=10&search=${search_address_lower}"
+        local response_data
+        response_data="$(cffi_http_get "$search_url" "$network")"
+
+        if [ -z "$response_data" ]; then
+            echo "$validator_address|ERROR|Empty API response" >> "$temp_file"
+            send_api_error_notification "Empty response" "$validator_address"
+            return 1
+        fi
+
+        if ! jq -e . >/dev/null 2>&1 <<<"$response_data"; then
+            echo "$validator_address|ERROR|Invalid JSON response" >> "$temp_file"
+            send_api_error_notification "Invalid JSON" "$validator_address"
+            return 1
+        fi
+
+        # Проверяем статус ответа
+        local status=$(echo "$response_data" | jq -r '.status')
+        if [ "$status" != "ok" ]; then
+            echo "$validator_address|ERROR|API returned non-ok status: $status" >> "$temp_file"
+            send_api_error_notification "Non-OK status: $status" "$validator_address"
+            return 1
+        fi
+
+        local validator_info
+        validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"$search_address_lower\")")
+        local filtered_count
+        filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+
+        if [ -n "$validator_info" ] && [ "$filtered_count" -gt 0 ]; then
+            local position withdrawer queued_at tx_hash index
+            position=$(echo "$validator_info" | jq -r '.position')
+            withdrawer=$(echo "$validator_info" | jq -r '.withdrawerAddress')
+            queued_at=$(echo "$validator_info" | jq -r '.queuedAt')
+            tx_hash=$(echo "$validator_info" | jq -r '.transactionHash')
+            index=$(echo "$validator_info" | jq -r '.index')
+            echo "$validator_address|FOUND|$position|$withdrawer|$queued_at|$tx_hash|$index" >> "$temp_file"
+        else
+            echo "$validator_address|NOT_FOUND||" >> "$temp_file"
+        fi
+    }
+
+    local pids=()
+    for validator_address in "${validator_addresses[@]}"; do
+        check_single_validator "$validator_address" "$temp_file" &
+        pids+=($!)
+    done
+
+    # Ожидаем завершения всех процессов
+    local api_errors=0
+    for pid in "${pids[@]}"; do
+        wait "$pid" 2>/dev/null || ((api_errors++))
+    done
+
+    # Если все запросы завершились с ошибкой API, отправляем общее уведомление
+    if [ $api_errors -eq ${#validator_addresses[@]} ] && [ ${#validator_addresses[@]} -gt 0 ]; then
+        send_api_error_notification "All API requests failed" "Batch check"
+    fi
+
+    # Обрабатываем результаты
+    while IFS='|' read -r address status position withdrawer queued_at tx_hash index; do
+        case "$status" in
+            FOUND) results+=("FOUND|$address|$position|$withdrawer|$queued_at|$tx_hash|$index"); found_count=$((found_count+1));;
+            NOT_FOUND) results+=("NOT_FOUND|$address"); not_found_count=$((not_found_count+1));;
+            ERROR) results+=("ERROR|$address|$position"); not_found_count=$((not_found_count+1));;
+        esac
+    done < "$temp_file"
+    rm -f "$temp_file"
+
+    echo -e "\n${CYAN}=== Queue Check Results ===${NC}"
+    echo -e "Found in queue: ${GREEN}$found_count${NC}"
+    echo -e "Not found: ${RED}$not_found_count${NC}"
+    echo -e "Total checked: ${BOLD}${#validator_addresses[@]}${NC}"
+
+    if [ $found_count -gt 0 ]; then
+        echo -e "\n${GREEN}Validators found in queue:${NC}"
+        for result in "${results[@]}"; do
+            IFS='|' read -r status address position withdrawer queued_at tx_hash index <<<"$result"
+            if [ "$status" == "FOUND" ]; then
+                local formatted_date
+                formatted_date=$(date -d "$queued_at" '+%d.%m.%Y %H:%M UTC' 2>/dev/null || echo "$queued_at")
+                echo -e "  ${CYAN}• ${address}${NC}"
+                echo -e "    ${BOLD}Position:${NC} $position"
+                echo -e "    ${BOLD}Withdrawer:${NC} $withdrawer"
+                echo -e "    ${BOLD}Queued at:${NC} $formatted_date"
+                echo -e "    ${BOLD}Tx Hash:${NC} $tx_hash"
+                echo -e "    ${BOLD}Index:${NC} $index"
+            fi
+        done
+    fi
+
+    if [ $not_found_count -gt 0 ]; then
+        echo -e "\n${RED}Validators not found in queue:${NC}"
+        for result in "${results[@]}"; do
+            IFS='|' read -r status address error_msg <<<"$result"
+            if [ "$status" == "NOT_FOUND" ]; then
+                echo -e "  ${RED}• ${address}${NC}"
+            elif [ "$status" == "ERROR" ]; then
+                echo -e "  ${RED}• ${address} (Error: ${error_msg})${NC}"
+            fi
+        done
+    fi
+
+    # Устанавливаем глобальные переменные с результатами поиска
+    QUEUE_FOUND_COUNT=$found_count
+    QUEUE_FOUND_ADDRESSES=()
+
+    # Заполняем массив найденными адресами
+    for result in "${results[@]}"; do
+        IFS='|' read -r status address position withdrawer queued_at tx_hash index <<<"$result"
+        if [ "$status" == "FOUND" ]; then
+            QUEUE_FOUND_ADDRESSES+=("$address")
+        fi
+    done
+
+    if [ $found_count -gt 0 ]; then return 0; else return 1; fi
+}
+
+# Вспомогательная функция для проверки одного валидатора (для обратной совместимости)
+check_single_validator_queue() {
+    local validator_address=$1
+    check_validator_queue "$validator_address"
+}
+
+create_monitor_script(){
+    local validator_address=$1
+    local network=$2
+    local MONITOR_DIR=$3
+    local QUEUE_URL=$4
+    local validator_address=$(echo "$validator_address" | xargs)
+    local normalized_address=${validator_address,,}
+    local script_name="monitor_${normalized_address:2}.sh"
+    local log_file="$MONITOR_DIR/monitor_${normalized_address:2}.log"
+    local position_file="$MONITOR_DIR/last_position_${normalized_address:2}.txt"
+    if [ -f "$MONITOR_DIR/$script_name" ]; then
+        echo -e "${YELLOW}$(t "notification_exists")${NC}"
+        return
+    fi
+    mkdir -p "$MONITOR_DIR"
+
+    local start_message="🎯 *Queue Monitoring Started*
+
+🔹 *Address:* \`$validator_address\`
+⏰ *Monitoring started at:* $(date '+%d.%m.%Y %H:%M UTC')
+📋 *Check frequency:* Hourly
+🔔 *Notifications:* Position changes"
+
+    if [ -n "${TELEGRAM_BOT_TOKEN-}" ] && [ -n "${TELEGRAM_CHAT_ID-}" ]; then
+        curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+            -d chat_id="$TELEGRAM_CHAT_ID" -d text="$start_message" -d parse_mode="Markdown" >/dev/null 2>&1
+    fi
+
+    cat > "$MONITOR_DIR/$script_name" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+VALIDATOR_ADDRESS="__ADDR__"
+NETWORK="__NETWORK__"
+MONITOR_DIR="__MDIR__"
+LAST_POSITION_FILE="__POSFILE__"
+LOG_FILE="__LOGFILE__"
+TELEGRAM_BOT_TOKEN="__TBOT__"
+TELEGRAM_CHAT_ID="__TCHAT__"
+
+CURL_CONNECT_TIMEOUT=15
+CURL_MAX_TIME=45
+API_RETRY_DELAY=30
+MAX_RETRIES=2
+
+mkdir -p "$MONITOR_DIR"
+log_message(){ echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"; }
+
+# Ensure curl_cffi
+python3 - <<'PY' >/dev/null 2>&1 || exit 1
+try:
+    import pkgutil
+    assert pkgutil.find_loader("curl_cffi")
+except Exception:
+    raise SystemExit(1)
+print("OK")
+PY
+
+send_telegram(){
+    local message="$1"
+    if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+        log_message "No Telegram tokens"
+        return 1
+    fi
+    curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+        -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null
+}
+
+format_date(){
+    local iso_date="$1"
+    if [[ "$iso_date" =~ ^([0-9]{4})-([0-9]{2})-([0-9]{2})T([0-9]{2}):([0-9]{2}):([0-9]{2}) ]]; then
+        echo "${BASH_REMATCH[3]}.${BASH_REMATCH[2]}.${BASH_REMATCH[1]} ${BASH_REMATCH[4]}:${BASH_REMATCH[5]} UTC"
+    else
+        echo "$iso_date"
+    fi
+}
+
+cffi_http_get(){
+  local url="$1"
+  python3 - "$url" "$NETWORK" <<'PY'
+import sys
+from curl_cffi import requests
+u = sys.argv[1]
+network = sys.argv[2]
+
+# Формируем origin и referer в зависимости от сети
+if network == "mainnet":
+    base_url = "https://dashtec.xyz"
+else:
+    base_url = f"https://{network}.dashtec.xyz"
+
+headers = {
+    "accept": "application/json, text/plain, */*",
+    "origin": base_url,
+    "referer": base_url + "/"
+}
+try:
+    r = requests.get(u, headers=headers, impersonate="chrome131", timeout=30)
+    ct = (r.headers.get("content-type") or "").lower()
+    txt = r.text
+    if "application/json" in ct:
+        print(txt)
+    else:
+        i, j = txt.find("{"), txt.rfind("}")
+        print(txt[i:j+1] if i!=-1 and j!=-1 and j>i else txt)
+except Exception as e:
+    print(f'{{"error": "Request failed: {e}"}}')
+PY
+}
+
+monitor_position(){
+    log_message "Start monitor_position for $VALIDATOR_ADDRESS"
+    local last_position=""
+    [[ -f "$LAST_POSITION_FILE" ]] && last_position=$(cat "$LAST_POSITION_FILE")
+
+    # Функция для отправки уведомления об ошибке API в мониторе
+    send_monitor_api_error(){
+        local error_type="$1"
+        local message="🚨 *Dashtec API Error - Monitor*
+
+🔧 *Error Type:* $error_type
+🔍 *Validator:* \`$VALIDATOR_ADDRESS\`
+⏰ *Time:* $(date '+%d.%m.%Y %H:%M UTC')
+⚠️ *Issue:* Possible problems with Dashtec API
+📞 *Contact developer:* https://t.me/+zEaCtoXYYwIyZjQ0"
+
+        if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/sendMessage" \
+                -d chat_id="$TELEGRAM_CHAT_ID" -d text="$message" -d parse_mode="Markdown" >/dev/null
+        fi
+    }
+
+    # Формируем URL для очереди в зависимости от сети
+    local queue_url
+    if [[ "$NETWORK" == "mainnet" ]]; then
+        queue_url="https://dashtec.xyz/api/sequencers/queue"
+    else
+        queue_url="https://${NETWORK}.dashtec.xyz/api/sequencers/queue"
+    fi
+
+    local search_url="${queue_url}?page=1&limit=10&search=${VALIDATOR_ADDRESS,,}"
+    log_message "GET $search_url"
+    local response_data; response_data="$(cffi_http_get "$search_url")"
+
+    if [ -z "$response_data" ]; then
+        log_message "Empty API response"
+        send_monitor_api_error "Empty response"
+        return 1
+    fi
+
+    # Проверяем наличие ошибки в ответе
+    if echo "$response_data" | jq -e 'has("error")' >/dev/null 2>&1; then
+        local error_msg=$(echo "$response_data" | jq -r '.error')
+        log_message "API request failed: $error_msg"
+        send_monitor_api_error "Request failed: $error_msg"
+        return 1
+    fi
+
+    if ! echo "$response_data" | jq -e . >/dev/null 2>&1; then
+        log_message "Invalid JSON response: $response_data"
+        send_monitor_api_error "Invalid JSON"
+        return 1
+    fi
+
+    # Проверяем статус ответа
+    local api_status=$(echo "$response_data" | jq -r '.status')
+    if [ "$api_status" != "ok" ]; then
+        log_message "API returned non-ok status: $api_status"
+        send_monitor_api_error "Non-OK status: $api_status"
+        return 1
+    fi
+
+    local validator_info; validator_info=$(echo "$response_data" | jq -r ".validatorsInQueue[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+    local filtered_count; filtered_count=$(echo "$response_data" | jq -r '.filteredCount // 0')
+
+    if [[ -n "$validator_info" && "$filtered_count" -gt 0 ]]; then
+        local current_position queued_at withdrawer_address transaction_hash index
+        current_position=$(echo "$validator_info" | jq -r '.position')
+        queued_at=$(format_date "$(echo "$validator_info" | jq -r '.queuedAt')")
+        withdrawer_address=$(echo "$validator_info" | jq -r '.withdrawerAddress')
+        transaction_hash=$(echo "$validator_info" | jq -r '.transactionHash')
+        index=$(echo "$validator_info" | jq -r '.index')
+
+        if [[ "$last_position" != "$current_position" ]]; then
+            local message
+            if [[ -n "$last_position" ]]; then
+                message="📊 *Validator Position Update*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+🔄 *Change:* $last_position → $current_position
+📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
+🏷️ *Index:* $index
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+            else
+                message="🎉 *New Validator in Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+📌 *Initial Position:* $current_position
+📅 *Queued since:* $queued_at
+🏦 *Withdrawer:* \`$withdrawer_address\`
+🔗 *Transaction:* \`$transaction_hash\`
+🏷️ *Index:* $index
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+            fi
+            if send_telegram "$message"; then
+                log_message "Notification sent"
+            else
+                log_message "Failed to send notification"
+            fi
+            echo "$current_position" > "$LAST_POSITION_FILE"
+            log_message "Saved new position: $current_position"
+        else
+            log_message "Position unchanged: $current_position"
+        fi
+    else
+        log_message "Validator not found in queue"
+        if [[ -n "$last_position" ]]; then
+            # Формируем URL для активного набора в зависимости от сети
+            local active_url
+            if [[ "$NETWORK" == "mainnet" ]]; then
+                active_url="https://dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            else
+                active_url="https://${NETWORK}.dashtec.xyz/api/validators?page=1&limit=10&sortBy=rank&sortOrder=asc&search=${VALIDATOR_ADDRESS,,}"
+            fi
+
+            log_message "Checking active set: $active_url"
+            local active_response; active_response="$(cffi_http_get "$active_url" 2>/dev/null || echo "")"
+
+            if [[ -n "$active_response" ]] && echo "$active_response" | jq -e . >/dev/null 2>&1; then
+                local api_status_active=$(echo "$active_response" | jq -r '.status')
+
+                if [[ "$api_status_active" == "ok" ]]; then
+                    local active_validator; active_validator=$(echo "$active_response" | jq -r ".validators[] | select(.address? | ascii_downcase == \"${VALIDATOR_ADDRESS,,}\")")
+
+                    if [[ -n "$active_validator" ]]; then
+                        # Валидатор найден в активном наборе
+                        local status balance rank attestation_success proposal_success
+                        status=$(echo "$active_validator" | jq -r '.status')
+                        rank=$(echo "$active_validator" | jq -r '.rank')
+
+                        # Формируем ссылку для валидатора в зависимости от сети
+                        local validator_link
+                        if [[ "$NETWORK" == "mainnet" ]]; then
+                            validator_link="https://dashtec.xyz/validators"
+                        else
+                            validator_link="https://${NETWORK}.dashtec.xyz/validators"
+                        fi
+
+                        local message="✅ *Validator Moved to Active Set*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+🎉 *Status:* $status
+🏆 *Rank:* $rank
+⌛ *Last Queue Position:* $last_position
+🔗 *Validator Link:* $validator_link/$VALIDATOR_ADDRESS
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')"
+                        send_telegram "$message" && log_message "Active set notification sent"
+                    else
+                        # Формируем ссылку для очереди в зависимости от сети
+                        local queue_link
+                        if [[ "$NETWORK" == "mainnet" ]]; then
+                            queue_link="https://dashtec.xyz/queue"
+                        else
+                            queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                        fi
+
+                        # Валидатор не найден ни в очереди, ни в активном наборе
+                        local message="❌ *Validator Removed from Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+⚠️ *Possible reasons:*
+• Validator was removed from queue
+• Validator activation failed
+• Technical issue with the validator
+
+📊 Check queue: $queue_link"
+                        send_telegram "$message" && log_message "Removal notification sent"
+                    fi
+                else
+                    log_message "Active set API returned non-ok status: $api_status_active"
+                    # Формируем ссылку для очереди в зависимости от сети
+                    local queue_link
+                    if [[ "$NETWORK" == "mainnet" ]]; then
+                        queue_link="https://dashtec.xyz/queue"
+                    else
+                        queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                    fi
+
+                    # Не удалось проверить активный набор из-за статуса API
+                    local message="❌ *Validator No Longer in Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+ℹ️ *Note:* Could not verify active set status (API error)
+📊 Check status: $queue_link"
+                    send_telegram "$message" && log_message "General removal notification sent"
+                fi
+            else
+                # Формируем ссылку для очереди в зависимости от сети
+                local queue_link
+                if [[ "$NETWORK" == "mainnet" ]]; then
+                    queue_link="https://dashtec.xyz/queue"
+                else
+                    queue_link="https://${NETWORK}.dashtec.xyz/queue"
+                fi
+
+                # Не удалось получить ответ от API активного набора
+                local message="❌ *Validator No Longer in Queue*
+
+🔹 *Address:* \`$VALIDATOR_ADDRESS\`
+⌛ *Last Position:* $last_position
+⏳ *Checked at:* $(date '+%d.%m.%Y %H:%M UTC')
+
+ℹ️ *Note:* Could not verify active set status
+📊 Check status: $queue_link"
+                send_telegram "$message" && log_message "General removal notification sent"
+            fi
+
+            # Очищаем ресурсы в любом случае
+            rm -f "$LAST_POSITION_FILE"; log_message "Removed position file"
+            rm -f "$0"; log_message "Removed monitor script"
+            (crontab -l | grep -v "$0" | crontab - 2>/dev/null) || true
+            rm -f "$LOG_FILE"
+        fi
+    fi
+    return 0
+}
+
+main(){
+    log_message "===== Starting monitor cycle ====="
+    ( sleep 300; log_message "ERROR: Script timed out after 5 minutes"; kill -TERM $$ 2>/dev/null ) & TO_PID=$!
+    monitor_position; local ec=$?
+    kill "$TO_PID" 2>/dev/null || true
+    [[ $ec -ne 0 ]] && log_message "ERROR: exit $ec"
+    log_message "===== Monitor cycle completed ====="
+    return $ec
+}
+main >> "$LOG_FILE" 2>&1
+EOF
+    # substitute placeholders
+    sed -i "s|__ADDR__|$validator_address|g" "$MONITOR_DIR/$script_name"
+    sed -i "s|__NETWORK__|$network|g" "$MONITOR_DIR/$script_name"
+    sed -i "s|__MDIR__|$MONITOR_DIR|g" "$MONITOR_DIR/$script_name"
+    sed -i "s|__POSFILE__|$position_file|g" "$MONITOR_DIR/$script_name"
+    sed -i "s|__LOGFILE__|$log_file|g" "$MONITOR_DIR/$script_name"
+    sed -i "s|__TBOT__|${TELEGRAM_BOT_TOKEN-}|g" "$MONITOR_DIR/$script_name"
+    sed -i "s|__TCHAT__|${TELEGRAM_CHAT_ID-}|g" "$MONITOR_DIR/$script_name"
+
+    chmod +x "$MONITOR_DIR/$script_name"
+    if ! crontab -l 2>/dev/null | grep -q "$MONITOR_DIR/$script_name"; then
+        (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
+    fi
+    echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${NC}"
+    echo -e "${YELLOW}Note: Initial notification sent. Script includes safety timeouts.${NC}"
+    echo -e "${CYAN}Running initial test...${NC}"
+    timeout 60 "$MONITOR_DIR/$script_name" >/dev/null 2>&1 || true
+}
+
+# Функция для отображения списка активных мониторингов
+list_monitor_scripts() {
+    local MONITOR_DIR="$1"
+    local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
+
+    if [ ${#scripts[@]} -eq 0 ]; then
+        echo -e "${YELLOW}$(t "no_notifications")${NC}"
+        return
+    fi
+
+    echo -e "${BOLD}$(t "active_monitors")${NC}"
+    for script in "${scripts[@]}"; do
+        local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
+        echo -e "  ${CYAN}$address${NC}"
+    done
+}
+
+# Функция для получения списка валидаторов через GSE контракт
+get_validators_via_gse() {
+    local network="$1"
+    local ROLLUP_ADDRESS="$2"
+    local GSE_ADDRESS="$3"
+    
+    echo -e "${YELLOW}$(t "getting_validator_count")${NC}"
+
+    # Используем правильный RPC URL в зависимости от сети
+    local current_rpc="$RPC_URL"
+    if [[ "$network" == "mainnet" && -n "$ALT_RPC" ]]; then
+        current_rpc="$ALT_RPC"
+        echo -e "${YELLOW}Using mainnet RPC: $current_rpc${NC}"
+    fi
+
+    VALIDATOR_COUNT=$(cast call "$ROLLUP_ADDRESS" "getActiveAttesterCount()" --rpc-url "$current_rpc" | cast to-dec)
+
+    # Проверяем успешность выполнения и валидность результата
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to get validator count${NC}"
+        return 1
+    fi
+
+    if ! [[ "$VALIDATOR_COUNT" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Invalid validator count format: '$VALIDATOR_COUNT'${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Validator count: $VALIDATOR_COUNT${NC}"
+
+    echo -e "${YELLOW}$(t "getting_current_slot")${NC}"
+
+    SLOT=$(cast call "$ROLLUP_ADDRESS" "getCurrentSlot()" --rpc-url "$current_rpc" | cast to-dec)
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to get current slot${NC}"
+        return 1
+    fi
+
+    if ! [[ "$SLOT" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Invalid slot format: '$SLOT'${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Current slot: $SLOT${NC}"
+
+    echo -e "${YELLOW}$(t "deriving_timestamp")${NC}"
+
+    TIMESTAMP=$(cast call "$ROLLUP_ADDRESS" "getTimestampForSlot(uint256)" $SLOT --rpc-url "$current_rpc" | cast to-dec)
+
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Error: Failed to get timestamp for slot${NC}"
+        return 1
+    fi
+
+    if ! [[ "$TIMESTAMP" =~ ^[0-9]+$ ]]; then
+        echo -e "${RED}Error: Invalid timestamp format: '$TIMESTAMP'${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}Timestamp for slot $SLOT: $TIMESTAMP${NC}"
+
+    # Создаем массив индексов от 0 до VALIDATOR_COUNT-1
+    INDICES=()
+    for ((i=0; i<VALIDATOR_COUNT; i++)); do
+        INDICES+=("$i")
+    done
+
+    echo -e "${YELLOW}$(t "querying_attesters")${NC}"
+
+    # Инициализируем массив для всех адресов
+    local ALL_VALIDATOR_ADDRESSES=()
+    local BATCH_SIZE=3000
+    local TOTAL_BATCHES=$(( (VALIDATOR_COUNT + BATCH_SIZE - 1) / BATCH_SIZE ))
+
+    # Обрабатываем индексы партиями
+    for ((BATCH_START=0; BATCH_START<VALIDATOR_COUNT; BATCH_START+=BATCH_SIZE)); do
+        BATCH_END=$((BATCH_START + BATCH_SIZE - 1))
+        if [ $BATCH_END -ge $VALIDATOR_COUNT ]; then
+            BATCH_END=$((VALIDATOR_COUNT - 1))
+        fi
+
+        CURRENT_BATCH=$((BATCH_START / BATCH_SIZE + 1))
+        BATCH_INDICES=("${INDICES[@]:$BATCH_START:$BATCH_SIZE}")
+        BATCH_COUNT=${#BATCH_INDICES[@]}
+
+        echo -e "${GRAY}Processing batch $CURRENT_BATCH/$TOTAL_BATCHES (indices $BATCH_START-$BATCH_END, $BATCH_COUNT addresses)${NC}"
+
+        # Преобразуем массив в строку для передачи в cast call
+        INDICES_STR=$(printf "%s," "${BATCH_INDICES[@]}")
+        INDICES_STR="${INDICES_STR%,}"  # Убираем последнюю запятую
+
+        # Вызываем GSE контракт для получения списка валидаторов
+        VALIDATORS_RESPONSE=$(cast call "$GSE_ADDRESS" \
+            "getAttestersFromIndicesAtTime(address,uint256,uint256[])" \
+            "$ROLLUP_ADDRESS" "$TIMESTAMP" "[$INDICES_STR]" \
+            --rpc-url "$current_rpc")
+        local exit_code=$?
+
+        if [ $exit_code -ne 0 ]; then
+            echo -e "${RED}Error: GSE contract call failed for batch $CURRENT_BATCH with exit code $exit_code${NC}"
+            return 1
+        fi
+
+        if [ -z "$VALIDATORS_RESPONSE" ]; then
+            echo -e "${RED}Error: Empty response from GSE contract for batch $CURRENT_BATCH${NC}"
+            return 1
+        fi
+
+        # Парсим ABI-encoded динамический массив
+        # Убираем префикс 0x
+        RESPONSE_WITHOUT_PREFIX=${VALIDATORS_RESPONSE#0x}
+
+        # Извлекаем длину массива (первые 64 символа после смещения)
+        OFFSET_HEX=${RESPONSE_WITHOUT_PREFIX:0:64}
+        ARRAY_LENGTH_HEX=${RESPONSE_WITHOUT_PREFIX:64:64}
+
+        # Конвертируем hex в decimal
+        local ARRAY_LENGTH=$(printf "%d" "0x$ARRAY_LENGTH_HEX")
+
+        if [ $ARRAY_LENGTH -eq 0 ]; then
+            echo -e "${YELLOW}Warning: Empty validator array in batch $CURRENT_BATCH${NC}"
+            continue
+        fi
+
+        if [ $ARRAY_LENGTH -ne $BATCH_COUNT ]; then
+            echo -e "${YELLOW}Warning: Batch array length ($ARRAY_LENGTH) doesn't match batch count ($BATCH_COUNT)${NC}"
+        fi
+
+        # Извлекаем адреса из массива
+        local START_POS=$((64 + 64))  # Пропускаем offset и length (по 64 символа каждый)
+
+        for ((i=0; i<ARRAY_LENGTH; i++)); do
+            # Каждый адрес занимает 64 символа (32 bytes), но нам нужны только последние 40 символов (20 bytes)
+            ADDR_HEX=${RESPONSE_WITHOUT_PREFIX:$START_POS:64}
+            ADDR="0x${ADDR_HEX:24:40}"  # Берем последние 20 bytes (40 символов)
+
+            # Проверяем валидность адреса
+            if [[ "$ADDR" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+                ALL_VALIDATOR_ADDRESSES+=("$ADDR")
+            else
+                echo -e "${YELLOW}Warning: Invalid address format at batch position $i: '$ADDR'${NC}"
+            fi
+
+            START_POS=$((START_POS + 64))
+        done
+
+        echo -e "${GREEN}Batch $CURRENT_BATCH processed: ${#ALL_VALIDATOR_ADDRESSES[@]} total addresses so far${NC}"
+
+        # Небольшая задержка между батчами чтобы не перегружать RPC
+        if [ $CURRENT_BATCH -lt $TOTAL_BATCHES ]; then
+            sleep 1
+        fi
+    done
+
+    # Сохраняем результаты в глобальный массив (перезаписываем его)
+    VALIDATOR_ADDRESSES=("${ALL_VALIDATOR_ADDRESSES[@]}")
+
+    echo -e "${GREEN}$(t "found_validators") ${#VALIDATOR_ADDRESSES[@]}${NC}"
+
+    if [ ${#VALIDATOR_ADDRESSES[@]} -eq 0 ]; then
+        echo -e "${RED}Error: No valid validator addresses found${NC}"
+        return 1
+    fi
+
+    return 0
+}
+
+fast_load_validators() {
+    local network="$1"
+    local ROLLUP_ADDRESS="$2"
+    
+    echo -e "\n${YELLOW}$(t "loading_validators")${NC}"
+
+    # Используем правильный RPC URL в зависимости от сети
+    local current_rpc="$RPC_URL"
+    if [[ "$network" == "mainnet" && -n "$ALT_RPC" ]]; then
+        current_rpc="$ALT_RPC"
+    fi
+
+    echo -e "${YELLOW}Using RPC: $current_rpc${NC}"
+
+    # Обрабатываем валидаторов последовательно
+    for ((i=0; i<VALIDATOR_COUNT; i++)); do
+        local validator="${VALIDATOR_ADDRESSES[i]}"
+        echo -e "${GRAY}Processing: $validator${NC}"
+
+        # Получаем данные getAttesterView
+        response=$(cast call "$ROLLUP_ADDRESS" "getAttesterView(address)" "$validator" --rpc-url "$current_rpc" 2>/dev/null)
+
+        if [[ $? -ne 0 || -z "$response" || ${#response} -lt 130 ]]; then
+            echo -e "${RED}Error getting data for: $validator${NC}"
+            continue
+        fi
+
+        # Парсим данные из getAttesterView
+        data=${response:2}  # Убираем префикс 0x
+
+        # Извлекаем статус (первые 64 символа)
+        status_hex=${data:0:64}
+
+        # Извлекаем стейк (следующие 64 символа)
+        stake_hex=${data:64:64}
+
+        # Извлекаем withdrawer из конца ответа (последние 64 символа)
+        withdrawer_hex=${data: -64}  # Последние 64 символа
+        withdrawer="0x${withdrawer_hex:24:40}"  # Берем последние 20 bytes (40 символов)
+
+        # Проверяем валидность адреса withdrawer
+        if [[ ! "$withdrawer" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+            echo -e "${YELLOW}Warning: Invalid withdrawer format for $validator, using zero address${NC}"
+            withdrawer="0x0000000000000000000000000000000000000000"
+        fi
+
+        # Получаем информацию о ревардах
+        rewards_response=$(cast call "$ROLLUP_ADDRESS" "getSequencerRewards(address)" "$validator" --rpc-url "$current_rpc" 2>/dev/null)
+        if [[ $? -eq 0 && -n "$rewards_response" ]]; then
+            rewards_decimal=$(echo "$rewards_response" | cast --to-dec 2>/dev/null)
+            rewards_wei=$(echo "$rewards_decimal" | cast --from-wei 2>/dev/null)
+            # Оставляем только целую часть
+            rewards=$(echo "$rewards_wei" | cut -d. -f1)
+        else
+            rewards="0"
+        fi
+
+        # Преобразуем hex в decimal с использованием вспомогательных функций
+        status=$(hex_to_dec "$status_hex")
+        stake_decimal=$(hex_to_dec "$stake_hex")
+        stake=$(wei_to_token "$stake_decimal")
+
+        # Безопасное получение статуса и цвета
+        local status_text="${STATUS_MAP[$status]:-UNKNOWN}"
+        local status_color="${STATUS_COLOR[$status]:-$NC}"
+
+        # Добавляем в результаты
+        RESULTS+=("$validator|$stake|$withdrawer|$rewards|$status|$status_text|$status_color")
+    done
+
+    echo -e "${GREEN}Successfully loaded: ${#RESULTS[@]}/$VALIDATOR_COUNT validators${NC}"
+}
+
+# Функция для удаления мониторинга
+remove_monitor_scripts() {
+    local MONITOR_DIR="$1"
+    local scripts=($(ls "$MONITOR_DIR"/monitor_*.sh 2>/dev/null))
+
+    if [ ${#scripts[@]} -eq 0 ]; then
+        echo -e "${YELLOW}$(t "no_notifications")${NC}"
+        return
+    fi
+
+    echo -e "\n${YELLOW}$(t "select_monitor_to_remove")${NC}"
+    echo -e "1. $(t "remove_all")"
+
+    local i=2
+    declare -A script_map
+    for script in "${scripts[@]}"; do
+        local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
+        echo -e "$i. $address"
+        script_map[$i]="$script|$address"
+        ((i++))
+    done
+
+    echo ""
+    read -p "$(t "enter_choice"): " choice
+
+    case $choice in
+        1)
+            # Удаление всех скриптов мониторинга
+            for script in "${scripts[@]}"; do
+                local address=$(grep -oP 'VALIDATOR_ADDRESS="\K[^"]+' "$script")
+                local base_name=$(basename "$script" .sh)
+                local log_file="$MONITOR_DIR/${base_name}.log"
+                local position_file="$MONITOR_DIR/last_position_${base_name#monitor_}.txt"
+
+                # Удаляем из crontab
+                (crontab -l | grep -v "$script" | crontab - 2>/dev/null) || true
+
+                # Удаляем файлы
+                rm -f "$script" "$log_file" "$position_file"
+
+                echo -e "${GREEN}$(t "monitor_removed" "$address")${NC}"
+            done
+            echo -e "${GREEN}$(t "all_monitors_removed")${NC}"
+            ;;
+        [2-9]|1[0-9])
+            # Удаление конкретного монитора
+            if [[ -n "${script_map[$choice]}" ]]; then
+                IFS='|' read -r script address <<< "${script_map[$choice]}"
+                local base_name=$(basename "$script" .sh)
+                local log_file="$MONITOR_DIR/${base_name}.log"
+                local position_file="$MONITOR_DIR/last_position_${base_name#monitor_}.txt"
+
+                # Удаляем из crontab
+                (crontab -l | grep -v "$script" | crontab - 2>/dev/null) || true
+
+                # Удаляем файлы
+                rm -f "$script" "$log_file" "$position_file"
+
+                echo -e "${GREEN}$(t "monitor_removed" "$address")${NC}"
+            else
+                echo -e "${RED}$(t "invalid_choice")${NC}"
+            fi
+            ;;
+        *)
+            echo -e "${RED}$(t "invalid_choice")${NC}"
+            ;;
+    esac
+}
+
+# Основная функция для запуска check-validator (merged from check-validator.sh main code)
+check_validator_main() {
+    local network=$(get_network_for_validator)
+    
+    # Выбор адресов в зависимости от сети
+    local ROLLUP_ADDRESS
+    local GSE_ADDRESS
+    local QUEUE_URL
+    if [[ "$network" == "mainnet" ]]; then
+        ROLLUP_ADDRESS="$ROLLUP_ADDRESS_MAINNET"
+        GSE_ADDRESS="$GSE_ADDRESS_MAINNET"
+        QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
+    else
+        ROLLUP_ADDRESS="$ROLLUP_ADDRESS_TESTNET"
+        GSE_ADDRESS="$GSE_ADDRESS_TESTNET"
+        QUEUE_URL="https://${network}.dashtec.xyz/api/sequencers/queue"
+    fi
+    
+    local MONITOR_DIR="$HOME/aztec-monitor-agent"
+    
+    # Загружаем конфигурацию RPC
+    if ! load_rpc_config; then
+        return 1
+    fi
+    
+    # Глобальная переменная для отслеживания использования резервного RPC
+    USING_BACKUP_RPC=false
+    
+    # Глобальная переменная для хранения количества найденных в очереди валидаторов
+    QUEUE_FOUND_COUNT=0
+    
+    # Глобальный массив для хранения адресов валидаторов, найденных в очереди
+    declare -a QUEUE_FOUND_ADDRESSES=()
+    
+    declare -A STATUS_MAP=(
+        [0]=$(t "status_0")
+        [1]=$(t "status_1")
+        [2]=$(t "status_2")
+        [3]=$(t "status_3")
+    )
+    
+    declare -A STATUS_COLOR=(
+        [0]="$GRAY"
+        [1]="$GREEN"
+        [2]="$YELLOW"
+        [3]="$RED"
+    )
+    
+    echo -e "${BOLD}$(t "fetching_validators") ${CYAN}$ROLLUP_ADDRESS${NC}..."
+    
+    # Используем функцию для получения списка валидаторов через GSE контракт
+    if ! get_validators_via_gse "$network" "$ROLLUP_ADDRESS" "$GSE_ADDRESS"; then
+        echo -e "${RED}Error: Failed to fetch validators using GSE contract method${NC}"
+        return 1
+    fi
+    
+    echo "----------------------------------------"
+    
+    # Запрашиваем адреса валидаторов для проверки
+    echo ""
+    echo -e "${BOLD}Enter validator addresses to check (comma separated):${NC}"
+    read -p "> " input_addresses
+    
+    # Парсим введенные адреса
+    IFS=',' read -ra INPUT_ADDRESSES <<< "$input_addresses"
+    
+    # Очищаем адреса от пробелов и проверяем их наличие в общем списке
+    declare -a VALIDATOR_ADDRESSES_TO_CHECK=()
+    declare -a QUEUE_VALIDATORS=()
+    declare -a NOT_FOUND_ADDRESSES=()
+    found_count=0
+    not_found_count=0
+    
+    # Сначала проверяем все адреса в активных валидаторах
+    for address in "${INPUT_ADDRESSES[@]}"; do
+        # Очищаем адрес от пробелов
+        clean_address=$(echo "$address" | tr -d ' ')
+        
+        # Проверяем, есть ли адрес в общем списке
+        found=false
+        for validator in "${VALIDATOR_ADDRESSES[@]}"; do
+            if [[ "${validator,,}" == "${clean_address,,}" ]]; then
+                VALIDATOR_ADDRESSES_TO_CHECK+=("$validator")
+                found=true
+                found_count=$((found_count + 1))
+                echo -e "${GREEN}✓ Found in active validators: $validator${NC}"
+                break
+            fi
+        done
+        
+        if ! $found; then
+            NOT_FOUND_ADDRESSES+=("$clean_address")
+        fi
+    done
+    
+    # Теперь проверяем не найденные адреса в очереди (пакетно)
+    found_in_queue_count=0
+    if [ ${#NOT_FOUND_ADDRESSES[@]} -gt 0 ]; then
+        echo -e "\n${YELLOW}$(t "validator_not_in_set")${NC}"
+        
+        # Используем новую функцию для пакетной проверки в очереди
+        check_validator_queue "${NOT_FOUND_ADDRESSES[@]}"
+        # Функция устанавливает глобальную переменную QUEUE_FOUND_COUNT
+        found_in_queue_count=$QUEUE_FOUND_COUNT
+        
+        not_found_count=$((${#NOT_FOUND_ADDRESSES[@]} - found_in_queue_count))
+    fi
+    
+    # Показываем общую сводку
+    echo -e "\n${CYAN}=== Search Summary ===${NC}"
+    echo -e "Found in active validators: ${GREEN}$found_count${NC}"
+    echo -e "Found in queue: ${YELLOW}$found_in_queue_count${NC}"
+    echo -e "Not found anywhere: ${RED}$not_found_count${NC}"
+    
+    # Обрабатываем активных валидаторов
+    if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -gt 0 ]]; then
+        echo -e "\n${GREEN}=== Active Validators Details ===${NC}"
+        
+        # Запускаем быструю загрузку для активных валидаторов
+        declare -a RESULTS
+        
+        # Временно заменяем массив для обработки только выбранных валидаторов
+        ORIGINAL_VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES[@]}")
+        ORIGINAL_VALIDATOR_COUNT=$VALIDATOR_COUNT
+        VALIDATOR_ADDRESSES=("${VALIDATOR_ADDRESSES_TO_CHECK[@]}")
+        VALIDATOR_COUNT=${#VALIDATOR_ADDRESSES_TO_CHECK[@]}
+        
+        # Запускаем быструю загрузку
+        fast_load_validators "$network" "$ROLLUP_ADDRESS"
+        
+        # Восстанавливаем оригинальный массив
+        VALIDATOR_ADDRESSES=("${ORIGINAL_VALIDATOR_ADDRESSES[@]}")
+        VALIDATOR_COUNT=$ORIGINAL_VALIDATOR_COUNT
+        
+        # Показываем результат
+        echo ""
+        echo -e "${BOLD}Validator results (${#RESULTS[@]} total):${NC}"
+        echo "----------------------------------------"
+        for line in "${RESULTS[@]}"; do
+            IFS='|' read -r validator stake withdrawer rewards status status_text status_color <<< "$line"
+            echo -e "${BOLD}$(t "address"):${NC} $validator"
+            echo -e "  ${BOLD}$(t "stake"):${NC} $stake STK"
+            echo -e "  ${BOLD}$(t "withdrawer"):${NC} $withdrawer"
+            echo -e "  ${BOLD}$(t "rewards"):${NC} $rewards STK"
+            echo -e "  ${BOLD}$(t "status"):${NC} ${status_color}$status ($status_text)${NC}"
+            echo -e ""
+            echo "----------------------------------------"
+        done
+    fi
+    
+    # Обрабатываем валидаторов из очереди (только если они не были уже показаны)
+    if [[ ${#QUEUE_FOUND_ADDRESSES[@]} -gt 0 ]]; then
+        echo -e "\n${YELLOW}=== Queue Validators Available for Monitoring ===${NC}"
+        
+        # Предлагаем добавить в мониторинг
+        echo -e "${BOLD}Would you like to add these validators to queue monitoring?${NC}"
+        read -p "Enter 'yes' to add all, or 'no' to skip: " add_to_monitor
+        
+        if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
+            # Создаем мониторы для всех валидаторов из очереди
+            for validator in "${QUEUE_FOUND_ADDRESSES[@]}"; do
+                echo -e "\n${YELLOW}$(t "processing_address" "$validator")${NC}"
+                create_monitor_script "$validator" "$network" "$MONITOR_DIR" "$QUEUE_URL"
+            done
+            echo -e "${GREEN}All queue validators added to monitoring.${NC}"
+        else
+            echo -e "${YELLOW}Skipping queue monitoring setup.${NC}"
+        fi
+    fi
+    
+    if [[ ${#VALIDATOR_ADDRESSES_TO_CHECK[@]} -eq 0 && ${#QUEUE_FOUND_ADDRESSES[@]} -eq 0 ]]; then
+        echo -e "${RED}No valid addresses to check.${NC}"
+    fi
+}
+
 # === Check validator ===
 function check_validator {
-  # Security: Use local file instead of remote execution to prevent supply chain attacks
-  LOCAL_CHECK_VALIDATOR="$SCRIPT_DIR/aztec-script-files/check-validator.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_validator_script")${NC}"
   echo -e ""
+  
+  check_validator_main || echo -e "${RED}$(t "failed_run_validator")${NC}"
+}
 
-  # Передаем текущий язык как аргумент
-  if [ -f "$LOCAL_CHECK_VALIDATOR" ]; then
-    bash "$LOCAL_CHECK_VALIDATOR" "$LANG" || echo -e "${RED}$(t "failed_run_validator")${NC}"
-  else
-    echo -e "${RED}Error: check-validator.sh not found at $LOCAL_CHECK_VALIDATOR${NC}"
-  fi
+# === Main installation function (merged from install_aztec.sh) ===
+install_aztec_node_main() {
+    set -e
+    
+    # Вызываем проверку портов
+    check_and_set_ports || return 2
+
+    echo -e "\n${GREEN}$(t "installing_deps")${NC}"
+    sudo apt update
+    sudo apt install curl iptables build-essential git wget lz4 jq make gcc nano automake autoconf tmux htop nvme-cli libgbm1 pkg-config libssl-dev libleveldb-dev tar clang bsdmainutils ncdu unzip libleveldb-dev -y
+
+    echo -e "\n${GREEN}$(t "deps_installed")${NC}"
+
+    echo -e "\n${GREEN}$(t "checking_docker")${NC}"
+
+    if ! command -v docker &>/dev/null; then
+        echo -e "\n${RED}$(t "docker_not_found")${NC}"
+        read -p "\n$(t "install_docker_prompt")" -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            install_docker
+        else
+            echo -e "\n${RED}$(t "docker_required")${NC}"
+            return 1
+        fi
+    fi
+
+    if ! docker compose version &>/dev/null; then
+        echo -e "\n${RED}$(t "docker_compose_not_found")${NC}"
+        read -p "\n$(t "install_compose_prompt")" -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            install_docker_compose
+        else
+            echo -e "\n${RED}$(t "compose_required")${NC}"
+            return 1
+        fi
+    fi
+
+    echo -e "\n${GREEN}$(t "docker_found")${NC}"
+
+    echo -e "\n${GREEN}$(t "installing_aztec")${NC}"
+    echo -e "${YELLOW}$(t "warn_orig_install") ${NC}$(t "warn_orig_install_2")${NC}"
+    sleep 5
+    curl -s https://install.aztec.network -o install-aztec.sh
+    chmod +x install-aztec.sh
+    bash install-aztec.sh
+
+    echo 'export PATH="$HOME/.aztec/bin:$PATH"' >> ~/.bash_profile
+    source ~/.bash_profile
+
+    if ! command -v aztec &>/dev/null; then
+        echo -e "\n${RED}$(t "aztec_not_installed")${NC}"
+        return 1
+    fi
+
+    echo -e "\n${GREEN}$(t "aztec_installed")${NC}"
+
+    # Обновляем настройки firewall
+    # Проверяем, установлен ли ufw
+    if ! command -v ufw >/dev/null 2>&1; then
+      echo -e "\n${YELLOW}$(t "ufw_not_installed")${NC}"
+    else
+      # Проверяем, активен ли ufw
+      if sudo ufw status | grep -q "inactive"; then
+        echo -e "\n${YELLOW}$(t "ufw_not_active")${NC}"
+      else
+        # Обновляем настройки firewall
+        echo -e "\n${GREEN}$(t "opening_ports")${NC}"
+        sudo ufw allow "$p2p_port"
+        sudo ufw allow "$http_port"
+        echo -e "\n${GREEN}$(t "ports_opened")${NC}"
+      fi
+    fi
+
+    # Create Aztec node folder and files
+    echo -e "\n${GREEN}$(t "creating_folder")${NC}"
+    mkdir -p "$HOME/aztec"
+    cd "$HOME/aztec"
+
+    # Ask if user wants to run single or multiple validators
+    echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
+    read -p "$(t "multiple_validators_prompt")" -n 1 -r
+    echo
+
+    # Store the response for validator mode selection
+    VALIDATOR_MODE_REPLY=$REPLY
+
+    # Initialize arrays for keys and addresses
+    VALIDATOR_PRIVATE_KEYS_ARRAY=()
+    VALIDATOR_ADDRESSES_ARRAY=()
+    VALIDATOR_BLS_PRIVATE_KEYS_ARRAY=()
+    VALIDATOR_BLS_PUBLIC_KEYS_ARRAY=()
+    USE_FIRST_AS_PUBLISHER=false
+    HAS_BLS_KEYS=false
+
+    # Ask if user has BLS keys
+    read -p "$(t "has_bls_keys") " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        HAS_BLS_KEYS=true
+        echo -e "${GREEN}BLS keys will be added to configuration${NC}"
+    fi
+
+    # Use the stored response for validator mode selection
+    if [[ $VALIDATOR_MODE_REPLY =~ ^[Yy]$ ]]; then
+        echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
+
+        if [ "$HAS_BLS_KEYS" = true ]; then
+            # Get multiple validator key-address-bls data
+            echo -e "${YELLOW}$(t "multi_validator_format")${NC}"
+            for i in {1..10}; do
+                read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_BLS_PAIR
+                if [ -z "$KEY_ADDRESS_BLS_PAIR" ]; then
+                    break
+                fi
+
+                # Split the input into private key, address, private bls, and public bls
+                IFS=',' read -r PRIVATE_KEY ADDRESS PRIVATE_BLS PUBLIC_BLS <<< "$KEY_ADDRESS_BLS_PAIR"
+
+                # Remove any spaces and ensure private key starts with 0x
+                PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+                if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+                    PRIVATE_KEY="0x$PRIVATE_KEY"
+                fi
+
+                # Remove any spaces from address
+                ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+                # Remove any spaces from BLS keys
+                PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
+                PUBLIC_BLS=$(echo "$PUBLIC_BLS" | tr -d ' ')
+
+                VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+                VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+                VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
+                VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("$PUBLIC_BLS")
+
+                echo -e "${GREEN}Added validator $i with BLS keys${NC}"
+            done
+        else
+            # Get multiple validator key-address pairs (original logic)
+            echo -e "${YELLOW}Enter validator private keys and addresses (up to 10, format: private_key,address):${NC}"
+            for i in {1..10}; do
+                read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_PAIR
+                if [ -z "$KEY_ADDRESS_PAIR" ]; then
+                    break
+                fi
+
+                # Split the input into private key and address
+                IFS=',' read -r PRIVATE_KEY ADDRESS <<< "$KEY_ADDRESS_PAIR"
+
+                # Remove any spaces and ensure private key starts with 0x
+                PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+                if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+                    PRIVATE_KEY="0x$PRIVATE_KEY"
+                fi
+
+                # Remove any spaces from address
+                ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+                VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+                VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+                # Add empty BLS keys for consistency
+                VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("")
+                VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("")
+            done
+        fi
+
+        # Ask if user wants to use first address as publisher for all validators
+        echo ""
+        read -p "Use first address as publisher for all validators? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            USE_FIRST_AS_PUBLISHER=true
+            echo -e "${GREEN}Using first address as publisher for all validators${NC}"
+        else
+            echo -e "${GREEN}Each validator will use their own address as publisher${NC}"
+        fi
+
+    else
+        echo -e "\n${GREEN}$(t "single_validator_mode")${NC}"
+
+        # Get single validator key-address pair
+        read -p "$(t "enter_validator_key") " PRIVATE_KEY
+        read -p "Enter validator address: " ADDRESS
+
+        # Remove any spaces and ensure private key starts with 0x
+        PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+        if [[ ! "$PRIVATE_KEY" =~ ^0x ]]; then
+            PRIVATE_KEY="0x$PRIVATE_KEY"
+        fi
+
+        # Remove any spaces from address
+        ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+
+        VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+        VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+
+        if [ "$HAS_BLS_KEYS" = true ]; then
+            # Get BLS keys for single validator
+            read -p "$(t "single_validator_bls_private") " PRIVATE_BLS
+            read -p "$(t "single_validator_bls_public") " PUBLIC_BLS
+
+            # Remove any spaces from BLS keys
+            PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
+            PUBLIC_BLS=$(echo "$PUBLIC_BLS" | tr -d ' ')
+
+            VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
+            VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("$PUBLIC_BLS")
+            echo -e "${GREEN}$(t "bls_keys_added")${NC}"
+        else
+            # Add empty BLS keys for consistency
+            VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("")
+            VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("")
+        fi
+
+        USE_FIRST_AS_PUBLISHER=true  # For single validator, always use own address
+    fi
+
+    # Ask for Aztec L2 Address for feeRecipient и COINBASE
+    echo -e "\n${YELLOW}Enter Aztec L2 Address to use as feeRecipient for all validators:${NC}"
+    read -p "Aztec L2 Address: " FEE_RECIPIENT_ADDRESS
+    FEE_RECIPIENT_ADDRESS=$(echo "$FEE_RECIPIENT_ADDRESS" | tr -d ' ')
+
+    # Добавляем запрос COINBASE сразу после Aztec L2 Address
+    read -p "COINBASE: " COINBASE
+    COINBASE=$(echo "$COINBASE" | tr -d ' ')
+
+    # Create keys directory and separate YML files
+    echo -e "\n${GREEN}Creating key files...${NC}"
+    mkdir -p "$HOME/aztec/keys"
+
+    for i in "${!VALIDATOR_PRIVATE_KEYS_ARRAY[@]}"; do
+        # Create SECP256K1 YML file for validator
+        KEY_FILE="$HOME/aztec/keys/validator_$((i+1)).yml"
+        cat > "$KEY_FILE" <<EOF
+type: "file-raw"
+keyType: "SECP256K1"
+privateKey: "${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
+EOF
+        echo -e "${GREEN}Created SECP256K1 key file: $KEY_FILE${NC}"
+
+        if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}" ]; then
+            # Create separate BLS YML file
+            BLS_KEY_FILE="$HOME/aztec/keys/bls_validator_$((i+1)).yml"
+            cat > "$BLS_KEY_FILE" <<EOF
+type: "file-raw"
+keyType: "BN254"
+privateKey: "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}"
+EOF
+            echo -e "${GREEN}Created BLS key file: $BLS_KEY_FILE${NC}"
+        fi
+    done
+
+    # Create config directory and keystore.json
+    echo -e "\n${GREEN}Creating keystore configuration...${NC}"
+    mkdir -p "$HOME/aztec/config"
+
+    # Prepare validators array for keystore.json
+    VALIDATORS_JSON_ARRAY=()
+    for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+        address="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
+
+        if [ "$USE_FIRST_AS_PUBLISHER" = true ] && [ $i -gt 0 ]; then
+            # Use first address as publisher for all other validators
+            publisher="${VALIDATOR_ADDRESSES_ARRAY[0]}"
+        else
+            # Use own address as publisher
+            publisher="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
+        fi
+
+        if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}" ]; then
+            # Create validator JSON with BLS key
+            VALIDATOR_JSON=$(cat <<EOF
+{
+      "attester": {
+        "eth": "$address",
+        "bls": "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}"
+      },
+      "publisher": ["$publisher"],
+      "coinbase": "$COINBASE",
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
+    }
+EOF
+            )
+        else
+            # Create validator JSON without BLS key (original format)
+            VALIDATOR_JSON=$(cat <<EOF
+{
+      "attester": {
+        "eth": "$address"
+      },
+      "publisher": ["$publisher"],
+      "coinbase": "$COINBASE",
+      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
+    }
+EOF
+            )
+        fi
+        VALIDATORS_JSON_ARRAY+=("$VALIDATOR_JSON")
+    done
+
+    # Join validators array with commas
+    VALIDATORS_JSON_STRING=$(IFS=,; echo "${VALIDATORS_JSON_ARRAY[*]}")
+
+    # Create keystore.json with updated schema
+    cat > "$HOME/aztec/config/keystore.json" <<EOF
+{
+  "schemaVersion": 1,
+  "remoteSigner": "http://127.0.0.1:10500",
+  "validators": [
+    $VALIDATORS_JSON_STRING
+  ]
+}
+EOF
+
+    echo -e "${GREEN}Created keystore.json configuration${NC}"
+
+    DEFAULT_IP=$(curl -s https://api.ipify.org || curl -s https://ifconfig.me)
+
+    echo -e "\n${GREEN}$(t "creating_env")${NC}"
+    read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
+    read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
+
+    # Create .env file без COINBASE
+    cat > .env <<EOF
+ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
+CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
+P2P_IP=${DEFAULT_IP}
+EOF
+
+    # Запрашиваем выбор сети
+    echo -e "\n${GREEN}$(t "select_network")${NC}"
+    echo "1) $(t "mainnet")"
+    echo "2) $(t "testnet")"
+    read -p "$(t "enter_choice") " network_choice
+
+    case $network_choice in
+        1)
+            NETWORK="mainnet"
+            DATA_DIR="$HOME/.aztec/mainnet/data/"
+            ;;
+        2)
+            NETWORK="testnet"
+            DATA_DIR="$HOME/.aztec/testnet/data/"
+            ;;
+        *)
+            echo -e "\n${RED}$(t "invalid_choice")${NC}"
+            return 1
+            ;;
+    esac
+
+    echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}$NETWORK${NC}"
+
+    # Сохраняем/обновляем NETWORK в файле .env-aztec-agent
+    ENV_FILE="$HOME/.env-aztec-agent"
+
+    # Если файл существует, обновляем переменную NETWORK
+    if [ -f "$ENV_FILE" ]; then
+        # Если NETWORK уже существует в файле, заменяем её значение
+        if grep -q "^NETWORK=" "$ENV_FILE"; then
+            sed -i "s/^NETWORK=.*/NETWORK=$NETWORK/" "$ENV_FILE"
+        else
+            # Если NETWORK нет, добавляем в конец файла
+            printf 'NETWORK=%s\n' "$NETWORK" >> "$ENV_FILE"
+        fi
+    else
+        # Если файла нет, создаем его с переменной NETWORK
+        printf 'NETWORK=%s\n' "$NETWORK" > "$ENV_FILE"
+    fi
+
+    echo -e "${GREEN}Network saved to $ENV_FILE${NC}"
+
+    # Создаем docker-compose.yml
+    echo -e "\n${GREEN}$(t "creating_compose")${NC}"
+
+    cat > docker-compose.yml <<EOF
+services:
+  aztec-node:
+    container_name: aztec-sequencer
+    networks:
+      - aztec
+    image: aztecprotocol/aztec:latest
+    restart: unless-stopped
+    environment:
+      ETHEREUM_HOSTS: \${ETHEREUM_RPC_URL}
+      L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
+      DATA_DIRECTORY: /data
+      KEY_STORE_DIRECTORY: /config
+      P2P_IP: \${P2P_IP}
+      LOG_LEVEL: info;debug:node:sentinel
+      AZTEC_PORT: ${http_port}
+      AZTEC_ADMIN_PORT: 8880
+    entrypoint: >
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --network $NETWORK'
+    ports:
+      - ${p2p_port}:${p2p_port}/tcp
+      - ${p2p_port}:${p2p_port}/udp
+      - ${http_port}:${http_port}
+    volumes:
+      - $DATA_DIR:/data
+      - $HOME/aztec/config:/config
+    labels:
+      - com.centurylinklabs.watchtower.enable=true
+networks:
+  aztec:
+    name: aztec
+EOF
+
+    echo -e "\n${GREEN}$(t "compose_created")${NC}"
+
+    # Check if Watchtower is already installed
+    if [ -d "$HOME/watchtower" ]; then
+        echo -e "\n${GREEN}$(t "watchtower_exists")${NC}"
+    else
+        # Create Watchtower folder and files
+        echo -e "\n${GREEN}$(t "installing_watchtower")${NC}"
+        mkdir -p "$HOME/watchtower"
+        cd "$HOME/watchtower"
+
+        # Ask for Telegram notification settings
+        echo -e "\n${YELLOW}Telegram notification settings for Watchtower:${NC}"
+        read -p "$(t "enter_tg_token") " TG_TOKEN
+        read -p "$(t "enter_tg_chat_id") " TG_CHAT_ID
+
+        # Create .env file for Watchtower
+        cat > .env <<EOF
+TG_TOKEN=${TG_TOKEN}
+TG_CHAT_ID=${TG_CHAT_ID}
+WATCHTOWER_NOTIFICATION_URL=telegram://${TG_TOKEN}@telegram?channels=${TG_CHAT_ID}&parseMode=html
+EOF
+
+        echo -e "\n${GREEN}$(t "env_created")${NC}"
+
+        echo -e "\n${GREEN}$(t "creating_watchtower_compose")${NC}"
+        cat > docker-compose.yml <<EOF
+services:
+  watchtower:
+    image: nickfedor/watchtower:latest
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env_file:
+      - .env
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_POLL_INTERVAL=3600
+      - WATCHTOWER_NOTIFICATIONS=shoutrrr
+      - WATCHTOWER_NOTIFICATION_URL
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_LABEL_ENABLE=true
+EOF
+
+        echo -e "\n${GREEN}$(t "compose_created")${NC}"
+    fi
+
+    # Download and run web3signer before starting the node
+    echo -e "\n${GREEN}Downloading and starting web3signer...${NC}"
+    docker pull consensys/web3signer:latest
+
+    # Stop and remove existing web3signer container if it exists
+    docker stop web3signer 2>/dev/null || true
+    docker rm web3signer 2>/dev/null || true
+
+    # Run web3signer container
+    docker run -d --name web3signer --restart unless-stopped \
+      -p 127.0.0.1:10500:10500 \
+      -v $HOME/aztec/keys:/keys \
+      consensys/web3signer:latest \
+      --http-listen-host=0.0.0.0 \
+      --http-listen-port=10500 \
+      --http-host-allowlist="*" \
+      --key-store-path=/keys \
+      eth1 --chain-id=11155111
+
+    echo -e "${GREEN}web3signer started successfully${NC}"
+
+    # Wait a moment for web3signer to initialize
+    echo -e "${YELLOW}Waiting for web3signer to initialize...${NC}"
+    sleep 5
+
+    echo -e "\n${GREEN}$(t "starting_node")${NC}"
+    cd "$HOME/aztec"
+    docker compose up -d
+
+    # Start Watchtower if it exists
+    if [ -d "$HOME/watchtower" ]; then
+        cd "$HOME/watchtower"
+        docker compose up -d
+    fi
+
+    echo -e "\n${YELLOW}$(t "showing_logs")${NC}"
+    echo -e "${YELLOW}$(t "logs_starting")${NC}"
+    sleep 5
+    echo -e ""
+    cd "$HOME/aztec"
+    docker compose logs -fn 200
+    
+    set +e
 }
 
 # === Install Aztec node ===
 function install_aztec {
-  # Security: Use local file instead of remote download to prevent supply chain attacks
-  LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
   echo -e ""
   echo -e "${CYAN}$(t "running_install_node")${NC}"
   echo -e ""
 
-  if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
-    echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
-    return 1
-  fi
-
   # Запускаем с обработкой Ctrl+C и других кодов возврата
-  bash "$LOCAL_INSTALL_SCRIPT" "$LANG"
+  install_aztec_node_main
   EXIT_CODE=$?
 
   case $EXIT_CODE in
@@ -3550,47 +6036,17 @@ function install_aztec {
 
 # === Delete Aztec node ===
 function delete_aztec() {
-    # Security: Use local file instead of remote execution to prevent supply chain attacks
-    local LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
-    local FUNCTION_NAME="delete_aztec_node"
-
-    if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
-        echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
-        return 1
-    fi
-
-    # Загружаем функцию из локального скрипта и выполняем
-    source <(sed -n "/^$FUNCTION_NAME()/,/^}/p" "$LOCAL_INSTALL_SCRIPT"; echo "$FUNCTION_NAME")
+    delete_aztec_node
 }
 
 # === Update Aztec node ===
 function update_aztec() {
-    # Security: Use local file instead of remote execution to prevent supply chain attacks
-    local LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
-    local FUNCTION_NAME="update_aztec_node"
-
-    if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
-        echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
-        return 1
-    fi
-
-    # Загружаем функцию из локального скрипта и выполняем
-    source <(sed -n "/^$FUNCTION_NAME()/,/^}/p" "$LOCAL_INSTALL_SCRIPT"; echo "$FUNCTION_NAME")
+    update_aztec_node
 }
 
 # === Downgrade Aztec node ===
 function downgrade_aztec() {
-    # Security: Use local file instead of remote execution to prevent supply chain attacks
-    local LOCAL_INSTALL_SCRIPT="$SCRIPT_DIR/aztec-script-files/install_aztec.sh"
-    local FUNCTION_NAME="downgrade_aztec_node"
-
-    if [ ! -f "$LOCAL_INSTALL_SCRIPT" ]; then
-        echo -e "${RED}Error: install_aztec.sh not found at $LOCAL_INSTALL_SCRIPT${NC}"
-        return 1
-    fi
-
-    # Загружаем функцию из локального скрипта и выполняем
-    source <(sed -n "/^$FUNCTION_NAME()/,/^}/p" "$LOCAL_INSTALL_SCRIPT"; echo "$FUNCTION_NAME")
+    downgrade_aztec_node
 }
 
 
