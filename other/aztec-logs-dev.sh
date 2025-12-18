@@ -2384,7 +2384,7 @@ check_updates_safely() {
 # === Безопасная проверка обновлений error_definitions.json ===
 check_error_definitions_updates_safely() {
   echo -e "\n${BLUE}=== $(t "safe_error_def_update_check") ===${NC}"
-  echo -e "${YELLOW}$(t "error_def_update_warning")${NC}"
+  echo -e "\n${YELLOW}$(t "error_def_update_warning")${NC}"
   echo -e "${YELLOW}$(t "file_not_executed_auto")${NC}"
   read -p "$(t "continue_prompt"): " confirm
   if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
