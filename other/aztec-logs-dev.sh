@@ -2585,8 +2585,8 @@ check_aztec_container_logs() {
     if [ "$log_block_number" -eq "$block_number" ]; then
         echo -e "\n${GREEN}$(t "node_ok")${NC}"
     else
-        printf "\n${YELLOW}$(t "log_behind_details")${NC}\n" \
-               "$log_block_number" "$block_number"
+        printf -v message "$(t "log_behind_details")" "$log_block_number" "$block_number"
+        echo -e "\n${YELLOW}${message}${NC}"
         echo -e "\n${BLUE}$(t "log_line_example")${NC}"
         echo "$latest_log_line"
     fi
@@ -5043,7 +5043,8 @@ EOF
     if ! crontab -l 2>/dev/null | grep -q "$MONITOR_DIR/$script_name"; then
         (crontab -l 2>/dev/null; echo "0 * * * * timeout 600 $MONITOR_DIR/$script_name") | crontab -
     fi
-    echo -e "\n${GREEN}$(t "notification_script_created" "$validator_address")${NC}"
+    printf -v message "$(t "notification_script_created")" "$validator_address"
+    echo -e "\n${GREEN}${message}${NC}"
     echo -e "${YELLOW}$(t "initial_notification_note")${NC}"
     echo -e "${CYAN}$(t "running_initial_test")${NC}"
     timeout 60 "$MONITOR_DIR/$script_name" >/dev/null 2>&1 || true
@@ -5373,7 +5374,8 @@ remove_monitor_scripts() {
                 # Удаляем файлы
                 rm -f "$script" "$log_file" "$position_file"
 
-                echo -e "${GREEN}$(t "monitor_removed" "$address")${NC}"
+                printf -v message "$(t "monitor_removed")" "$address"
+                echo -e "${GREEN}${message}${NC}"
             done
             echo -e "${GREEN}$(t "all_monitors_removed")${NC}"
             ;;
@@ -5391,7 +5393,8 @@ remove_monitor_scripts() {
                 # Удаляем файлы
                 rm -f "$script" "$log_file" "$position_file"
 
-                echo -e "${GREEN}$(t "monitor_removed" "$address")${NC}"
+                printf -v message "$(t "monitor_removed")" "$address"
+                echo -e "${GREEN}${message}${NC}"
             else
                 echo -e "${RED}$(t "invalid_choice")${NC}"
             fi
@@ -5563,7 +5566,8 @@ check_validator_main() {
         if [[ "$add_to_monitor" == "yes" || "$add_to_monitor" == "y" ]]; then
             # Создаем мониторы для всех валидаторов из очереди
             for validator in "${QUEUE_FOUND_ADDRESSES[@]}"; do
-                echo -e "\n${YELLOW}$(t "processing_address" "$validator")${NC}"
+                printf -v message "$(t "processing_address")" "$validator"
+                echo -e "\n${YELLOW}${message}${NC}"
                 create_monitor_script "$validator" "$network" "$MONITOR_DIR" "$QUEUE_URL"
             done
             echo -e "${GREEN}$(t "queue_validators_added")${NC}"
@@ -5620,7 +5624,8 @@ validator_submenu() {
                 IFS=',' read -ra ADDRESSES_TO_MONITOR <<< "$validator_addresses"
                 for address in "${ADDRESSES_TO_MONITOR[@]}"; do
                     clean_address=$(echo "$address" | tr -d ' ')
-                    echo -e "${YELLOW}$(t "processing_address" "$clean_address")${NC}"
+                    printf -v message "$(t "processing_address")" "$clean_address"
+                    echo -e "${YELLOW}${message}${NC}"
 
                     # Проверяем, есть ли валидатор хотя бы в очереди
                     if check_validator_queue "$clean_address"; then
@@ -7735,7 +7740,8 @@ claim_rewards() {
                     else
                         local timestamp_human
                         timestamp_human=$(date -d "@$timestamp_dec" 2>/dev/null || echo "unknown format")
-                        printf "${CYAN}ℹ️  $(t "earliest_rewards_claimable_timestamp")${NC}\n" "$timestamp_dec" "$timestamp_human"
+                        printf -v message "$(t "earliest_rewards_claimable_timestamp")" "$timestamp_dec" "$timestamp_human"
+                        echo -e "${CYAN}ℹ️  ${message}${NC}"
                     fi
                 fi
             fi
@@ -7830,7 +7836,8 @@ claim_rewards() {
         rewards_wei=$(cast --to-dec "$rewards_hex" 2>/dev/null)
 
         if [ $? -ne 0 ]; then
-            echo -e "${YELLOW}⚠️ $(t "failed_convert_rewards_amount") $address${NC}"
+            printf -v message "$(t "failed_convert_rewards_amount")" "$address"
+            echo -e "${YELLOW}⚠️ ${message}${NC}"
             continue
         fi
 
@@ -7845,7 +7852,8 @@ claim_rewards() {
 
         # Check if rewards > 0
         if (( $(echo "$rewards_eth > 0" | bc -l) )); then
-            printf "${GREEN}🎯 $(t "rewards_amount") ${TOKEN_SYMBOL}${NC}\n" "$rewards_eth"
+            printf -v message "$(t "rewards_amount")" "$rewards_eth"
+            echo -e "${GREEN}🎯 ${message} ${TOKEN_SYMBOL}${NC}"
             addresses_with_rewards+=("$address")
             reward_amounts+=("$rewards_eth")
         else
@@ -7937,14 +7945,16 @@ claim_rewards() {
                             if (( $(echo "$new_rewards_eth == 0" | bc -l) )); then
                                 echo -e "${GREEN}✅ $(t "rewards_successfully_claimed")${NC}"
                             else
-                                printf "${YELLOW}⚠️ $(t "rewards_claimed_balance_not_zero") ${TOKEN_SYMBOL}${NC}\n" "$new_rewards_eth"
+                                printf -v message "$(t "rewards_claimed_balance_not_zero")" "$new_rewards_eth"
+                                echo -e "${YELLOW}⚠️ ${message} ${TOKEN_SYMBOL}${NC}"
                             fi
 
                             ((claimed_count++))
 
                             # If this address repeats multiple times, show message
                             if [ "$repeat_count" -gt 1 ]; then
-                                printf "${GREEN}✅ $(t "claimed_rewards_for_address_appears_times")${NC}\n" "$address" "$repeat_count"
+                                printf -v message "$(t "claimed_rewards_for_address_appears_times")" "$address" "$repeat_count"
+                                echo -e "${GREEN}✅ ${message}${NC}"
                             fi
                         else
                             echo -e "${RED}❌ $(t "transaction_failed")${NC}"
