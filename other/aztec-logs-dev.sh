@@ -69,7 +69,7 @@ init_languages() {
   TRANSLATIONS["en,option0"]="0. Exit"
 
   # Update check translations
-  TRANSLATIONS["en,note_check_updates_safely"]="Note: To check for remote updates safely, use the optional update check function"
+  TRANSLATIONS["en,note_check_updates_safely"]="Note: To check for remote updates safely, use the Option 23"
   TRANSLATIONS["en,local_version_up_to_date"]="Local version file is up to date"
   TRANSLATIONS["en,safe_update_check"]="Safe Update Check"
   TRANSLATIONS["en,update_check_warning"]="This will download version_control.json from GitHub with SHA256 verification."
@@ -709,7 +709,7 @@ init_languages() {
   TRANSLATIONS["ru,option0"]="0. Выход"
 
   # Переводы для проверки обновлений
-  TRANSLATIONS["ru,note_check_updates_safely"]="Примечание: Для безопасной проверки удалённых обновлений используйте опциональную функцию проверки обновлений"
+  TRANSLATIONS["ru,note_check_updates_safely"]="Примечание: Для безопасной проверки удалённых обновлений используйте Опцию 23"
   TRANSLATIONS["ru,local_version_up_to_date"]="Локальный файл версий актуален"
   TRANSLATIONS["ru,safe_update_check"]="Безопасная проверка обновлений"
   TRANSLATIONS["ru,update_check_warning"]="Будет загружен version_control.json из GitHub с проверкой SHA256."
@@ -1368,7 +1368,7 @@ init_languages() {
   TRANSLATIONS["tr,option0"]="0. Çıkış"
 
   # Güncelleme kontrolü çevirileri
-  TRANSLATIONS["tr,note_check_updates_safely"]="Not: Uzaktan güncellemeleri güvenli bir şekilde kontrol etmek için isteğe bağlı güncelleme kontrolü işlevini kullanın"
+  TRANSLATIONS["tr,note_check_updates_safely"]="Not: Uzaktan güncellemeleri güvenli bir şekilde kontrol etmek için Seçenek 23'ü kullanın"
   TRANSLATIONS["tr,local_version_up_to_date"]="Yerel sürüm dosyası güncel"
   TRANSLATIONS["tr,safe_update_check"]="Güvenli Güncelleme Kontrolü"
   TRANSLATIONS["tr,update_check_warning"]="Bu, SHA256 doğrulaması ile GitHub'dan version_control.json dosyasını indirecektir."
