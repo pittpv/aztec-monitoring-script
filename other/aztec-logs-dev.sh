@@ -298,7 +298,6 @@ init_languages() {
   TRANSLATIONS["en,checking_port"]="Checking port"
   TRANSLATIONS["en,port_not_available"]="Aztec port not available on"
   TRANSLATIONS["en,current_aztec_port"]="Current Aztec node port:"
-  TRANSLATIONS["en,log_block_not_found"]="❌ No line with 'Downloaded L2 block' found in logs."
   TRANSLATIONS["en,log_block_extract_failed"]="❌ Failed to extract block number from the line:"
   TRANSLATIONS["en,log_block_number"]="📄 Latest block from logs:"
   TRANSLATIONS["en,log_behind_details"]="⚠️ Logs are behind. Latest block in logs: %s, from contract: %s"
@@ -944,7 +943,6 @@ init_languages() {
   TRANSLATIONS["ru,checking_port"]="Проверка порта"
   TRANSLATIONS["ru,port_not_available"]="Aztec порт недоступен на"
   TRANSLATIONS["ru,current_aztec_port"]="Текущий порт ноды Aztec:"
-  TRANSLATIONS["ru,log_block_not_found"]="❌ Не найдена строка с 'Downloaded L2 block' в логах."
   TRANSLATIONS["ru,log_block_extract_failed"]="❌ Не удалось извлечь номер блока из строки:"
   TRANSLATIONS["ru,log_block_number"]="📄 Последний блок из логов:"
   TRANSLATIONS["ru,log_behind_details"]="⚠️ Логи отстают. Последний блок из логов: %s, из контракта: %s"
@@ -1605,7 +1603,6 @@ init_languages() {
   TRANSLATIONS["tr,checking_port"]="Port kontrol ediliyor"
   TRANSLATIONS["tr,port_not_available"]="Aztec portu şurada mevcut değil:"
   TRANSLATIONS["tr,current_aztec_port"]="Mevcut Aztec düğüm portu:"
-  TRANSLATIONS["tr,log_block_not_found"]="❌ Loglarda 'Downloaded L2 block' içeren satır bulunamadı."
   TRANSLATIONS["tr,log_block_extract_failed"]="❌ Blok numarası satırdan çıkarılamadı:"
   TRANSLATIONS["tr,log_block_number"]="📄 Loglardaki son blok:"
   TRANSLATIONS["tr,log_behind_details"]="⚠️ Loglar geride. Loglardaki son blok: %s, kontraktaki: %s"
@@ -2811,7 +2808,7 @@ check_aztec_container_logs() {
     rm -f "$temp_file"
 
     if [ -z "$latest_log_line" ]; then
-        echo -e "\n${RED}$(t "log_block_not_found")${NC}"
+        echo -e "\n${RED}$(t "agent_no_block_in_logs")${NC}"
         return
     fi
 
