@@ -98,7 +98,7 @@ init_languages() {
   TRANSLATIONS["en,local_hash"]="Local hash:"
   TRANSLATIONS["en,remote_hash"]="Remote hash:"
   TRANSLATIONS["en,local_error_def_not_found"]="Local error_definitions.json not found."
-  TRANSLATIONS["en,local_version"]="Local version:"
+  TRANSLATIONS["en,local_version"]="Script version in local version control file:"
   TRANSLATIONS["en,remote_version"]="Remote version:"
   TRANSLATIONS["en,expected_version"]="Expected version (from script):"
   TRANSLATIONS["en,version_mismatch_warning"]="Warning: Versions differ but hashes match. This should not happen."
@@ -738,7 +738,7 @@ init_languages() {
   TRANSLATIONS["ru,local_hash"]="Локальный хеш:"
   TRANSLATIONS["ru,remote_hash"]="Удалённый хеш:"
   TRANSLATIONS["ru,local_error_def_not_found"]="Локальный error_definitions.json не найден."
-  TRANSLATIONS["ru,local_version"]="Локальная версия:"
+  TRANSLATIONS["ru,local_version"]="Версия скрипта в локальном файле контроля версий:"
   TRANSLATIONS["ru,remote_version"]="Удалённая версия:"
   TRANSLATIONS["ru,expected_version"]="Ожидаемая версия (из скрипта):"
   TRANSLATIONS["ru,version_mismatch_warning"]="Предупреждение: Версии различаются, но хеши совпадают. Этого не должно происходить."
@@ -1397,7 +1397,7 @@ init_languages() {
   TRANSLATIONS["tr,local_hash"]="Yerel hash:"
   TRANSLATIONS["tr,remote_hash"]="Uzak hash:"
   TRANSLATIONS["tr,local_error_def_not_found"]="Yerel error_definitions.json bulunamadı."
-  TRANSLATIONS["tr,local_version"]="Yerel sürüm:"
+  TRANSLATIONS["tr,local_version"]="Yerel sürüm kontrol dosyasındaki komut dosyası sürümü:"
   TRANSLATIONS["tr,remote_version"]="Uzak sürüm:"
   TRANSLATIONS["tr,expected_version"]="Beklenen sürüm (betikten):"
   TRANSLATIONS["tr,version_mismatch_warning"]="Uyarı: Sürümler farklı ancak hash'ler eşleşiyor. Bu olmamalı."
@@ -2418,7 +2418,7 @@ check_updates_safely() {
   TEMP_VC_FILE=$(mktemp)
 
   # === Шаг 1: Проверка локального файла ===
-  echo -e "\n${CYAN}━━━ $(t "current_installed_version") ${INSTALLED_VERSION} ━━━${NC}"
+  echo -e "\n${CYAN}$(t "current_installed_version") ${INSTALLED_VERSION}${NC}"
   
   LOCAL_LATEST_VERSION=""
   local_data=""
@@ -2428,7 +2428,7 @@ check_updates_safely() {
   fi
 
   # === Шаг 2: Загрузка удаленного файла ===
-  echo -e "\n${CYAN}━━━ $(t "downloading_version_control") ━━━${NC}"
+  echo -e "\n${CYAN}$(t "downloading_version_control")${NC}"
   if ! curl -fsSL "$REMOTE_VC_URL" -o "$TEMP_VC_FILE"; then
     echo -e "${RED}$(t "failed_download_version_control")${NC}"
     rm -f "$TEMP_VC_FILE"
@@ -2467,7 +2467,7 @@ check_updates_safely() {
   # === Шаг 3: Обработка файла version_control.json ===
   if [ -z "$LOCAL_LATEST_VERSION" ] || [ ! -f "$LOCAL_VC_FILE" ]; then
     # Случай 1: Локального файла нет - сохраняем удаленный файл
-    echo -e "\n${CYAN}━━━ $(t "version_control_saving") ━━━${NC}"
+    echo -e "\n${CYAN}$(t "version_control_saving")${NC}"
     if cp "$TEMP_VC_FILE" "$LOCAL_VC_FILE"; then
       echo -e "${GREEN}$(t "version_control_saved")${NC}"
     else
@@ -2479,10 +2479,10 @@ check_updates_safely() {
     # Локальный файл существует - сравниваем версии файлов
     if [ "$LOCAL_LATEST_VERSION" = "$REMOTE_LATEST_VERSION" ]; then
       # Версии файлов совпадают - файл не сохраняем
-      echo -e "\n${GREEN}━━━ $(t "local_version_up_to_date") ━━━${NC}"
+      echo -e "\n${GREEN}$(t "local_version_up_to_date")${NC}"
     elif [ -n "$REMOTE_LATEST_VERSION" ] && [ -n "$LOCAL_LATEST_VERSION" ] && version_gt "$REMOTE_LATEST_VERSION" "$LOCAL_LATEST_VERSION"; then
       # Удаленная версия новее локальной - сохраняем обновленный файл
-      echo -e "\n${CYAN}━━━ $(t "version_control_saving") ━━━${NC}"
+      echo -e "\n${CYAN}$(t "version_control_saving")${NC}"
       if cp "$TEMP_VC_FILE" "$LOCAL_VC_FILE"; then
         echo -e "${GREEN}$(t "version_control_saved")${NC}"
       else
@@ -2492,7 +2492,7 @@ check_updates_safely() {
       fi
     else
       # Локальная версия новее удаленной или версии не удалось сравнить
-      echo -e "\n${YELLOW}━━━ $(t "local_remote_versions_differ") ━━━${NC}"
+      echo -e "\n${YELLOW}$(t "local_remote_versions_differ")${NC}"
       if [ -n "$LOCAL_LATEST_VERSION" ] && [ -n "$REMOTE_LATEST_VERSION" ] && version_gt "$LOCAL_LATEST_VERSION" "$REMOTE_LATEST_VERSION"; then
         echo -e "${BLUE}$(t "error_def_local_newer")${NC}"
       fi
@@ -2518,13 +2518,13 @@ check_updates_safely() {
   if [ -n "$ACTUAL_LATEST_VERSION" ] && [ -n "$INSTALLED_VERSION" ]; then
     if version_gt "$ACTUAL_LATEST_VERSION" "$INSTALLED_VERSION"; then
       # Версия скрипта устарела - показываем обновления
-      echo -e "\n${YELLOW}━━━ $(t "new_version_available") ${ACTUAL_LATEST_VERSION} ━━━${NC}"
+      echo -e "\n${YELLOW}$(t "new_version_available") ${ACTUAL_LATEST_VERSION}${NC}"
       echo -e "${BLUE}=== $(t "update_changes") ===${NC}"
       show_updates_from_data "$ACTUAL_DATA" "$INSTALLED_VERSION"
       echo -e "\n${BLUE}$(t "note_update_manually")${NC}"
     elif [ "$ACTUAL_LATEST_VERSION" = "$INSTALLED_VERSION" ]; then
       # Версия скрипта актуальна
-      echo -e "\n${GREEN}━━━ $(t "version_up_to_date") ━━━${NC}"
+      echo -e "\n${GREEN}$(t "version_up_to_date")${NC}"
     fi
   fi
 
