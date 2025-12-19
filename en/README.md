@@ -64,7 +64,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 **error_definitions.json**
 
-SHA256: `506e6e023f63e1068cd2b5529acbde16e42ec34cace4fcc6b9a8abc41730f4b4`
+SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
 
 **version_control.json**
 
