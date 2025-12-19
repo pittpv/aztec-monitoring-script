@@ -69,7 +69,6 @@ init_languages() {
   TRANSLATIONS["en,option0"]="0. Exit"
 
   # Update check translations
-  TRANSLATIONS["en,local_version_shows"]="Local version file shows version:"
   TRANSLATIONS["en,note_check_updates_safely"]="Note: To check for remote updates safely, use the optional update check function"
   TRANSLATIONS["en,local_version_up_to_date"]="Local version file is up to date"
   TRANSLATIONS["en,safe_update_check"]="Safe Update Check"
@@ -710,7 +709,6 @@ init_languages() {
   TRANSLATIONS["ru,option0"]="0. Выход"
 
   # Переводы для проверки обновлений
-  TRANSLATIONS["ru,local_version_shows"]="Локальный файл версий показывает версию:"
   TRANSLATIONS["ru,note_check_updates_safely"]="Примечание: Для безопасной проверки удалённых обновлений используйте опциональную функцию проверки обновлений"
   TRANSLATIONS["ru,local_version_up_to_date"]="Локальный файл версий актуален"
   TRANSLATIONS["ru,safe_update_check"]="Безопасная проверка обновлений"
@@ -1370,7 +1368,6 @@ init_languages() {
   TRANSLATIONS["tr,option0"]="0. Çıkış"
 
   # Güncelleme kontrolü çevirileri
-  TRANSLATIONS["tr,local_version_shows"]="Yerel sürüm dosyası sürümü gösteriyor:"
   TRANSLATIONS["tr,note_check_updates_safely"]="Not: Uzaktan güncellemeleri güvenli bir şekilde kontrol etmek için isteğe bağlı güncelleme kontrolü işlevini kullanın"
   TRANSLATIONS["tr,local_version_up_to_date"]="Yerel sürüm dosyası güncel"
   TRANSLATIONS["tr,safe_update_check"]="Güvenli Güncelleme Kontrolü"
@@ -2344,7 +2341,7 @@ check_dependencies() {
   echo -e "\n${CYAN}$(t "current_script_version") ${INSTALLED_VERSION}${NC}"
   if [ -n "$LOCAL_LATEST_VERSION" ]; then
     if [ "$LOCAL_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
-      echo -e "${YELLOW}$(t "local_version_shows") ${LOCAL_LATEST_VERSION}${NC}"
+      echo -e "${YELLOW}$(t "new_version_available") ${LOCAL_LATEST_VERSION}. $(t "new_version_update")${NC}"
       echo -e "${BLUE}$(t "note_check_updates_safely")${NC}"
     else
       echo -e "${GREEN}$(t "local_version_up_to_date")${NC}"
@@ -2364,8 +2361,36 @@ check_updates_safely() {
     return 0
   fi
 
+  # Функция для сравнения версий (возвращает 0 если версия1 > версия2)
+  version_gt() {
+    if [ "$1" = "$2" ]; then
+      return 1
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    for ((i=0; i<${#ver1[@]}; i++)); do
+      if [[ -z ${ver2[i]} ]]; then
+        ver2[i]=0
+      fi
+      if ((10#${ver1[i]} > 10#${ver2[i]})); then
+        return 0
+      fi
+      if ((10#${ver1[i]} < 10#${ver2[i]})); then
+        return 1
+      fi
+    done
+    return 1
+  }
+
+  LOCAL_VC_FILE="$SCRIPT_DIR/version_control.json"
   REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/version_control.json"
   TEMP_VC_FILE=$(mktemp)
+
+  # Проверяем наличие локального файла
+  LOCAL_LATEST_VERSION=""
+  if [ -f "$LOCAL_VC_FILE" ] && local_data=$(cat "$LOCAL_VC_FILE" 2>/dev/null); then
+    LOCAL_LATEST_VERSION=$(echo "$local_data" | jq -r '.[].VERSION' | sort -V | tail -n1 2>/dev/null)
+  fi
 
   echo -e "\n${CYAN}$(t "downloading_version_control")${NC}"
   if ! curl -fsSL "$REMOTE_VC_URL" -o "$TEMP_VC_FILE"; then
@@ -2393,44 +2418,50 @@ check_updates_safely() {
     return 0
   fi
 
-  # Парсим и показываем информацию об обновлениях
-  if remote_data=$(cat "$TEMP_VC_FILE"); then
-    REMOTE_LATEST_VERSION=$(echo "$remote_data" | jq -r '.[].VERSION' | sort -V | tail -n1)
+  # Парсим удаленный файл
+  if ! remote_data=$(cat "$TEMP_VC_FILE" 2>/dev/null); then
+    echo -e "${RED}$(t "failed_download_version_control")${NC}"
+    rm -f "$TEMP_VC_FILE"
+    return 1
+  fi
 
-    echo -e "\n${CYAN}$(t "current_installed_version") ${INSTALLED_VERSION}${NC}"
-    echo -e "${CYAN}$(t "latest_version_repo") ${REMOTE_LATEST_VERSION}${NC}"
+  REMOTE_LATEST_VERSION=$(echo "$remote_data" | jq -r '.[].VERSION' | sort -V | tail -n1 2>/dev/null)
 
-    if [ -n "$REMOTE_LATEST_VERSION" ] && [ "$REMOTE_LATEST_VERSION" != "$INSTALLED_VERSION" ]; then
+  echo -e "\n${CYAN}$(t "current_installed_version") ${INSTALLED_VERSION}${NC}"
+  echo -e "${CYAN}$(t "latest_version_repo") ${REMOTE_LATEST_VERSION}${NC}"
+
+  # Случай 1: Локального файла нет - сохраняем удаленный файл
+  if [ -z "$LOCAL_LATEST_VERSION" ] || [ ! -f "$LOCAL_VC_FILE" ]; then
+    echo -e "\n${CYAN}$(t "version_control_saving")${NC}"
+    if cp "$TEMP_VC_FILE" "$LOCAL_VC_FILE"; then
+      echo -e "${GREEN}$(t "version_control_saved")${NC}"
+      if [ -n "$REMOTE_LATEST_VERSION" ]; then
+        echo -e "${BLUE}$(t "local_version") ${REMOTE_LATEST_VERSION}${NC}"
+      fi
+    else
+      echo -e "${RED}$(t "version_control_save_failed")${NC}"
+      rm -f "$TEMP_VC_FILE"
+      return 1
+    fi
+  else
+    # Случай 2 и 3: Локальный файл существует - сравниваем версии
+    echo -e "${CYAN}$(t "local_version") ${LOCAL_LATEST_VERSION}${NC}"
+    echo -e "${CYAN}$(t "remote_version") ${REMOTE_LATEST_VERSION}${NC}"
+
+    if [ "$LOCAL_LATEST_VERSION" = "$REMOTE_LATEST_VERSION" ]; then
+      # Случай 2: Версии совпадают - обновление не требуется
+      echo -e "\n${GREEN}$(t "version_up_to_date")${NC}"
+    elif [ -n "$REMOTE_LATEST_VERSION" ] && [ -n "$LOCAL_LATEST_VERSION" ] && version_gt "$REMOTE_LATEST_VERSION" "$LOCAL_LATEST_VERSION"; then
+      # Случай 3: Удаленная версия новее - показываем изменения и сохраняем
       echo -e "\n${YELLOW}$(t "new_version_available") ${REMOTE_LATEST_VERSION}${NC}"
 
-      # Функция для сравнения версий
-      version_gt() {
-        if [ "$1" = "$2" ]; then
-          return 1
-        fi
-        local IFS=.
-        local i ver1=($1) ver2=($2)
-        for ((i=0; i<${#ver1[@]}; i++)); do
-          if [[ -z ${ver2[i]} ]]; then
-            ver2[i]=0
-          fi
-          if ((10#${ver1[i]} > 10#${ver2[i]})); then
-            return 0
-          fi
-          if ((10#${ver1[i]} < 10#${ver2[i]})); then
-            return 1
-          fi
-        done
-        return 1
-      }
-
-      # Выводим обновления только для версий НОВЕЕ текущей
+      # Выводим обновления только для версий НОВЕЕ локальной
       echo -e "\n${BLUE}=== $(t "update_changes") ===${NC}"
       echo "$remote_data" | jq -c '.[]' | while read -r update; do
         version=$(echo "$update" | jq -r '.VERSION')
         date=$(echo "$update" | jq -r '.UPDATE_DATE')
 
-        if version_gt "$version" "$INSTALLED_VERSION"; then
+        if version_gt "$version" "$LOCAL_LATEST_VERSION"; then
           echo -e "\n${GREEN}$(t "version_label") $version (${date})${NC}"
           echo "$update" | jq -r '.CHANGES[]' | while read -r change; do
             echo -e "  • ${YELLOW}$change${NC}"
@@ -2439,27 +2470,24 @@ check_updates_safely() {
       done
 
       echo -e "\n${BLUE}$(t "note_update_manually")${NC}"
-    elif [ -n "$REMOTE_LATEST_VERSION" ]; then
-      echo -e "${GREEN}$(t "version_up_to_date")${NC}"
-    fi
-  fi
 
-  # Сохраняем файл version_control.json локально для работы локальной проверки
-  LOCAL_VC_FILE="$SCRIPT_DIR/version_control.json"
-  echo -e "\n${CYAN}$(t "version_control_saving")${NC}"
-  if cp "$TEMP_VC_FILE" "$LOCAL_VC_FILE"; then
-    echo -e "${GREEN}$(t "version_control_saved")${NC}"
-    # Извлекаем версию из сохранённого файла для отображения
-    if saved_data=$(cat "$LOCAL_VC_FILE" 2>/dev/null); then
-      SAVED_LATEST_VERSION=$(echo "$saved_data" | jq -r '.[].VERSION' | sort -V | tail -n1 2>/dev/null)
-      if [ -n "$SAVED_LATEST_VERSION" ]; then
-        echo -e "${BLUE}$(t "local_version") ${SAVED_LATEST_VERSION}${NC}"
+      # Сохраняем обновленный файл
+      echo -e "\n${CYAN}$(t "version_control_saving")${NC}"
+      if cp "$TEMP_VC_FILE" "$LOCAL_VC_FILE"; then
+        echo -e "${GREEN}$(t "version_control_saved")${NC}"
+        echo -e "${BLUE}$(t "local_version") ${REMOTE_LATEST_VERSION}${NC}"
+      else
+        echo -e "${RED}$(t "version_control_save_failed")${NC}"
+        rm -f "$TEMP_VC_FILE"
+        return 1
+      fi
+    else
+      # Локальная версия новее или версии не удалось сравнить
+      echo -e "\n${YELLOW}$(t "local_remote_versions_differ")${NC}"
+      if [ -n "$LOCAL_LATEST_VERSION" ] && [ -n "$REMOTE_LATEST_VERSION" ] && version_gt "$LOCAL_LATEST_VERSION" "$REMOTE_LATEST_VERSION"; then
+        echo -e "${BLUE}$(t "error_def_local_newer")${NC}"
       fi
     fi
-  else
-    echo -e "${RED}$(t "version_control_save_failed")${NC}"
-    rm -f "$TEMP_VC_FILE"
-    return 1
   fi
 
   # Удаляем временный файл
