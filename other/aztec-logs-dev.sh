@@ -6593,6 +6593,10 @@ EOF
         echo -e "\n${GREEN}$(t "compose_created")${NC}"
     fi
 
+    # Create aztec network before starting web3signer (needed for web3signer to connect)
+    echo -e "\n${GREEN}Creating aztec network...${NC}"
+    docker network create aztec 2>/dev/null || echo -e "${YELLOW}Network aztec already exists${NC}"
+
     # Download and run web3signer before starting the node
     echo -e "\n${GREEN}Downloading and starting web3signer...${NC}"
     docker pull consensys/web3signer:latest

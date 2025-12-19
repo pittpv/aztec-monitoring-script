@@ -2027,7 +2027,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.7.0"
+SCRIPT_VERSION="2.7.1"
 ERROR_DEFINITIONS_VERSION="1.0.0"
 
 # Determine script directory for local file access (security: avoid remote code execution)
@@ -6592,6 +6592,10 @@ EOF
 
         echo -e "\n${GREEN}$(t "compose_created")${NC}"
     fi
+
+    # Create aztec network before starting web3signer (needed for web3signer to connect)
+    echo -e "\n${GREEN}Creating aztec network...${NC}"
+    docker network create aztec 2>/dev/null || echo -e "${YELLOW}Network aztec already exists${NC}"
 
     # Download and run web3signer before starting the node
     echo -e "\n${GREEN}Downloading and starting web3signer...${NC}"
