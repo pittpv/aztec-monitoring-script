@@ -2439,7 +2439,7 @@ check_updates_safely() {
   }
 
   LOCAL_VC_FILE="$SCRIPT_DIR/version_control.json"
-  REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/version_control.json"
+  REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/aztec-script-files/version_control.json"
   TEMP_VC_FILE=$(mktemp)
 
   # === Шаг 1: Проверка локального файла ===
