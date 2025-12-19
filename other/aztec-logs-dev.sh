@@ -4115,6 +4115,11 @@ EOF
     return 1
   fi
 
+  # Определяем пользователя для systemd сервиса
+  # Предпочтительно используем SUDO_USER (если скрипт запущен с sudo)
+  # Иначе используем USER, иначе whoami как fallback
+  local service_user="${SUDO_USER:-${USER:-$(whoami)}}"
+
   {
     printf '[Unit]\n'
     printf 'Description=Aztec Monitoring Agent\n'
@@ -4124,7 +4129,7 @@ EOF
     printf 'Type=oneshot\n'
     printf 'EnvironmentFile=%s\n' "$env_file"
     printf 'ExecStart=%s\n' "$agent_script_path"
-    printf 'User=root\n'
+    printf 'User=%s\n' "$service_user"
     printf 'WorkingDirectory=%s\n' "$working_dir"
     printf 'LimitNOFILE=65535\n'
     printf '\n'
