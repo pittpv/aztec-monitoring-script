@@ -2416,12 +2416,33 @@ check_updates_safely() {
     echo "$data" | jq -c '.[]' | while read -r update; do
       version=$(echo "$update" | jq -r '.VERSION')
       date=$(echo "$update" | jq -r '.UPDATE_DATE')
+      notice=$(echo "$update" | jq -r '.NOTICE // empty')
+      color_name=$(echo "$update" | jq -r '.COLOR // empty' | tr '[:upper:]' '[:lower:]')
+
+      # Получаем цвет по имени
+      color_code=""
+      case "$color_name" in
+        red) color_code="$RED" ;;
+        green) color_code="$GREEN" ;;
+        yellow) color_code="$YELLOW" ;;
+        blue) color_code="$BLUE" ;;
+        cyan) color_code="$CYAN" ;;
+        violet) color_code="$VIOLET" ;;
+      esac
 
       if [ -n "$base_version" ] && version_gt "$version" "$base_version"; then
         echo -e "\n${GREEN}$(t "version_label") $version (${date})${NC}"
         echo "$update" | jq -r '.CHANGES[]' | while read -r change; do
           echo -e "  • ${YELLOW}$change${NC}"
         done
+        # Выводим NOTICE если он есть
+        if [ -n "$notice" ] && [ "$notice" != "null" ] && [ "$notice" != "" ]; then
+          if [ -n "$color_code" ]; then
+            echo -e "\n  ${color_code}NOTICE: $notice${NC}"
+          else
+            echo -e "\n  NOTICE: $notice"
+          fi
+        fi
         updates_shown=1
       elif [ -z "$base_version" ]; then
         # Если базовая версия не указана, показываем все обновления новее скрипта
@@ -2430,6 +2451,14 @@ check_updates_safely() {
           echo "$update" | jq -r '.CHANGES[]' | while read -r change; do
             echo -e "  • ${YELLOW}$change${NC}"
           done
+          # Выводим NOTICE если он есть
+          if [ -n "$notice" ] && [ "$notice" != "null" ] && [ "$notice" != "" ]; then
+            if [ -n "$color_code" ]; then
+              echo -e "\n  ${color_code}NOTICE: $notice${NC}"
+            else
+              echo -e "\n  NOTICE: $notice"
+            fi
+          fi
           updates_shown=1
         fi
       fi
