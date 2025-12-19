@@ -102,6 +102,15 @@ init_languages() {
   TRANSLATIONS["en,version_mismatch_warning"]="Warning: Versions differ but hashes match. This should not happen."
   TRANSLATIONS["en,version_difference"]="Version difference detected: Local (%s) vs Remote (%s)"
   TRANSLATIONS["en,version_script_mismatch"]="Warning: Remote version (%s) does not match expected script version (%s)"
+  TRANSLATIONS["en,error_def_saving"]="Saving error_definitions.json file..."
+  TRANSLATIONS["en,error_def_saved"]="✅ error_definitions.json file saved successfully"
+  TRANSLATIONS["en,error_def_save_failed"]="❌ Failed to save error_definitions.json file"
+  TRANSLATIONS["en,error_def_updating"]="Updating error_definitions.json file..."
+  TRANSLATIONS["en,error_def_updated"]="✅ error_definitions.json file updated successfully"
+  TRANSLATIONS["en,error_def_update_failed"]="❌ Failed to update error_definitions.json file"
+  TRANSLATIONS["en,error_def_version_up_to_date"]="✅ error_definitions.json is up to date (version: %s)"
+  TRANSLATIONS["en,error_def_newer_version_available"]="🔄 Newer version available: %s (current: %s)"
+  TRANSLATIONS["en,error_def_local_newer"]="Local version is newer or same. No update needed."
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
   TRANSLATIONS["en,bls_invalid_number"]="Invalid number. Please enter a positive integer."
@@ -732,6 +741,17 @@ init_languages() {
   TRANSLATIONS["ru,version_mismatch_warning"]="Предупреждение: Версии различаются, но хеши совпадают. Этого не должно происходить."
   TRANSLATIONS["ru,version_difference"]="Обнаружено различие версий: Локальная (%s) vs Удалённая (%s)"
   TRANSLATIONS["ru,version_script_mismatch"]="Предупреждение: Удалённая версия (%s) не соответствует ожидаемой версии скрипта (%s)"
+  TRANSLATIONS["ru,error_def_saving"]="Сохранение файла error_definitions.json..."
+  TRANSLATIONS["ru,error_def_saved"]="✅ Файл error_definitions.json успешно сохранён"
+  TRANSLATIONS["ru,error_def_save_failed"]="❌ Не удалось сохранить файл error_definitions.json"
+  TRANSLATIONS["ru,error_def_updating"]="Обновление файла error_definitions.json..."
+  TRANSLATIONS["ru,error_def_updated"]="✅ Файл error_definitions.json успешно обновлён"
+  TRANSLATIONS["ru,error_def_update_failed"]="❌ Не удалось обновить файл error_definitions.json"
+  TRANSLATIONS["ru,error_def_version_up_to_date"]="✅ error_definitions.json актуален (версия: %s)"
+  TRANSLATIONS["ru,error_def_newer_version_available"]="🔄 Доступна новая версия: %s (текущая: %s)"
+  TRANSLATIONS["ru,error_def_local_newer"]="Локальная версия новее или такая же. Обновление не требуется."
+  TRANSLATIONS["ru,error_def_version_unknown"]="Предупреждение: Невозможно сравнить версии (одна или обе неизвестны). Файлы различаются по хешу."
+  TRANSLATIONS["ru,error_def_hash_mismatch"]="Предупреждение: Версии совпадают, но хеши различаются. Файлы могли быть изменены."
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
   TRANSLATIONS["ru,bls_invalid_number"]="Неверное число. Введите положительное целое число."
@@ -1379,6 +1399,17 @@ init_languages() {
   TRANSLATIONS["tr,version_mismatch_warning"]="Uyarı: Sürümler farklı ancak hash'ler eşleşiyor. Bu olmamalı."
   TRANSLATIONS["tr,version_difference"]="Sürüm farkı tespit edildi: Yerel (%s) vs Uzak (%s)"
   TRANSLATIONS["tr,version_script_mismatch"]="Uyarı: Uzak sürüm (%s) beklenen betik sürümü (%s) ile eşleşmiyor"
+  TRANSLATIONS["tr,error_def_saving"]="error_definitions.json dosyası kaydediliyor..."
+  TRANSLATIONS["tr,error_def_saved"]="✅ error_definitions.json dosyası başarıyla kaydedildi"
+  TRANSLATIONS["tr,error_def_save_failed"]="❌ error_definitions.json dosyası kaydedilemedi"
+  TRANSLATIONS["tr,error_def_updating"]="error_definitions.json dosyası güncelleniyor..."
+  TRANSLATIONS["tr,error_def_updated"]="✅ error_definitions.json dosyası başarıyla güncellendi"
+  TRANSLATIONS["tr,error_def_update_failed"]="❌ error_definitions.json dosyası güncellenemedi"
+  TRANSLATIONS["tr,error_def_version_up_to_date"]="✅ error_definitions.json güncel (sürüm: %s)"
+  TRANSLATIONS["tr,error_def_newer_version_available"]="🔄 Yeni sürüm mevcut: %s (mevcut: %s)"
+  TRANSLATIONS["tr,error_def_local_newer"]="Yerel sürüm daha yeni veya aynı. Güncelleme gerekmiyor."
+  TRANSLATIONS["tr,error_def_version_unknown"]="Uyarı: Sürümler karşılaştırılamıyor (biri veya ikisi bilinmiyor). Dosyalar hash'e göre farklı."
+  TRANSLATIONS["tr,error_def_hash_mismatch"]="Uyarı: Sürümler eşleşiyor ancak hash'ler farklı. Dosyalar değiştirilmiş olabilir."
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
   TRANSLATIONS["tr,bls_invalid_number"]="Geçersiz sayı. Lütfen pozitif bir tam sayı girin."
@@ -2451,23 +2482,65 @@ check_error_definitions_updates_safely() {
     return 0
   fi
 
+  # Функция для сравнения версий (возвращает 0 если версия1 > версия2)
+  version_gt() {
+    if [ "$1" = "$2" ]; then
+      return 1
+    fi
+    local IFS=.
+    local i ver1=($1) ver2=($2)
+    for ((i=0; i<${#ver1[@]}; i++)); do
+      if [[ -z ${ver2[i]} ]]; then
+        ver2[i]=0
+      fi
+      if ((10#${ver1[i]} > 10#${ver2[i]})); then
+        return 0
+      fi
+      if ((10#${ver1[i]} < 10#${ver2[i]})); then
+        return 1
+      fi
+    done
+    return 1
+  }
+
   # Сравниваем с локальным файлом
   LOCAL_ERROR_FILE="$SCRIPT_DIR/error_definitions.json"
-  if [ -f "$LOCAL_ERROR_FILE" ]; then
+  
+  # Извлекаем версию из удалённого файла
+  if command -v jq >/dev/null 2>&1; then
+    REMOTE_VERSION=$(jq -r '.version // "unknown"' "$TEMP_ERROR_FILE" 2>/dev/null)
+  else
+    REMOTE_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$TEMP_ERROR_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
+  fi
+
+  if [ ! -f "$LOCAL_ERROR_FILE" ]; then
+    # Случай 1: Локального файла нет - сохраняем удалённый файл
+    echo -e "\n${YELLOW}$(t "local_error_def_not_found")${NC}"
+    echo -e "${BLUE}$(t "remote_version") ${REMOTE_VERSION}${NC}"
+    echo -e "${BLUE}$(t "expected_version") ${ERROR_DEFINITIONS_VERSION}${NC}"
+    
+    echo -e "\n${CYAN}$(t "error_def_saving")${NC}"
+    if cp "$TEMP_ERROR_FILE" "$LOCAL_ERROR_FILE"; then
+      echo -e "${GREEN}$(t "error_def_saved")${NC}"
+      echo -e "${BLUE}$(t "local_version") ${REMOTE_VERSION}${NC}"
+    else
+      echo -e "${RED}$(t "error_def_save_failed")${NC}"
+      rm -f "$TEMP_ERROR_FILE"
+      return 1
+    fi
+  else
+    # Локальный файл существует - сравниваем версии
     if command -v sha256sum >/dev/null 2>&1; then
       LOCAL_HASH=$(sha256sum "$LOCAL_ERROR_FILE" | cut -d' ' -f1)
     elif command -v shasum >/dev/null 2>&1; then
       LOCAL_HASH=$(shasum -a 256 "$LOCAL_ERROR_FILE" | cut -d' ' -f1)
     fi
 
-    # Извлекаем версии из файлов
+    # Извлекаем версию из локального файла
     if command -v jq >/dev/null 2>&1; then
       LOCAL_VERSION=$(jq -r '.version // "unknown"' "$LOCAL_ERROR_FILE" 2>/dev/null)
-      REMOTE_VERSION=$(jq -r '.version // "unknown"' "$TEMP_ERROR_FILE" 2>/dev/null)
     else
-      # Простая проверка версии без jq
       LOCAL_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$LOCAL_ERROR_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
-      REMOTE_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$TEMP_ERROR_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
     fi
 
     # Показываем версии
@@ -2476,21 +2549,57 @@ check_error_definitions_updates_safely() {
     echo -e "${BLUE}$(t "remote_version") ${REMOTE_VERSION}${NC}"
     echo -e "${BLUE}$(t "expected_version") ${ERROR_DEFINITIONS_VERSION}${NC}"
 
+    # Проверяем хеши
     if [ "$DOWNLOADED_HASH" = "$LOCAL_HASH" ]; then
-      echo -e "\n${GREEN}$(t "error_def_matches_remote")${NC}"
-      if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
-        echo -e "${YELLOW}$(t "version_mismatch_warning")${NC}"
+      # Хеши совпадают - файлы идентичны
+      if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
+        # Случай 2: Версии одинаковые
+        up_to_date_msg=$(t "error_def_version_up_to_date")
+        up_to_date_msg=$(echo "$up_to_date_msg" | sed "s/%s/$LOCAL_VERSION/")
+        echo -e "\n${GREEN}${up_to_date_msg}${NC}"
+      else
+        echo -e "\n${YELLOW}$(t "version_mismatch_warning")${NC}"
       fi
     else
-      echo -e "\n${YELLOW}$(t "local_remote_versions_differ")${NC}"
-      echo -e "${BLUE}$(t "local_hash") ${LOCAL_HASH}${NC}"
-      echo -e "${BLUE}$(t "remote_hash") ${DOWNLOADED_HASH}${NC}"
-      if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
-        version_diff_msg=$(t "version_difference")
-        version_diff_msg=$(echo "$version_diff_msg" | sed "s/%s/$LOCAL_VERSION/" | sed "s/%s/$REMOTE_VERSION/")
-        echo -e "${YELLOW}${version_diff_msg}${NC}"
+      # Хеши различаются - проверяем версии
+      if [ "$LOCAL_VERSION" = "$REMOTE_VERSION" ]; then
+        echo -e "\n${YELLOW}$(t "local_remote_versions_differ")${NC}"
+        echo -e "${BLUE}$(t "local_hash") ${LOCAL_HASH}${NC}"
+        echo -e "${BLUE}$(t "remote_hash") ${DOWNLOADED_HASH}${NC}"
+        echo -e "${YELLOW}$(t "error_def_hash_mismatch")${NC}"
+      elif [ "$REMOTE_VERSION" != "unknown" ] && [ "$LOCAL_VERSION" != "unknown" ] && version_gt "$REMOTE_VERSION" "$LOCAL_VERSION"; then
+        # Случай 3: Удалённая версия выше - обновляем файл
+        newer_version_msg=$(t "error_def_newer_version_available")
+        newer_version_msg=$(echo "$newer_version_msg" | sed "s/%s/$REMOTE_VERSION/" | sed "s/%s/$LOCAL_VERSION/")
+        echo -e "\n${YELLOW}${newer_version_msg}${NC}"
+        echo -e "${BLUE}$(t "local_hash") ${LOCAL_HASH}${NC}"
+        echo -e "${BLUE}$(t "remote_hash") ${DOWNLOADED_HASH}${NC}"
+        
+        echo -e "\n${CYAN}$(t "error_def_updating")${NC}"
+        if cp "$TEMP_ERROR_FILE" "$LOCAL_ERROR_FILE"; then
+          echo -e "${GREEN}$(t "error_def_updated")${NC}"
+          echo -e "${BLUE}$(t "local_version") ${REMOTE_VERSION}${NC}"
+        else
+          echo -e "${RED}$(t "error_def_update_failed")${NC}"
+          rm -f "$TEMP_ERROR_FILE"
+          return 1
+        fi
+      else
+        # Удалённая версия ниже или равна, или версии неизвестны - не обновляем
+        echo -e "\n${YELLOW}$(t "local_remote_versions_differ")${NC}"
+        echo -e "${BLUE}$(t "local_hash") ${LOCAL_HASH}${NC}"
+        echo -e "${BLUE}$(t "remote_hash") ${DOWNLOADED_HASH}${NC}"
+        if [ "$LOCAL_VERSION" != "unknown" ] && [ "$REMOTE_VERSION" != "unknown" ]; then
+          version_diff_msg=$(t "version_difference")
+          version_diff_msg=$(echo "$version_diff_msg" | sed "s/%s/$LOCAL_VERSION/" | sed "s/%s/$REMOTE_VERSION/")
+          echo -e "${YELLOW}${version_diff_msg}${NC}"
+        fi
+        if [ "$LOCAL_VERSION" = "unknown" ] || [ "$REMOTE_VERSION" = "unknown" ]; then
+          echo -e "${YELLOW}$(t "error_def_version_unknown")${NC}"
+        else
+          echo -e "${BLUE}$(t "error_def_local_newer")${NC}"
+        fi
       fi
-      echo -e "${BLUE}$(t "note_update_manually")${NC}"
     fi
 
     # Проверяем соответствие версии скрипта
@@ -2498,21 +2607,6 @@ check_error_definitions_updates_safely() {
       version_mismatch_msg=$(t "version_script_mismatch")
       version_mismatch_msg=$(echo "$version_mismatch_msg" | sed "s/%s/$REMOTE_VERSION/" | sed "s/%s/$ERROR_DEFINITIONS_VERSION/")
       echo -e "\n${YELLOW}${version_mismatch_msg}${NC}"
-    fi
-  else
-    echo -e "${YELLOW}$(t "local_error_def_not_found")${NC}"
-    # Извлекаем версию из удалённого файла
-    if command -v jq >/dev/null 2>&1; then
-      REMOTE_VERSION=$(jq -r '.version // "unknown"' "$TEMP_ERROR_FILE" 2>/dev/null)
-    else
-      REMOTE_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$TEMP_ERROR_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
-    fi
-    echo -e "${BLUE}$(t "remote_version") ${REMOTE_VERSION}${NC}"
-    echo -e "${BLUE}$(t "expected_version") ${ERROR_DEFINITIONS_VERSION}${NC}"
-    if [ "$REMOTE_VERSION" != "$ERROR_DEFINITIONS_VERSION" ]; then
-      version_mismatch_msg=$(t "version_script_mismatch")
-      version_mismatch_msg=$(echo "$version_mismatch_msg" | sed "s/%s/$REMOTE_VERSION/" | sed "s/%s/$ERROR_DEFINITIONS_VERSION/")
-      echo -e "${YELLOW}${version_mismatch_msg}${NC}"
     fi
   fi
 
@@ -2553,7 +2647,8 @@ check_aztec_container_logs() {
     # Загружаем JSON с определениями ошибок из локального файла
     download_error_definitions() {
         if [ ! -f "$ERROR_DEFINITIONS_FILE" ]; then
-            echo -e "${YELLOW}Warning: Error definitions file not found at $ERROR_DEFINITIONS_FILE${NC}"
+            echo -e "\n${YELLOW}Warning: Error definitions file not found at $ERROR_DEFINITIONS_FILE${NC}"
+            echo -e "\n${YELLOW}Please download the Error definitions file with Option 24${NC}"
             return 1
         fi
         return 0
