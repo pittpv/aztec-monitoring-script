@@ -44,7 +44,7 @@
     {
       "pattern": "ERROR: cli ContractFunctionExecutionError: The request took too long to respond",
       "message": "Cli Error in command execution - The request took too long to respond",
-      "solution": "Check your RPC node. The request timed out."
+      "solution": "Check your RPC node, docker-compose.yml settings, or firewall. The request timed out."
     }
   ]
 }
