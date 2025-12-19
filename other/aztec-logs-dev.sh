@@ -2648,7 +2648,7 @@ check_aztec_container_logs() {
     download_error_definitions() {
         if [ ! -f "$ERROR_DEFINITIONS_FILE" ]; then
             echo -e "\n${YELLOW}Warning: Error definitions file not found at $ERROR_DEFINITIONS_FILE${NC}"
-            echo -e "\n${YELLOW}Please download the Error definitions file with Option 24${NC}"
+            echo -e "${YELLOW}Please download the Error definitions file with Option 24${NC}"
             return 1
         fi
         return 0
@@ -3094,7 +3094,17 @@ create_systemd_agent() {
 
   # Security: Copy local error_definitions.json to agent directory to avoid remote downloads
   if [ -f "$SCRIPT_DIR/error_definitions.json" ]; then
-    cp "$SCRIPT_DIR/error_definitions.json" "$HOME/error_definitions.json"
+    # Проверяем, что файлы разные перед копированием (избегаем копирования файла сам в себя)
+    source_file="$SCRIPT_DIR/error_definitions.json"
+    dest_file="$HOME/error_definitions.json"
+    
+    # Получаем абсолютные пути для сравнения
+    source_abs=$(cd "$(dirname "$source_file")" && pwd)/$(basename "$source_file")
+    dest_abs=$(cd "$(dirname "$dest_file")" && pwd)/$(basename "$dest_file")
+    
+    if [ "$source_abs" != "$dest_abs" ]; then
+      cp "$source_file" "$dest_file"
+    fi
   fi
 
   # Генерация скрипта агента
