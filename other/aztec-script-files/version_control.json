@@ -242,6 +242,6 @@
   {
     "VERSION": "2.7.0",
     "UPDATE_DATE": "19.12.2025",
-    "CHANGES": ["Full support for mainnet and testnet in all script functions", "Security update of the script (read full description in Github)", "Improved claim_rewards function (Option 21)", "Node installation function update", "Node removal function update", "Critical error definitions file update", "Removed the last hardcoded root reference", "Script code refactoring", "Improved translations in three languages", "After updating the script, delete the old agent (option 3) and create a new agent (option 2)\nDelete old error definition file in the sctipt root directory and download new with Option 24"]
+    "CHANGES": ["Full support for mainnet and testnet in all script functions", "Security update of the script (read full description in Github)", "Improved claim_rewards function (Option 21)", "Node installation function update", "Node removal function update", "Critical error definitions file update", "Removed the last hardcoded root reference", "Script code refactoring", "Improved translations in three languages", "After updating the script, delete the old agent (option 3) and create a new agent (option 2)\nDelete old error definition file in the script root directory and download new with Option 24"]
   }
 ]
