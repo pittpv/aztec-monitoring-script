@@ -9,10 +9,6 @@ CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
 NC='\033[0m' # No Color
 
-SCRIPT_VERSION="2.5.3"
-
-# Determine script directory for local file access (security: avoid remote code execution)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Language settings ===
 LANG=""
@@ -100,6 +96,12 @@ init_languages() {
   TRANSLATIONS["en,local_hash"]="Local hash:"
   TRANSLATIONS["en,remote_hash"]="Remote hash:"
   TRANSLATIONS["en,local_error_def_not_found"]="Local error_definitions.json not found."
+  TRANSLATIONS["en,local_version"]="Local version:"
+  TRANSLATIONS["en,remote_version"]="Remote version:"
+  TRANSLATIONS["en,expected_version"]="Expected version (from script):"
+  TRANSLATIONS["en,version_mismatch_warning"]="Warning: Versions differ but hashes match. This should not happen."
+  TRANSLATIONS["en,version_difference"]="Version difference detected: Local (%s) vs Remote (%s)"
+  TRANSLATIONS["en,version_script_mismatch"]="Warning: Remote version (%s) does not match expected script version (%s)"
   TRANSLATIONS["en,bls_mnemonic_prompt"]="Copy all 12 words of your mnemonic phrase, paste it and press Enter (the input will be hidden, but pasted):"
   TRANSLATIONS["en,bls_wallet_count_prompt"]="Enter the number of wallets to generate. \nFor example: if your seed phrase contains only one wallet, insert the digit 1. \nIf your seed phrase contains several wallets for multiple validators, insert approximately the maximum number of the last wallet, for example 30, 50. \nIt is better to specify a larger number if you are not sure, the script will collect all keys and remove the extras."
   TRANSLATIONS["en,bls_invalid_number"]="Invalid number. Please enter a positive integer."
@@ -724,6 +726,12 @@ init_languages() {
   TRANSLATIONS["ru,local_hash"]="Локальный хеш:"
   TRANSLATIONS["ru,remote_hash"]="Удалённый хеш:"
   TRANSLATIONS["ru,local_error_def_not_found"]="Локальный error_definitions.json не найден."
+  TRANSLATIONS["ru,local_version"]="Локальная версия:"
+  TRANSLATIONS["ru,remote_version"]="Удалённая версия:"
+  TRANSLATIONS["ru,expected_version"]="Ожидаемая версия (из скрипта):"
+  TRANSLATIONS["ru,version_mismatch_warning"]="Предупреждение: Версии различаются, но хеши совпадают. Этого не должно происходить."
+  TRANSLATIONS["ru,version_difference"]="Обнаружено различие версий: Локальная (%s) vs Удалённая (%s)"
+  TRANSLATIONS["ru,version_script_mismatch"]="Предупреждение: Удалённая версия (%s) не соответствует ожидаемой версии скрипта (%s)"
   TRANSLATIONS["ru,bls_mnemonic_prompt"]="Скопируйте все 12 слов вашей мнемонической фразы, вставьте и нажмите Enter (ввод будет скрыт, но вставлен):"
   TRANSLATIONS["ru,bls_wallet_count_prompt"]="Введите количество кошельков для генерации. \nНапример: если у вас в сид-фразе всего один кошелек, вставьте цифру 1. \nЕсли в вашей сид-фразе несколько кошельков для нескольких валидаторов, вставьте примернуо максимальную цифру последнего кошелька, например 30, 50. \nЛучше укажите больше, если не уверены, скрипт соберет все ключи и удалит лишние.):"
   TRANSLATIONS["ru,bls_invalid_number"]="Неверное число. Введите положительное целое число."
@@ -1365,6 +1373,12 @@ init_languages() {
   TRANSLATIONS["tr,local_hash"]="Yerel hash:"
   TRANSLATIONS["tr,remote_hash"]="Uzak hash:"
   TRANSLATIONS["tr,local_error_def_not_found"]="Yerel error_definitions.json bulunamadı."
+  TRANSLATIONS["tr,local_version"]="Yerel sürüm:"
+  TRANSLATIONS["tr,remote_version"]="Uzak sürüm:"
+  TRANSLATIONS["tr,expected_version"]="Beklenen sürüm (betikten):"
+  TRANSLATIONS["tr,version_mismatch_warning"]="Uyarı: Sürümler farklı ancak hash'ler eşleşiyor. Bu olmamalı."
+  TRANSLATIONS["tr,version_difference"]="Sürüm farkı tespit edildi: Yerel (%s) vs Uzak (%s)"
+  TRANSLATIONS["tr,version_script_mismatch"]="Uyarı: Uzak sürüm (%s) beklenen betik sürümü (%s) ile eşleşmiyor"
   TRANSLATIONS["tr,bls_mnemonic_prompt"]="Hafıza ifadenizin 12 kelimesinin tamamını kopyalayın, yapıştırın ve Enter'a basın (giriş gizlenecek, ancak yapıştırılacak):"
   TRANSLATIONS["tr,bls_wallet_count_prompt"]="Oluşturulacak cüzdan sayısını girin. \nÖrneğin: seed ifadenizde yalnızca bir cüzdan varsa, 1 rakamını girin. \nSeed ifadenizde birden fazla doğrulayıcı için birden fazla cüzdan varsa, son cüzdanın yaklaşık en yüksek numarasını girin, örneğin 30, 50. \nEmin değilseniz daha büyük bir sayı belirtmeniz daha iyidir, betik tüm anahtarları toplayacak ve fazlalıkları silecektir."
   TRANSLATIONS["tr,bls_invalid_number"]="Geçersiz sayı. Lütfen pozitif bir tam sayı girin."
@@ -1954,12 +1968,28 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
+SCRIPT_VERSION="2.5.3"
+ERROR_DEFINITIONS_VERSION="1.0.0"
+
+# Determine script directory for local file access (security: avoid remote code execution)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # === Configuration ===
-CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
-CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
+# Contract addresses (Rollup addresses)
+CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet rollup address
+CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet rollup address
+
+# GSE contract addresses
+GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
+GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
+
+# Function signature for contract calls
 FUNCTION_SIG="getPendingBlockNumber()"
 
+# Required tools
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
+
+# Agent paths
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 
@@ -2392,7 +2422,7 @@ check_error_definitions_updates_safely() {
     return 0
   fi
 
-  REMOTE_ERROR_DEF_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
+  REMOTE_ERROR_DEF_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/aztec-script-files/error_definitions.json"
   TEMP_ERROR_FILE=$(mktemp)
 
   echo -e "\n${CYAN}$(t "downloading_error_definitions")${NC}"
@@ -2430,16 +2460,60 @@ check_error_definitions_updates_safely() {
       LOCAL_HASH=$(shasum -a 256 "$LOCAL_ERROR_FILE" | cut -d' ' -f1)
     fi
 
-    if [ "$DOWNLOADED_HASH" = "$LOCAL_HASH" ]; then
-      echo -e "${GREEN}$(t "error_def_matches_remote")${NC}"
+    # Извлекаем версии из файлов
+    if command -v jq >/dev/null 2>&1; then
+      LOCAL_VERSION=$(jq -r '.version // "unknown"' "$LOCAL_ERROR_FILE" 2>/dev/null)
+      REMOTE_VERSION=$(jq -r '.version // "unknown"' "$TEMP_ERROR_FILE" 2>/dev/null)
     else
-      echo -e "${YELLOW}$(t "local_remote_versions_differ")${NC}"
+      # Простая проверка версии без jq
+      LOCAL_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$LOCAL_ERROR_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
+      REMOTE_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$TEMP_ERROR_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
+    fi
+
+    # Показываем версии
+    echo -e "\n${CYAN}$(t "version_label")${NC}"
+    echo -e "${BLUE}$(t "local_version") ${LOCAL_VERSION}${NC}"
+    echo -e "${BLUE}$(t "remote_version") ${REMOTE_VERSION}${NC}"
+    echo -e "${BLUE}$(t "expected_version") ${ERROR_DEFINITIONS_VERSION}${NC}"
+
+    if [ "$DOWNLOADED_HASH" = "$LOCAL_HASH" ]; then
+      echo -e "\n${GREEN}$(t "error_def_matches_remote")${NC}"
+      if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
+        echo -e "${YELLOW}$(t "version_mismatch_warning")${NC}"
+      fi
+    else
+      echo -e "\n${YELLOW}$(t "local_remote_versions_differ")${NC}"
       echo -e "${BLUE}$(t "local_hash") ${LOCAL_HASH}${NC}"
       echo -e "${BLUE}$(t "remote_hash") ${DOWNLOADED_HASH}${NC}"
+      if [ "$LOCAL_VERSION" != "$REMOTE_VERSION" ]; then
+        version_diff_msg=$(t "version_difference")
+        version_diff_msg=$(echo "$version_diff_msg" | sed "s/%s/$LOCAL_VERSION/" | sed "s/%s/$REMOTE_VERSION/")
+        echo -e "${YELLOW}${version_diff_msg}${NC}"
+      fi
       echo -e "${BLUE}$(t "note_update_manually")${NC}"
+    fi
+
+    # Проверяем соответствие версии скрипта
+    if [ "$REMOTE_VERSION" != "$ERROR_DEFINITIONS_VERSION" ]; then
+      version_mismatch_msg=$(t "version_script_mismatch")
+      version_mismatch_msg=$(echo "$version_mismatch_msg" | sed "s/%s/$REMOTE_VERSION/" | sed "s/%s/$ERROR_DEFINITIONS_VERSION/")
+      echo -e "\n${YELLOW}${version_mismatch_msg}${NC}"
     fi
   else
     echo -e "${YELLOW}$(t "local_error_def_not_found")${NC}"
+    # Извлекаем версию из удалённого файла
+    if command -v jq >/dev/null 2>&1; then
+      REMOTE_VERSION=$(jq -r '.version // "unknown"' "$TEMP_ERROR_FILE" 2>/dev/null)
+    else
+      REMOTE_VERSION=$(grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' "$TEMP_ERROR_FILE" | head -1 | sed 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/' || echo "unknown")
+    fi
+    echo -e "${BLUE}$(t "remote_version") ${REMOTE_VERSION}${NC}"
+    echo -e "${BLUE}$(t "expected_version") ${ERROR_DEFINITIONS_VERSION}${NC}"
+    if [ "$REMOTE_VERSION" != "$ERROR_DEFINITIONS_VERSION" ]; then
+      version_mismatch_msg=$(t "version_script_mismatch")
+      version_mismatch_msg=$(echo "$version_mismatch_msg" | sed "s/%s/$REMOTE_VERSION/" | sed "s/%s/$ERROR_DEFINITIONS_VERSION/")
+      echo -e "${YELLOW}${version_mismatch_msg}${NC}"
+    fi
   fi
 
   # Удаляем временный файл
@@ -2495,7 +2569,7 @@ check_aztec_container_logs() {
                 solution=$(jq -r '.solution' <<< "$line")
                 critical_errors["$pattern"]="$message"
                 error_solutions["$pattern"]="$solution"
-            done < <(jq -c '.[]' "$ERROR_DEFINITIONS_FILE")
+            done < <(jq -c '.errors[]' "$ERROR_DEFINITIONS_FILE")
         else
             # Простой парсинг без jq (ограниченная функциональность)
             while IFS= read -r line; do
@@ -4316,13 +4390,9 @@ get_network_for_validator() {
 }
 
 # === Адреса контрактов в зависимости от сети ===
-# Testnet адреса
-ROLLUP_ADDRESS_TESTNET="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"
-GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
-
-# Mainnet адреса
-ROLLUP_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"
-GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
+# Note: Contract addresses are now defined in the Configuration section above
+# ROLLUP_ADDRESS_TESTNET = CONTRACT_ADDRESS
+# ROLLUP_ADDRESS_MAINNET = CONTRACT_ADDRESS_MAINNET
 
 # ========= HTTP via curl_cffi =========
 # cffi_http_get <url>
@@ -5433,11 +5503,11 @@ check_validator_main() {
     local GSE_ADDRESS
     local QUEUE_URL
     if [[ "$network" == "mainnet" ]]; then
-        ROLLUP_ADDRESS="$ROLLUP_ADDRESS_MAINNET"
+        ROLLUP_ADDRESS="$CONTRACT_ADDRESS_MAINNET"
         GSE_ADDRESS="$GSE_ADDRESS_MAINNET"
         QUEUE_URL="https://dashtec.xyz/api/sequencers/queue"
     else
-        ROLLUP_ADDRESS="$ROLLUP_ADDRESS_TESTNET"
+        ROLLUP_ADDRESS="$CONTRACT_ADDRESS"
         GSE_ADDRESS="$GSE_ADDRESS_TESTNET"
         QUEUE_URL="https://${network}.dashtec.xyz/api/sequencers/queue"
     fi
