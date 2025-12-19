@@ -482,6 +482,11 @@ init_languages() {
   TRANSLATIONS["en,delete_watchtower_confirm"]="Do you want to also delete Watchtower? (y/n) "
   TRANSLATIONS["en,watchtower_deleted"]="✅ Watchtower successfully deleted"
   TRANSLATIONS["en,watchtower_kept"]="✅ Watchtower kept intact"
+  TRANSLATIONS["en,delete_web3signer_confirm"]="Do you want to also delete web3signer? (y/n) "
+  TRANSLATIONS["en,web3signer_deleted"]="✅ web3signer successfully deleted"
+  TRANSLATIONS["en,web3signer_kept"]="✅ web3signer kept intact"
+  TRANSLATIONS["en,stopping_web3signer"]="Stopping web3signer..."
+  TRANSLATIONS["en,removing_web3signer_data"]="Removing web3signer data..."
   TRANSLATIONS["en,enter_tg_token"]="Enter Telegram bot token: "
   TRANSLATIONS["en,enter_tg_chat_id"]="Enter Telegram chat ID: "
   TRANSLATIONS["en,single_validator_mode"]="🔹 Single validator mode selected"
@@ -533,6 +538,8 @@ init_languages() {
   TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
   TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
   TRANSLATIONS["en,removing_watchtower_data"]="Removing Watchtower data..."
+  TRANSLATIONS["en,stopping_web3signer"]="Stopping web3signer..."
+  TRANSLATIONS["en,removing_web3signer_data"]="Removing web3signer data..."
   TRANSLATIONS["en,enter_yn"]="Please enter Y or N: "
 
   # Translations from check-validator.sh
@@ -1058,6 +1065,9 @@ init_languages() {
   TRANSLATIONS["ru,delete_watchtower_confirm"]="Хотите также удалить Watchtower? (y/n) "
   TRANSLATIONS["ru,watchtower_deleted"]="✅ Watchtower успешно удален"
   TRANSLATIONS["ru,watchtower_kept"]="✅ Watchtower оставлен без изменений"
+  TRANSLATIONS["ru,delete_web3signer_confirm"]="Хотите также удалить web3signer? (y/n) "
+  TRANSLATIONS["ru,web3signer_deleted"]="✅ web3signer успешно удален"
+  TRANSLATIONS["ru,web3signer_kept"]="✅ web3signer оставлен без изменений"
   TRANSLATIONS["ru,enter_tg_token"]="Введите токен Telegram бота: "
   TRANSLATIONS["ru,enter_tg_chat_id"]="Введите ID Telegram чата: "
   TRANSLATIONS["ru,single_validator_mode"]="🔹 Выбран режим одного валидатора"
@@ -1070,6 +1080,8 @@ init_languages() {
   TRANSLATIONS["ru,removing_node_data"]="Удаление данных ноды Aztec..."
   TRANSLATIONS["ru,stopping_watchtower"]="Остановка Watchtower..."
   TRANSLATIONS["ru,removing_watchtower_data"]="Удаление данных Watchtower..."
+  TRANSLATIONS["ru,stopping_web3signer"]="Остановка web3signer..."
+  TRANSLATIONS["ru,removing_web3signer_data"]="Удаление данных web3signer..."
   #update
   TRANSLATIONS["ru,update_title"]="Обновление ноды Aztec до последней версии"
   TRANSLATIONS["ru,update_folder_error"]="Ошибка: Папка $HOME/aztec не существует"
@@ -1172,6 +1184,9 @@ init_languages() {
   TRANSLATIONS["ru,delete_watchtower_confirm"]="Хотите также удалить Watchtower? (y/n) "
   TRANSLATIONS["ru,watchtower_deleted"]="✅ Watchtower успешно удален"
   TRANSLATIONS["ru,watchtower_kept"]="✅ Watchtower оставлен без изменений"
+  TRANSLATIONS["ru,delete_web3signer_confirm"]="Хотите также удалить web3signer? (y/n) "
+  TRANSLATIONS["ru,web3signer_deleted"]="✅ web3signer успешно удален"
+  TRANSLATIONS["ru,web3signer_kept"]="✅ web3signer оставлен без изменений"
   TRANSLATIONS["ru,enter_tg_token"]="Введите токен Telegram бота: "
   TRANSLATIONS["ru,enter_tg_chat_id"]="Введите ID Telegram чата: "
   TRANSLATIONS["ru,single_validator_mode"]="🔹 Выбран режим одного валидатора"
@@ -1717,6 +1732,9 @@ init_languages() {
   TRANSLATIONS["tr,delete_watchtower_confirm"]="Watchtower'ı da silmek istiyor musunuz? (y/n) "
   TRANSLATIONS["tr,watchtower_deleted"]="✅ Watchtower başarıyla silindi"
   TRANSLATIONS["tr,watchtower_kept"]="✅ Watchtower korundu"
+  TRANSLATIONS["tr,delete_web3signer_confirm"]="web3signer'ı da silmek istiyor musunuz? (y/n) "
+  TRANSLATIONS["tr,web3signer_deleted"]="✅ web3signer başarıyla silindi"
+  TRANSLATIONS["tr,web3signer_kept"]="✅ web3signer korundu"
   TRANSLATIONS["tr,enter_tg_token"]="Telegram bot tokenini girin: "
   TRANSLATIONS["tr,enter_tg_chat_id"]="Telegram chat ID'sini girin: "
   TRANSLATIONS["tr,single_validator_mode"]="🔹 Tek validatör modu seçildi"
@@ -1729,6 +1747,8 @@ init_languages() {
   TRANSLATIONS["tr,removing_node_data"]="Aztec node verileri kaldırılıyor..."
   TRANSLATIONS["tr,stopping_watchtower"]="Watchtower durduruluyor..."
   TRANSLATIONS["tr,removing_watchtower_data"]="Watchtower verileri kaldırılıyor..."
+  TRANSLATIONS["tr,stopping_web3signer"]="web3signer durduruluyor..."
+  TRANSLATIONS["tr,removing_web3signer_data"]="web3signer verileri kaldırılıyor..."
   # Güncelleme
   TRANSLATIONS["tr,update_title"]="Aztec düğümü en son sürüme güncelleniyor"
   TRANSLATIONS["tr,update_folder_error"]="Hata: $HOME/aztec klasörü mevcut değil"
@@ -1830,6 +1850,9 @@ init_languages() {
   TRANSLATIONS["tr,delete_watchtower_confirm"]="Watchtower'ı da silmek istiyor musunuz? (y/n) "
   TRANSLATIONS["tr,watchtower_deleted"]="✅ Watchtower başarıyla silindi"
   TRANSLATIONS["tr,watchtower_kept"]="✅ Watchtower korundu"
+  TRANSLATIONS["tr,delete_web3signer_confirm"]="web3signer'ı da silmek istiyor musunuz? (y/n) "
+  TRANSLATIONS["tr,web3signer_deleted"]="✅ web3signer başarıyla silindi"
+  TRANSLATIONS["tr,web3signer_kept"]="✅ web3signer korundu"
   TRANSLATIONS["tr,enter_tg_token"]="Telegram bot tokenini girin: "
   TRANSLATIONS["tr,enter_tg_chat_id"]="Telegram chat ID'sini girin: "
   TRANSLATIONS["tr,single_validator_mode"]="🔹 Tek validatör modu seçildi"
@@ -1855,6 +1878,8 @@ init_languages() {
   TRANSLATIONS["tr,removing_node_data"]="Aztec node verileri kaldırılıyor..."
   TRANSLATIONS["tr,stopping_watchtower"]="Watchtower durduruluyor..."
   TRANSLATIONS["tr,removing_watchtower_data"]="Watchtower verileri kaldırılıyor..."
+  TRANSLATIONS["tr,stopping_web3signer"]="web3signer durduruluyor..."
+  TRANSLATIONS["tr,removing_web3signer_data"]="web3signer verileri kaldırılıyor..."
   TRANSLATIONS["tr,enter_yn"]="Lütfen Y veya N girin: "
 
   # Translations from check-validator.sh (Turkish)
@@ -4545,6 +4570,28 @@ delete_aztec_node() {
                 echo -e "${GREEN}$(t "watchtower_deleted")${NC}"
             else
                 echo -e "${GREEN}$(t "watchtower_kept")${NC}"
+            fi
+        fi
+
+        # Проверяем web3signer
+        if docker ps -a --format '{{.Names}}' | grep -q 'web3signer'; then
+            while :; do
+                read -p "$(t "delete_web3signer_confirm") " -n 1 -r
+                [[ $REPLY =~ ^[YyNn]$ ]] && break
+                echo -e "\n${YELLOW}$(t "enter_yn")${NC}"
+            done
+            echo
+
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                echo -e "${YELLOW}$(t "stopping_web3signer")${NC}"
+                docker stop web3signer 2>/dev/null || true
+                docker rm web3signer 2>/dev/null || true
+
+                echo -e "${YELLOW}$(t "removing_web3signer_data")${NC}"
+                # Данные web3signer находятся в $HOME/aztec/keys, который уже удален выше
+                echo -e "${GREEN}$(t "web3signer_deleted")${NC}"
+            else
+                echo -e "${GREEN}$(t "web3signer_kept")${NC}"
             fi
         fi
 
