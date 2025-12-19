@@ -63,9 +63,11 @@
 - Мелкие улучшения
 
 **error_definitions.json**
+
 SHA256: `506e6e023f63e1068cd2b5529acbde16e42ec34cace4fcc6b9a8abc41730f4b4`
 
 **version_control.json**
+
 SHA256: `9f05c9e36c83b6574dadb5c8ce73078b5037bd2440915ed440e7ab0a67f45e92`
 
 <details>
