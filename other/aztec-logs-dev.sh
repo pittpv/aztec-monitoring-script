@@ -2387,7 +2387,7 @@ check_updates_safely() {
     local data="$1"
     local base_version="$2"
     local updates_shown=0
-    
+
     echo "$data" | jq -c '.[]' | while read -r update; do
       version=$(echo "$update" | jq -r '.VERSION')
       date=$(echo "$update" | jq -r '.UPDATE_DATE')
@@ -2409,7 +2409,7 @@ check_updates_safely() {
         fi
       fi
     done
-    
+
     return $updates_shown
   }
 
@@ -2419,7 +2419,7 @@ check_updates_safely() {
 
   # === Шаг 1: Проверка локального файла ===
   echo -e "\n${CYAN}$(t "current_installed_version") ${INSTALLED_VERSION}${NC}"
-  
+
   LOCAL_LATEST_VERSION=""
   local_data=""
   if [ -f "$LOCAL_VC_FILE" ] && local_data=$(cat "$LOCAL_VC_FILE" 2>/dev/null); then
@@ -2595,7 +2595,7 @@ check_error_definitions_updates_safely() {
 
   # Сравниваем с локальным файлом
   LOCAL_ERROR_FILE="$SCRIPT_DIR/error_definitions.json"
-  
+
   # Извлекаем версию из удалённого файла
   if command -v jq >/dev/null 2>&1; then
     REMOTE_VERSION=$(jq -r '.version // "unknown"' "$TEMP_ERROR_FILE" 2>/dev/null)
@@ -2608,7 +2608,7 @@ check_error_definitions_updates_safely() {
     echo -e "\n${YELLOW}$(t "local_error_def_not_found")${NC}"
     echo -e "${BLUE}$(t "remote_version") ${REMOTE_VERSION}${NC}"
     echo -e "${BLUE}$(t "expected_version") ${ERROR_DEFINITIONS_VERSION}${NC}"
-    
+
     echo -e "\n${CYAN}$(t "error_def_saving")${NC}"
     if cp "$TEMP_ERROR_FILE" "$LOCAL_ERROR_FILE"; then
       echo -e "${GREEN}$(t "error_def_saved")${NC}"
@@ -2664,7 +2664,7 @@ check_error_definitions_updates_safely() {
         echo -e "\n${YELLOW}${newer_version_msg}${NC}"
         echo -e "${BLUE}$(t "local_hash") ${LOCAL_HASH}${NC}"
         echo -e "${BLUE}$(t "remote_hash") ${DOWNLOADED_HASH}${NC}"
-        
+
         echo -e "\n${CYAN}$(t "error_def_updating")${NC}"
         if cp "$TEMP_ERROR_FILE" "$LOCAL_ERROR_FILE"; then
           echo -e "${GREEN}$(t "error_def_updated")${NC}"
@@ -2760,31 +2760,31 @@ check_aztec_container_logs() {
             # Извлекаем содержимое массива errors из новой структуры JSON
             # Используем sed для извлечения содержимого между "errors": [ и ]
             errors_section=$(sed -n '/"errors":\s*\[/,/\]/{ /"errors":\s*\[/d; /\]/d; p; }' "$ERROR_DEFINITIONS_FILE" 2>/dev/null)
-            
+
             # Парсим объекты из массива errors
             # Собираем объекты по фигурным скобкам, учитывая многострочность
             current_obj=""
             brace_level=0
-            
+
             while IFS= read -r line || [ -n "$line" ]; do
                 # Удаляем ведущие/замыкающие пробелы и запятые
                 line=$(echo "$line" | sed 's/^[[:space:],]*//;s/[[:space:],]*$//')
-                
+
                 # Пропускаем пустые строки
                 [ -z "$line" ] && continue
-                
+
                 # Подсчитываем фигурные скобки в строке
                 open_count=$(echo "$line" | tr -cd '{' | wc -c)
                 close_count=$(echo "$line" | tr -cd '}' | wc -c)
                 brace_level=$((brace_level + open_count - close_count))
-                
+
                 # Добавляем строку к текущему объекту
                 if [ -z "$current_obj" ]; then
                     current_obj="$line"
                 else
                     current_obj="${current_obj} ${line}"
                 fi
-                
+
                 # Когда объект завершён (brace_level вернулся к 0 и есть закрывающая скобка)
                 if [ "$brace_level" -eq 0 ] && [ "$close_count" -gt 0 ]; then
                     # Извлекаем pattern, message и solution из объекта
@@ -2792,12 +2792,12 @@ check_aztec_container_logs() {
                     pattern=$(echo "$current_obj" | sed -n 's/.*"pattern"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
                     message=$(echo "$current_obj" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
                     solution=$(echo "$current_obj" | sed -n 's/.*"solution"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
-                    
+
                     if [ -n "$pattern" ] && [ -n "$message" ] && [ -n "$solution" ]; then
                         critical_errors["$pattern"]="$message"
                         error_solutions["$pattern"]="$solution"
                     fi
-                    
+
                     current_obj=""
                 fi
             done <<< "$errors_section"
@@ -3187,11 +3187,11 @@ create_systemd_agent() {
     # Проверяем, что файлы разные перед копированием (избегаем копирования файла сам в себя)
     source_file="$SCRIPT_DIR/error_definitions.json"
     dest_file="$HOME/error_definitions.json"
-    
+
     # Получаем абсолютные пути для сравнения
     source_abs=$(cd "$(dirname "$source_file")" && pwd)/$(basename "$source_file")
     dest_abs=$(cd "$(dirname "$dest_file")" && pwd)/$(basename "$dest_file")
-    
+
     if [ "$source_abs" != "$dest_abs" ]; then
       cp "$source_file" "$dest_file"
     fi
@@ -3460,37 +3460,37 @@ check_critical_errors() {
     # Fallback парсинг без jq (ограниченная функциональность)
     # Извлекаем содержимое массива errors из новой структуры JSON
     errors_section=\$(sed -n '/"errors":\s*\[/,/\]/{ /"errors":\s*\[/d; /\]/d; p; }' "\$ERROR_DEFINITIONS_FILE" 2>/dev/null)
-    
+
     # Парсим объекты из массива errors
     current_obj=""
     brace_level=0
-    
+
     while IFS= read -r line || [ -n "\$line" ]; do
       # Удаляем ведущие/замыкающие пробелы и запятые
       line=\$(echo "\$line" | sed 's/^[[:space:],]*//;s/[[:space:],]*$//')
-      
+
       # Пропускаем пустые строки
       [ -z "\$line" ] && continue
-      
+
       # Подсчитываем фигурные скобки в строке
       open_count=\$(echo "\$line" | tr -cd '{' | wc -c)
       close_count=\$(echo "\$line" | tr -cd '}' | wc -c)
       brace_level=\$((brace_level + open_count - close_count))
-      
+
       # Добавляем строку к текущему объекту
       if [ -z "\$current_obj" ]; then
         current_obj="\$line"
       else
         current_obj="\${current_obj} \${line}"
       fi
-      
+
       # Когда объект завершён (brace_level вернулся к 0 и есть закрывающая скобка)
       if [ "\$brace_level" -eq 0 ] && [ "\$close_count" -gt 0 ]; then
         # Извлекаем pattern, message и solution из объекта
         pattern=\$(echo "\$current_obj" | sed -n 's/.*"pattern"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
         message=\$(echo "\$current_obj" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
         solution=\$(echo "\$current_obj" | sed -n 's/.*"solution"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
-        
+
         if [ -n "\$pattern" ] && [ -n "\$message" ] && [ -n "\$solution" ]; then
           if echo "\$clean_logs" | grep -q "\$pattern"; then
             log "Critical error detected: \$pattern"
@@ -3500,7 +3500,7 @@ check_critical_errors() {
             exit 1
           fi
         fi
-        
+
         current_obj=""
       fi
     done <<< "\$errors_section"
@@ -5683,7 +5683,7 @@ fast_load_validators() {
                 *) local status_text="UNKNOWN (status=$status)" ;;
             esac
         fi
-        
+
         if [[ -n "${STATUS_COLOR[$status]:-}" ]]; then
             local status_color="${STATUS_COLOR[$status]}"
         else
@@ -5955,7 +5955,7 @@ check_validator_main() {
 validator_submenu() {
     local MONITOR_DIR="$HOME/aztec-monitor-agent"
     local network=$(get_network_for_validator)
-    
+
     # Выбор адресов в зависимости от сети
     local QUEUE_URL
     if [[ "$network" == "mainnet" ]]; then
@@ -6364,7 +6364,7 @@ EOF
     cat > "$HOME/aztec/config/keystore.json" <<EOF
 {
   "schemaVersion": 1,
-  "remoteSigner": "http://127.0.0.1:10500",
+  "remoteSigner": "http://web3signer:10500",
   "validators": [
     $VALIDATORS_JSON_STRING
   ]
@@ -6521,8 +6521,11 @@ EOF
     docker rm web3signer 2>/dev/null || true
 
     # Run web3signer container
-    docker run -d --name web3signer --restart unless-stopped \
-      -p 127.0.0.1:10500:10500 \
+    docker run -d \
+      --name web3signer \
+      --restart unless-stopped \
+      --network aztec \
+      -p 10500:10500 \
       -v $HOME/aztec/keys:/keys \
       consensys/web3signer:latest \
       --http-listen-host=0.0.0.0 \
