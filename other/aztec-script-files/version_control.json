@@ -237,15 +237,13 @@
   {
     "VERSION": "2.6.0",
     "UPDATE_DATE": "10.12.2025",
-    "CHANGES": ["New Publisher balance monitoring (Option 10)", "Main menu options reordered", "Enter key wait after menu function execution", "Updated Translations and Messages", "Fixes and Improvements"],
-    "NOTICE": "After updating the script, delete the old agent (option 3) and create a new agent (option 2)",
-    "COLOR": "red"
+    "CHANGES": ["New Publisher balance monitoring (Option 10)", "Main menu options reordered", "Enter key wait after menu function execution", "Updated Translations and Messages", "Fixes and Improvements"]
   },
   {
     "VERSION": "2.7.0",
     "UPDATE_DATE": "19.12.2025",
-    "CHANGES": ["Full support for mainnet and testnet in all script functions", "Security update of the script (read full description in Github)", "Improved claim_rewards function (Option 21)", "Node installation function update", "Node removal function update", "Critical error definitions file update", "Removed the last hardcoded root reference", "Script code refactoring", "Improved translations in three languages"],
-    "NOTICE": "After updating the script, delete old error definition file in the script root directory and download new with Option 24. Also delete the old agent (option 3) and create a new agent (option 2).",
+    "CHANGES": ["Full support for mainnet and testnet in all script functions", "Security update of the script (read full description in Github)", "Improved claim_rewards function (Option 21)", "Node installation function update", "Node removal function update", "Critical error definitions file update", "Removed the last hardcoded root reference", "Script code refactoring", "Improved translations in three languages", "After updating the script, delete old error definition file (aztec_error_definitions.json or error_definitions.json) in the script root directory and download new with Option 24. Also delete the old agent (option 3) and create a new agent (option 2)."],
+    "NOTICE": "After updating the script, delete old error definition file (aztec_error_definitions.json or error_definitions.json) in the script root directory and download new with Option 24. Also delete the old agent (option 3) and create a new agent (option 2).",
     "COLOR": "red"
   }
 ]

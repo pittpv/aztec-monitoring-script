@@ -1,5 +1,5 @@
 {
-  "version": "1.1.0",
+  "version": "1.0.0",
   "errors": [
     {
       "pattern": "ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync",

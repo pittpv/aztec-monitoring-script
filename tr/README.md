@@ -35,7 +35,37 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 10-12-2025
+## 📌 Son Güncellemeler 19-12-2025
+
+⚠️ Script'i güncelledikten sonra, script kök dizinindeki eski kritik hata tanımları dosyasını (`aztec_error_definitions.json` veya `error_definitions.json`) silin ve yenisini **Seçenek 24** ile indirin. Ayrıca eski izleme ajanını (seçenek 3) silin ve yeni bir ajan oluşturun (seçenek 2).
+
+- Bet bet script işlevlerinde mainnet ve testnet için tam destek
+- Script güvenlik güncellemesi
+  - Harici dosyaların otomatik indirilmesi ve yürütülmesi kaldırıldı
+  - Tüm ek scriptler (logo.sh, install_aztec.sh, check-validator.sh) ana aztec-logs.sh script'ine entegre edildi
+  - Dosya hash doğrulaması ve kullanıcı onayı ile yeni script versiyonu kontrolü için manuel fonksiyon eklendi (Seçenek 23)
+  - Dosya hash doğrulaması ve kullanıcı onayı ile yeni kritik hata tanımları dosyası versiyonu kontrolü için manuel fonksiyon eklendi (Seçenek 24). İlk çalıştırmada, error_definitions.json dosyasını indirmek için bu seçeneği kullanmalısınız.
+- Geliştirilmiş `claim_rewards` fonksiyonu (Seçenek 21)
+  - Bir coinbase adresi belirtilmemişse, kontrol attestör'ün ETH adresi kullanılarak yapılacaktır
+  - Ağa bağlı olarak doğru ticker'ın gösterilmesi için çıktı iyileştirildi: testnet için STK, mainnet için AZTEC
+- Node kurulum fonksiyonu güncellemesi
+  - `docker-compose.yml` resmi dokümantasyonla uyumlu hale getirildi
+  - `web3signer`, izole Aztec ağında çalışacak şekilde doğru yapılandırıldı
+  - Güvenlik duvarı kullanıyorsanız, Aztec ağının kullandığı Docker alt ağı için RPC portlarını açın
+- Node kaldırma fonksiyonu güncellemesi
+  - Onay sonrası `web3signer` kaldırma seçeneği eklendi
+- Kritik hata tanımları dosyası güncellemesi
+  - Yeni bir hata eklendi
+  - Yapı güncellendi, versiyon belirtimi eklendi
+- İzleme ajanının systemd servis dosyasındaki son sabit kodlanmış `root` referansı kaldırıldı. `Root` değilseniz, kullanıcınızın sistemde yeterli izinlere sahip olduğundan emin olun!
+- Script kod refaktoringi
+- Üç dilde çeviriler iyileştirildi
+- Küçük iyileştirmeler
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 10-12-2025
 
 ⚠️ Betiği güncelledikten sonra eski aracı silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2)
 
@@ -67,9 +97,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
   - Menü seçenek ifadeleri iyileştirildi
 
 - Düzeltmeler ve İyileştirmeler
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 08-12-2025
 
@@ -156,6 +183,7 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
     - API sorunları veya kuyruktan çıkma ile ilgili diğer sebepler için bildirim eklendi
     - İndeks eklendi
 - İlk RPC isteğinde çeviriye eklendi – Ethereum RPC URL’sini girin
+- Düğüm kurulum betiğinde küçük iyileştirmeler
 
 ### 13-11-2025
 

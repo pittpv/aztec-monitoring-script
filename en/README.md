@@ -35,7 +35,37 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 10-12-2025
+## 📌 Latest Updates 19-12-2025
+
+⚠️ After updating the script, delete the old critical error definitions file (`aztec_error_definitions.json` or `error_definitions.json`) in the script root directory and download a new one via **Option 24**. Also delete the old monitoring agent (option 3) and create a new agent (option 2).
+
+- Full support for mainnet and testnet in all script functions
+- Security update of the script
+  - Removed automatic downloading and execution of external files
+  - All additional scripts (logo.sh, install_aztec.sh, check-validator.sh) are integrated into the main aztec-logs.sh script
+  - Added a manual function to check for a new script version (Option 23) with file hash verification and user confirmation prompts
+  - Added a manual function to check for a new critical error definitions file version (Option 24) with file hash verification and user confirmation prompts. On first run, you must use this option to download the error_definitions.json file.
+- Improved `claim_rewards` function (Option 21)
+  - If a coinbase address is not specified, the check will be performed using the attester's ETH address
+  - Improved output to display the correct ticker depending on the network: STK for testnet, AZTEC for mainnet
+- Node installation function update
+  - `docker-compose.yml` aligned with the official documentation
+  - `web3signer` correctly configured to work in the isolated Aztec network
+  - If using a firewall, open RPC ports for the Docker subnet used by the Aztec network
+- Node removal function update
+  - Added an option to remove `web3signer` after confirmation
+- Critical error definitions file update
+  - Added a new error
+  - Updated structure, added version specification
+- Removed the last hardcoded `root` reference in the systemd service file for the monitoring agent. If you are not `root`, ensure your user has sufficient system permissions!
+- Script code refactoring
+- Improved translations in three languages
+- Minor improvements
+
+<details>
+<summary>📅 Version History</summary>
+
+### 10-12-2025
 
 ⚠️ After updating the script, delete the old agent (option 3) and create a new agent (option 2)
 
@@ -68,9 +98,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
   - Improved menu option wording
 
 - Fixes and Improvements
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 08-12-2025
 
