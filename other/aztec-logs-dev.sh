@@ -87,6 +87,9 @@ init_languages() {
   TRANSLATIONS["en,new_version_available"]="New version available:"
   TRANSLATIONS["en,version_label"]="Version:"
   TRANSLATIONS["en,note_update_manually"]="Note: To update, pull the latest changes from the repository manually."
+  TRANSLATIONS["en,version_control_saving"]="Saving version_control.json file..."
+  TRANSLATIONS["en,version_control_saved"]="✅ version_control.json file saved successfully"
+  TRANSLATIONS["en,version_control_save_failed"]="❌ Failed to save version_control.json file"
   TRANSLATIONS["en,safe_error_def_update_check"]="Safe Error Definitions Update Check"
   TRANSLATIONS["en,error_def_update_warning"]="This will download error_definitions.json from GitHub with SHA256 verification."
   TRANSLATIONS["en,downloading_error_definitions"]="Downloading error_definitions.json..."
@@ -726,6 +729,9 @@ init_languages() {
   TRANSLATIONS["ru,new_version_available"]="Доступна новая версия:"
   TRANSLATIONS["ru,version_label"]="Версия:"
   TRANSLATIONS["ru,note_update_manually"]="Примечание: Для обновления вручную загрузите последние изменения из репозитория."
+  TRANSLATIONS["ru,version_control_saving"]="Сохранение файла version_control.json..."
+  TRANSLATIONS["ru,version_control_saved"]="✅ Файл version_control.json успешно сохранён"
+  TRANSLATIONS["ru,version_control_save_failed"]="❌ Не удалось сохранить файл version_control.json"
   TRANSLATIONS["ru,safe_error_def_update_check"]="Безопасная проверка обновлений определений ошибок"
   TRANSLATIONS["ru,error_def_update_warning"]="Будет загружен error_definitions.json из GitHub с проверкой SHA256."
   TRANSLATIONS["ru,downloading_error_definitions"]="Загрузка error_definitions.json..."
@@ -1384,6 +1390,9 @@ init_languages() {
   TRANSLATIONS["tr,new_version_available"]="Yeni sürüm mevcut:"
   TRANSLATIONS["tr,version_label"]="Sürüm:"
   TRANSLATIONS["tr,note_update_manually"]="Not: Güncellemek için depodan en son değişiklikleri manuel olarak çekin."
+  TRANSLATIONS["tr,version_control_saving"]="version_control.json dosyası kaydediliyor..."
+  TRANSLATIONS["tr,version_control_saved"]="✅ version_control.json dosyası başarıyla kaydedildi"
+  TRANSLATIONS["tr,version_control_save_failed"]="❌ version_control.json dosyası kaydedilemedi"
   TRANSLATIONS["tr,safe_error_def_update_check"]="Güvenli Hata Tanımları Güncelleme Kontrolü"
   TRANSLATIONS["tr,error_def_update_warning"]="Bu, SHA256 doğrulaması ile GitHub'dan error_definitions.json dosyasını indirecektir."
   TRANSLATIONS["tr,downloading_error_definitions"]="error_definitions.json indiriliyor..."
@@ -2436,6 +2445,24 @@ check_updates_safely() {
     elif [ -n "$REMOTE_LATEST_VERSION" ]; then
       echo -e "${GREEN}$(t "version_up_to_date")${NC}"
     fi
+  fi
+
+  # Сохраняем файл version_control.json локально для работы локальной проверки
+  LOCAL_VC_FILE="$SCRIPT_DIR/version_control.json"
+  echo -e "\n${CYAN}$(t "version_control_saving")${NC}"
+  if cp "$TEMP_VC_FILE" "$LOCAL_VC_FILE"; then
+    echo -e "${GREEN}$(t "version_control_saved")${NC}"
+    # Извлекаем версию из сохранённого файла для отображения
+    if saved_data=$(cat "$LOCAL_VC_FILE" 2>/dev/null); then
+      SAVED_LATEST_VERSION=$(echo "$saved_data" | jq -r '.[].VERSION' | sort -V | tail -n1 2>/dev/null)
+      if [ -n "$SAVED_LATEST_VERSION" ]; then
+        echo -e "${BLUE}$(t "local_version") ${SAVED_LATEST_VERSION}${NC}"
+      fi
+    fi
+  else
+    echo -e "${RED}$(t "version_control_save_failed")${NC}"
+    rm -f "$TEMP_VC_FILE"
+    return 1
   fi
 
   # Удаляем временный файл
