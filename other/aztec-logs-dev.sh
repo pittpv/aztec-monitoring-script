@@ -6279,6 +6279,7 @@ install_aztec_node_main() {
     FEE_RECIPIENT_ADDRESS=$(echo "$FEE_RECIPIENT_ADDRESS" | tr -d ' ')
 
     # Добавляем запрос COINBASE сразу после Aztec L2 Address
+    echo -e "\n${YELLOW}Enter COINBASE eth address:${NC}"
     read -p "COINBASE: " COINBASE
     COINBASE=$(echo "$COINBASE" | tr -d ' ')
 

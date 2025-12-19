@@ -39,7 +39,12 @@
     {
       "pattern": "ERROR: cli KeystoreError: Duplicate attester address found",
       "message": "Cli Error in command execution - Duplicate attester address found",
-      "solution": "1. Run this command in terminal: mv /root/aztec/config/bls-filtered-pk.json /root/aztec/ \n2. Stop/Start node container"
+      "solution": "1. Please check your keystore.json file and remove duplicate attester addresses. \n2. Stop/Start node container"
+    },
+    {
+      "pattern": "ERROR: cli ContractFunctionExecutionError: The request took too long to respond",
+      "message": "Cli Error in command execution - The request took too long to respond",
+      "solution": "Check your RPC node. The request timed out."
     }
   ]
 }
