@@ -2667,15 +2667,50 @@ check_aztec_container_logs() {
             done < <(jq -c '.errors[]' "$ERROR_DEFINITIONS_FILE")
         else
             # Простой парсинг без jq (ограниченная функциональность)
-            while IFS= read -r line; do
-                if [[ "$line" =~ \"pattern\":\"([^\"]*)\".*\"message\":\"([^\"]*)\".*\"solution\":\"([^\"]*)\" ]]; then
-                    pattern="${BASH_REMATCH[1]}"
-                    message="${BASH_REMATCH[2]}"
-                    solution="${BASH_REMATCH[3]}"
-                    critical_errors["$pattern"]="$message"
-                    error_solutions["$pattern"]="$solution"
+            # Извлекаем содержимое массива errors из новой структуры JSON
+            # Используем sed для извлечения содержимого между "errors": [ и ]
+            errors_section=$(sed -n '/"errors":\s*\[/,/\]/{ /"errors":\s*\[/d; /\]/d; p; }' "$ERROR_DEFINITIONS_FILE" 2>/dev/null)
+            
+            # Парсим объекты из массива errors
+            # Собираем объекты по фигурным скобкам, учитывая многострочность
+            current_obj=""
+            brace_level=0
+            
+            while IFS= read -r line || [ -n "$line" ]; do
+                # Удаляем ведущие/замыкающие пробелы и запятые
+                line=$(echo "$line" | sed 's/^[[:space:],]*//;s/[[:space:],]*$//')
+                
+                # Пропускаем пустые строки
+                [ -z "$line" ] && continue
+                
+                # Подсчитываем фигурные скобки в строке
+                open_count=$(echo "$line" | tr -cd '{' | wc -c)
+                close_count=$(echo "$line" | tr -cd '}' | wc -c)
+                brace_level=$((brace_level + open_count - close_count))
+                
+                # Добавляем строку к текущему объекту
+                if [ -z "$current_obj" ]; then
+                    current_obj="$line"
+                else
+                    current_obj="${current_obj} ${line}"
                 fi
-            done < <(grep -Eo '\{[^}]+\}' "$ERROR_DEFINITIONS_FILE")
+                
+                # Когда объект завершён (brace_level вернулся к 0 и есть закрывающая скобка)
+                if [ "$brace_level" -eq 0 ] && [ "$close_count" -gt 0 ]; then
+                    # Извлекаем pattern, message и solution из объекта
+                    # Используем sed для более надёжного извлечения значений
+                    pattern=$(echo "$current_obj" | sed -n 's/.*"pattern"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+                    message=$(echo "$current_obj" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+                    solution=$(echo "$current_obj" | sed -n 's/.*"solution"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+                    
+                    if [ -n "$pattern" ] && [ -n "$message" ] && [ -n "$solution" ]; then
+                        critical_errors["$pattern"]="$message"
+                        error_solutions["$pattern"]="$solution"
+                    fi
+                    
+                    current_obj=""
+                fi
+            done <<< "$errors_section"
         fi
     }
 
@@ -3305,20 +3340,71 @@ check_critical_errors() {
   fi
 
   # Парсим JSON с ошибками
-  errors_count=\$(jq '. | length' "\$ERROR_DEFINITIONS_FILE")
-  for ((i=0; i<\$errors_count; i++)); do
-    pattern=\$(jq -r ".[\$i].pattern" "\$ERROR_DEFINITIONS_FILE")
-    message=\$(jq -r ".[\$i].message" "\$ERROR_DEFINITIONS_FILE")
-    solution=\$(jq -r ".[\$i].solution" "\$ERROR_DEFINITIONS_FILE")
+  if command -v jq >/dev/null 2>&1; then
+    # Используем jq для парсинга новой структуры JSON (объект с массивом errors)
+    errors_count=\$(jq '.errors | length' "\$ERROR_DEFINITIONS_FILE")
+    for ((i=0; i<\$errors_count; i++)); do
+      pattern=\$(jq -r ".errors[\$i].pattern" "\$ERROR_DEFINITIONS_FILE")
+      message=\$(jq -r ".errors[\$i].message" "\$ERROR_DEFINITIONS_FILE")
+      solution=\$(jq -r ".errors[\$i].solution" "\$ERROR_DEFINITIONS_FILE")
 
-    if echo "\$clean_logs" | grep -q "\$pattern"; then
-      log "Critical error detected: \$pattern"
-      current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-      full_message="\$(t "critical_error_found")%0A\$(t "server_info" "\$ip")%0A\$(t "error_prefix") \$message%0A\$(t "solution_prefix")%0A\$solution%0A\$(t "time_info" "\$current_time")"
-      send_telegram_message "\$full_message"
-      exit 1
-    fi
-  done
+      if echo "\$clean_logs" | grep -q "\$pattern"; then
+        log "Critical error detected: \$pattern"
+        current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+        full_message="\$(t "critical_error_found")%0A\$(t "server_info" "\$ip")%0A\$(t "error_prefix") \$message%0A\$(t "solution_prefix")%0A\$solution%0A\$(t "time_info" "\$current_time")"
+        send_telegram_message "\$full_message"
+        exit 1
+      fi
+    done
+  else
+    # Fallback парсинг без jq (ограниченная функциональность)
+    # Извлекаем содержимое массива errors из новой структуры JSON
+    errors_section=\$(sed -n '/"errors":\s*\[/,/\]/{ /"errors":\s*\[/d; /\]/d; p; }' "\$ERROR_DEFINITIONS_FILE" 2>/dev/null)
+    
+    # Парсим объекты из массива errors
+    current_obj=""
+    brace_level=0
+    
+    while IFS= read -r line || [ -n "\$line" ]; do
+      # Удаляем ведущие/замыкающие пробелы и запятые
+      line=\$(echo "\$line" | sed 's/^[[:space:],]*//;s/[[:space:],]*$//')
+      
+      # Пропускаем пустые строки
+      [ -z "\$line" ] && continue
+      
+      # Подсчитываем фигурные скобки в строке
+      open_count=\$(echo "\$line" | tr -cd '{' | wc -c)
+      close_count=\$(echo "\$line" | tr -cd '}' | wc -c)
+      brace_level=\$((brace_level + open_count - close_count))
+      
+      # Добавляем строку к текущему объекту
+      if [ -z "\$current_obj" ]; then
+        current_obj="\$line"
+      else
+        current_obj="\${current_obj} \${line}"
+      fi
+      
+      # Когда объект завершён (brace_level вернулся к 0 и есть закрывающая скобка)
+      if [ "\$brace_level" -eq 0 ] && [ "\$close_count" -gt 0 ]; then
+        # Извлекаем pattern, message и solution из объекта
+        pattern=\$(echo "\$current_obj" | sed -n 's/.*"pattern"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+        message=\$(echo "\$current_obj" | sed -n 's/.*"message"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+        solution=\$(echo "\$current_obj" | sed -n 's/.*"solution"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+        
+        if [ -n "\$pattern" ] && [ -n "\$message" ] && [ -n "\$solution" ]; then
+          if echo "\$clean_logs" | grep -q "\$pattern"; then
+            log "Critical error detected: \$pattern"
+            current_time=\$(date '+%Y-%m-%d %H:%M:%S')
+            full_message="\$(t "critical_error_found")%0A\$(t "server_info" "\$ip")%0A\$(t "error_prefix") \$message%0A\$(t "solution_prefix")%0A\$solution%0A\$(t "time_info" "\$current_time")"
+            send_telegram_message "\$full_message"
+            exit 1
+          fi
+        fi
+        
+        current_obj=""
+      fi
+    done <<< "\$errors_section"
+  fi
 }
 
 # === Оптимизированная функция для поиска строк в логах ===
