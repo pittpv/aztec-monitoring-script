@@ -48,9 +48,11 @@ Add it to /root/.bash_profile to make the aztec binaries accessible?
 
 ## Doğrulayıcı Kurulumu
 
-Sonraki soru:
+Sonraki sorunlar:
 ```
-Do you want to run multiple validators?
+Birden fazla validator çalıştırmak istiyor musunuz? (y/n)
+
+BLS anahtarlarınız var mı? (y/n)
 ```
 
 *   **Bir doğrulayıcı** çalıştırıyorsanız, `n` girin.
@@ -61,10 +63,18 @@ Do you want to run multiple validators?
 ### Çoklu doğrulayıcı modu için
 
 Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı için verileri kesin biçimde girin:
+
 `0x_ile_özel_anahtar,doğrulayıcı_adresi`
 
 Örnek:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
+
+BLS anahtarları seçeneği seçilirse, katı formatta işlem yapılır:
+
+`0x_ile_özel_anahtar,doğrulayıcı_adresi,0x_ile_BLS_özel_anahtar,public_BLS_adresi`
+
+Örnek:
+`0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e,0xa1b2c3d4e5f6...,0x12d4720c311e6d2e0826738a071fa06743f6cb8efd586ed718c3b020f09b5c8d`
 
 ⚠️ Eğer **tüm** validatörlerin işlemleri için Sepolia ETH ödemek amacıyla **tek bir adres** kullanmayı planlıyorsanız, önce o adresin verilerini girin. Tüm validatörlerin verilerini girdikten sonra script, ilk adresin tüm validatörler için publisher adresi olarak kullanılıp kullanılmayacağını soracaktır (`Use first address as publisher for all validators?`) - **`y`** seçin.
 

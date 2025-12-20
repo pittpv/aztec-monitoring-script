@@ -48,9 +48,11 @@ Add it to /root/.bash_profile to make the aztec binaries accessible?
 
 ## Validator Setup
 
-The next question is:
+The next questions is:
 ```
-Do you want to run multiple validators?
+Do you want to run multiple validators? (y/n)
+
+Do you have BLS keys? (y/n)
 ```
 
 *   If you are running **one validator**, enter `n`.
@@ -61,10 +63,18 @@ Do you want to run multiple validators?
 ### For multivalidator mode
 
 Next, you need to enter the validator data. For each validator, enter the data in the strict format:
+
 `private_key_with_0x,validator_address`
 
 Example:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
+
+If the option with BLS keys is selected, then in strict format:
+
+`private_key_with_0x,validator_address,private_BLS_key_with_0x,public_BLS_address`
+
+Example:
+`0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e,0xa1b2c3d4e5f6...,0x12d4720c311e6d2e0826738a071fa06743f6cb8efd586ed718c3b020f09b5c8d`
 
 ⚠️ If you plan to use **one address** to pay Sepolia ETH for transactions of **all** validators, then enter the data of that address first. After entering the data of all validators the script will ask whether to use the first address as the publisher address for all validators (`Use first address as publisher for all validators?`) - choose **`y`**.
 
