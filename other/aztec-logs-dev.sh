@@ -6514,30 +6514,8 @@ EOF
 
     cat > docker-compose.yml <<EOF
 services:
-  web3signer:
-    container_name: web3signer
-    image: consensys/web3signer:latest
-    restart: unless-stopped
-    networks:
-      - aztec
-    ports:
-      - 10500:10500
-    volumes:
-      - $HOME/aztec/keys:/keys
-    command:
-      - --http-listen-host=0.0.0.0
-      - --http-listen-port=10500
-      - --http-host-allowlist="*"
-      - --key-store-path=/keys
-      - eth1
-      - --chain-id=11155111
-    labels:
-      - com.centurylinklabs.watchtower.enable=true
-
   aztec-node:
     container_name: aztec-sequencer
-    depends_on:
-      - web3signer
     networks:
       - aztec
     image: aztecprotocol/aztec:latest
@@ -6562,10 +6540,10 @@ services:
       - $HOME/aztec/config:/config
     labels:
       - com.centurylinklabs.watchtower.enable=true
-
 networks:
   aztec:
     name: aztec
+    external: true
 EOF
 
     echo -e "\n${GREEN}$(t "compose_created")${NC}"
@@ -6616,18 +6594,41 @@ EOF
         echo -e "\n${GREEN}$(t "compose_created")${NC}"
     fi
 
-    # Stop and remove existing web3signer container if it exists (for migration from old setup)
-    echo -e "\n${GREEN}Cleaning up existing web3signer container if exists...${NC}"
+    # Create aztec network before starting web3signer (needed for web3signer to connect)
+    echo -e "\n${GREEN}Creating aztec network...${NC}"
+    docker network create aztec 2>/dev/null || echo -e "${YELLOW}Network aztec already exists${NC}"
+
+    # Download and run web3signer before starting the node
+    echo -e "\n${GREEN}Downloading and starting web3signer...${NC}"
+    docker pull consensys/web3signer:latest
+
+    # Stop and remove existing web3signer container if it exists
     docker stop web3signer 2>/dev/null || true
     docker rm web3signer 2>/dev/null || true
 
-    echo -e "\n${GREEN}$(t "starting_node")${NC}"
-    cd "$HOME/aztec"
-    docker compose up -d
+    # Run web3signer container
+    docker run -d \
+      --name web3signer \
+      --restart unless-stopped \
+      --network aztec \
+      -p 10500:10500 \
+      -v $HOME/aztec/keys:/keys \
+      consensys/web3signer:latest \
+      --http-listen-host=0.0.0.0 \
+      --http-listen-port=10500 \
+      --http-host-allowlist="*" \
+      --key-store-path=/keys \
+      eth1 --chain-id=11155111
+
+    echo -e "${GREEN}web3signer started successfully${NC}"
 
     # Wait a moment for web3signer to initialize
     echo -e "${YELLOW}Waiting for web3signer to initialize...${NC}"
     sleep 5
+
+    echo -e "\n${GREEN}$(t "starting_node")${NC}"
+    cd "$HOME/aztec"
+    docker compose up -d
 
     # Start Watchtower if it exists
     if [ -d "$HOME/watchtower" ]; then
