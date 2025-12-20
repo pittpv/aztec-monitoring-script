@@ -488,7 +488,7 @@ After running the script, select the option to `Install node monitoring agent wi
 
 ### Updating the Monitoring Agent
 
-If there is an update for the cron-agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
+If there is an update for the monitoring agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
 
 ## 🚀 Installing the Aztec node v 2.1.9
 

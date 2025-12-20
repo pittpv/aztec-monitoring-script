@@ -487,7 +487,7 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
 
 ### İzleme Aracını Güncelleme
 
-Cron-agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
+İzleme agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
 
 ## 🚀 Aztec v 2.1.9 düğümünü kurma
 
