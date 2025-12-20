@@ -6543,6 +6543,7 @@ services:
 networks:
   aztec:
     name: aztec
+    external: true
 EOF
 
     echo -e "\n${GREEN}$(t "compose_created")${NC}"

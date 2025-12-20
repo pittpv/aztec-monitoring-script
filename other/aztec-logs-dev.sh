@@ -6383,7 +6383,7 @@ EOF
             BLS_KEY_FILE="$HOME/aztec/keys/bls_validator_$((i+1)).yml"
             cat > "$BLS_KEY_FILE" <<EOF
 type: "file-raw"
-keyType: "BN254"
+keyType: "BLS"
 privateKey: "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}"
 EOF
             echo -e "${GREEN}Created BLS key file: $BLS_KEY_FILE${NC}"

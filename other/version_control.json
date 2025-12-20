@@ -250,5 +250,12 @@
     "VERSION": "2.7.1",
     "UPDATE_DATE": "19.12.2025",
     "CHANGES": ["Fix for Aztec Node installation function"]
+  },
+  {
+    "VERSION": "2.7.2",
+    "UPDATE_DATE": "20.12.2025",
+    "CHANGES": ["Fix 2 for Aztec Node installation function", "Correct keyType for BLS private keys"],
+    "NOTICE": "After updating the script, uninstall and install the aztec node or manually change the keyType from BN254 to BLS in all bls_validator_N.yml files located at ./aztec/keys/. Then restart the web3signer container.",
+    "COLOR": "red"
   }
 ]
