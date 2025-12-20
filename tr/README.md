@@ -423,6 +423,7 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
   * Ağ türünü girin (mainnet, testnet)
   * Telegram botunu yapılandırın
   * İzlemeyi etkinleştirin (seçenek 2)
+  * Kritik hata tanımlarının indirilmesi (seçenek 24)
 
 ❗️Yuva istatistiklerini elde etmek için, düğümün günlük düzeyinin şu şekilde ayarlanmış olması **gerekir**: `info;debug:node:sentinel` veya `debug`
 
@@ -452,6 +453,8 @@ Ana menü:
 20. Stake
 21. Ödülleri talep edin
 22. RPC URL'sini değiştir
+23. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)
+24. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)
 
 `0.` 🚪 Çıkış
 
@@ -472,6 +475,8 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
   - Komiteye seçilirse
   - Doğrulayıcı komitedeyken her slot için istatistikler (başarılı/kaçırılmış onaylama, önerilen/kazılmış/kaçırılmış blok)
 - Normal modda 1 MB'a, `DEBUG=true` modunda ise 10 MB'a ulaştığında günlük dosyasını temizler ve ilk raporu kaydeder.
+
+❗️İlk çalıştırmada, kritik hataları içeren `error_definitions.json` dosyasını indirmek için **24. seçeneğin** kullanılması gerekmektedir.
 
 ### İzleme Aracı Gereksinimleri:
 

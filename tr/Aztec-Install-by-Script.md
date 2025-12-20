@@ -143,7 +143,8 @@ Düğüm kurulumu şu anda tamamlanmıştır.
 
 1.  Betiğin ana menüsünden `1` seçeneğini seçerek **düğümün senkronizasyon durumunu kontrol edin**.
 2.  Ana menüdeki `2` seçeneği aracılığıyla kullanışlı düğüm izleme için **izleme aracısını kurun**.
-3.  **Doğrulayıcı durumunu kontrol edin ve kuyruk pozisyonu izlemesini ayarlayın** `9` seçeneğini kullanarak
+3.  **Kritik hata tanımları dosyasını**, `24` seçeneğini kullanarak indirin.
+4.  **Doğrulayıcı durumunu kontrol edin ve kuyruk pozisyonu izlemesini ayarlayın** `9` seçeneğini kullanarak
 
 Ana menüde bulunan betiğin diğer özelliklerini de incelediğinizden emin olun, örneğin:
 *   Konteynerleri başlatma ve durdurma

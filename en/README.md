@@ -424,6 +424,7 @@ Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone
    * Enter the network type (mainnet, testnet)
    * Configure the Telegram bot
    * Enable monitoring (option 2)
+   * Downloading the critical error definitions file (option 24)
 
 ❗️To obtain slot statistics, the node **must** have the log level set to: `info;debug:node:sentinel` or `debug`
 
@@ -453,6 +454,8 @@ Main menu:
 20. Stake
 21. Claim rewards
 22. Change RPC URL
+23. Check for script updates (safe, with hash verification)
+24. Check for error definitions updates (safe, with hash verification)
 
 `0.` 🚪 Exit
 
@@ -473,6 +476,8 @@ After running the script, select the option to `Install node monitoring agent wi
   - Selected for committee
   - Statistics for each slot while validator to the committee (successful/missed attestation, proposed/mined/missed block)
 - Clears the log file when it reaches 1 MB in normal mode and 10 MB in `DEBUG=true` mode, saving the very first report.
+
+❗️On the **first** run, you must use **option 24** to download the `error_definitions.json` file containing critical errors.
 
 ### Requirements for Monitoring Agent:
 

@@ -142,7 +142,8 @@ The node installation is now complete.
 
 1.  **Check the node's sync status** by selecting option `1` in the script's main menu.
 2.  **Install the monitoring agent** for convenient node monitoring via option `2` in the main menu.
-3.  **Check the validator status and set up queue position monitoring** using option `9`
+3.  **Download the critical error definitions file** using option `24`.
+4.  **Check the validator status and set up queue position monitoring** using option `9`
 
 Be sure to explore other features of the script available in the main menu, such as:
 *   Starting and stopping containers
