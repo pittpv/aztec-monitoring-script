@@ -2027,7 +2027,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.7.1"
+SCRIPT_VERSION="2.7.2"
 ERROR_DEFINITIONS_VERSION="1.0.0"
 
 # Determine script directory for local file access (security: avoid remote code execution)
