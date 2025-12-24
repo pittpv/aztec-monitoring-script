@@ -35,7 +35,24 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 20-12-2025
+## 📌 Son Güncellemeler 25-12-2025
+
+⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+
+- Yinelenen çevirileri kaldırma
+
+**error_definitions.json**
+
+SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
+
+**version_control.json**
+
+SHA256: `d4a57f3756e5e25cda4aa761b7b13b65370c27425e0c061493aa31f5d0dea62c`
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 20-12-2025
 
 ⚠️ Script'i güncelledikten sonra, script kök dizinindeki eski kritik hata tanımları dosyasını (`aztec_error_definitions.json` veya `error_definitions.json`) silin ve yenisini **Seçenek 24** ile indirin. Ayrıca eski izleme ajanını (seçenek 3) silin ve yeni bir ajan oluşturun (seçenek 2).
 
@@ -64,17 +81,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 - Aztec Node kurulum fonksiyonu için düzeltme
 - BLS özel anahtarları için keyType düzeltmesi
-
-**error_definitions.json**
-
-SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
-
-**version_control.json**
-
-SHA256: `5d198d8e09a348c9ffb975fdf6cd33f0be2066d290812dcef7c00f3f0ce098d5`
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 10-12-2025
 

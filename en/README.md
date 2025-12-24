@@ -35,7 +35,24 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 20-12-2025
+## 📌 Latest Updates 25-12-2025
+
+⚠️ After updating the script, delete the old monitoring agent (option 3) and create a new agent (option 2).
+
+- Removing duplicate translations
+
+**error_definitions.json**
+
+SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
+
+**version_control.json**
+
+SHA256: `d4a57f3756e5e25cda4aa761b7b13b65370c27425e0c061493aa31f5d0dea62c`
+
+<details>
+<summary>📅 Version History</summary>
+
+### 20-12-2025
 
 ⚠️ After updating the script, delete the old critical error definitions file (`aztec_error_definitions.json` or `error_definitions.json`) in the script root directory and download a new one via **Option 24**. Also delete the old monitoring agent (option 3) and create a new agent (option 2).
 
@@ -64,17 +81,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 - Fix for Aztec Node installation function
 - Correct keyType for BLS private keys
-
-**error_definitions.json**
-
-SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
-
-**version_control.json**
-
-SHA256: `5d198d8e09a348c9ffb975fdf6cd33f0be2066d290812dcef7c00f3f0ce098d5`
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 10-12-2025
 
