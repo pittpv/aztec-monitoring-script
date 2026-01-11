@@ -264,5 +264,12 @@
     "CHANGES": ["Translation duplication removal"],
     "NOTICE": "After updating the script, delete the old agent (option 3) and create a new agent (option 2)",
     "COLOR": "red"
+  },
+  {
+    "VERSION": "2.7.4",
+    "UPDATE_DATE": "11.01.2025",
+    "CHANGES": ["The Node downgrade feature has been updated. Now only the latest and all stable versions are displayed."],
+    "NOTICE": "ONLY FOR TESTNET - After updating the script, downgrade the node in the test network to version 2.1.9.",
+    "COLOR": "red"
   }
 ]
