@@ -1984,15 +1984,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Configuration ===
 # Contract addresses (Rollup addresses)
-CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet rollup address
+CONTRACT_ADDRESS="0x66a41cb55f9a1e38a45a2ac8685f12a61fbfab77"  # Testnet new rollup address
+#CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet current rollup address
 CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet rollup address
 
 # GSE contract addresses
-GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
+GSE_ADDRESS_TESTNET="0xb6a38a51a6c1de9012f9d8ea9745ef957212eaac" # Testnet new GSE address
+#GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614" # Testnet current GSE address
 GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
 
 # Function signature for contract calls
-FUNCTION_SIG="getPendingBlockNumber()"
+FUNCTION_SIG="getPendingCheckpointNumber()"
 
 # Required tools
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
@@ -2417,7 +2419,7 @@ check_updates_safely() {
   }
 
   LOCAL_VC_FILE="$SCRIPT_DIR/version_control.json"
-  REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/aztec-script-files/version_control.json"
+  REMOTE_VC_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/version_control.json"
   TEMP_VC_FILE=$(mktemp)
 
   # === Шаг 1: Проверка локального файла ===
@@ -2546,7 +2548,7 @@ check_error_definitions_updates_safely() {
     return 0
   fi
 
-  REMOTE_ERROR_DEF_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/aztec-script-files/error_definitions.json"
+  REMOTE_ERROR_DEF_URL="https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/error_definitions.json"
   TEMP_ERROR_FILE=$(mktemp)
 
   echo -e "\n${CYAN}$(t "downloading_error_definitions")${NC}"
