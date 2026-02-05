@@ -1976,7 +1976,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.7.4"
+SCRIPT_VERSION="2.7.5"
 ERROR_DEFINITIONS_VERSION="1.0.0"
 
 # Determine script directory for local file access (security: avoid remote code execution)
@@ -1984,15 +1984,17 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Configuration ===
 # Contract addresses (Rollup addresses)
-CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet rollup address
+CONTRACT_ADDRESS="0x66a41cb55f9a1e38a45a2ac8685f12a61fbfab77"  # Testnet new rollup address
+#CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet current rollup address
 CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet rollup address
 
 # GSE contract addresses
-GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614"
+GSE_ADDRESS_TESTNET="0xb6a38a51a6c1de9012f9d8ea9745ef957212eaac" # Testnet new GSE address
+#GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614" # Testnet current GSE address
 GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
 
 # Function signature for contract calls
-FUNCTION_SIG="getPendingBlockNumber()"
+FUNCTION_SIG="getPendingCheckpointNumber()"
 
 # Required tools
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
@@ -2866,7 +2868,7 @@ check_aztec_container_logs() {
     {
         echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file" 2>/dev/null
         if [ ! -s "$temp_file" ]; then
-            echo "$clean_logs" | tac | grep -m1 'Downloaded L2 block' >"$temp_file" 2>/dev/null
+            echo "$clean_logs" | tac | grep -m1 -iE 'Downloaded L2 block|Downloaded checkpoint|"checkpointNumber":[0-9]+' >"$temp_file" 2>/dev/null
         fi
     } &
     search_pid=$!
@@ -2887,8 +2889,8 @@ check_aztec_container_logs() {
             | grep -o '[0-9]\+$')
     else
         log_block_number=$(echo "$latest_log_line" \
-            | grep -o '"blockNumber":[0-9]\+' \
-            | head -n1 | cut -d':' -f2)
+            | grep -oE '"checkpointNumber":[0-9]+|"blockNumber":[0-9]+' \
+            | head -n1 | grep -oE '[0-9]+')
     fi
 
     if [ -z "$log_block_number" ]; then
@@ -3516,17 +3518,18 @@ find_last_log_line() {
   local temp_file=\$(mktemp)
 
   # Получаем логи с ограничением по объему и сразу фильтруем нужные строки
+  # -i: нечувствительность к регистру; checkpointNumber — на случай разбиения длинной строки
   docker logs "\$container_id" --tail 20000 2>&1 | \
     sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g' | \
-    grep -E 'Sequencer sync check succeeded|Downloaded L2 block' | \
+    grep -iE 'Sequencer sync check succeeded|Downloaded L2 block|Downloaded checkpoint|"checkpointNumber":[0-9]+' | \
     tail -100 > "\$temp_file"
 
   # Сначала ищем Sequencer sync check succeeded
   local line=\$(tac "\$temp_file" | grep -m1 'Sequencer sync check succeeded')
 
-  # Если не нашли, ищем Downloaded L2 block
+  # Если не нашли, ищем Downloaded L2 block / Downloaded checkpoint или строку с checkpointNumber
   if [ -z "\$line" ]; then
-    line=\$(tac "\$temp_file" | grep -m1 'Downloaded L2 block')
+    line=\$(tac "\$temp_file" | grep -m1 -iE 'Downloaded L2 block|Downloaded checkpoint|"checkpointNumber":[0-9]+')
   fi
 
   rm -f "\$temp_file"
@@ -3846,9 +3849,9 @@ check_blocks() {
     log_block_number=\$(echo "\$latest_log_line" | grep -o '"worldState":{"number":[0-9]\+' | grep -o '[0-9]\+$')
     debug_log "Extracted from worldState: \$log_block_number"
   else
-    # формат: ..."blockNumber":18254,...
-    log_block_number=\$(echo "\$latest_log_line" | grep -o '"blockNumber":[0-9]\+' | head -n1 | cut -d':' -f2)
-    debug_log "Extracted from blockNumber: \$log_block_number"
+    # формат: ..."checkpointNumber":59973,... или ..."blockNumber":18254,...
+    log_block_number=\$(echo "\$latest_log_line" | grep -oE '"checkpointNumber":[0-9]+|"blockNumber":[0-9]+' | head -n1 | grep -oE '[0-9]+')
+    debug_log "Extracted from checkpointNumber/blockNumber: \$log_block_number"
   fi
 
   if [ -z "\$log_block_number" ]; then
@@ -6153,7 +6156,7 @@ install_aztec_node_main() {
     echo -e "\n${GREEN}$(t "installing_aztec")${NC}"
     echo -e "${YELLOW}$(t "warn_orig_install") ${NC}$(t "warn_orig_install_2")${NC}"
     sleep 5
-    curl -s https://install.aztec.network -o install-aztec.sh
+    curl -L https://install.aztec.network -o install-aztec.sh
     chmod +x install-aztec.sh
     bash install-aztec.sh
 
@@ -7007,7 +7010,7 @@ approve_with_all_keys() {
             echo "Using RPC URL: $current_rpc_url"
 
             # Execute the cast command
-            cast send 0x139d2a7a0881e16332d7D1F8DB383A4507E1Ea7A \
+            cast send 0x5595cb9ed193cac2c0bc5393313bc6115817954b \
                 "approve(address,uint256)" \
                 "$contract_address" \
                 200000ether \

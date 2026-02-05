@@ -271,5 +271,12 @@
     "CHANGES": ["The Node downgrade feature has been updated. Now only the latest and all stable versions are displayed."],
     "NOTICE": "ONLY FOR TESTNET - After updating the script, downgrade the node in the test network to version 2.1.9.",
     "COLOR": "red"
+  },
+  {
+    "VERSION": "2.7.5",
+    "UPDATE_DATE": "05.02.2025",
+    "CHANGES": ["Support for the new test network"],
+    "NOTICE": "ONLY FOR TESTNET - After updating the script, downgrade the node in the test network to version 3.0.3! Remove the old monitoring agent and install a new one.",
+    "COLOR": "red"
   }
 ]
