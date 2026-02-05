@@ -37,7 +37,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ## 📌 Son Güncellemeler 05-02-2026
 
-⚠️ Komut dosyasını güncelledikten sonra, kurulu node sürümünün en az **3.0.3** olduğundan emin olun. Sürüm daha eski ise, node sürümü 3.0.3'ü yüklemek için sürüm düşürme seçeneğini kullanın! Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+⚠️ TESTNET İÇİN - Komut dosyasını güncelledikten sonra, kurulu node sürümünün en az **3.0.3** olduğundan emin olun. Sürüm daha eski ise, node sürümü 3.0.3'ü yüklemek için sürüm düşürme seçeneğini kullanın! Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
 
 - Yeni test ağı desteği
 

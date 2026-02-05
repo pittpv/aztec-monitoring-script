@@ -37,7 +37,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 ## 📌 Latest Updates 05-02-2026
 
-⚠️ After updating the script, ensure that the node version installed is at least **3.0.3**. If the version is earlier, use the downgrade option to install node version 3.0.3! Delete the old monitoring agent (option 3) and create a new agent (option 2).
+⚠️ FOR TESTNET - After updating the script, ensure that the node version installed is at least **3.0.3**. If the version is earlier, use the downgrade option to install node version 3.0.3! Delete the old monitoring agent (option 3) and create a new agent (option 2).
 
 - New testnet support
 
