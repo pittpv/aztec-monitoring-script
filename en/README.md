@@ -35,11 +35,11 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 25-12-2025
+## 📌 Latest Updates 05-02-2026
 
-⚠️ After updating the script, delete the old monitoring agent (option 3) and create a new agent (option 2).
+⚠️ After updating the script, ensure that the node version installed is at least **3.0.3**. If the version is earlier, use the downgrade option to install node version 3.0.3! Delete the old monitoring agent (option 3) and create a new agent (option 2).
 
-- Removing duplicate translations
+- New testnet support
 
 **error_definitions.json**
 
@@ -47,10 +47,20 @@ SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
 
 **version_control.json**
 
-SHA256: `d4a57f3756e5e25cda4aa761b7b13b65370c27425e0c061493aa31f5d0dea62c`
+SHA256: `cf614e2c3f2f32836e3bb7889d6cbedf7af8dabb0f389018eed5587c3e130550`
 
 <details>
 <summary>📅 Version History</summary>
+
+### 11-01-2026
+
+- Updated the node downgrade function (option 16). Now only the latest and all stable versions are displayed.
+
+### 25-12-2025
+
+⚠️ After updating the script, delete the old monitoring agent (option 3) and create a new agent (option 2).
+
+- Removing duplicate translations
 
 ### 20-12-2025
 
@@ -496,7 +506,7 @@ After running the script, select the option to `Install node monitoring agent wi
 
 If there is an update for the monitoring agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
 
-## 🚀 Installing the Aztec node v 2.1.9
+## 🚀 Installing the Aztec node v 3.0.3
 
 To install the Aztec node, select **option 11** and follow the script instructions.
 

@@ -35,11 +35,11 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 25-12-2025
+## 📌 Son Güncellemeler 05-02-2026
 
-⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+⚠️ Komut dosyasını güncelledikten sonra, kurulu node sürümünün en az **3.0.3** olduğundan emin olun. Sürüm daha eski ise, node sürümü 3.0.3'ü yüklemek için sürüm düşürme seçeneğini kullanın! Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
 
-- Yinelenen çevirileri kaldırma
+- Yeni test ağı desteği
 
 **error_definitions.json**
 
@@ -47,10 +47,20 @@ SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
 
 **version_control.json**
 
-SHA256: `d4a57f3756e5e25cda4aa761b7b13b65370c27425e0c061493aa31f5d0dea62c`
+SHA256: `cf614e2c3f2f32836e3bb7889d6cbedf7af8dabb0f389018eed5587c3e130550`
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 11-01-2026
+
+- Düğüm sürüm düşürme işlevi güncellendi (seçenek 16). Artık yalnızca en son ve tüm kararlı sürümler görüntüleniyor.
+
+### 25-12-2025
+
+⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+
+- Yinelenen çevirileri kaldırma
 
 ### 20-12-2025
 
@@ -495,7 +505,7 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
 
 İzleme agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
 
-## 🚀 Aztec v 2.1.9 düğümünü kurma
+## 🚀 Aztec v 3.0.3 düğümünü kurma
 
 Aztec düğümünü kurmak için **seçenek 11**'i seçin ve betik talimatlarını izleyin.
 
