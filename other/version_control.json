@@ -267,16 +267,24 @@
   },
   {
     "VERSION": "2.7.4",
-    "UPDATE_DATE": "11.01.2025",
+    "UPDATE_DATE": "11.01.2026",
     "CHANGES": ["The Node downgrade feature has been updated. Now only the latest and all stable versions are displayed."],
     "NOTICE": "ONLY FOR TESTNET - After updating the script, downgrade the node in the test network to version 2.1.9.",
     "COLOR": "red"
   },
   {
     "VERSION": "2.7.5",
-    "UPDATE_DATE": "05.02.2025",
+    "UPDATE_DATE": "05.02.2026",
     "CHANGES": ["Support for the new test network"],
     "NOTICE": "ONLY FOR TESTNET - After updating the script, downgrade the node in the test network to version 3.0.3! Remove the old monitoring agent and install a new one.",
     "COLOR": "red"
+  },
+  {
+    "VERSION": "2.8.0",
+    "UPDATE_DATE": "06.02.2026",
+    "CHANGES": [
+      "New option in BLS menu (option 18-4): generate dashboard keystores — private keystore and staker_output for staking dashboard, files saved with dashboard_ prefix in $HOME/aztec/, supports new mnemonic or existing seed phrase",
+      "Minor improvements"
+    ]
   }
 ]

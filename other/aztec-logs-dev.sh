@@ -154,8 +154,13 @@ init_languages() {
   TRANSLATIONS["en,bls_key"]="BLS Key"
   TRANSLATIONS["en,bls_method_existing"]="Generate using existing addresses (from mnemonic, only if all validator addresses are from the same seed phrase)"
   TRANSLATIONS["en,bls_method_new_operator"]="Generate new operator address (recommended)"
-  TRANSLATIONS["en,bls_method_prompt"]="Choose method (1/2): "
+  TRANSLATIONS["en,bls_method_prompt"]="Choose method (1-4): "
   TRANSLATIONS["en,bls_invalid_method"]="Invalid method selected"
+  TRANSLATIONS["en,bls_method_dashboard"]="Generate dashboard keystores (private + staker_output for staking dashboard)"
+  TRANSLATIONS["en,bls_dashboard_title"]="Dashboard keystores (docs.aztec.network)"
+  TRANSLATIONS["en,bls_dashboard_new_or_mnemonic"]="Generate new mnemonic (1) or enter existing mnemonic (2)? [1/2]: "
+  TRANSLATIONS["en,bls_dashboard_count_prompt"]="Number of validator identities (e.g. 1 or 5): "
+  TRANSLATIONS["en,bls_dashboard_saved"]="Dashboard keystores saved to $HOME/aztec/ (dashboard_keystore.json, dashboard_keystore_staker_output.json)"
   TRANSLATIONS["en,bls_existing_method_title"]="Existing Address Method"
   TRANSLATIONS["en,bls_new_operator_title"]="New Operator Address Method"
   TRANSLATIONS["en,bls_old_validator_info"]="Please provide your old validator info:"
@@ -797,8 +802,13 @@ init_languages() {
   TRANSLATIONS["ru,bls_key"]="BLS ключ"
   TRANSLATIONS["ru,bls_method_existing"]="Сгенерировать используя существующие адреса (из mnemonic, только если все адреса валидаторов из одной сид фразы)"
   TRANSLATIONS["ru,bls_method_new_operator"]="Сгенерировать новый адрес оператора (рекомендуется)"
-  TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод (1/2): "
+  TRANSLATIONS["ru,bls_method_prompt"]="Выберите метод (1-4): "
   TRANSLATIONS["ru,bls_invalid_method"]="Выбран неверный метод"
+  TRANSLATIONS["ru,bls_method_dashboard"]="Сгенерировать keystore для дашборда (приватный + staker_output для staking dashboard)"
+  TRANSLATIONS["ru,bls_dashboard_title"]="Keystore для дашборда (docs.aztec.network)"
+  TRANSLATIONS["ru,bls_dashboard_new_or_mnemonic"]="Сгенерировать новую мнемонику (1) или ввести существующую (2)? [1/2]: "
+  TRANSLATIONS["ru,bls_dashboard_count_prompt"]="Количество идентичностей валидаторов (например 1 или 5): "
+  TRANSLATIONS["ru,bls_dashboard_saved"]="Keystore для дашборда сохранены в $HOME/aztec/ (dashboard_keystore.json, dashboard_keystore_staker_output.json)"
   TRANSLATIONS["ru,bls_existing_method_title"]="Метод существующих адресов"
   TRANSLATIONS["ru,bls_new_operator_title"]="Метод нового адреса оператора"
   TRANSLATIONS["ru,bls_old_validator_info"]="Пожалуйста, предоставьте информацию о вашем старом валидаторе:"
@@ -1444,8 +1454,13 @@ init_languages() {
   TRANSLATIONS["tr,bls_key"]="BLS Anahtarı"
   TRANSLATIONS["tr,bls_method_existing"]="Mevcut adresleri kullanarak üret (yalnızca tüm doğrulayıcı adresleri aynı başlangıç ​​ifadesinden geliyorsa, anımsatıcıdan)"
   TRANSLATIONS["tr,bls_method_new_operator"]="Yeni operatör adresi oluştur (tavsiye edilen)"
-  TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin (1/2): "
+  TRANSLATIONS["tr,bls_method_prompt"]="Yöntem seçin (1-4): "
   TRANSLATIONS["tr,bls_invalid_method"]="Geçersiz yöntem seçildi"
+  TRANSLATIONS["tr,bls_method_dashboard"]="Dashboard keystore'ları oluştur (özel + staking dashboard için staker_output)"
+  TRANSLATIONS["tr,bls_dashboard_title"]="Dashboard keystore'ları (docs.aztec.network)"
+  TRANSLATIONS["tr,bls_dashboard_new_or_mnemonic"]="Yeni anımsatıcı oluştur (1) veya mevcut anımsatıcıyı gir (2)? [1/2]: "
+  TRANSLATIONS["tr,bls_dashboard_count_prompt"]="Doğrulayıcı kimlik sayısı (örn. 1 veya 5): "
+  TRANSLATIONS["tr,bls_dashboard_saved"]="Dashboard keystore'ları $HOME/aztec/ dizinine kaydedildi (dashboard_keystore.json, dashboard_keystore_staker_output.json)"
   TRANSLATIONS["tr,bls_existing_method_title"]="Mevcut Adres Yöntemi"
   TRANSLATIONS["tr,bls_new_operator_title"]="Yeni Operatör Adresi Yöntemi"
   TRANSLATIONS["tr,bls_old_validator_info"]="Lütfen eski validatör bilgilerinizi sağlayın:"
@@ -6975,15 +6990,18 @@ approve_with_all_keys() {
     local rpc_providers=(
         "$rpc_url"
         "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://1rpc.io/sepolia"
         "https://sepolia.drpc.org"
+        "https://rpc.sepolia.org"
+        "https://1rpc.io/sepolia"
     )
     local key_files
     local private_key
     local current_rpc_url
+    local key_index=0
+    local rpc_count=${#rpc_providers[@]}
 
-    # Find all YML key files
-    key_files=$(find $HOME/aztec/keys/ -name "*.yml" -type f)
+    # Find all YML key files and sort so order is fixed (e.g. validator_1 then validator_2)
+    key_files=$(find $HOME/aztec/keys/ -name "*.yml" -type f | sort)
     if [ -z "$key_files" ]; then
         echo "Error: No YML key files found in $HOME/aztec/keys/"
         return 1
@@ -7005,20 +7023,80 @@ approve_with_all_keys() {
         if [ -n "$private_key" ]; then
             echo "Executing with private key from $key_file"
 
-            # Use the first RPC provider from the list
-            current_rpc_url="${rpc_providers[0]}"
+            # Use different RPC for each validator to avoid "replacement transaction underpriced"
+            # on the same node when sending several txs in a row
+            current_rpc_url="${rpc_providers[$((key_index % rpc_count))]}"
             echo "Using RPC URL: $current_rpc_url"
 
-            # Execute the cast command
-            cast send 0x5595cb9ed193cac2c0bc5393313bc6115817954b \
-                "approve(address,uint256)" \
-                "$contract_address" \
-                200000ether \
-                --private-key "$private_key" \
-                --rpc-url "$current_rpc_url"
+            # Get address and current nonce for this key so each tx uses correct nonce (no duplicate nonce)
+            local eth_address
+            eth_address=$(cast wallet address --private-key "$private_key" 2>/dev/null | tr '[:upper:]' '[:lower:]')
+            local nonce
+            # Use pending block to include already pending txs, so we always get the next free nonce
+            nonce=$(cast nonce "$eth_address" --rpc-url "$current_rpc_url" --block pending 2>/dev/null)
+            if [ -z "$nonce" ]; then
+                nonce=0
+            fi
+            echo "Address: $eth_address, nonce: $nonce"
 
-            # Wait for completion before proceeding to next key
-            wait
+            # Gas price 50% above current, minimum 10 gwei; retry with doubled gas if "replacement transaction underpriced"
+            local base_gas
+            base_gas=$(cast gas-price --rpc-url "$current_rpc_url" 2>/dev/null)
+            if [ -z "$base_gas" ] || [ "$base_gas" -lt 1000000000 ]; then
+                base_gas=1000000000
+            fi
+            local gas_price=$(( base_gas * 150 / 100 ))
+            if [ "$gas_price" -lt 10000000000 ]; then
+                gas_price=10000000000
+            fi
+
+            local max_attempts=4
+            local attempt=1
+            local send_output
+            local send_exit
+            local try_rpc_url
+
+            while [ "$attempt" -le "$max_attempts" ]; do
+                # On retry use next RPC — your node may have different mempool view
+                try_rpc_url="${rpc_providers[$(((key_index + attempt - 1) % rpc_count))]}"
+                echo "Gas price: $gas_price wei, RPC: $try_rpc_url (attempt $attempt/$max_attempts)"
+                send_output=$(cast send 0x5595cb9ed193cac2c0bc5393313bc6115817954b \
+                    "approve(address,uint256)" \
+                    "$contract_address" \
+                    200000ether \
+                    --private-key "$private_key" \
+                    --rpc-url "$try_rpc_url" \
+                    --gas-price "$gas_price" 2>&1)
+                send_exit=$?
+                if [ "$send_exit" -eq 0 ]; then
+                    echo "$send_output"
+                    break
+                fi
+                if echo "$send_output" | grep -qi "replacement transaction underpriced\|underpriced"; then
+                    echo "Underpriced, retrying with next RPC and higher gas..."
+                    gas_price=$(( gas_price * 2 ))
+                    attempt=$(( attempt + 1 ))
+                    sleep 2
+                elif echo "$send_output" | grep -qi "tls\|handshake\|eof\|connect\|timeout\|connection refused\|error sending request"; then
+                    echo "RPC connection error, retrying with next RPC (same gas)..."
+                    echo "$send_output"
+                    attempt=$(( attempt + 1 ))
+                    sleep 2
+                else
+                    echo "$send_output"
+                    echo "Send failed (exit $send_exit)."
+                    break
+                fi
+            done
+            if [ "$send_exit" -ne 0 ]; then
+                echo "Skipping to next key after $max_attempts attempts."
+                echo "To fix $eth_address: clear pending tx (e.g. MetaMask: Activity -> Speed up or Cancel), then run Approve again."
+            fi
+
+            # Next validator uses next RPC in list
+            key_index=$((key_index + 1))
+            # Pause before next tx so previous is mined and RPC state is clear
+            sleep 12
         else
             echo "Warning: No privateKey found in $key_file"
         fi
@@ -7181,6 +7259,7 @@ generate_bls_keys() {
     echo -e "1) $(t "bls_method_new_operator")"
     echo -e "2) $(t "bls_method_existing")"
     echo -e "3) $(t "bls_to_keystore")"
+    echo -e "4) $(t "bls_method_dashboard")"
     echo ""
     read -p "$(t "bls_method_prompt") " GENERATION_METHOD
 
@@ -7194,11 +7273,106 @@ generate_bls_keys() {
         3)
             add_bls_to_keystore
             ;;
+        4)
+            generate_bls_dashboard_method
+            ;;
         *)
             echo -e "${RED}$(t "bls_invalid_method")${NC}"
             return 1
             ;;
     esac
+}
+
+# === Dashboard keystores: private + staker_output (docs.aztec.network/operate/.../sequencer_management) ===
+generate_bls_dashboard_method() {
+    echo -e "\n${BLUE}=== $(t "bls_dashboard_title") ===${NC}"
+
+    local AZTEC_DIR="$HOME/aztec"
+    local FEE_RECIPIENT_ZERO="0x0000000000000000000000000000000000000000000000000000000000000000"
+    local PRIVATE_FILE="$AZTEC_DIR/dashboard_keystore.json"
+    local STAKER_FILE="$AZTEC_DIR/dashboard_keystore_staker_output.json"
+
+    mkdir -p "$AZTEC_DIR"
+
+    # Сеть и RPC из настроек скрипта
+    local settings
+    settings=$(get_network_settings)
+    local network=$(echo "$settings" | cut -d'|' -f1)
+    local rpc_url=$(echo "$settings" | cut -d'|' -f2)
+
+    local GSE_ADDRESS
+    if [[ "$network" == "mainnet" ]]; then
+        GSE_ADDRESS="$GSE_ADDRESS_MAINNET"
+    else
+        GSE_ADDRESS="$GSE_ADDRESS_TESTNET"
+    fi
+
+    if [ -z "$rpc_url" ] || [ "$rpc_url" = "null" ]; then
+        rpc_url="https://ethereum-sepolia-rpc.publicnode.com"
+        echo -e "${YELLOW}RPC not set in .env-aztec-agent, using default: $rpc_url${NC}"
+    fi
+
+    echo -e "${CYAN}$(t "bls_dashboard_new_or_mnemonic")${NC}"
+    read -p "> " DASHBOARD_MODE
+
+    local RUN_OK=0
+    if [ "$DASHBOARD_MODE" = "2" ]; then
+        echo -e "\n${CYAN}$(t "bls_mnemonic_prompt")${NC}"
+        read -s -p "> " MNEMONIC
+        echo
+        if [ -z "$MNEMONIC" ]; then
+            echo -e "${RED}Error: Mnemonic phrase cannot be empty${NC}"
+            return 1
+        fi
+        echo -e "\n${CYAN}$(t "bls_dashboard_count_prompt")${NC}"
+        read -p "> " WALLET_COUNT
+        if ! [[ "$WALLET_COUNT" =~ ^[1-9][0-9]*$ ]]; then
+            WALLET_COUNT=1
+        fi
+        echo -e "\n${YELLOW}Running: aztec validator-keys new --staker-output ... --file dashboard_keystore.json --mnemonic \"...\" --count $WALLET_COUNT${NC}"
+        if aztec validator-keys new \
+            --fee-recipient "$FEE_RECIPIENT_ZERO" \
+            --staker-output \
+            --gse-address "$GSE_ADDRESS" \
+            --l1-rpc-urls "$rpc_url" \
+            --data-dir "$AZTEC_DIR" \
+            --file "dashboard_keystore.json" \
+            --mnemonic "$MNEMONIC" \
+            --count "$WALLET_COUNT"; then
+            RUN_OK=1
+        fi
+    else
+        echo -e "\n${CYAN}$(t "bls_dashboard_count_prompt")${NC}"
+        read -p "> " WALLET_COUNT
+        if ! [[ "$WALLET_COUNT" =~ ^[1-9][0-9]*$ ]]; then
+            WALLET_COUNT=1
+        fi
+        echo -e "\n${YELLOW}Running: aztec validator-keys new --staker-output ... --file dashboard_keystore.json --count $WALLET_COUNT (new mnemonic)${NC}"
+        if aztec validator-keys new \
+            --fee-recipient "$FEE_RECIPIENT_ZERO" \
+            --staker-output \
+            --gse-address "$GSE_ADDRESS" \
+            --l1-rpc-urls "$rpc_url" \
+            --data-dir "$AZTEC_DIR" \
+            --file "dashboard_keystore.json" \
+            --count "$WALLET_COUNT"; then
+            RUN_OK=1
+        fi
+    fi
+
+    if [ "$RUN_OK" -eq 1 ]; then
+        if [ -f "$PRIVATE_FILE" ]; then
+            echo -e "${GREEN}✅ $(t "bls_dashboard_saved")${NC}"
+            echo -e "   Private: $PRIVATE_FILE"
+            [ -f "$STAKER_FILE" ] && echo -e "   Staker (for dashboard): $STAKER_FILE"
+        else
+            echo -e "${YELLOW}Command succeeded but expected file not found: $PRIVATE_FILE (check CLI --file/--data-dir behavior)${NC}"
+        fi
+    else
+        echo -e "${RED}$(t "bls_generation_failed")${NC}"
+        return 1
+    fi
+    return 0
 }
 
 # === Исправленная версия функции для новой структуры keystore.json ===
@@ -7355,63 +7529,45 @@ generate_bls_existing_method() {
         return 1
     fi
 
-    # 8. Создаем bls-filtered-pk.json в порядке keystore.json
+    # 8. Создаем bls-filtered-pk.json в порядке keystore.json через jq (без разбора по "|" и с корректным экранированием)
     echo -e "\n${BLUE}=== Creating final bls-filtered-pk.json in keystore.json order ===${NC}"
 
-    local VALIDATORS_JSON=""
-    local MATCH_COUNT=0
+    # Формируем JSON-массив адресов в порядке keystore (lowercase для сопоставления)
+    local ADDRESSES_JSON
+    ADDRESSES_JSON=$(printf '%s\n' "${KEYSTORE_VALIDATOR_ADDRESSES[@]}" | jq -R . | jq -s .)
 
-    # Создаем ассоциативный массив для быстрого поиска по адресам
-    declare -A ADDRESS_TO_KEYS
+    # Собираем bls-filtered-pk.json через jq: для каждого адреса keystore берём соответствующего валидатора из bls-ethwallet
+    # (attester.eth = приватный ETH, attester.bls = приватный BLS — подставляются напрямую из источника без разделителей)
+    if ! jq --argjson addresses "$ADDRESSES_JSON" --arg feeRecipient "$FEE_RECIPIENT_ADDRESS" '
+        .validators as $validators |
+        [
+            $addresses[] | ascii_downcase as $addr |
+            ($validators[] | select((.attester.address | ascii_downcase) == $addr)) // empty
+        ] |
+        map({
+            attester: { eth: .attester.eth, bls: .attester.bls },
+            feeRecipient: $feeRecipient
+        }) |
+        { schemaVersion: 1, validators: . }
+    ' "$BLS_ETHWALLET_FILE" > "$BLS_FILTERED_PK_FILE"; then
+        echo -e "${RED}Error: Failed to build bls-filtered-pk.json with jq${NC}"
+        rm -f "$BLS_OUTPUT_FILE" "$BLS_ETHWALLET_FILE"
+        return 1
+    fi
 
-    # Заполняем массив данными из bls-ethwallet.json
-    while IFS= read -r validator; do
-        local ETH_ADDRESS=$(echo "$validator" | jq -r '.attester.address' | tr '[:upper:]' '[:lower:]')
-        local PRIVATE_KEY=$(echo "$validator" | jq -r '.attester.eth')
-        local BLS_KEY=$(echo "$validator" | jq -r '.attester.bls')
+    local MATCH_COUNT
+    MATCH_COUNT=$(jq -r '.validators | length' "$BLS_FILTERED_PK_FILE")
 
-        if [ -n "$ETH_ADDRESS" ] && [ "$ETH_ADDRESS" != "null" ]; then
-            ADDRESS_TO_KEYS["$ETH_ADDRESS"]="$PRIVATE_KEY|$BLS_KEY"
-        fi
-    done < <(jq -c '.validators[]' "$BLS_ETHWALLET_FILE")
-
-    # Теперь создаем финальный файл в порядке keystore.json
+    # Предупреждение о несовпавших адресах (адрес есть в keystore, но нет в bls-ethwallet)
     for keystore_address in "${KEYSTORE_VALIDATOR_ADDRESSES[@]}"; do
-        if [ -n "${ADDRESS_TO_KEYS[$keystore_address]}" ]; then
-            ((MATCH_COUNT++))
-
-            # Разбираем данные из массива
-            IFS='|' read -r PRIVATE_KEY BLS_KEY <<< "${ADDRESS_TO_KEYS[$keystore_address]}"
-
-            # Добавляем в JSON (сохраняем порядок keystore.json)
-            if [ -n "$VALIDATORS_JSON" ]; then
-                VALIDATORS_JSON+=","
-            fi
-            VALIDATORS_JSON+=$(cat <<EOF
-    {
-      "attester": {
-        "eth": "$PRIVATE_KEY",
-        "bls": "$BLS_KEY"
-      },
-      "feeRecipient": "$FEE_RECIPIENT_ADDRESS"
-    }
-EOF
-            )
-        else
+        if ! jq -e --arg addr "$keystore_address" '
+            [.validators[] | .attester.address | ascii_downcase] | index($addr) != null
+        ' "$BLS_ETHWALLET_FILE" > /dev/null 2>&1; then
             echo -e "${YELLOW}⚠️ No matching keys found for address: $keystore_address${NC}"
         fi
     done
 
-    # 9. Создаем итоговый файл
-    if [ $MATCH_COUNT -gt 0 ]; then
-        cat > "$BLS_FILTERED_PK_FILE" << EOF
-{
-  "schemaVersion": 1,
-  "validators": [
-$VALIDATORS_JSON
-  ]
-}
-EOF
+    if [ "$MATCH_COUNT" -gt 0 ]; then
         echo -e "${GREEN}✅ BLS keys file created with validators in keystore.json order${NC}"
 
         # Очистка временных файлов

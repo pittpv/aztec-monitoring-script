@@ -35,11 +35,10 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 05-02-2026
+## 📌 Latest Updates 06-02-2026
 
-⚠️ FOR TESTNET - After updating the script, ensure that the node version installed is at least **3.0.3**. If the version is earlier, use the downgrade option to install node version 3.0.3! Delete the old monitoring agent (option 3) and create a new agent (option 2).
-
-- New testnet support
+- New option in BLS menu (option 18): generate dashboard keystores — private keystore and staker_output for staking dashboard, files saved with `dashboard_` prefix in `$HOME/aztec/`, supports new mnemonic or existing seed phrase.
+- Minor improvements.
 
 **error_definitions.json**
 
@@ -47,10 +46,16 @@ SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
 
 **version_control.json**
 
-SHA256: `cf614e2c3f2f32836e3bb7889d6cbedf7af8dabb0f389018eed5587c3e130550`
+SHA256: `d1187f860df8e79045c3bf013db218129ebc5674022b681d1f3a0d0e2e59b218`
 
 <details>
 <summary>📅 Version History</summary>
+
+### 05-02-2026
+
+⚠️ FOR TESTNET - After updating the script, ensure that the node version installed is at least **3.0.3**. If the version is earlier, use the downgrade option to install node version 3.0.3! Delete the old monitoring agent (option 3) and create a new agent (option 2).
+
+- New testnet support
 
 ### 11-01-2026
 

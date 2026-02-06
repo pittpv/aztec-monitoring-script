@@ -35,11 +35,10 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 05-02-2026
+## 📌 Son Güncellemeler 06-02-2026
 
-⚠️ TESTNET İÇİN - Komut dosyasını güncelledikten sonra, kurulu node sürümünün en az **3.0.3** olduğundan emin olun. Sürüm daha eski ise, node sürümü 3.0.3'ü yüklemek için sürüm düşürme seçeneğini kullanın! Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
-
-- Yeni test ağı desteği
+- BLS menüsüne (seçenek 18) yeni alt seçenek eklendi: dashboard keystore oluşturma — `$HOME/aztec/` içinde `dashboard_` önekli dosyalar (özel keystore ve staking dashboard için staker_output), yeni anımsatıcı veya mevcut seed phrase desteği.
+- Küçük iyileştirmeler.
 
 **error_definitions.json**
 
@@ -47,10 +46,16 @@ SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
 
 **version_control.json**
 
-SHA256: `cf614e2c3f2f32836e3bb7889d6cbedf7af8dabb0f389018eed5587c3e130550`
+SHA256: `d1187f860df8e79045c3bf013db218129ebc5674022b681d1f3a0d0e2e59b218`
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 05-02-2026
+
+⚠️ TESTNET İÇİN - Komut dosyasını güncelledikten sonra, kurulu node sürümünün en az **3.0.3** olduğundan emin olun. Sürüm daha eski ise, node sürümü 3.0.3'ü yüklemek için sürüm düşürme seçeneğini kullanın! Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+
+- Yeni test ağı desteği
 
 ### 11-01-2026
 
