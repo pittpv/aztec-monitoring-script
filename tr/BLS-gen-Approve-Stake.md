@@ -19,7 +19,7 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
 
 ---
 
-### Alt seçenek 18-1: Yeni operatör adresi (tavsiye edilen)
+### Alt seçenek 18-1: Yeni operatör adresi
 
 **Amaç:** Doğrulayıcı operatörünü değiştirmek: her mevcut doğrulayıcı için **yeni** bir ETH adresi ve yeni BLS anahtarı üretilir. Eski adres sözleşmede kalır (çekim vb. için), staking ise yeni operatöre bağlanır.
 
@@ -83,7 +83,7 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
 
 ---
 
-### Alt seçenek 18-4: Dashboard keystore’ları
+### Alt seçenek 18-4: Dashboard keystore’ları (tavsiye edilen)
 
 **Amaç:** **Staking dashboard** için dosyalar oluşturmak (Aztec dokümantasyonu: sequencer_management vb.): özel keystore ve staker_output.
 

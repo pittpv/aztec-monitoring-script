@@ -19,7 +19,7 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
 
 ---
 
-### Sub-option 18-1: New Operator Address (recommended)
+### Sub-option 18-1: New Operator Address
 
 **Purpose:** Replace the validator operator: for each existing validator a **new** ETH address and new BLS key are generated. The old address remains in the contract (for withdrawals etc.), while staking is tied to the new operator.
 
@@ -83,7 +83,7 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
 
 ---
 
-### Sub-option 18-4: Dashboard Keystores
+### Sub-option 18-4: Dashboard Keystores (recommended)
 
 **Purpose:** Create files for the **staking dashboard** (Aztec docs: sequencer_management etc.): private keystore and staker_output.
 
