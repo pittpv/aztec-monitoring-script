@@ -37,7 +37,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 ## 📌 Latest Updates 06-02-2026
 
-- New option in BLS menu (option 18): generate dashboard keystores — private keystore and staker_output for staking dashboard, files saved with `dashboard_` prefix in `$HOME/aztec/`, supports new mnemonic or existing seed phrase.
+- New option in BLS menu (option 18-4): generate keystores for Aztec Staking dashboard  — private keystore and staker_output for staking dashboard, files saved with `dashboard_` prefix in `$HOME/aztec/`, supports new mnemonic or existing seed phrase.
 - Minor improvements.
 
 **error_definitions.json**

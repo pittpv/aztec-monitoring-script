@@ -37,7 +37,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ## 📌 Son Güncellemeler 06-02-2026
 
-- BLS menüsüne (seçenek 18) yeni alt seçenek eklendi: dashboard keystore oluşturma — `$HOME/aztec/` içinde `dashboard_` önekli dosyalar (özel keystore ve staking dashboard için staker_output), yeni anımsatıcı veya mevcut seed phrase desteği.
+- BLS menüsüne (seçenek 18-4) yeni alt seçenek eklendi: dashboard keystore oluşturma — `$HOME/aztec/` içinde `dashboard_` önekli dosyalar (özel keystore ve staking dashboard için staker_output), yeni anımsatıcı veya mevcut seed phrase desteği.
 - Küçük iyileştirmeler.
 
 **error_definitions.json**
