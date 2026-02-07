@@ -175,7 +175,7 @@ Düğümü yeniden kurarken (seçenek 11) veya daha sonra BLS anahtarı eklerken
 
 ### Betiğe Özel Dosya
 
-**`bls-filtered-pk.json`** dosyası **yalnızca betik tarafından** oluşturulur ve kullanılır. Dashboard senaryosu (aşağıdaki varyant 2) dışında elle düzenlemeniz gerekmez. Yol: `$HOME/aztec/bls-filtered-pk.json`.
+**`bls-filtered-pk.json`** dosyası **yalnızca betik tarafından** oluşturulur ve kullanılır. Hiçbir durumda elle düzenlenmemelidir. Yol: `$HOME/aztec/bls-filtered-pk.json`.
 
 ---
 
@@ -204,11 +204,13 @@ Yeni bir eth adresi ve BLS anahtarları (örn. yeni cüzdana geçmek için) olu�
 
 ---
 
-### Varyant C: Yalnızca Dashboard Keystore’ları (Seçenek 18-4)
+### Varyant C: Yalnızca Dashboard Keystore'ları (Seçenek 18-4)
 
 Düğüm yapılandırmasını değiştirmeden yalnızca staking dashboard (docs.aztec.network) için keystore gerekiyorsa:
 
 - **Seçenek 18 → alt seçenek 4.** Yeni mnemonic (1) veya mevcut mnemonic (2) seçin, doğrulayıcı kimlik sayısını girin. Betik `$HOME/aztec/` içinde **`dashboard_keystore.json`** ve **`dashboard_keystore_staker_output.json`** oluşturur. Düğümün `keystore.json` ve `bls-filtered-pk.json` dosyaları değiştirilmez.
+
+**Birden fazla** doğrulayıcı kimliği belirtirseniz, oluşturulan dosyalarda **tüm** üretilen adreslere ait veriler bulunur. Yalnızca ihtiyacınız olan kayıtları bırakmak için dosyayı açıp **gereksiz olanları elle silin**; böylece dashboard’da yalnızca bir adres (veya ihtiyacınız olan alt küme) kullanılır.
 
 ---
 

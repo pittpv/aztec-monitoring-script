@@ -174,7 +174,7 @@ When reinstalling the node (option 11) or adding BLS keys later, it helps to und
 
 ### Script-Internal File
 
-The file **`bls-filtered-pk.json`** is created and used **only by the script**. You do not need to edit it manually, except in the dashboard case (see variant 2 below). Path: `$HOME/aztec/bls-filtered-pk.json`.
+The file **`bls-filtered-pk.json`** is created and used **only by the script**. It must not be edited manually under any circumstances. Path: `$HOME/aztec/bls-filtered-pk.json`.
 
 ---
 
@@ -208,6 +208,8 @@ Use this when you want to create a **new** eth address and BLS keys (e.g. to swi
 When you only need keystores for the staking dashboard (docs.aztec.network), without changing the node configuration:
 
 - **Option 18 → sub-option 4.** Choose new mnemonic (1) or enter existing (2), and enter the number of validator identities. The script will create **`dashboard_keystore.json`** and **`dashboard_keystore_staker_output.json`** in `$HOME/aztec/`. The node’s `keystore.json` and `bls-filtered-pk.json` are not modified.
+
+If you specify **more than one** validator identity, the created files will contain data for **all** generated addresses. To use only the entries you need, open the file and **manually remove the rest**, so that the dashboard uses only one address (or the subset you need).
 
 ---
 
