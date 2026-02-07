@@ -161,6 +161,66 @@ Ana menüde bulunan betiğin diğer özelliklerini de incelediğinizden emin olu
 *   Düğüm sürümünü düşürme (bir güncellemede sorun çıkması durumunda)
 *   Logları ve istatistikleri görüntüleme
 
+## Düğümü Yeniden Kurma ve BLS Anahtarlarını Ekleme (Seçenek 18)
+
+Düğümü yeniden kurarken (seçenek 11) veya daha sonra BLS anahtarı eklerken, iki kurulum şeklini ve **18** numaralı seçeneğin (Mnemonic'ten BLS anahtarları oluştur) alt seçeneklerinin nasıl çalıştığını bilmek önemlidir.
+
+### Düğüm Kurulumu: BLS ile veya BLS Olmadan
+
+- **BLS anahtarlarıyla** — Kurulum sırasında (seçenek 11), “BLS anahtarlarınız var mı?” sorusuna **`y`** yanıtı verin ve her doğrulayıcı için veriyi şu biçimde girin:  
+  `özel_anahtar,adres,özel_BLS,genel_BLS`.  
+  Betik hemen `keystore.json` ve BLS YML dosyalarını oluşturur. Ek BLS adımı gerekmez.
+
+- **BLS anahtarları olmadan** — **`n`** yanıtı verin. Betik yalnızca doğrulayıcıların eth adresleriyle (bls alanı olmadan) `keystore.json` oluşturur. BLS anahtarlarını aşağıda anlatıldığı gibi seçenek 18 ile sonradan ekleyebilirsiniz.
+
+### Betiğe Özel Dosya
+
+**`bls-filtered-pk.json`** dosyası **yalnızca betik tarafından** oluşturulur ve kullanılır. Dashboard senaryosu (aşağıdaki varyant 2) dışında elle düzenlemeniz gerekmez. Yol: `$HOME/aztec/bls-filtered-pk.json`.
+
+---
+
+### Varyant A: Keystore’daki Adreslerle Aynı Mnemonic’ten BLS (Seçenek 18-2 ve 18-3)
+
+Düğümü kurarken doğrulayıcı olarak mnemonic’inizden türetilmiş eth adresini girdiyseniz ve şimdi bu adres için BLS anahtarlarını aynı mnemonic’ten üretmek istiyorsanız bu yolu kullanın.
+
+1. **Seçenek 18 → alt seçenek 2** (mnemonic’ten mevcut adresler).
+2. Mnemonic ifadenizi ve **üretilecek cüzdan sayısını** girin (örn. 30 veya 50). Betik bu kadar indeks için anahtar üretir, sonra yalnızca eth adresi `keystore.json` içindeki adreslerle eşleşenleri tutar.  
+   Sonuç: Düğümü kurarken doğrulayıcı olarak eklediğiniz adresler için **`bls-filtered-pk.json`** oluşturulur.
+3. Düğüm **BLS olmadan** kurulduysa **Seçenek 18 → alt seçenek 3** (BLS anahtarlarını keystore’a ekle) çalıştırın. Betik BLS bilgisini `bls-filtered-pk.json` dosyasından `keystore.json` dosyasına kopyalar.
+4. Bundan sonra iki yol var:
+    - **Varyant 1:** Doğrulayıcıyı stake etmek için **19 (Approve)** ve **20 (Stake)** seçeneklerini çalıştırın.
+    - **Varyant 2 (dashboard anahtarı):** **Seçenek 18 → alt seçenek 4** (dashboard keystore’ları) çalıştırın. 2. adımda girdiğinizle **aynı adres sayısını** girin (örn. 30). Betik tüm üretilen adreslerle yeni formatta dosyalar oluşturur. Oluşan dosyayı açıp **gereksiz kayıtları elle silin**, yalnızca kendi doğrulayıcınıza ait olanı bırakın.
+
+---
+
+### Varyant B: Yeni Operatör Adresi (Seçenek 18-1)
+
+Yeni bir eth adresi ve BLS anahtarları (örn. yeni cüzdana geçmek için) oluşturmak istediğinizde kullanın.
+
+1. **Seçenek 18 → alt seçenek 1** (yeni operatör adresi).
+2. Eski özel anahtarınızı (veya virgülle ayrılmış anahtarları) girin. Betik yeni anahtarlar üretir ve her doğrulayıcı için `new_operator_info` içeren **`bls-filtered-pk.json`** oluşturur.
+3. Yeni eth adresine Sepolia ETH (0.1–0.3) gönderin, ardından **19 (Approve)** ve **20 (Stake)** seçeneklerini çalıştırın. Seçenek 20, başarılı stake sonrası **`keystore.json` dosyasını günceller**, eski adresi yeni operatör adresiyle değiştirir ve yeni anahtarlarla YML dosyaları oluşturur.
+4. Bu akışta **18-3** kullanılmaz — keystore’daki adres değişikliği seçenek 20’de yapılır.
+
+---
+
+### Varyant C: Yalnızca Dashboard Keystore’ları (Seçenek 18-4)
+
+Düğüm yapılandırmasını değiştirmeden yalnızca staking dashboard (docs.aztec.network) için keystore gerekiyorsa:
+
+- **Seçenek 18 → alt seçenek 4.** Yeni mnemonic (1) veya mevcut mnemonic (2) seçin, doğrulayıcı kimlik sayısını girin. Betik `$HOME/aztec/` içinde **`dashboard_keystore.json`** ve **`dashboard_keystore_staker_output.json`** oluşturur. Düğümün `keystore.json` ve `bls-filtered-pk.json` dosyaları değiştirilmez.
+
+---
+
+### Kısa Özet: Seçenek 18 Alt Seçenekleri
+
+| Alt seçenek | Amaç | `keystore.json` değişir mi? |
+|-------------|------|------------------------------|
+| **18-1** | Yeni operatör adresi; ardından 19 ve 20 (20 keystore’u günceller) | Doğrudan hayır; seçenek 20’de güncellenir |
+| **18-2** | Kurulumda keystore’a girilen adresler için mnemonic’ten BLS | Hayır; yalnızca `bls-filtered-pk.json` oluşturur |
+| **18-3** | `bls-filtered-pk.json` içeriğini `keystore.json`’a kopyala | Evet |
+| **18-4** | Dashboard keystore’ları (`$HOME/aztec/` içinde ayrı dosyalar) | Hayır |
+
 Düğümünüzü çalıştırırken size istikrarlı çalışma ve başarılar dileriz!
 
 Saygılarımızla,  

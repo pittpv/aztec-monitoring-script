@@ -160,6 +160,66 @@ Be sure to explore other features of the script available in the main menu, such
 *   Downgrading the node version (in case of issues with an update)
 *   Viewing logs and statistics
 
+## Reinstalling the Node and Adding BLS Keys (Option 18)
+
+When reinstalling the node (option 11) or adding BLS keys later, it helps to understand the two installation modes and how **option 18** (Generate BLS keys from mnemonic) sub-options work with them.
+
+### Installing the Node: With or Without BLS
+
+- **With BLS keys** — During installation (option 11), when asked “Do you have BLS keys?” answer **`y`** and enter, for each validator, data in the format:  
+  `private_key,address,private_BLS,public_BLS`.  
+  The script will create `keystore.json` and BLS YML files immediately. No extra BLS steps are needed.
+
+- **Without BLS keys** — Answer **`n`**. The script will create `keystore.json` with only the validators’ eth addresses (no `bls` field). You can add BLS keys later via option 18, as described below.
+
+### Script-Internal File
+
+The file **`bls-filtered-pk.json`** is created and used **only by the script**. You do not need to edit it manually, except in the dashboard case (see variant 2 below). Path: `$HOME/aztec/bls-filtered-pk.json`.
+
+---
+
+### Variant A: BLS from the Same Mnemonic as the Addresses in Keystore (Options 18-2 and 18-3)
+
+Use this when you installed the node with a validator whose eth address comes from your mnemonic, and you now want to generate BLS keys for that address from the same mnemonic.
+
+1. **Option 18 → sub-option 2** (existing addresses from mnemonic).
+2. Enter your mnemonic phrase and the **number of wallets** to generate (e.g. 30 or 50). The script will generate keys for that many indices, then keep only those whose eth address matches the addresses in `keystore.json`.  
+   Result: **`bls-filtered-pk.json`** is created with keys for exactly the addresses you added as validators when installing the node.
+3. If the node was installed **without BLS**, run **Option 18 → sub-option 3** (add BLS keys to keystore). The script will copy BLS from `bls-filtered-pk.json` into `keystore.json`.
+4. Then you can either:
+    - **Variant 1:** Run **options 19 (Approve)** and **20 (Stake)** to stake the validator.
+    - **Variant 2 (dashboard key):** Run **Option 18 → sub-option 4** (dashboard keystores). Enter the **same number of addresses** as in step 2 (e.g. 30). The script will create files in the new format with all generated addresses. Open the created file, **manually remove the extra entries** and keep only the one that corresponds to your validator.
+
+---
+
+### Variant B: New Operator Address (Option 18-1)
+
+Use this when you want to create a **new** eth address and BLS keys (e.g. to switch to a new wallet).
+
+1. **Option 18 → sub-option 1** (new operator address).
+2. Enter your old private key (or keys separated by commas). The script will generate new keys and create **`bls-filtered-pk.json`** with `new_operator_info` for each validator.
+3. Fund the new eth address with Sepolia ETH (0.1–0.3), then run **options 19 (Approve)** and **20 (Stake)**. Option 20 will **update `keystore.json`** on successful stake, replacing the old address with the new operator address and creating YML files with the new keys.
+4. **Option 18-3** is not used in this flow — keystore address replacement is done in option 20.
+
+---
+
+### Variant C: Dashboard Keystores Only (Option 18-4)
+
+When you only need keystores for the staking dashboard (docs.aztec.network), without changing the node configuration:
+
+- **Option 18 → sub-option 4.** Choose new mnemonic (1) or enter existing (2), and enter the number of validator identities. The script will create **`dashboard_keystore.json`** and **`dashboard_keystore_staker_output.json`** in `$HOME/aztec/`. The node’s `keystore.json` and `bls-filtered-pk.json` are not modified.
+
+---
+
+### Quick Reference: Option 18 Sub-options
+
+| Sub-option | Purpose | Does it change `keystore.json`? |
+|------------|---------|---------------------------------|
+| **18-1** | New operator address; then 19 and 20 (20 updates keystore) | Not directly; updated in option 20 |
+| **18-2** | BLS from mnemonic for addresses already in keystore from installation | No; only creates `bls-filtered-pk.json` |
+| **18-3** | Copy BLS from `bls-filtered-pk.json` into `keystore.json` | Yes |
+| **18-4** | Dashboard keystores (separate files in `$HOME/aztec/`) | No |
+
 We wish you stable operation and success in running your node!
 
 Best regards,  
