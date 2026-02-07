@@ -162,7 +162,7 @@ Be sure to explore other features of the script available in the main menu, such
 
 ## Reinstalling the Node and Adding BLS Keys (Option 18)
 
-When reinstalling the node (option 11) or adding BLS keys later, it helps to understand the two installation modes and how **option 18** (Generate BLS keys from mnemonic) sub-options work with them.
+When reinstalling the node (option 11) or adding BLS keys later, it helps to understand the two installation modes and how **option 18** (Generate BLS keys) sub-options work with them.
 
 ### Installing the Node: With or Without BLS
 

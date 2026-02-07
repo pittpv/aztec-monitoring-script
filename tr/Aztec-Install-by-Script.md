@@ -163,7 +163,7 @@ Ana menüde bulunan betiğin diğer özelliklerini de incelediğinizden emin olu
 
 ## Düğümü Yeniden Kurma ve BLS Anahtarlarını Ekleme (Seçenek 18)
 
-Düğümü yeniden kurarken (seçenek 11) veya daha sonra BLS anahtarı eklerken, iki kurulum şeklini ve **18** numaralı seçeneğin (Mnemonic'ten BLS anahtarları oluştur) alt seçeneklerinin nasıl çalıştığını bilmek önemlidir.
+Düğümü yeniden kurarken (seçenek 11) veya daha sonra BLS anahtarı eklerken, iki kurulum şeklini ve **18** numaralı seçeneğin (BLS anahtarları oluştur) alt seçeneklerinin nasıl çalıştığını bilmek önemlidir.
 
 ### Düğüm Kurulumu: BLS ile veya BLS Olmadan
 
