@@ -228,3 +228,4 @@ Add it to /root/.bash_profile to make the aztec binaries accessible?
 pittpv
 
 > **Если у вас возникли вопросы по работе скрипта**, задавайте их в нашем Telegram-чате: [https://t.me/+DLsyG6ol3SFjM2Vk](https://t.me/+DLsyG6ol3SFjM2Vk)
+
