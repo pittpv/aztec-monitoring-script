@@ -524,7 +524,6 @@ MIT License © 2025
 
 https://t.me/+DLsyG6ol3SFjM2Vk
 
-
 ## 🔗 Полезные ссылки
 
 [Скрипт для запуска RPC в один клик](https://github.com/pittpv/sepolia-auto-install "Запуск Sepolia узла для RPC")
