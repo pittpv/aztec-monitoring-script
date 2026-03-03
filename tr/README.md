@@ -42,6 +42,8 @@ yeni bir aracı oluşturun (seçenek 2).
 
 
 - Test ağı düğümü için rollup sözleşmesi güncellemesi. Cezalardan kaçınmak için test ağı düğümü 4.0.3 sürümüne güncelleyin!
+- Kritik hata JSON dosyası güncellendi, sürüm 1.0.1
+- Aztec-Install-by-Script.md talimat dosyası güncellendi
 
 **error_definitions.json**
 

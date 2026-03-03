@@ -41,6 +41,8 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 new agent (option 2).
 
 - Rollup contract update for testnet node. Update your testnet node to version 4.0.3 to avoid slashing!
+- Updated critical error JSON file, version 1.0.1
+- Updated Aztec-Install-by-Script.md instruction file
 
 **error_definitions.json**
 
