@@ -35,11 +35,12 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 26-02-2026
+## 📌 Latest Updates 03-03-2026
 
-⚠️ After updating the script, delete the old monitoring agent (option 3) and create a new agent (option 2).
+⚠️ After updating the script, delete the old monitoring agent (option 3) and create a 
+new agent (option 2).
 
-- Contract call compatibility: rollup block fetch now uses fallback — first `getPendingBlockNumber()` (current mainnet), then `getPendingCheckpointNumber()` on failure (new contract / testnet).
+- Rollup contract update for testnet node. Update your testnet node to version 4.0.3 to avoid slashing!
 
 **error_definitions.json**
 
@@ -47,10 +48,16 @@ SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
 
 **version_control.json**
 
-SHA256: `c81ceb7c07347435c88757a74c22b78eaa9e37a61d69199effbbac59d58f7921`
+SHA256: `0df38bc04410333d64b5cfc2eebff079a7467746c47182d4769b73df83a132e1`
 
 <details>
 <summary>📅 Version History</summary>
+
+### 26-02-2026
+
+⚠️ After updating the script, delete the old monitoring agent (option 3) and create a new agent (option 2).
+
+- Contract call compatibility: rollup block fetch now uses fallback — first `getPendingBlockNumber()` (current mainnet), then `getPendingCheckpointNumber()` on failure (new contract / testnet).
 
 ### 06-02-2026
 

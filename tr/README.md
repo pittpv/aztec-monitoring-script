@@ -35,11 +35,13 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 26-02-2026
+## 📌 Son Güncellemeler 03-03-2026
 
-⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve 
+yeni bir aracı oluşturun (seçenek 2).
 
-- Rollup sözleşmesi ile uyumluluk: blok almak için fallback kullanılıyor — önce `getPendingBlockNumber()` (güncel mainnet), başarısız olursa `getPendingCheckpointNumber()` (yeni sözleşme / testnet).
+
+- Test ağı düğümü için rollup sözleşmesi güncellemesi. Cezalardan kaçınmak için test ağı düğümü 4.0.3 sürümüne güncelleyin!
 
 **error_definitions.json**
 
@@ -47,10 +49,16 @@ SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
 
 **version_control.json**
 
-SHA256: `c81ceb7c07347435c88757a74c22b78eaa9e37a61d69199effbbac59d58f7921`
+SHA256: `0df38bc04410333d64b5cfc2eebff079a7467746c47182d4769b73df83a132e1`
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 26-02-2026
+
+⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+
+- Rollup sözleşmesi ile uyumluluk: blok almak için fallback kullanılıyor — önce `getPendingBlockNumber()` (güncel mainnet), başarısız olursa `getPendingCheckpointNumber()` (yeni sözleşme / testnet).
 
 ### 06-02-2026
 
