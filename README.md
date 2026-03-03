@@ -43,7 +43,7 @@
 
 **error_definitions.json**
 
-SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
+SHA256: `9f4932305b68de3b666c20f1519ddbebf077a647dc0a6068531fbb6509443228`
 
 **version_control.json**
 
@@ -539,3 +539,4 @@ https://t.me/+DLsyG6ol3SFjM2Vk
 ## 🔗 Полезные ссылки
 
 [Скрипт для запуска RPC в один клик](https://github.com/pittpv/sepolia-auto-install "Запуск Sepolia узла для RPC")
+

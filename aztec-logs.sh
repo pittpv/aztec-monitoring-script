@@ -1992,7 +1992,7 @@ init_languages() {
 }
 
 SCRIPT_VERSION="2.8.2"
-ERROR_DEFINITIONS_VERSION="1.0.0"
+ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

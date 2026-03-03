@@ -44,7 +44,7 @@ new agent (option 2).
 
 **error_definitions.json**
 
-SHA256: `39e9dff9e976f5db9417aa11cd35117644e689668c01e438c5206f8d664ddcc1`
+SHA256: `9f4932305b68de3b666c20f1519ddbebf077a647dc0a6068531fbb6509443228`
 
 **version_control.json**
 
@@ -547,3 +547,4 @@ For any issues, suggestions, or feedback:
 ## 🔗 Useful Links
 
 [One-click RPC setup script](https://github.com/pittpv/sepolia-auto-install "Quickly set up a Sepolia node for RPC")
+
