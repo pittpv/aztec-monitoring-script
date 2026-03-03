@@ -47,7 +47,7 @@ yeni bir aracı oluşturun (seçenek 2).
 
 **error_definitions.json**
 
-SHA256: `fb4a5cae3b30a635f3fd662d83a423bd295ad68a11826b11b5931ab59c4ca0e7`
+SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 **version_control.json**
 
@@ -549,4 +549,5 @@ Herhangi bir sorun, öneri veya geri bildirim için:
 ## 🔗 Yararlı Bağlantılar
 
 [Tek tıklamayla RPC kurulum betiği](https://github.com/pittpv/sepolia-auto-install "RPC için hızlı bir şekilde Sepolia düğümü kurun")
+
 
