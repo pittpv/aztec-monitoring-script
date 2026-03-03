@@ -69,7 +69,7 @@
     {
       "pattern": "ERROR: cli Error: Ethereum node is out of sync",
       "message": "Cli Error - Ethereum node is out of sync",
-      "solution": "Check your RPC node."
+      "solution": "Check your RPC node. Restart the Aztec container to clear the error history."
     },
     {
       "pattern": "ERROR: cli Error: The computed genesis archive tree root",

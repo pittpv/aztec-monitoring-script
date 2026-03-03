@@ -45,7 +45,7 @@
 
 **error_definitions.json**
 
-SHA256: `e0b76536f4b4b79bc55c5deb2895bba189096a006cade140c512f6e139519ffe`
+SHA256: `fb4a5cae3b30a635f3fd662d83a423bd295ad68a11826b11b5931ab59c4ca0e7`
 
 **version_control.json**
 
