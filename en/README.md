@@ -44,7 +44,7 @@ new agent (option 2).
 
 **error_definitions.json**
 
-SHA256: `9f4932305b68de3b666c20f1519ddbebf077a647dc0a6068531fbb6509443228`
+SHA256: `e0b76536f4b4b79bc55c5deb2895bba189096a006cade140c512f6e139519ffe`
 
 **version_control.json**
 
