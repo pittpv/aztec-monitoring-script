@@ -39,7 +39,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 - Düğüm sürüm düşürme işlevinde (seçenek 16) mevcut sürüm listesine ek olarak kendi görüntü sürümünü manuel girmek için seçenek eklendi.
 
-⚠️ SADECE TEST AĞI İÇİN - Aztec düğümünüzü 7 Mart 20:30 UTC'de (Moskova saatiyle 23:30) ve sonrasında 24 saat boyunca 4.1.0-rc.2 sürümüne güncelleyin!
+⚠️ SADECE TEST AĞI İÇİN - Komut dosyasını güncelledikten sonra, Aztec düğümünü 7 Mart 20:30 UTC'de (İstanbul saatiyle 23:30) ve sonrasında 24 saat boyunca `4.1.0-rc.2` sürümüne güncellemek için Sürüm Düşürme seçeneğini kullanın!
 
 **error_definitions.json**
 
