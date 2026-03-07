@@ -43,7 +43,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 **version_control.json**
 
-SHA256: `72560d2112f3e40639068a31429fa6c724b17dd3737affda7b1161f94d60c367`
+SHA256: `dec50d122eccbbf6763e50ac970fd3626151909cea829c455359df81b380dd4e`
 
 **error_definitions.json**
 
