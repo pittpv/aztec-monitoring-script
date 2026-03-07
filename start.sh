@@ -49,8 +49,8 @@ t() {
   echo "${TRANSLATIONS[$LANG,$key]}"
 }
 
-SCRIPT_VERSION="2.8.1"
-ERROR_DEFINITIONS_VERSION="1.0.0"
+SCRIPT_VERSION="2.8.2"
+ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Function to load configuration from config.json
 load_config() {

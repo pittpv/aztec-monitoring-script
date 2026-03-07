@@ -293,5 +293,14 @@
     "CHANGES": [
       "Compatibility: getPendingBlockNumber() / getPendingCheckpointNumber() fallback for rollup contract block fetch (mainnet upgrade)"
     ]
+  },
+  {
+    "VERSION": "2.8.2",
+    "UPDATE_DATE": "03.03.2026",
+    "CHANGES": [
+      "Rollup contract update for testnet node."
+    ],
+    "NOTICE": "ONLY FOR TESTNET - Update node to version 4.0.3 to avoid slashing! Remove the old monitoring agent and install a new one.",
+    "COLOR": "red"
   }
 ]

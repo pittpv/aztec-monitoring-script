@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1",
   "errors": [
     {
       "pattern": "ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync",
@@ -33,7 +33,7 @@
     },
     {
       "pattern": "WARN: node:blob-sink:client Failed to fetch blobs",
-      "message": "Failed to fetch blobs from BEACON. Sync wıll not complete!",
+      "message": "Failed to fetch blobs from BEACON. Sync will not complete!",
       "solution": "1. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
     },
     {
@@ -45,6 +45,16 @@
       "pattern": "ERROR: cli ContractFunctionExecutionError: The request took too long to respond",
       "message": "Cli Error in command execution - The request took too long to respond",
       "solution": "Check your RPC node, docker-compose.yml settings, or firewall. The request timed out."
+    },
+    {
+      "pattern": "ERROR: cli Error: Ethereum node is out of sync",
+      "message": "Cli Error - Ethereum node is out of sync",
+      "solution": "Check your RPC node."
+    },
+    {
+      "pattern": "ERROR: cli Error: The computed genesis archive tree root",
+      "message": "Cli Error - The computed genesis archive tree root does not match the expected genesis archive tree root for the rollup deployed at rollup contract.",
+      "solution": "Make sure you have the latest recommended version of the node installed. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
     }
   ]
 }
