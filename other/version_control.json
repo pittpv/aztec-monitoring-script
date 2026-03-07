@@ -311,5 +311,14 @@
     ],
     "NOTICE": "ONLY FOR TESTNET - Update node to version 4.1.0-rc.2 at 8:30PM UTC (March 7th) & within 24h after that!",
     "COLOR": "red"
+  },
+  {
+    "VERSION": "2.8.4",
+    "UPDATE_DATE": "08.03.2026",
+    "CHANGES": [
+      "Testnet rollup contract address update: 0xf6D0D42aCE06829bECB78C74F49879528fC632c1"
+    ],
+    "NOTICE": "ONLY FOR TESTNET - Update node to version 4.1.0-rc.2 at 8:30PM UTC (March 7th) & within 24h after that! Remove the old monitoring agent and install a new one.",
+    "COLOR": "red"
   }
 ]

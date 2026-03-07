@@ -35,22 +35,26 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 07-03-2026
+## 📌 Latest Updates 08-03-2026
 
-- Option to enter custom image version in the node downgrade function (option 16), in addition to the list of available versions.
+- Testnet rollup contract address updated to: `0xf6D0D42aCE06829bECB78C74F49879528fC632c1`.
 
-⚠️ TESTNET ONLY - After updating the script, use Downgrade option to upgrade Aztec node to version `4.1.0-rc.2` at 20:30 UTC (March 7, 23:30 Moscow time) and for 24 hours after that!
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
+⚠️ TESTNET ONLY — use Downgrade option to upgrade Aztec node to version `4.1.0-rc.2` at 20:30 UTC (March 7) and within 24 hours after that. Delete the old monitoring agent (option 3) and create a new agent (option 2)
 
 **version_control.json**
 
-SHA256: `31fb9412d68b1f4e65ed67b489b45f49aa172482570739502a855c228d957968`
+SHA256: `72560d2112f3e40639068a31429fa6c724b17dd3737affda7b1161f94d60c367`
+
+**error_definitions.json**
+
+SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
 
 <details>
 <summary>📅 Version History</summary>
+
+### 07-03-2026
+
+- Option to enter custom image version in the node downgrade function (option 16), in addition to the list of available versions. 
 
 ### 03-03-2026
 

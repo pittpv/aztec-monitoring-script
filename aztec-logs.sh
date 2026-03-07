@@ -1997,7 +1997,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.8.3"
+SCRIPT_VERSION="2.8.4"
 ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
@@ -2005,7 +2005,8 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Configuration ===
 # Contract addresses (Rollup addresses)
-CONTRACT_ADDRESS="0x5932fcb01b6f63550c8bd91055613752480b6455"  # Testnet 4.0.4 rollup address
+CONTRACT_ADDRESS="0xf6D0D42aCE06829bECB78C74F49879528fC632c1"  # Testnet 4.1.0 rollup address
+#CONTRACT_ADDRESS="0x5932fcb01b6f63550c8bd91055613752480b6455"  # Testnet 4.0.4 rollup address
 #CONTRACT_ADDRESS="0x66a41cb55f9a1e38a45a2ac8685f12a61fbfab77"  # Testnet 3.0.3 rollup address
 #CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet current rollup address
 CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet rollup address

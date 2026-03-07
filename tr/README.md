@@ -35,22 +35,26 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 07-03-2026
+## 📌 Son Güncellemeler 08-03-2026
 
-- Düğüm sürüm düşürme işlevinde (seçenek 16) mevcut sürüm listesine ek olarak kendi görüntü sürümünü manuel girmek için seçenek eklendi.
+- Test ağı rollup sözleşme adresi güncellendi: `0xf6D0D42aCE06829bECB78C74F49879528fC632c1`.
 
-⚠️ SADECE TEST AĞI İÇİN - Komut dosyasını güncelledikten sonra, Aztec düğümünü 7 Mart 20:30 UTC'de (İstanbul saatiyle 23:30) ve sonrasında 24 saat boyunca `4.1.0-rc.2` sürümüne güncellemek için Sürüm Düşürme seçeneğini kullanın!
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
+⚠️ SADECE TEST AĞI — 7 Mart 20:30 UTC ve sonrasında 24 saat içinde Aztec düğümünü `4.1.0-rc.2` sürümüne güncellemek için Sürüm Düşürme seçeneğini kullanın. Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
 
 **version_control.json**
 
-SHA256: `31fb9412d68b1f4e65ed67b489b45f49aa172482570739502a855c228d957968`
+SHA256: `72560d2112f3e40639068a31429fa6c724b17dd3737affda7b1161f94d60c367`
+
+**error_definitions.json**
+
+SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 07-03-2026
+
+- Düğüm sürüm düşürme işlevinde (seçenek 16) mevcut sürüm listesine ek olarak kendi görüntü sürümünü manuel girmek için seçenek eklendi.
 
 ### 03-03-2026
 
