@@ -308,6 +308,8 @@
     "UPDATE_DATE": "07.03.2026",
     "CHANGES": [
       "Option to enter custom image version in downgrade function (option 16)"
-    ]
+    ],
+    "NOTICE": "ONLY FOR TESTNET - Update node to version 4.1.0-rc.2 at 8:30PM UTC (March 7th) & within 24h after that!",
+    "COLOR": "red"
   }
 ]
