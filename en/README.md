@@ -39,6 +39,8 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 - Option to enter custom image version in the node downgrade function (option 16), in addition to the list of available versions.
 
+⚠️ TESTNET ONLY - Update your Aztec node to version 4.1.0-rc.2 at 20:30 UTC (March 7, 23:30 Moscow time) and for 24 hours after that!
+
 **error_definitions.json**
 
 SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`

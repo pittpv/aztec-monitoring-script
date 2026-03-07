@@ -39,6 +39,8 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 - Düğüm sürüm düşürme işlevinde (seçenek 16) mevcut sürüm listesine ek olarak kendi görüntü sürümünü manuel girmek için seçenek eklendi.
 
+⚠️ SADECE TEST AĞI İÇİN - Aztec düğümünüzü 7 Mart 20:30 UTC'de (Moskova saatiyle 23:30) ve sonrasında 24 saat boyunca 4.1.0-rc.2 sürümüne güncelleyin!
+
 **error_definitions.json**
 
 SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
