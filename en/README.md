@@ -35,14 +35,9 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 03-03-2026
+## 📌 Latest Updates 07-03-2026
 
-⚠️ After updating the script, delete the old monitoring agent (option 3) and create a 
-new agent (option 2).
-
-- Rollup contract update for testnet node. Update your testnet node to version 4.0.3 to avoid slashing!
-- Updated critical error JSON file, version 1.0.1
-- Updated Aztec-Install-by-Script.md instruction file
+- Option to enter custom image version in the node downgrade function (option 16), in addition to the list of available versions.
 
 **error_definitions.json**
 
@@ -50,10 +45,18 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 **version_control.json**
 
-SHA256: `0df38bc04410333d64b5cfc2eebff079a7467746c47182d4769b73df83a132e1`
+SHA256: `7d1c479d4c7107351cef6f4694547618c96204af9d709501df9cc2149f92b8e0`
 
 <details>
 <summary>📅 Version History</summary>
+
+### 03-03-2026
+
+⚠️ After updating the script, delete the old monitoring agent (option 3) and create a new agent (option 2).
+
+- Rollup contract update for testnet node. Update your testnet node to version 4.0.3 to avoid slashing!
+- Updated critical error JSON file, version 1.0.1
+- Updated Aztec-Install-by-Script.md instruction file
 
 ### 26-02-2026
 

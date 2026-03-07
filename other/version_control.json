@@ -302,5 +302,12 @@
     ],
     "NOTICE": "ONLY FOR TESTNET - Update node to version 4.0.3 to avoid slashing! Remove the old monitoring agent and install a new one.",
     "COLOR": "red"
+  },
+  {
+    "VERSION": "2.8.3",
+    "UPDATE_DATE": "07.03.2026",
+    "CHANGES": [
+      "Option to enter custom image version in downgrade function (option 16)"
+    ]
   }
 ]

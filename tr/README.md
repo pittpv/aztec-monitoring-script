@@ -35,15 +35,9 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 03-03-2026
+## 📌 Son Güncellemeler 07-03-2026
 
-⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve 
-yeni bir aracı oluşturun (seçenek 2).
-
-
-- Test ağı düğümü için rollup sözleşmesi güncellemesi. Cezalardan kaçınmak için test ağı düğümü 4.0.3 sürümüne güncelleyin!
-- Kritik hata JSON dosyası güncellendi, sürüm 1.0.1
-- Aztec-Install-by-Script.md talimat dosyası güncellendi
+- Düğüm sürüm düşürme işlevinde (seçenek 16) mevcut sürüm listesine ek olarak kendi görüntü sürümünü manuel girmek için seçenek eklendi.
 
 **error_definitions.json**
 
@@ -51,10 +45,18 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 **version_control.json**
 
-SHA256: `0df38bc04410333d64b5cfc2eebff079a7467746c47182d4769b73df83a132e1`
+SHA256: `7d1c479d4c7107351cef6f4694547618c96204af9d709501df9cc2149f92b8e0`
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 03-03-2026
+
+⚠️ Komut dosyasını güncelledikten sonra, eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+
+- Test ağı düğümü için rollup sözleşmesi güncellemesi. Cezalardan kaçınmak için test ağı düğümü 4.0.3 sürümüne güncelleyin!
+- Kritik hata JSON dosyası güncellendi, sürüm 1.0.1
+- Aztec-Install-by-Script.md talimat dosyası güncellendi
 
 ### 26-02-2026
 

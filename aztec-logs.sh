@@ -535,6 +535,8 @@ init_languages() {
   TRANSLATIONS["en,downgrade_starting"]="Starting downgraded node:"
   TRANSLATIONS["en,downgrade_start_error"]="Error starting containers"
   TRANSLATIONS["en,downgrade_success"]="Aztec node successfully downgraded to version"
+  TRANSLATIONS["en,downgrade_custom_option"]="Custom"
+  TRANSLATIONS["en,downgrade_custom_prompt"]="Enter image version (e.g. 1.2.3 or latest): "
   TRANSLATIONS["en,stopping_containers"]="Stopping containers..."
   TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
   TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
@@ -1111,6 +1113,8 @@ init_languages() {
   TRANSLATIONS["ru,downgrade_starting"]="Запуск ноды с версией"
   TRANSLATIONS["ru,downgrade_start_error"]="Ошибка при запуске контейнеров"
   TRANSLATIONS["ru,downgrade_success"]="Нода Aztec успешно даунгрейднута до версии"
+  TRANSLATIONS["ru,downgrade_custom_option"]="Своя"
+  TRANSLATIONS["ru,downgrade_custom_prompt"]="Введите версию образа (например 1.2.3 или latest): "
   #agent
   TRANSLATIONS["ru,agent_systemd_added"]="Агент добавлен (запуск каждые 37 секунд через systemd)"
   TRANSLATIONS["ru,agent_timer_status"]="Статус таймера:"
@@ -1760,6 +1764,8 @@ init_languages() {
   TRANSLATIONS["tr,downgrade_starting"]="Düğüm şu sürümle başlatılıyor"
   TRANSLATIONS["tr,downgrade_start_error"]="Kapsayıcılar başlatılırken hata oluştu"
   TRANSLATIONS["tr,downgrade_success"]="Aztec düğümü başarıyla şu sürüme düşürüldü"
+  TRANSLATIONS["tr,downgrade_custom_option"]="Özel"
+  TRANSLATIONS["tr,downgrade_custom_prompt"]="Görüntü sürümünü girin (örn. 1.2.3 veya latest): "
   #agent
   TRANSLATIONS["tr,agent_systemd_added"]="Aracı eklendi (systemd ile her 37 saniyede bir çalışıyor)"
   TRANSLATIONS["tr,agent_timer_status"]="Zamanlayıcı durumu:"
@@ -1991,7 +1997,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.8.2"
+SCRIPT_VERSION="2.8.3"
 ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
@@ -4685,13 +4691,24 @@ downgrade_aztec_node() {
     fi
 
     echo -e "\n${CYAN}$(t "downgrade_available")${NC}"
-    select TAG in $FILTERED_TAGS; do
+    CUSTOM_OPT="$(t 'downgrade_custom_option')"
+    select TAG in $CUSTOM_OPT $FILTERED_TAGS; do
         if [ -n "$TAG" ]; then
             break
         else
             echo -e "${RED}$(t "downgrade_invalid_choice")${NC}"
         fi
     done
+
+    if [ "$TAG" = "$CUSTOM_OPT" ]; then
+        echo -e "\n${CYAN}$(t "downgrade_custom_prompt")${NC}"
+        read -r TAG
+        TAG=$(echo "$TAG" | tr -d '[:space:]')
+        if [ -z "$TAG" ]; then
+            echo -e "${RED}$(t "downgrade_invalid_choice")${NC}"
+            return 1
+        fi
+    fi
 
     echo -e "\n${YELLOW}$(t "downgrade_selected") $TAG${NC}"
 
