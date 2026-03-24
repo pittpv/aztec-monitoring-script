@@ -69,12 +69,14 @@ Next, you need to enter the validator data. For each validator, enter the data i
 Example:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
 
-If the option with BLS keys is selected, then in strict format:
+If you selected **BLS keys**, use the **three-field** format (SECP256K1 private key, eth address, private BLS):
 
-`private_key_with_0x,validator_address,private_BLS_key_with_0x,public_BLS_address`
+`private_key_with_0x,validator_address,private_BLS_key_with_0x`
 
 Example:
-`0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e,0xa1b2c3d4e5f6...,0x12d4720c311e6d2e0826738a071fa06743f6cb8efd586ed718c3b020f09b5c8d`
+`0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e,0xa1b2c3d4e5f6...`
+
+BLS material is stored in **`keystore.json`**; separate **`bls_validator_*.yml`** files are **not** created. For web3signer, only **`validator_N.yml`** files with the SECP256K1 key are created. A **fourth** comma-separated value (public BLS), if you enter it, is **ignored** — kept for backward compatibility with the old input format.
 
 ⚠️ If you plan to use **one address** to pay Sepolia ETH for transactions of **all** validators, then enter the data of that address first. After entering the data of all validators the script will ask whether to use the first address as the publisher address for all validators (`Use first address as publisher for all validators?`) - choose **`y`**.
 
@@ -96,7 +98,7 @@ If you wish, you can later replace it with a real L2 address.
 
 ![Entering L2 address](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 
-> **Important:** The script will automatically create all necessary configuration files (`YML` for web3signer in `/root/aztec/keys` and `keystore.json` in `/root/aztec/config`).
+> **Important:** The script will automatically create the necessary configuration files: in `$HOME/aztec/keys` — `validator_N.yml` (SECP256K1 for web3signer); in `$HOME/aztec/config` — `keystore.json` (including BLS fields when applicable).
 
 ## Docker Compose Configuration
 
@@ -105,7 +107,7 @@ For the final node setup, the script will request data to generate the `docker-c
 *   **`ETHEREUM_RPC_URL`** — Your RPC URL for Ethereum L1. **Important:** For mainnet, use mainnet RPC; for testnet, use Sepolia testnet RPC.
 *   **`CONSENSUS_BEACON_URL`** — Your RPC URL for the Beacon Chain. **Important:** For mainnet, use mainnet Beacon Chain RPC; for testnet, use Sepolia testnet Beacon Chain RPC.
 *   **`COINBASE`** — The Ethereum wallet address. Enter the address of your validator.
-*   **`P2P_IP`** — This parameter will be determined automatically by the script. **If you are using a VPN on the server**, after completing the node installation, you must enter the real IP address **manually** in the `.env` file in the `/root/aztec` folder
+*   **`P2P_IP`** — This parameter will be determined automatically by the script. **If you are using a VPN on the server**, after completing the node installation, you must enter the real IP address **manually** in the `.env` file under `$HOME/aztec`
 
     ![Entering RPC and other data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -120,7 +122,7 @@ Select the desired network by entering the corresponding number (1 or 2).
 
 > **Important:** 
 > *   The selected network determines which network your node will operate on
-> *   Node data will be stored in different directories: `/root/.aztec/mainnet/data/` for mainnet and `/root/.aztec/testnet/data/` for testnet
+> *   Node data will be stored in different directories: `$HOME/.aztec/mainnet/data/` for mainnet and `$HOME/.aztec/testnet/data/` for testnet
 > *   Make sure you use the correct RPC addresses for the selected network
 > *   The selected network is saved in the `~/.env-aztec-agent` file in the `NETWORK` variable
 
@@ -153,12 +155,23 @@ The node installation is now complete.
 1.  **Check the node's sync status** by selecting option `1` in the script's main menu.
 2.  **Install the monitoring agent** for convenient node monitoring via option `2` in the main menu.
 3.  **Download the critical error definitions file** using option `24`.
-4.  **Check the validator status and set up queue position monitoring** using option `9`
+4.  **Check the validator status and set up queue position monitoring** using option `9`.
+
+After updating the script, it is recommended to **remove the old monitoring agent** (option `3`) and **create a new one** (option `2`) so notifications stay current (including the **L1 inclusion / Committee** block in Telegram when applicable). Rollup calldata parsing uses the Python package `eth_abi`; the script checks dependencies and installs them via `pip3` or `python3 -m pip` if needed.
 
 Be sure to explore other features of the script available in the main menu, such as:
 *   Starting and stopping containers
 *   Downgrading the node version (in case of issues with an update)
 *   Viewing logs and statistics
+
+## Adding or Removing Validators Without a Full Node Reinstall (Options 25 and 26)
+
+If the node is already deployed and you need to change the validator set **without** a full reinstall via option `11`:
+
+*   **Option 25** — Add new validators (up to 10 per run): updates `keystore.json`, `validator_N.yml` under `$HOME/aztec/keys`, the `VALIDATORS` variable in `~/.env-aztec-agent`, optional keystore backup, then restarts web3signer and `docker compose`. Input format and BLS checks match the existing keystore; Ethereum addresses are normalized to **lowercase**; the script asks about **publisher** (one for all new validators or per validator) and feeRecipient/coinbase.
+*   **Option 26** — Remove validators by number from the displayed attester list; you cannot remove the last validator; after removal, `validator_N.yml` files are renumbered and `VALIDATORS` is updated.
+
+Follow the script prompts for backup and service restarts.
 
 ## Reinstalling the Node and Adding BLS Keys (Option 18)
 
@@ -167,8 +180,8 @@ When reinstalling the node (option 11) or adding BLS keys later, it helps to und
 ### Installing the Node: With or Without BLS
 
 - **With BLS keys** — During installation (option 11), when asked “Do you have BLS keys?” answer **`y`** and enter, for each validator, data in the format:  
-  `private_key,address,private_BLS,public_BLS`.  
-  The script will create `keystore.json` and BLS YML files immediately. No extra BLS steps are needed.
+  `private_key,address,private_BLS`.  
+  The script will create `keystore.json` (BLS in the JSON) and `validator_N.yml` (SECP256K1 only) immediately. Separate `bls_validator_*.yml` files are not used.
 
 - **Without BLS keys** — Answer **`n`**. The script will create `keystore.json` with only the validators’ eth addresses (no `bls` field). You can add BLS keys later via option 18, as described below.
 

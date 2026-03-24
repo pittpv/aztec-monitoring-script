@@ -320,5 +320,15 @@
     ],
     "NOTICE": "ONLY FOR TESTNET - Update node to version 4.1.0-rc.2 at 8:30PM UTC (March 7th) & within 24h after that! Remove the old monitoring agent and install a new one.",
     "COLOR": "red"
+  },
+  {
+    "VERSION": "2.9.0",
+    "UPDATE_DATE": "24.03.2026",
+    "CHANGES": [
+      "Options 25-26: add/remove validators without full node reinstall (keystore, YAML, VALIDATORS, web3signer, docker compose)",
+      "L1 inclusion/committee Telegram block; rollup FUNCTION_SIG_BLOCK/CHECKPOINT; eth_abi and pip3_or_pym fallback",
+      "Node install: multi-validator YAML without per-validator public BLS files; EN/RU/TR translations"
+    ],
+    "NOTICE": "After updating the script, remove the old monitoring agent and install a new one."
   }
 ]

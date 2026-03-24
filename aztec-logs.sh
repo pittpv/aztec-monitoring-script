@@ -66,6 +66,43 @@ init_languages() {
   TRANSLATIONS["en,option22"]="22. Change RPC URL"
   TRANSLATIONS["en,option23"]="23. Check for script updates (safe, with hash verification)"
   TRANSLATIONS["en,option24"]="24. Check for error definitions updates (safe, with hash verification)"
+  TRANSLATIONS["en,option25"]="25. Add validators (YAML keys, keystore, .env-aztec-agent)"
+  TRANSLATIONS["en,add_validators_title"]="=== Add validators to existing node ==="
+  TRANSLATIONS["en,add_validators_prereq_fail"]="❌ Required: %s — run node installation (option 11) first or fix paths."
+  TRANSLATIONS["en,add_validators_jq_required"]="❌ jq is required. Install jq and try again."
+  TRANSLATIONS["en,add_validators_max_reached"]="❌ Maximum 10 validators total. You have %d; you can add at most %d."
+  TRANSLATIONS["en,add_validators_existing_bls"]="Existing keystore uses BLS keys; new validators must include BLS private keys (same format as install)."
+  TRANSLATIONS["en,add_validators_existing_no_bls"]="Existing keystore has no BLS; new validators will be added without BLS (match current setup)."
+  TRANSLATIONS["en,add_validators_fee_coinbase_keep"]="Current feeRecipient: %s\nCurrent coinbase: %s\nPress Enter to keep both, or type new feeRecipient,coinbase (comma-separated):"
+  TRANSLATIONS["en,add_validators_duplicate"]="❌ Address already in keystore: %s"
+  TRANSLATIONS["en,add_validators_backup"]="Keystore backup:"
+  TRANSLATIONS["en,add_validators_merged"]="✅ keystore.json updated; YAML keys created."
+  TRANSLATIONS["en,add_validators_env_updated"]="✅ VALIDATORS updated in .env-aztec-agent (existing entries preserved)."
+  TRANSLATIONS["en,add_validators_restarting"]="Restarting web3signer and Aztec node..."
+  TRANSLATIONS["en,add_validators_done"]="✅ Restart completed."
+  TRANSLATIONS["en,add_validators_no_compose"]="⚠️ Could not find docker-compose.yml under $HOME/aztec or COMPOSE_PATH; restart the node and web3signer manually."
+  TRANSLATIONS["en,add_validators_aborted"]="Aborted; keystore backup was left in place."
+  TRANSLATIONS["en,add_validators_current_publisher_show"]="Current publisher in keystore: %s"
+  TRANSLATIONS["en,add_validators_use_current_publisher_prompt"]="Use this publisher for all new validators? (y/n) "
+  TRANSLATIONS["en,add_validators_current_publisher_missing"]="❌ Could not read publisher from keystore (validators[0].publisher or attester)."
+  TRANSLATIONS["en,option26"]="26. Remove validators (keystore, keys, .env-aztec-agent)"
+  TRANSLATIONS["en,remove_validators_title"]="=== Remove validators ==="
+  TRANSLATIONS["en,remove_validators_no_keystore"]="❌ keystore.json not found: %s"
+  TRANSLATIONS["en,remove_validators_only_one"]="❌ Cannot remove the only validator. Use option 12 to delete the node if needed."
+  TRANSLATIONS["en,remove_validators_list_header"]="Validators in keystore (number — attester address):"
+  TRANSLATIONS["en,remove_validators_prompt"]="Enter numbers to remove (comma-separated, e.g. 1,3): "
+  TRANSLATIONS["en,remove_validators_invalid_num"]="❌ Invalid or out-of-range number: %s (valid: 1–%d)"
+  TRANSLATIONS["en,remove_validators_empty"]="❌ No validators selected."
+  TRANSLATIONS["en,remove_validators_would_remove_all"]="❌ At least one validator must remain."
+  TRANSLATIONS["en,remove_validators_backup"]="Keystore backup:"
+  TRANSLATIONS["en,remove_validators_key_missing"]="❌ Key file missing for validator #%d: %s"
+  TRANSLATIONS["en,remove_validators_keys_renumbered"]="✅ Key files updated (validator_1.yml …)."
+  TRANSLATIONS["en,remove_validators_keystore_updated"]="✅ keystore.json updated."
+  TRANSLATIONS["en,remove_validators_env_updated"]="✅ VALIDATORS updated in .env-aztec-agent."
+  TRANSLATIONS["en,remove_validators_restarting"]="Restarting web3signer and Aztec node..."
+  TRANSLATIONS["en,remove_validators_done"]="✅ Restart completed."
+  TRANSLATIONS["en,remove_validators_no_compose"]="⚠️ Could not find docker-compose.yml; restart web3signer and the node manually."
+  TRANSLATIONS["en,remove_validators_aborted"]="Aborted."
   TRANSLATIONS["en,option0"]="0. Exit"
 
   # Update check translations
@@ -381,6 +418,13 @@ init_languages() {
   TRANSLATIONS["en,status_block_mined"]="🟦 Block mined"
   TRANSLATIONS["en,status_block_missed"]="🟨 Block missed"
   TRANSLATIONS["en,status_block_proposed"]="🟪 Block proposed"
+  TRANSLATIONS["en,l1_section_title"]="L1 inclusion (rollup batch)"
+  TRANSLATIONS["en,l1_slots_label"]="Slots (L1):"
+  TRANSLATIONS["en,l1_legend_title"]="L1 legend:"
+  TRANSLATIONS["en,l1_pending"]="⬜️ Pending on L1"
+  TRANSLATIONS["en,l1_in_signers"]="✅ Attested in L1 calldata"
+  TRANSLATIONS["en,l1_not_in_signers"]="❌ Not in L1"
+  TRANSLATIONS["en,node_slots_label"]="Slots (node):"
   TRANSLATIONS["en,publisher_monitoring_title"]="=== Publisher Balance Monitoring ==="
   TRANSLATIONS["en,publisher_monitoring_option1"]="1. Add addresses and start balance monitoring"
   TRANSLATIONS["en,publisher_monitoring_option2"]="2. Configure minimum balance threshold"
@@ -500,9 +544,8 @@ init_languages() {
   TRANSLATIONS["en,ufw_not_installed"]="⚠️ ufw is not installed"
   TRANSLATIONS["en,ufw_not_active"]="⚠️ ufw is not active"
   TRANSLATIONS["en,has_bls_keys"]="Do you have BLS keys? (y/n) "
-  TRANSLATIONS["en,multi_validator_format"]="Enter validator data (format: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["en,multi_validator_format"]="Enter validator data (format: private_key,address,private_bls):"
   TRANSLATIONS["en,single_validator_bls_private"]="Enter validator BLS private key:"
-  TRANSLATIONS["en,single_validator_bls_public"]="Enter validator BLS public key:"
   TRANSLATIONS["en,bls_keys_added"]="BLS keys added to validator configuration"
   TRANSLATIONS["en,select_network"]="Select network"
   TRANSLATIONS["en,enter_choice"]="Enter choice:"
@@ -625,6 +668,7 @@ init_languages() {
   TRANSLATIONS["en,installing_jq"]="Installing jq..."
   TRANSLATIONS["en,installing_bc"]="Installing bc..."
   TRANSLATIONS["en,installing_python3"]="Installing Python3..."
+  TRANSLATIONS["en,installing_eth_abi"]="Installing eth_abi..."
   # Web3signer restart translations
   TRANSLATIONS["en,bls_restarting_web3signer"]="Restarting web3signer to load new key"
   TRANSLATIONS["en,bls_web3signer_restarted"]="Web3signer successfully restarted"
@@ -714,6 +758,43 @@ init_languages() {
   TRANSLATIONS["ru,option22"]="22. Изменить RPC URL"
   TRANSLATIONS["ru,option23"]="23. Проверить обновления скрипта (безопасно, с проверкой хеша)"
   TRANSLATIONS["ru,option24"]="24. Проверить обновления определений ошибок (безопасно, с проверкой хеша)"
+  TRANSLATIONS["ru,option25"]="25. Добавить валидаторов (YAML-ключи, keystore, .env-aztec-agent)"
+  TRANSLATIONS["ru,add_validators_title"]="=== Добавление валидаторов к существующей ноде ==="
+  TRANSLATIONS["ru,add_validators_prereq_fail"]="❌ Нужно: %s — сначала установите ноду (п. 11) или исправьте пути."
+  TRANSLATIONS["ru,add_validators_jq_required"]="❌ Нужен jq. Установите jq и повторите."
+  TRANSLATIONS["ru,add_validators_max_reached"]="❌ Не более 10 валидаторов всего. Сейчас %d; можно добавить не более %d."
+  TRANSLATIONS["ru,add_validators_existing_bls"]="В keystore уже есть BLS; новые валидаторы нужно вводить с BLS (как при установке)."
+  TRANSLATIONS["ru,add_validators_existing_no_bls"]="В keystore без BLS; новые валидаторы будут без BLS (как текущие)."
+  TRANSLATIONS["ru,add_validators_fee_coinbase_keep"]="Текущий feeRecipient: %s\nТекущий coinbase: %s\nEnter — оставить; или feeRecipient,coinbase через запятую:"
+  TRANSLATIONS["ru,add_validators_duplicate"]="❌ Адрес уже есть в keystore: %s"
+  TRANSLATIONS["ru,add_validators_backup"]="Резервная копия keystore:"
+  TRANSLATIONS["ru,add_validators_merged"]="✅ keystore.json обновлён; YAML-ключи созданы."
+  TRANSLATIONS["ru,add_validators_env_updated"]="✅ VALIDATORS в .env-aztec-agent обновлён (старые адреса сохранены)."
+  TRANSLATIONS["ru,add_validators_restarting"]="Перезапуск web3signer и ноды Aztec..."
+  TRANSLATIONS["ru,add_validators_done"]="✅ Перезапуск выполнен."
+  TRANSLATIONS["ru,add_validators_no_compose"]="⚠️ Не найден docker-compose.yml в $HOME/aztec или COMPOSE_PATH; перезапустите web3signer и ноду вручную."
+  TRANSLATIONS["ru,add_validators_aborted"]="Отмена; резервная копия keystore сохранена."
+  TRANSLATIONS["ru,add_validators_current_publisher_show"]="Текущий publisher в keystore: %s"
+  TRANSLATIONS["ru,add_validators_use_current_publisher_prompt"]="Использовать его для всех новых валидаторов? (y/n) "
+  TRANSLATIONS["ru,add_validators_current_publisher_missing"]="❌ Не удалось прочитать publisher из keystore (validators[0].publisher или attester)."
+  TRANSLATIONS["ru,option26"]="26. Удалить валидаторов (keystore, ключи, .env-aztec-agent)"
+  TRANSLATIONS["ru,remove_validators_title"]="=== Удаление валидаторов ==="
+  TRANSLATIONS["ru,remove_validators_no_keystore"]="❌ Нет keystore.json: %s"
+  TRANSLATIONS["ru,remove_validators_only_one"]="❌ Нельзя удалить единственного валидатора. Для полного удаления ноды используйте п. 12."
+  TRANSLATIONS["ru,remove_validators_list_header"]="Валидаторы в keystore (номер — адрес attester):"
+  TRANSLATIONS["ru,remove_validators_prompt"]="Номера для удаления через запятую (например 1,3): "
+  TRANSLATIONS["ru,remove_validators_invalid_num"]="❌ Неверный номер: %s (допустимо 1–%d)"
+  TRANSLATIONS["ru,remove_validators_empty"]="❌ Ничего не выбрано."
+  TRANSLATIONS["ru,remove_validators_would_remove_all"]="❌ Должен остаться хотя бы один валидатор."
+  TRANSLATIONS["ru,remove_validators_backup"]="Резервная копия keystore:"
+  TRANSLATIONS["ru,remove_validators_key_missing"]="❌ Нет файла ключа для валидатора #%d: %s"
+  TRANSLATIONS["ru,remove_validators_keys_renumbered"]="✅ Файлы ключей обновлены (validator_1.yml …)."
+  TRANSLATIONS["ru,remove_validators_keystore_updated"]="✅ keystore.json обновлён."
+  TRANSLATIONS["ru,remove_validators_env_updated"]="✅ VALIDATORS в .env-aztec-agent обновлён."
+  TRANSLATIONS["ru,remove_validators_restarting"]="Перезапуск web3signer и ноды..."
+  TRANSLATIONS["ru,remove_validators_done"]="✅ Перезапуск выполнен."
+  TRANSLATIONS["ru,remove_validators_no_compose"]="⚠️ docker-compose.yml не найден; перезапустите web3signer и ноду вручную."
+  TRANSLATIONS["ru,remove_validators_aborted"]="Отмена."
   TRANSLATIONS["ru,option0"]="0. Выход"
 
   # Переводы для проверки обновлений
@@ -1033,6 +1114,13 @@ init_languages() {
   TRANSLATIONS["ru,status_block_mined"]="🟦 Блок добыт"
   TRANSLATIONS["ru,status_block_missed"]="🟨 Блок пропущен"
   TRANSLATIONS["ru,status_block_proposed"]="🟪 Блок предложен"
+  TRANSLATIONS["ru,l1_section_title"]="Включение в L1 (batch rollup)"
+  TRANSLATIONS["ru,l1_slots_label"]="Слоты (L1):"
+  TRANSLATIONS["ru,l1_legend_title"]="Легенда L1:"
+  TRANSLATIONS["ru,l1_pending"]="⬜️ Ожидание L1"
+  TRANSLATIONS["ru,l1_in_signers"]="✅ Аттестован в calldata L1"
+  TRANSLATIONS["ru,l1_not_in_signers"]="❌ Нет в L1"
+  TRANSLATIONS["ru,node_slots_label"]="Слоты (нода):"
   TRANSLATIONS["ru,publisher_monitoring_title"]="=== Мониторинг баланса publisher ==="
   TRANSLATIONS["ru,publisher_monitoring_option1"]="1. Добавить адреса и запустить мониторинг баланса"
   TRANSLATIONS["ru,publisher_monitoring_option2"]="2. Настроить значение минимального баланса"
@@ -1187,9 +1275,8 @@ init_languages() {
   TRANSLATIONS["ru,ufw_not_installed"]="⚠️ ufw не установлен"
   TRANSLATIONS["ru,ufw_not_active"]="⚠️ ufw не активен"
   TRANSLATIONS["ru,has_bls_keys"]="У вас есть BLS ключи? (y/n) "
-  TRANSLATIONS["ru,multi_validator_format"]="Введите данные валидатора (формат: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["ru,multi_validator_format"]="Введите данные валидатора (формат: private_key,address,private_bls):"
   TRANSLATIONS["ru,single_validator_bls_private"]="Введите приватный BLS ключ валидатора:"
-  TRANSLATIONS["ru,single_validator_bls_public"]="Введите публичный BLS ключ валидатора:"
   TRANSLATIONS["ru,bls_keys_added"]="BLS ключи добавлены в конфигурацию валидатора"
   TRANSLATIONS["ru,select_network"]="Выберите сеть"
   TRANSLATIONS["ru,enter_choice"]="Введите:"
@@ -1279,6 +1366,7 @@ init_languages() {
   TRANSLATIONS["ru,installing_jq"]="Устанавливается jq..."
   TRANSLATIONS["ru,installing_bc"]="Устанавливается bc..."
   TRANSLATIONS["ru,installing_python3"]="Устанавливается Python3..."
+  TRANSLATIONS["ru,installing_eth_abi"]="Устанавливается eth_abi..."
 
   TRANSLATIONS["ru,bls_restarting_web3signer"]="Перезапускаем web3signer для загрузки нового ключа"
   TRANSLATIONS["ru,bls_web3signer_restarted"]="Web3signer успешно перезапущен"
@@ -1368,6 +1456,43 @@ init_languages() {
   TRANSLATIONS["tr,option22"]="22. RPC URL'sini değiştir"
   TRANSLATIONS["tr,option23"]="23. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
   TRANSLATIONS["tr,option24"]="24. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
+  TRANSLATIONS["tr,option25"]="25. Doğrulayıcı ekle (YAML anahtarlar, keystore, .env-aztec-agent)"
+  TRANSLATIONS["tr,add_validators_title"]="=== Mevcut düğüme doğrulayıcı ekleme ==="
+  TRANSLATIONS["tr,add_validators_prereq_fail"]="❌ Gerekli: %s — önce düğüm kurulumunu (seçenek 11) yapın veya yolları düzeltin."
+  TRANSLATIONS["tr,add_validators_jq_required"]="❌ jq gerekli. jq kurup tekrar deneyin."
+  TRANSLATIONS["tr,add_validators_max_reached"]="❌ Toplam en fazla 10 doğrulayıcı. Şu an %d; en fazla %d eklenebilir."
+  TRANSLATIONS["tr,add_validators_existing_bls"]="Mevcut keystore BLS kullanıyor; yeni doğrulayıcılar BLS ile girilmeli (kurulumdaki gibi)."
+  TRANSLATIONS["tr,add_validators_existing_no_bls"]="Mevcut keystore BLS içermiyor; yeniler BLS olmadan eklenecek."
+  TRANSLATIONS["tr,add_validators_fee_coinbase_keep"]="Mevcut feeRecipient: %s\nMevcut coinbase: %s\nEnter — aynı kalsın; veya feeRecipient,coinbase (virgülle):"
+  TRANSLATIONS["tr,add_validators_duplicate"]="❌ Adres zaten keystore’da: %s"
+  TRANSLATIONS["tr,add_validators_backup"]="Keystore yedeği:"
+  TRANSLATIONS["tr,add_validators_merged"]="✅ keystore.json güncellendi; YAML anahtarları oluşturuldu."
+  TRANSLATIONS["tr,add_validators_env_updated"]="✅ .env-aztec-agent içinde VALIDATORS güncellendi (eskiler korundu)."
+  TRANSLATIONS["tr,add_validators_restarting"]="web3signer ve Aztec düğümü yeniden başlatılıyor..."
+  TRANSLATIONS["tr,add_validators_done"]="✅ Yeniden başlatma tamamlandı."
+  TRANSLATIONS["tr,add_validators_no_compose"]="⚠️ $HOME/aztec veya COMPOSE_PATH altında docker-compose.yml bulunamadı; web3signer ve düğümü elle yeniden başlatın."
+  TRANSLATIONS["tr,add_validators_aborted"]="İptal; keystore yedeği duruyor."
+  TRANSLATIONS["tr,add_validators_current_publisher_show"]="Keystore’daki mevcut publisher: %s"
+  TRANSLATIONS["tr,add_validators_use_current_publisher_prompt"]="Tüm yeni doğrulayıcılar için bunu kullanılsın mı? (y/n) "
+  TRANSLATIONS["tr,add_validators_current_publisher_missing"]="❌ Keystore’dan publisher okunamadı (validators[0].publisher veya attester)."
+  TRANSLATIONS["tr,option26"]="26. Doğrulayıcı kaldır (keystore, anahtarlar, .env-aztec-agent)"
+  TRANSLATIONS["tr,remove_validators_title"]="=== Doğrulayıcı kaldırma ==="
+  TRANSLATIONS["tr,remove_validators_no_keystore"]="❌ keystore.json yok: %s"
+  TRANSLATIONS["tr,remove_validators_only_one"]="❌ Tek doğrulayıcı kaldırılamaz. Gerekirse düğümü silmek için seçenek 12."
+  TRANSLATIONS["tr,remove_validators_list_header"]="Keystore’daki doğrulayıcılar (numara — attester adresi):"
+  TRANSLATIONS["tr,remove_validators_prompt"]="Kaldırılacak numaralar (virgülle, örn. 1,3): "
+  TRANSLATIONS["tr,remove_validators_invalid_num"]="❌ Geçersiz numara: %s (geçerli: 1–%d)"
+  TRANSLATIONS["tr,remove_validators_empty"]="❌ Seçim yok."
+  TRANSLATIONS["tr,remove_validators_would_remove_all"]="❌ En az bir doğrulayıcı kalmalı."
+  TRANSLATIONS["tr,remove_validators_backup"]="Keystore yedeği:"
+  TRANSLATIONS["tr,remove_validators_key_missing"]="❌ Doğrulayıcı #%d için anahtar dosyası yok: %s"
+  TRANSLATIONS["tr,remove_validators_keys_renumbered"]="✅ Anahtar dosyaları güncellendi (validator_1.yml …)."
+  TRANSLATIONS["tr,remove_validators_keystore_updated"]="✅ keystore.json güncellendi."
+  TRANSLATIONS["tr,remove_validators_env_updated"]="✅ .env-aztec-agent içinde VALIDATORS güncellendi."
+  TRANSLATIONS["tr,remove_validators_restarting"]="web3signer ve düğüm yeniden başlatılıyor..."
+  TRANSLATIONS["tr,remove_validators_done"]="✅ Yeniden başlatma tamamlandı."
+  TRANSLATIONS["tr,remove_validators_no_compose"]="⚠️ docker-compose.yml bulunamadı; web3signer ve düğümü elle yeniden başlatın."
+  TRANSLATIONS["tr,remove_validators_aborted"]="İptal."
   TRANSLATIONS["tr,option0"]="0. Çıkış"
 
   # Güncelleme kontrolü çevirileri
@@ -1687,6 +1812,13 @@ init_languages() {
   TRANSLATIONS["tr,status_block_mined"]="🟦 Blok çıkarıldı"
   TRANSLATIONS["tr,status_block_missed"]="🟨 Blok kaçırıldı"
   TRANSLATIONS["tr,status_block_proposed"]="🟪 Blok önerildi"
+  TRANSLATIONS["tr,l1_section_title"]="L1 dahil etme (rollup batch)"
+  TRANSLATIONS["tr,l1_slots_label"]="Slotlar (L1):"
+  TRANSLATIONS["tr,l1_legend_title"]="L1 açıklaması:"
+  TRANSLATIONS["tr,l1_pending"]="⬜️ L1 bekleniyor"
+  TRANSLATIONS["tr,l1_in_signers"]="✅ L1 calldata'da attested"
+  TRANSLATIONS["tr,l1_not_in_signers"]="❌ L1'de yok"
+  TRANSLATIONS["tr,node_slots_label"]="Slotlar (düğüm):"
   TRANSLATIONS["tr,publisher_monitoring_title"]="=== Publisher Bakiye İzleme ==="
   TRANSLATIONS["tr,publisher_monitoring_option1"]="1. Adresleri ekleyin ve bakiye izlemeyi başlatın"
   TRANSLATIONS["tr,publisher_monitoring_option2"]="2. Minimum bakiye eşiğini yapılandır"
@@ -1839,9 +1971,8 @@ init_languages() {
   TRANSLATIONS["tr,ufw_not_installed"]="⚠️ ufw yüklü değil"
   TRANSLATIONS["tr,ufw_not_active"]="⚠️ ufw aktif değil"
   TRANSLATIONS["tr,has_bls_keys"]="BLS anahtarlarınız var mı? (y/n) "
-  TRANSLATIONS["tr,multi_validator_format"]="Validator verilerini girin (format: private_key,address,private_bls,public_bls):"
+  TRANSLATIONS["tr,multi_validator_format"]="Validator verilerini girin (format: private_key,address,private_bls):"
   TRANSLATIONS["tr,single_validator_bls_private"]="Validator BLS özel anahtarını girin:"
-  TRANSLATIONS["tr,single_validator_bls_public"]="Validator BLS genel anahtarını girin:"
   TRANSLATIONS["tr,bls_keys_added"]="BLS anahtarları validator konfigürasyonuna eklendi"
   TRANSLATIONS["tr,select_network"]="Ağ seçin"
   TRANSLATIONS["tr,enter_choice"]="Seçimi girin:"
@@ -1934,6 +2065,7 @@ init_languages() {
   TRANSLATIONS["tr,installing_jq"]="jq yükleniyor..."
   TRANSLATIONS["tr,installing_bc"]="bc yükleniyor..."
   TRANSLATIONS["tr,installing_python3"]="Python3 yükleniyor..."
+  TRANSLATIONS["tr,installing_eth_abi"]="eth_abi yükleniyor..."
 
   TRANSLATIONS["tr,bls_restarting_web3signer"]="Yeni anahtarı yüklemek için web3signer yeniden başlatılıyor"
   TRANSLATIONS["tr,bls_web3signer_restarted"]="Web3signer başarıyla yeniden başlatıldı"
@@ -1997,7 +2129,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.8.4"
+SCRIPT_VERSION="2.9.0"
 ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
@@ -2016,8 +2148,13 @@ GSE_ADDRESS_TESTNET="0xb6a38a51a6c1de9012f9d8ea9745ef957212eaac" # Testnet new G
 #GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614" # Testnet current GSE address
 GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
 
-# Function signature for contract calls
-FUNCTION_SIG="getPendingCheckpointNumber()"
+# Function signatures for rollup contract cast calls
+FUNCTION_SIG_BLOCK="getPendingBlockNumber()"
+FUNCTION_SIG_CHECKPOINT="getPendingCheckpointNumber()"
+
+# L1 rollup event topic0 per network
+L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x9ad613a7ff46b97e0f732b31118d43f39c9ca017bed1efe739b70b0625383589"
+L2_BLOCK_PROPOSED_TOPIC0_TESTNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
 
 # Required tools
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
@@ -2098,6 +2235,20 @@ get_network_settings() {
     echo "$network|$rpc_url|$contract_address"
 }
 
+# Prefer pip3 when available; fall back to python3 -m pip (minimal/old installs).
+pip3_or_pym_available() {
+  (command -v pip3 >/dev/null 2>&1 && pip3 --version &>/dev/null) || \
+    python3 -m pip --version &>/dev/null
+}
+
+pip3_or_pym() {
+  if command -v pip3 >/dev/null 2>&1 && pip3 --version &>/dev/null; then
+    pip3 "$@"
+  else
+    python3 -m pip "$@"
+  fi
+}
+
 # === Dependency check ===
 check_dependencies() {
   missing=()
@@ -2126,7 +2277,7 @@ check_dependencies() {
     fi
   done
 
-  # Отдельная проверка для curl_cffi
+  # Отдельная проверка для python-пакетов
   if command -v python3 &>/dev/null; then
     if python3 -c "import curl_cffi" 2>/dev/null; then
       echo -e "${GREEN}✅ curl_cffi $(t "installed")${NC}"
@@ -2137,9 +2288,20 @@ check_dependencies() {
         missing+=("python3_curl_cffi")
       fi
     fi
+
+    if python3 -c "import eth_abi" 2>/dev/null; then
+      echo -e "${GREEN}✅ eth_abi $(t "installed")${NC}"
+    else
+      echo -e "${RED}❌ eth_abi $(t "not_installed")${NC}"
+      # eth_abi required for L1 checks
+      if [[ ! " ${missing[@]} " =~ " python3 " ]]; then
+        missing+=("python3_eth_abi")
+      fi
+    fi
   else
     # python3 не установлен, это уже обрабатывается выше
     echo -e "${YELLOW}⚠️  curl_cffi $(t "not_installed") (requires python3)${NC}"
+    echo -e "${YELLOW}⚠️  eth_abi $(t "not_installed") (requires python3)${NC}"
   fi
 
   if [ ${#missing[@]} -gt 0 ]; then
@@ -2148,6 +2310,8 @@ check_dependencies() {
     for tool in "${missing[@]}"; do
       if [ "$tool" == "python3_curl_cffi" ]; then
         missing_display+=("curl_cffi")
+      elif [ "$tool" == "python3_eth_abi" ]; then
+        missing_display+=("eth_abi")
       else
         missing_display+=("${tool_names[$tool]:-$tool}")
       fi
@@ -2205,17 +2369,17 @@ check_dependencies() {
 
             # Устанавливаем curl_cffi с обходом externally-managed-environment
             echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-            # Сначала проверяем доступность pip
-            if python3 -m pip --version &>/dev/null; then
-              python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
-              python3 -m pip install --quiet curl_cffi
+            # Сначала проверяем доступность pip3 / python3 -m pip
+            if pip3_or_pym_available; then
+              pip3_or_pym install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+              pip3_or_pym install --quiet curl_cffi
             else
               # Если pip недоступен, устанавливаем через ensurepip
               python3 -m ensurepip --user 2>/dev/null || true
-              python3 -m pip install --user --quiet curl_cffi 2>/dev/null || \
+              pip3_or_pym install --user --quiet curl_cffi 2>/dev/null || \
               curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
               python3 get-pip.py --user && \
-              python3 -m pip install --user --quiet curl_cffi
+              pip3_or_pym install --user --quiet curl_cffi
               rm -f get-pip.py
             fi
             ;;
@@ -2223,17 +2387,33 @@ check_dependencies() {
           python3_curl_cffi)
             # Устанавливаем только curl_cffi с обходом externally-managed-environment
             echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-            # Сначала проверяем доступность pip
-            if python3 -m pip --version &>/dev/null; then
-              python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
-              python3 -m pip install --quiet curl_cffi
+            # Сначала проверяем доступность pip3 / python3 -m pip
+            if pip3_or_pym_available; then
+              pip3_or_pym install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+              pip3_or_pym install --quiet curl_cffi
             else
               # Если pip недоступен, устанавливаем через ensurepip
               python3 -m ensurepip --user 2>/dev/null || true
-              python3 -m pip install --user --quiet curl_cffi 2>/dev/null || \
+              pip3_or_pym install --user --quiet curl_cffi 2>/dev/null || \
               curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
               python3 get-pip.py --user && \
-              python3 -m pip install --user --quiet curl_cffi
+              pip3_or_pym install --user --quiet curl_cffi
+              rm -f get-pip.py
+            fi
+            ;;
+
+          python3_eth_abi)
+            # Устанавливаем eth_abi (необходим для декодирования L1 calldata)
+            echo -e "\n${CYAN}$(t "installing_eth_abi")${NC}"
+            if pip3_or_pym_available; then
+              pip3_or_pym install --break-system-packages --quiet eth_abi 2>/dev/null || \
+              pip3_or_pym install --quiet eth_abi
+            else
+              python3 -m ensurepip --user 2>/dev/null || true
+              pip3_or_pym install --user --quiet eth_abi 2>/dev/null || \
+              curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+              python3 get-pip.py --user && \
+              pip3_or_pym install --user --quiet eth_abi
               rm -f get-pip.py
             fi
             ;;
@@ -2254,17 +2434,17 @@ check_dependencies() {
 
       if [[ "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "\n${CYAN}$(t "installing_curl_cffi")${NC}"
-        # Сначала проверяем доступность pip
-        if python3 -m pip --version &>/dev/null; then
-          python3 -m pip install --break-system-packages --quiet curl_cffi 2>/dev/null || \
-          python3 -m pip install --quiet curl_cffi
+        # Сначала проверяем доступность pip3 / python3 -m pip
+        if pip3_or_pym_available; then
+          pip3_or_pym install --break-system-packages --quiet curl_cffi 2>/dev/null || \
+          pip3_or_pym install --quiet curl_cffi
         else
           # Если pip недоступен, устанавливаем через ensurepip
           python3 -m ensurepip --user 2>/dev/null || true
-          python3 -m pip install --user --quiet curl_cffi 2>/dev/null || \
+          pip3_or_pym install --user --quiet curl_cffi 2>/dev/null || \
           curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
           python3 get-pip.py --user && \
-          python3 -m pip install --user --quiet curl_cffi
+          pip3_or_pym install --user --quiet curl_cffi
           rm -f get-pip.py
         fi
       else
@@ -2860,8 +3040,13 @@ check_aztec_container_logs() {
     echo -e "\n${GREEN}$(t "container_found") $container_id${NC}"
 
     echo -e "\n${BLUE}$(t "get_block")${NC}"
-    block_hex=$(cast call "$contract_address" "getPendingBlockNumber()" --rpc-url "$rpc_url" 2>/dev/null)
-    [ -z "$block_hex" ] && block_hex=$(cast call "$contract_address" "getPendingCheckpointNumber()" --rpc-url "$rpc_url" 2>/dev/null)
+    if [[ "$network" == "mainnet" ]]; then
+        block_hex=$(cast call "$contract_address" "$FUNCTION_SIG_BLOCK" --rpc-url "$rpc_url" 2>/dev/null)
+        [ -z "$block_hex" ] && block_hex=$(cast call "$contract_address" "$FUNCTION_SIG_CHECKPOINT" --rpc-url "$rpc_url" 2>/dev/null)
+    else
+        block_hex=$(cast call "$contract_address" "$FUNCTION_SIG_CHECKPOINT" --rpc-url "$rpc_url" 2>/dev/null)
+        [ -z "$block_hex" ] && block_hex=$(cast call "$contract_address" "$FUNCTION_SIG_BLOCK" --rpc-url "$rpc_url" 2>/dev/null)
+    fi
     if [ -z "$block_hex" ]; then
         echo -e "\n${RED}$(t "block_error")${NC}"
         return
@@ -2892,7 +3077,7 @@ check_aztec_container_logs() {
     {
         echo "$clean_logs" | tac | grep -m1 'Sequencer sync check succeeded' >"$temp_file" 2>/dev/null
         if [ ! -s "$temp_file" ]; then
-            echo "$clean_logs" | tac | grep -m1 -iE 'Downloaded L2 block|Downloaded checkpoint|"checkpointNumber":[0-9]+' >"$temp_file" 2>/dev/null
+            echo "$clean_logs" | tac | grep -m1 -iE 'Downloaded L2 block|Downloaded checkpoint' >"$temp_file" 2>/dev/null
         fi
     } &
     search_pid=$!
@@ -2912,9 +3097,21 @@ check_aztec_container_logs() {
             | grep -o '"worldState":{"number":[0-9]\+' \
             | grep -o '[0-9]\+$')
     else
-        log_block_number=$(echo "$latest_log_line" \
-            | grep -oE '"checkpointNumber":[0-9]+|"blockNumber":[0-9]+' \
-            | head -n1 | grep -oE '[0-9]+')
+        if [[ "$network" == "mainnet" ]]; then
+            log_block_number=$(echo "$latest_log_line" \
+                | grep -oE '"blockNumber":[0-9]+' \
+                | head -n1 | grep -oE '[0-9]+')
+            [ -z "$log_block_number" ] && log_block_number=$(echo "$latest_log_line" \
+                | grep -oE '"checkpointNumber":[0-9]+' \
+                | head -n1 | grep -oE '[0-9]+')
+        else
+            log_block_number=$(echo "$latest_log_line" \
+                | grep -oE '"checkpointNumber":[0-9]+' \
+                | head -n1 | grep -oE '[0-9]+')
+            [ -z "$log_block_number" ] && log_block_number=$(echo "$latest_log_line" \
+                | grep -oE '"blockNumber":[0-9]+' \
+                | head -n1 | grep -oE '[0-9]+')
+        fi
     fi
 
     if [ -z "$log_block_number" ]; then
@@ -3211,6 +3408,135 @@ create_systemd_agent() {
 
   mkdir -p "$AGENT_SCRIPT_PATH"
 
+  cat > "$AGENT_SCRIPT_PATH/aztec_l1_extract_signers.py" <<'AZTEC_L1_EXTRACT_SIGNERS_PY'
+#!/usr/bin/env python3
+"""
+Decode Aztec Rollup.propose() calldata: print global slot (decimal) on line 1,
+then one signer address per line (lowercase 0x-prefixed).
+
+Handles:
+- propose() v1 selector 0x85b98fd8 (legacy header; slot at header[5])
+- propose() v2 selector 0x48aeda19 (Ignition / blob path; slot at propose_arg0[3][2])
+- Multicall3.aggregate3() 0x82ad56cb wrapping either propose variant
+
+Requires: pip3 install eth_abi
+"""
+from __future__ import annotations
+
+import sys
+
+# Legacy propose (pre-blob / older rollup)
+PROPOSE_SELECTOR_V1 = bytes.fromhex("85b98fd8")
+# New propose (e.g. mainnet blob commits; see 4byte 0x48aeda19)
+PROPOSE_SELECTOR_V2 = bytes.fromhex("48aeda19")
+AGGREGATE3_SELECTOR = bytes.fromhex("82ad56cb")
+
+PROPOSE_ABI_TYPES_V1 = [
+    "(bytes32,(int256),(bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint256,address,bytes32,(uint128,uint128),uint256))",
+    "(bytes,bytes)",
+    "address[]",
+    "(uint8,bytes32,bytes32)",
+    "bytes",
+]
+
+PROPOSE_ABI_TYPES_V2 = [
+    "(bytes32,((bytes32,uint32),((bytes32,uint32),(bytes32,uint32),(bytes32,uint32))),(int256),(bytes32,(bytes32,bytes32,bytes32),uint256,uint256,address,bytes32,(uint128,uint128),uint256))",
+    "(bytes,bytes)",
+    "address[]",
+    "(uint8,bytes32,bytes32)",
+    "bytes",
+]
+
+
+def _is_propose_selector(sel: bytes) -> bool:
+    return sel in (PROPOSE_SELECTOR_V1, PROPOSE_SELECTOR_V2)
+
+
+def extract_propose_calldata(data: bytes) -> bytes | None:
+    """Return raw propose() calldata, unwrapping Multicall3 if needed."""
+    if len(data) < 4:
+        return None
+    sel = data[:4]
+    if _is_propose_selector(sel):
+        return data
+    if sel == AGGREGATE3_SELECTOR:
+        try:
+            from eth_abi import decode
+
+            calls = decode(["(address,bool,bytes)[]"], data[4:])[0]
+            for _target, _allow, call_data in calls:
+                cd = bytes(call_data)
+                if len(cd) >= 4 and _is_propose_selector(cd[:4]):
+                    return cd
+        except Exception:
+            pass
+    return None
+
+
+def _slot_and_signers_from_decoded(propose_data: bytes) -> tuple[int, list] | None:
+    from eth_abi import decode
+
+    sel = propose_data[:4]
+    body = propose_data[4:]
+    if sel == PROPOSE_SELECTOR_V1:
+        try:
+            decoded = decode(PROPOSE_ABI_TYPES_V1, body)
+        except Exception:
+            return None
+        header = decoded[0][2]
+        slot = int(header[5])
+        signers = decoded[2]
+        return slot, list(signers)
+    if sel == PROPOSE_SELECTOR_V2:
+        try:
+            decoded = decode(PROPOSE_ABI_TYPES_V2, body)
+        except Exception:
+            return None
+        # propose_arg0[3] = (bytes32, (bytes32^3), uint256, uint256, address, bytes32, (uint128,uint128), uint256)
+        inner_header = decoded[0][3]
+        slot = int(inner_header[2])
+        signers = decoded[2]
+        return slot, list(signers)
+    return None
+
+
+def main() -> int:
+    if len(sys.argv) < 2:
+        return 1
+    h = sys.argv[1].strip()
+    if h.startswith("0x") or h.startswith("0X"):
+        h = h[2:]
+    try:
+        data = bytes.fromhex(h)
+    except ValueError:
+        return 1
+    propose_data = extract_propose_calldata(data)
+    if propose_data is None:
+        return 1
+    try:
+        parsed = _slot_and_signers_from_decoded(propose_data)
+    except ImportError:
+        return 2
+    if parsed is None:
+        return 1
+    slot, signers = parsed
+    print(slot)
+    for addr in signers:
+        if isinstance(addr, str):
+            a = addr.lower() if addr.startswith("0x") else f"0x{addr.lower()}"
+        elif hasattr(addr, "hex"):
+            a = f"0x{addr.hex().lower()}"
+        else:
+            a = f"0x{bytes(addr).hex().lower()}"
+        print(a)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+AZTEC_L1_EXTRACT_SIGNERS_PY
+  chmod +x "$AGENT_SCRIPT_PATH/aztec_l1_extract_signers.py" 2>/dev/null || true
+
   # Security: Copy local error_definitions.json to agent directory to avoid remote downloads
   if [ -f "$SCRIPT_DIR/error_definitions.json" ]; then
     # Проверяем, что файлы разные перед копированием (избегаем копирования файла сам в себя)
@@ -3235,11 +3561,14 @@ export FOUNDRY_DISABLE_NIGHTLY_WARNING=1
 source \$HOME/.env-aztec-agent
 CONTRACT_ADDRESS="$CONTRACT_ADDRESS"
 CONTRACT_ADDRESS_MAINNET="$CONTRACT_ADDRESS_MAINNET"
-FUNCTION_SIG="$FUNCTION_SIG"
+FUNCTION_SIG_BLOCK="$FUNCTION_SIG_BLOCK"
+FUNCTION_SIG_CHECKPOINT="$FUNCTION_SIG_CHECKPOINT"
 TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
 LANG="$LANG"
+L2_BLOCK_PROPOSED_TOPIC0_MAINNET="$L2_BLOCK_PROPOSED_TOPIC0_MAINNET"
+L2_BLOCK_PROPOSED_TOPIC0_TESTNET="$L2_BLOCK_PROPOSED_TOPIC0_TESTNET"
 
 # === Helper function to get network and RPC settings ===
 get_network_settings() {
@@ -3321,6 +3650,13 @@ t() {
     "status_block_mined") echo "$(t "status_block_mined")" ;;
     "status_block_missed") echo "$(t "status_block_missed")" ;;
     "status_block_proposed") echo "$(t "status_block_proposed")" ;;
+    "l1_section_title") echo "$(t "l1_section_title")" ;;
+    "l1_slots_label") echo "$(t "l1_slots_label")" ;;
+    "l1_legend_title") echo "$(t "l1_legend_title")" ;;
+    "l1_pending") echo "$(t "l1_pending")" ;;
+    "l1_in_signers") echo "$(t "l1_in_signers")" ;;
+    "l1_not_in_signers") echo "$(t "l1_not_in_signers")" ;;
+    "node_slots_label") echo "$(t "node_slots_label")" ;;
     "current_slot") printf "$(t "current_slot")" "\$value1" ;;
     "publisher_balance_warning") echo "$(t "publisher_balance_warning")" ;;
     *) echo "\$key" ;;
@@ -3442,6 +3778,390 @@ build_slots_board() {
   echo "\$out"
 }
 
+# L1 grid file: exactly 32 lines (cell i = line i), so indices never shift. Migrates legacy one-line space-separated.
+l1_slots_state_read() {
+  local sf="\$1"
+  local -n _c="\$2"
+  local -a lines buf
+  local i
+  _c=()
+  [ ! -f "\$sf" ] && return 1
+  mapfile -t lines < "\$sf" 2>/dev/null || return 1
+  [ \${#lines[@]} -eq 0 ] && return 1
+  if [ \${#lines[@]} -ge 2 ]; then
+    for i in {0..31}; do
+      _c[i]="\${lines[i]:-⬜️}"
+    done
+  else
+    read -ra buf <<< "\${lines[0]}"
+    for i in {0..31}; do
+      _c[i]="\${buf[i]:-⬜️}"
+    done
+  fi
+  return 0
+}
+
+l1_slots_state_write() {
+  local sf="\$1"
+  local -n _c="\$2"
+  local i
+  for i in {0..31}; do
+    printf '%s\n' "\${_c[i]:-⬜️}"
+  done > "\$sf"
+}
+
+# === Committee Telegram body (node grid + L1 grid) ===
+format_committee_message() {
+  local epoch="\$1" v_link="\$2" cur_slot="\$3" v_lower="\$4"
+  local epoch_state_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_slots_state"
+  local l1_state_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_l1_slots_state"
+  local slots_arr=() l1_arr=() board l1_board
+  if [ ! -f "\$epoch_state_file" ]; then
+    for i in {0..31}; do slots_arr+=("⬜️"); done
+  else
+    read -ra slots_arr < "\$epoch_state_file"
+    while [ \${#slots_arr[@]} -lt 32 ]; do slots_arr+=("⬜️"); done
+  fi
+  if [ ! -f "\$l1_state_file" ]; then
+    for i in {0..31}; do l1_arr[i]="⬜️"; done
+    l1_slots_state_write "\$l1_state_file" l1_arr
+  else
+    if ! l1_slots_state_read "\$l1_state_file" l1_arr; then
+      for i in {0..31}; do l1_arr[i]="⬜️"; done
+    fi
+    for i in {0..31}; do
+      [ "\${l1_arr[\$i]}" = "░" ] && l1_arr[\$i]="⬜️"
+      [ "\${l1_arr[\$i]}" = "🟩" ] && l1_arr[\$i]="✅"
+      [ "\${l1_arr[\$i]}" = "🟥" ] && l1_arr[\$i]="❌"
+    done
+  fi
+  board=\$(build_slots_board "\${slots_arr[@]}")
+  local _l1b=()
+  for i in {0..31}; do _l1b+=("\${l1_arr[\$i]:-⬜️}"); done
+  l1_board=\$(build_slots_board "\${_l1b[@]}")
+  local out=""
+  out+="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
+  out+="%0A\$(t "found_validators" "\$v_link")%0A"
+  out+="%0A\$(t "current_slot" "\$cur_slot")%0A"
+  out+="%0A\$(t "node_slots_label")%0A\${board}%0A"
+  out+="%0A\$(t "status_legend")%0A"
+  out+="\$(t "status_empty")%0A"
+  out+="\$(t "status_attestation_sent")%0A"
+  out+="\$(t "status_attestation_missed")%0A"
+  out+="\$(t "status_block_mined")%0A"
+  out+="\$(t "status_block_missed")%0A"
+  out+="\$(t "status_block_proposed")%0A"
+  out+="%0A\$(t "l1_section_title")%0A"
+  out+="%0A\$(t "l1_slots_label")%0A\${l1_board}%0A"
+  out+="%0A\$(t "l1_legend_title")%0A"
+  out+="\$(t "l1_pending")%0A"
+  out+="\$(t "l1_in_signers")%0A"
+  out+="\$(t "l1_not_in_signers")%0A"
+  out+="%0A\$(t "server_info" "\$ip")%0A"
+  out+="\$(t "time_info" "\$(date '+%Y-%m-%d %H:%M:%S')")"
+  printf '%s' "\$out"
+}
+
+committee_line_for_slot() {
+  local cid="\$1" slot="\$2"
+  docker logs "\$cid" --tail 50000 2>&1 | grep -a "Computing stats for slot" | grep -aE "\"slot\":[[:space:]]*\${slot}([^0-9]|\$)" | tail -n 1
+}
+
+append_l1_eligible_slot() {
+  local epoch="\$1" slot="\$2" v_lower="\$3"
+  local f="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_l1_eligible_slots"
+  [ -z "\$slot" ] && return
+  [ ! -f "\$f" ] && : > "\$f"
+  grep -qxF "\$slot" "\$f" 2>/dev/null || echo "\$slot" >> "\$f"
+}
+
+validator_in_json_committee() {
+  local json_part="\$1" v_lower="\$2"
+  [ -z "\$json_part" ] && return 1
+  local comm
+  comm=\$(echo "\$json_part" | jq -r '.committee[]?' 2>/dev/null) || return 1
+  echo "\$comm" | grep -qi "\$v_lower"
+}
+
+rollup_epoch_for_checkpoint() {
+  local cn="\$1"
+  local raw dec
+  if [[ "\$NETWORK" == "mainnet" ]]; then
+    raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForBlock(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
+    if [ -z "\$raw" ] || [[ "\$raw" == *Error* ]] || [[ "\$raw" == *"revert"* ]]; then
+      raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForCheckpoint(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
+    fi
+  else
+    raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForCheckpoint(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
+    if [ -z "\$raw" ] || [[ "\$raw" == *Error* ]] || [[ "\$raw" == *"revert"* ]]; then
+      raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForBlock(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
+    fi
+  fi
+  [ -z "\$raw" ] && echo "" && return
+  if [[ "\$raw" =~ ^[0-9]+$ ]]; then
+    echo "\$raw"
+  elif [[ "\$raw" =~ ^0x ]]; then
+    dec=\$(cast to-dec "\$raw" 2>/dev/null | tr -d '[:space:]')
+    [ -z "\$dec" ] && dec=\$(hex_to_dec "\$raw")
+    echo "\$dec"
+  else
+    echo ""
+  fi
+}
+
+# topic0 = keccak256("L2BlockProposed(uint256,bytes32,bytes32[])") — verify with: cast sig-event "L2BlockProposed(uint256,bytes32,bytes32[])"
+L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x9ad613a7ff46b97e0f732b31118d43f39c9ca017bed1efe739b70b0625383589"
+L2_BLOCK_PROPOSED_TOPIC0_TESTNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
+
+sync_l1_proposed_logs() {
+  debug_log "sync_l1_proposed_logs started"
+  if [ "\$NOTIFICATION_TYPE" -ne 2 ]; then
+    return
+  fi
+  if [ ! -f "\$HOME/.env-aztec-agent" ]; then
+    return
+  fi
+  local _val_line _vals
+  _val_line=\$(grep '^VALIDATORS=' "\$HOME/.env-aztec-agent" | tail -n 1)
+  _vals=\${_val_line#VALIDATORS=}
+  _vals=\$(echo "\$_vals" | tr -d '"' | tr -d "'")
+  if [ -z "\$_vals" ]; then
+    return
+  fi
+  local SYNC_VALIDATORS=()
+  local _vx
+  IFS=',' read -ra _tmp_vals <<< "\$_vals"
+  for _vx in "\${_tmp_vals[@]}"; do
+    SYNC_VALIDATORS+=("\$(echo "\$_vx" | tr '[:upper:]' '[:lower:]')")
+  done
+  if ! command -v cast >/dev/null 2>&1 || ! command -v jq >/dev/null 2>&1; then
+    debug_log "cast or jq missing; skip L1 sync"
+    return
+  fi
+  if [ -z "\$RPC_URL" ] || [ -z "\$CONTRACT_ADDRESS" ]; then
+    debug_log "RPC_URL or CONTRACT_ADDRESS empty; skip L1 sync"
+    return
+  fi
+  local L2_BLOCK_PROPOSED_TOPIC0 _topic_line
+  _topic_line=\$(grep '^L1_ROLLUP_EVENT_TOPIC0=' "\$HOME/.env-aztec-agent" 2>/dev/null | tail -n 1)
+  if [ -n "\$_topic_line" ]; then
+    L2_BLOCK_PROPOSED_TOPIC0=\${_topic_line#L1_ROLLUP_EVENT_TOPIC0=}
+    L2_BLOCK_PROPOSED_TOPIC0=\$(echo "\$L2_BLOCK_PROPOSED_TOPIC0" | tr -d '"' | tr -d "'")
+  else
+    if [[ "\$NETWORK" == "mainnet" ]]; then
+      L2_BLOCK_PROPOSED_TOPIC0="\${L1_ROLLUP_EVENT_TOPIC0:-\$L2_BLOCK_PROPOSED_TOPIC0_MAINNET}"
+    else
+      L2_BLOCK_PROPOSED_TOPIC0="\${L1_ROLLUP_EVENT_TOPIC0:-\$L2_BLOCK_PROPOSED_TOPIC0_TESTNET}"
+    fi
+  fi
+  local py="$AGENT_SCRIPT_PATH/aztec_l1_extract_signers.py"
+  if [ ! -f "\$py" ]; then
+    debug_log "aztec_l1_extract_signers.py not found; skip L1 sync"
+    return
+  fi
+  local step=\${L1_LOG_SCAN_STEP:-2000}
+  local wm_file="$AGENT_SCRIPT_PATH/l1_last_scanned_l1_block"
+  local seen_file="$AGENT_SCRIPT_PATH/l1_seen_proposed_events"
+  local pending_file="$AGENT_SCRIPT_PATH/l1_pending_l1_events"
+  local dirty
+  dirty=\$(mktemp) || return
+  touch "\$seen_file"
+  touch "\$pending_file"
+
+  # Apply decoded L2BlockProposed calldata: update grids where slot is L1-eligible; set _l1_matched
+  local _l1_matched slot_l1 epoch_l1 signers_in idx icon v_lower elig msg_id l1_sf epoch_state
+  l1_apply_decoded_event() {
+    local key="\$1" l2_bn="\$2" dec_out="\$3"
+    local -a l1_cells=()
+    _l1_matched=0
+    local first_line
+    first_line=\$(echo "\$dec_out" | head -n 1)
+    slot_l1="\$first_line"
+    ! [[ "\$slot_l1" =~ ^[0-9]+$ ]] && return 1
+    signers_in=\$(echo "\$dec_out" | tail -n +2 | tr '[:upper:]' '[:lower:]')
+    epoch_l1=\$(rollup_epoch_for_checkpoint "\$l2_bn")
+    ! [[ "\$epoch_l1" =~ ^[0-9]+$ ]] && return 1
+    idx=\$((slot_l1 % 32))
+    for v_lower in "\${SYNC_VALIDATORS[@]}"; do
+      elig="$AGENT_SCRIPT_PATH/epoch_\${epoch_l1}_\${v_lower}_l1_eligible_slots"
+      msg_id="$AGENT_SCRIPT_PATH/epoch_\${epoch_l1}_\${v_lower}_message_id"
+      l1_sf="$AGENT_SCRIPT_PATH/epoch_\${epoch_l1}_\${v_lower}_l1_slots_state"
+      [ ! -f "\$msg_id" ] && continue
+      [ ! -f "\$elig" ] && continue
+      grep -qxF "\$slot_l1" "\$elig" 2>/dev/null || continue
+      epoch_state="$AGENT_SCRIPT_PATH/epoch_\${epoch_l1}_\${v_lower}_slots_state"
+      [ ! -f "\$epoch_state" ] && continue
+      if echo "\$signers_in" | grep -qFx "\$v_lower"; then
+        icon="✅"
+      else
+        icon="❌"
+      fi
+      if ! l1_slots_state_read "\$l1_sf" l1_cells; then
+        debug_log "L1 state read failed, skip cell update: \$l1_sf"
+        continue
+      fi
+      for j in {0..31}; do
+        [ "\${l1_cells[\$j]}" = "░" ] && l1_cells[\$j]="⬜️"
+        [ "\${l1_cells[\$j]}" = "🟩" ] && l1_cells[\$j]="✅"
+        [ "\${l1_cells[\$j]}" = "🟥" ] && l1_cells[\$j]="❌"
+      done
+      l1_cells[\$idx]="\$icon"
+      l1_slots_state_write "\$l1_sf" l1_cells
+      echo "\$epoch_l1:\$v_lower" >> "\$dirty"
+      _l1_matched=\$((_l1_matched + 1))
+    done
+    return 0
+  }
+
+  l1_remove_from_pending() {
+    local key="\$1"
+    [ ! -f "\$pending_file" ] && return
+    grep -vxF "\$key" "\$pending_file" > "\${pending_file}.tmp.\$\$" 2>/dev/null && mv "\${pending_file}.tmp.\$\$" "\$pending_file"
+  }
+
+  # After committee marks new eligible slots, retry events that previously had no elig match
+  local pkey txh li_raw t1 inp dec_out l2_bn _pc pnew _pend_copy
+  if [ -s "\$pending_file" ]; then
+    _pc=\$(wc -l < "\$pending_file" | tr -d ' ')
+    debug_log "L1 pending queue: \$_pc event(s), retrying"
+    pnew=\$(mktemp) || { rm -f "\$dirty"; return; }
+    _pend_copy=\$(mktemp) || { rm -f "\$dirty" "\$pnew"; return; }
+    cp "\$pending_file" "\$_pend_copy"
+    while IFS= read -r pkey; do
+      [ -z "\$pkey" ] && continue
+      grep -qxF "\$pkey" "\$seen_file" 2>/dev/null && continue
+      txh="\${pkey%_*}"
+      li_raw="\${pkey#*_}"
+      [ -z "\$txh" ] || [ "\$txh" = "\$pkey" ] && continue
+      t1=\$(cast receipt "\$txh" --rpc-url "\$RPC_URL" --json 2>/dev/null | jq -r --arg c "\${CONTRACT_ADDRESS,,}" --arg t0 "\$L2_BLOCK_PROPOSED_TOPIC0" --arg li "\$li_raw" \
+        '.logs[] | select((.address|ascii_downcase) == \$c and .topics[0] == \$t0 and .logIndex == \$li) | .topics[1] // empty' | head -1)
+      [ -z "\$t1" ] && { echo "\$pkey" >> "\$pnew"; continue; }
+      l2_bn=\$(cast to-dec "\$t1" 2>/dev/null | tr -d '[:space:]')
+      [[ "\$l2_bn" =~ ^[0-9]+$ ]] || { echo "\$pkey" >> "\$pnew"; continue; }
+      [ "\$l2_bn" -eq 0 ] && { echo "\$pkey" >> "\$pnew"; continue; }
+      inp=\$(cast tx "\$txh" --rpc-url "\$RPC_URL" --json 2>/dev/null | jq -r '.input // empty')
+      [ -z "\$inp" ] && { echo "\$pkey" >> "\$pnew"; continue; }
+      dec_out=\$(python3 "\$py" "\$inp" 2>/dev/null) || dec_out=""
+      if [ -z "\$dec_out" ]; then
+        debug_log "L1 decode failed for pending tx \$txh (pip3 install eth_abi)"
+        echo "\$pkey" >> "\$seen_file"
+        continue
+      fi
+      if ! l1_apply_decoded_event "\$pkey" "\$l2_bn" "\$dec_out"; then
+        echo "\$pkey" >> "\$seen_file"
+        continue
+      fi
+      if [ "\$_l1_matched" -gt 0 ]; then
+        echo "\$pkey" >> "\$seen_file"
+      else
+        echo "\$pkey" >> "\$pnew"
+      fi
+    done < "\$_pend_copy"
+    rm -f "\$_pend_copy"
+    mv "\$pnew" "\$pending_file"
+  fi
+
+  local latest
+  latest=\$(cast block-number --rpc-url "\$RPC_URL" 2>/dev/null | tr -d '[:space:]')
+  if ! [[ "\$latest" =~ ^[0-9]+$ ]]; then
+    debug_log "Could not read L1 latest block"
+    rm -f "\$dirty"
+    return
+  fi
+  local from_b to_b last_wm
+  if [ -f "\$wm_file" ]; then
+    last_wm=\$(cat "\$wm_file" | tr -d '[:space:]')
+    if [[ "\$last_wm" =~ ^[0-9]+$ ]]; then
+      from_b=\$((last_wm + 1))
+    else
+      from_b=\$((latest > 200 ? latest - 200 : 0))
+    fi
+  else
+    from_b=\$((latest > 200 ? latest - 200 : 0))
+  fi
+  ! [[ "\$from_b" =~ ^[0-9]+$ ]] && from_b=\$((latest > 200 ? latest - 200 : 0))
+  if [ "\$from_b" -gt "\$latest" ]; then
+    debug_log "L1 scan up to date (from=\$from_b latest=\$latest)"
+    sort -u "\$dirty" -o "\$dirty" 2>/dev/null || true
+    while IFS=: read -r ep vl; do
+      [ -z "\$ep" ] || [ -z "\$vl" ] && continue
+      msg_id="$AGENT_SCRIPT_PATH/epoch_\${ep}_\${vl}_message_id"
+      cur_sf="$AGENT_SCRIPT_PATH/epoch_\${ep}_\${vl}_committee_cur_slot"
+      vlink_sf="$AGENT_SCRIPT_PATH/epoch_\${ep}_\${vl}_validator_link"
+      [ ! -f "\$msg_id" ] && continue
+      mid=\$(cat "\$msg_id" | tr -d '[:space:]')
+      [ -z "\$mid" ] || [ "\$mid" = "null" ] && continue
+      cs=\$(cat "\$cur_sf" 2>/dev/null | tr -d '[:space:]')
+      [ -z "\$cs" ] && cs="0"
+      vlink=\$(cat "\$vlink_sf" 2>/dev/null)
+      [ -z "\$vlink" ] && vlink="\$vl"
+      msg_body=\$(format_committee_message "\$ep" "\$vlink" "\$cs" "\$vl")
+      debug_log "L1 sync: editing message \$mid for epoch \$ep validator \$vl"
+      edit_telegram_message "\$mid" "\$msg_body"
+    done < "\$dirty"
+    rm -f "\$dirty"
+    debug_log "sync_l1_proposed_logs finished"
+    return
+  fi
+  to_b=\$((from_b + step - 1))
+  [ "\$to_b" -gt "\$latest" ] && to_b="\$latest"
+  local logs_json
+  logs_json=\$(cast logs --from-block "\$from_b" --to-block "\$to_b" --address "\$CONTRACT_ADDRESS" "\$L2_BLOCK_PROPOSED_TOPIC0" --rpc-url "\$RPC_URL" --json 2>/dev/null) || logs_json="[]"
+  local count
+  count=\$(echo "\$logs_json" | jq 'length' 2>/dev/null) || count=0
+  debug_log "L1 logs in range [\$from_b,\$to_b]: \$count events"
+  local row txh t1 l2_bn key inp dec_out
+  while read -r row; do
+    [ -z "\$row" ] && continue
+    txh=\$(echo "\$row" | jq -r '.transactionHash // empty')
+    t1=\$(echo "\$row" | jq -r '.topics[1] // empty')
+    key="\${txh}_\$(echo "\$row" | jq -r '.logIndex // empty')"
+    [ -z "\$txh" ] || [ -z "\$t1" ] && continue
+    grep -qxF "\$key" "\$seen_file" 2>/dev/null && continue
+    l2_bn=\$(cast to-dec "\$t1" 2>/dev/null | tr -d '[:space:]')
+    [[ "\$l2_bn" =~ ^[0-9]+$ ]] || { echo "\$key" >> "\$seen_file"; continue; }
+    [ "\$l2_bn" -eq 0 ] && { echo "\$key" >> "\$seen_file"; continue; }
+    inp=\$(cast tx "\$txh" --rpc-url "\$RPC_URL" --json 2>/dev/null | jq -r '.input // empty')
+    [ -z "\$inp" ] && { echo "\$key" >> "\$seen_file"; continue; }
+    dec_out=\$(python3 "\$py" "\$inp" 2>/dev/null) || dec_out=""
+    if [ -z "\$dec_out" ]; then
+      debug_log "L1 decode failed for tx \$txh (pip3 install eth_abi)"
+      echo "\$key" >> "\$seen_file"
+      continue
+    fi
+    if ! l1_apply_decoded_event "\$key" "\$l2_bn" "\$dec_out"; then
+      echo "\$key" >> "\$seen_file"
+      continue
+    fi
+    if [ "\$_l1_matched" -gt 0 ]; then
+      echo "\$key" >> "\$seen_file"
+      l1_remove_from_pending "\$key"
+    else
+      grep -qxF "\$key" "\$pending_file" 2>/dev/null || echo "\$key" >> "\$pending_file"
+    fi
+  done < <(echo "\$logs_json" | jq -c '.[]' 2>/dev/null)
+  echo "\$to_b" > "\$wm_file"
+  sort -u "\$dirty" -o "\$dirty" 2>/dev/null || true
+  while IFS=: read -r ep vl; do
+    [ -z "\$ep" ] || [ -z "\$vl" ] && continue
+    msg_id="$AGENT_SCRIPT_PATH/epoch_\${ep}_\${vl}_message_id"
+    cur_sf="$AGENT_SCRIPT_PATH/epoch_\${ep}_\${vl}_committee_cur_slot"
+    vlink_sf="$AGENT_SCRIPT_PATH/epoch_\${ep}_\${vl}_validator_link"
+    [ ! -f "\$msg_id" ] && continue
+    mid=\$(cat "\$msg_id" | tr -d '[:space:]')
+    [ -z "\$mid" ] || [ "\$mid" = "null" ] && continue
+    cs=\$(cat "\$cur_sf" 2>/dev/null | tr -d '[:space:]')
+    [ -z "\$cs" ] && cs="0"
+    vlink=\$(cat "\$vlink_sf" 2>/dev/null)
+    [ -z "\$vlink" ] && vlink="\$vl"
+    msg_body=\$(format_committee_message "\$ep" "\$vlink" "\$cs" "\$vl")
+    debug_log "L1 sync: editing message \$mid for epoch \$ep validator \$vl"
+    edit_telegram_message "\$mid" "\$msg_body"
+  done < "\$dirty"
+  rm -f "\$dirty"
+  debug_log "sync_l1_proposed_logs finished"
+}
+
 # === Получаем свой публичный IP для включения в уведомления ===
 get_ip_address() {
   curl -s https://api.ipify.org || echo "unknown-ip"
@@ -3541,19 +4261,15 @@ find_last_log_line() {
   local container_id=\$1
   local temp_file=\$(mktemp)
 
-  # Получаем логи с ограничением по объему и сразу фильтруем нужные строки
-  # -i: нечувствительность к регистру; checkpointNumber — на случай разбиения длинной строки
   docker logs "\$container_id" --tail 20000 2>&1 | \
     sed -r 's/\x1B\[[0-9;]*[A-Za-z]//g' | \
-    grep -iE 'Sequencer sync check succeeded|Downloaded L2 block|Downloaded checkpoint|"checkpointNumber":[0-9]+' | \
+    grep -iE 'Sequencer sync check succeeded|Downloaded L2 block|Downloaded checkpoint' | \
     tail -100 > "\$temp_file"
 
-  # Сначала ищем Sequencer sync check succeeded
   local line=\$(tac "\$temp_file" | grep -m1 'Sequencer sync check succeeded')
 
-  # Если не нашли, ищем Downloaded L2 block / Downloaded checkpoint или строку с checkpointNumber
   if [ -z "\$line" ]; then
-    line=\$(tac "\$temp_file" | grep -m1 -iE 'Downloaded L2 block|Downloaded checkpoint|"checkpointNumber":[0-9]+')
+    line=\$(tac "\$temp_file" | grep -m1 -iE 'Downloaded L2 block|Downloaded checkpoint')
   fi
 
   rm -f "\$temp_file"
@@ -3678,7 +4394,6 @@ check_committee() {
   # === Уведомление о включении в комитет (раз за эпоху) ===
   last_epoch_file="$AGENT_SCRIPT_PATH/aztec_last_committee_epoch"
   if [ ! -f "\$last_epoch_file" ] || ! grep -q "\$epoch" "\$last_epoch_file"; then
-    current_time=\$(date '+%Y-%m-%d %H:%M:%S')
     echo "\$epoch" > "\$last_epoch_file"
     # Для каждого валидатора создаём отдельное сообщение и отдельное состояние из 32 слотов
     for idx in "\${!committee_validators[@]}"; do
@@ -3686,23 +4401,19 @@ check_committee() {
       v_link="\${found_validators[\$idx]}"
       epoch_state_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_slots_state"
       epoch_msg_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_message_id"
-      # initialize 32 empty slots
+      l1_state_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_l1_slots_state"
+      l1_elig_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_l1_eligible_slots"
+      cur_slot_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_committee_cur_slot"
+      vlink_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_validator_link"
+      printf '%s' "\$v_link" > "\$vlink_file"
       slots_arr=()
       for i in {0..31}; do slots_arr+=("⬜️"); done
-      board=\$(build_slots_board "\${slots_arr[@]}")
-      committee_message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
-      committee_message+="%0A\$(t "found_validators" "\$v_link")%0A"
-      committee_message+="%0A\$(t "current_slot" "0")%0A"
-      committee_message+="%0ASlots:%0A\${board}%0A"
-      committee_message+="%0A\$(t "status_legend")%0A"
-      committee_message+="\$(t "status_empty")%0A"
-      committee_message+="\$(t "status_attestation_sent")%0A"
-      committee_message+="\$(t "status_attestation_missed")%0A"
-      committee_message+="\$(t "status_block_mined")%0A"
-      committee_message+="\$(t "status_block_missed")%0A"
-      committee_message+="\$(t "status_block_proposed")%0A"
-      committee_message+="%0A\$(t "server_info" "\$ip")%0A"
-      committee_message+="\$(t "time_info" "\$current_time")"
+      l1_arr=()
+      for i in {0..31}; do l1_arr[i]="⬜️"; done
+      l1_slots_state_write "\$l1_state_file" l1_arr
+      : > "\$l1_elig_file"
+      echo "0" > "\$cur_slot_file"
+      committee_message=\$(format_committee_message "\$epoch" "\$v_link" "0" "\$v_lower")
 
       debug_log "Sending committee message for validator \$v_lower: \$committee_message"
       message_id=\$(send_telegram_message_get_id "\$committee_message")
@@ -3710,7 +4421,6 @@ check_committee() {
         echo "\$message_id" > "\$epoch_msg_file"
       fi
       printf "%s " "\${slots_arr[@]}" > "\$epoch_state_file"
-      # Очистим файл учета слотов для этого валидатора
       : > "$AGENT_SCRIPT_PATH/aztec_last_committee_slot_\${v_lower}"
     done
     log "Committee selection notification sent for epoch \$epoch: found validators \${found_validators[*]}"
@@ -3727,6 +4437,9 @@ check_committee() {
     debug_log "Slot \$slot belongs to epoch \$epoch, but current epoch is \$current_epoch - skipping"
     return
   fi
+
+  line_for_slot=\$(committee_line_for_slot "\$container_id" "\$slot")
+  json_for_slot=\$(echo "\$line_for_slot" | sed -n 's/.*\({.*}\).*/\1/p')
 
   activity_line=\$(docker logs "\$container_id" --tail 20000 2>&1 | grep -a "Updating L2 slot \$slot observed activity" | tail -n 1)
   if [ -n "\$activity_line" ]; then
@@ -3745,8 +4458,14 @@ check_committee() {
         continue
       fi
 
+      if [ -n "\$json_for_slot" ] && validator_in_json_committee "\$json_for_slot" "\$v_lower"; then
+        append_l1_eligible_slot "\$epoch" "\$slot" "\$v_lower"
+        debug_log "Marked slot \$slot L1-eligible for \$v_lower (committee for this slot)"
+      fi
+
       epoch_state_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_slots_state"
       epoch_msg_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_message_id"
+      cur_slot_file="$AGENT_SCRIPT_PATH/epoch_\${epoch}_\${v_lower}_committee_cur_slot"
       if [ ! -f "\$epoch_state_file" ]; then
         slots_arr=()
         for i in {0..31}; do slots_arr+=("⬜️"); done
@@ -3760,9 +4479,9 @@ check_committee() {
         status=\$(echo "\$activity_json" | jq -r ".\"\$v_lower\"")
         if [ "\$status" != "null" ] && [ -n "\$status" ]; then
           case "\$status" in
-            block-proposed) slot_icon="🟪" ;;
-            block-mined)    slot_icon="🟦" ;;
-            block-missed)   slot_icon="🟨" ;;
+            block-proposed|checkpoint-proposed) slot_icon="🟪" ;;
+            block-mined|checkpoint-mined)       slot_icon="🟦" ;;
+            block-missed|blocks-missed)         slot_icon="🟨" ;;
             attestation-missed) slot_icon="🟥" ;;
             attestation-sent)   slot_icon="🟩" ;;
           esac
@@ -3773,21 +4492,8 @@ check_committee() {
         slots_arr[\$slot_idx]="\$slot_icon"
         printf "%s " "\${slots_arr[@]}" > "\$epoch_state_file"
 
-        board=\$(build_slots_board "\${slots_arr[@]}")
-        current_time=\$(date '+%Y-%m-%d %H:%M:%S')
-        updated_message="\$(t "committee_selected") (\$(t "epoch_info" "\$epoch"))!%0A"
-        updated_message+="%0A\$(t "found_validators" "\$v_link")%0A"
-        updated_message+="%0A\$(t "current_slot" "\$slot")%0A"
-        updated_message+="%0ASlots:%0A\${board}%0A"
-        updated_message+="%0A\$(t "status_legend")%0A"
-        updated_message+="\$(t "status_empty")%0A"
-        updated_message+="\$(t "status_attestation_sent")%0A"
-        updated_message+="\$(t "status_attestation_missed")%0A"
-        updated_message+="\$(t "status_block_mined")%0A"
-        updated_message+="\$(t "status_block_missed")%0A"
-        updated_message+="\$(t "status_block_proposed")%0A"
-        updated_message+="%0A\$(t "server_info" "\$ip")%0A"
-        updated_message+="\$(t "time_info" "\$current_time")"
+        echo "\$slot" > "\$cur_slot_file"
+        updated_message=\$(format_committee_message "\$epoch" "\$v_link" "\$slot" "\$v_lower")
 
         if [ -f "\$epoch_msg_file" ]; then
           message_id=\$(cat "\$epoch_msg_file")
@@ -3833,11 +4539,16 @@ check_blocks() {
   # Проверка критических ошибок
   check_critical_errors "\$container_id"
 
-  # Получаем текущий блок из контракта (совместимость: getPendingBlockNumber для mainnet, getPendingCheckpointNumber для старых контрактов)
-  debug_log "Getting block from contract: \$CONTRACT_ADDRESS"
+  # Получаем текущий блок из контракта: mainnet — сначала block sig, fallback checkpoint; testnet — наоборот
+  debug_log "Getting block from contract: \$CONTRACT_ADDRESS (network: \$NETWORK)"
   debug_log "Using RPC: \$RPC_URL"
-  block_hex=\$(cast call "\$CONTRACT_ADDRESS" "getPendingBlockNumber()" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
-  [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]] && block_hex=\$(cast call "\$CONTRACT_ADDRESS" "getPendingCheckpointNumber()" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
+  if [[ "\$NETWORK" == "mainnet" ]]; then
+    block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG_BLOCK" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
+    [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]] && block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG_CHECKPOINT" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
+  else
+    block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG_CHECKPOINT" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
+    [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]] && block_hex=\$(cast call "\$CONTRACT_ADDRESS" "\$FUNCTION_SIG_BLOCK" --rpc-url "\$RPC_URL" 2>&1 | grep -vE '^Warning:' | grep -oE '0x[0-9a-fA-F]+' | head -1)
+  fi
   if [[ "\$block_hex" == *"Error"* || -z "\$block_hex" ]]; then
     log "Block Fetch Error. Check RPC or cast: \$block_hex"
     current_time=\$(date '+%Y-%m-%d %H:%M:%S')
@@ -3870,9 +4581,14 @@ check_blocks() {
     log_block_number=\$(echo "\$latest_log_line" | grep -o '"worldState":{"number":[0-9]\+' | grep -o '[0-9]\+$')
     debug_log "Extracted from worldState: \$log_block_number"
   else
-    # формат: ..."checkpointNumber":59973,... или ..."blockNumber":18254,...
-    log_block_number=\$(echo "\$latest_log_line" | grep -oE '"checkpointNumber":[0-9]+|"blockNumber":[0-9]+' | head -n1 | grep -oE '[0-9]+')
-    debug_log "Extracted from checkpointNumber/blockNumber: \$log_block_number"
+    if [[ "\$NETWORK" == "mainnet" ]]; then
+      log_block_number=\$(echo "\$latest_log_line" | grep -oE '"blockNumber":[0-9]+' | head -n1 | grep -oE '[0-9]+')
+      [ -z "\$log_block_number" ] && log_block_number=\$(echo "\$latest_log_line" | grep -oE '"checkpointNumber":[0-9]+' | head -n1 | grep -oE '[0-9]+')
+    else
+      log_block_number=\$(echo "\$latest_log_line" | grep -oE '"checkpointNumber":[0-9]+' | head -n1 | grep -oE '[0-9]+')
+      [ -z "\$log_block_number" ] && log_block_number=\$(echo "\$latest_log_line" | grep -oE '"blockNumber":[0-9]+' | head -n1 | grep -oE '[0-9]+')
+    fi
+    debug_log "Extracted block number: \$log_block_number (network: \$NETWORK)"
   fi
 
   if [ -z "\$log_block_number" ]; then
@@ -3921,9 +4637,10 @@ check_blocks() {
   fi
 
    # Дополнительные проверки (только если NOTIFICATION_TYPE == 2)
-  if [ "\$NOTIFICATION_TYPE" -eq 2 ]; then
+   if [ "\$NOTIFICATION_TYPE" -eq 2 ]; then
     debug_log "Starting committee check"
     check_committee
+    sync_l1_proposed_logs
   else
     debug_log "Skipping committee check (NOTIFICATION_TYPE=\$NOTIFICATION_TYPE)"
   fi
@@ -6261,8 +6978,9 @@ install_aztec_node_main() {
                     break
                 fi
 
-                # Split the input into private key, address, private bls, and public bls
-                IFS=',' read -r PRIVATE_KEY ADDRESS PRIVATE_BLS PUBLIC_BLS <<< "$KEY_ADDRESS_BLS_PAIR"
+                # Split the input into private key, address and private bls
+                # Backward compatible: a 4th comma-separated value (public BLS) is ignored if provided
+                IFS=',' read -r PRIVATE_KEY ADDRESS PRIVATE_BLS _IGNORED_PUBLIC_BLS <<< "$KEY_ADDRESS_BLS_PAIR"
 
                 # Remove any spaces and ensure private key starts with 0x
                 PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
@@ -6273,14 +6991,13 @@ install_aztec_node_main() {
                 # Remove any spaces from address
                 ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
 
-                # Remove any spaces from BLS keys
+                # Remove any spaces from BLS key
                 PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
-                PUBLIC_BLS=$(echo "$PUBLIC_BLS" | tr -d ' ')
 
                 VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
                 VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
                 VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
-                VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("$PUBLIC_BLS")
+                VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("")
 
                 echo -e "${GREEN}Added validator $i with BLS keys${NC}"
             done
@@ -6344,16 +7061,14 @@ install_aztec_node_main() {
         VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
 
         if [ "$HAS_BLS_KEYS" = true ]; then
-            # Get BLS keys for single validator
+            # Get BLS private key for single validator
             read -p "$(t "single_validator_bls_private") " PRIVATE_BLS
-            read -p "$(t "single_validator_bls_public") " PUBLIC_BLS
 
-            # Remove any spaces from BLS keys
+            # Remove any spaces from BLS key
             PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
-            PUBLIC_BLS=$(echo "$PUBLIC_BLS" | tr -d ' ')
 
             VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
-            VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("$PUBLIC_BLS")
+            VALIDATOR_BLS_PUBLIC_KEYS_ARRAY+=("")
             echo -e "${GREEN}$(t "bls_keys_added")${NC}"
         else
             # Add empty BLS keys for consistency
@@ -6387,17 +7102,6 @@ keyType: "SECP256K1"
 privateKey: "${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
 EOF
         echo -e "${GREEN}Created SECP256K1 key file: $KEY_FILE${NC}"
-
-        if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}" ]; then
-            # Create separate BLS YML file
-            BLS_KEY_FILE="$HOME/aztec/keys/bls_validator_$((i+1)).yml"
-            cat > "$BLS_KEY_FILE" <<EOF
-type: "file-raw"
-keyType: "BLS"
-privateKey: "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}"
-EOF
-            echo -e "${GREEN}Created BLS key file: $BLS_KEY_FILE${NC}"
-        fi
     done
 
     # Create config directory and keystore.json
@@ -6417,13 +7121,13 @@ EOF
             publisher="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
         fi
 
-        if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}" ]; then
-            # Create validator JSON with BLS key
+        if [ "$HAS_BLS_KEYS" = true ] && [ -n "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}" ]; then
+            # Create validator JSON with BLS private key
             VALIDATOR_JSON=$(cat <<EOF
 {
       "attester": {
         "eth": "$address",
-        "bls": "${VALIDATOR_BLS_PUBLIC_KEYS_ARRAY[$i]}"
+        "bls": "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}"
       },
       "publisher": ["$publisher"],
       "coinbase": "$COINBASE",
@@ -6690,6 +7394,541 @@ function install_aztec {
   esac
 
   return $EXIT_CODE
+}
+
+# === Add validators to existing Docker node (keys + keystore + .env-aztec-agent) ===
+function add_aztec_validators() {
+  echo -e "\n${CYAN}$(t "add_validators_title")${NC}"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    echo -e "${RED}$(t "add_validators_jq_required")${NC}"
+    return 1
+  fi
+
+  local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
+  local KEYS_DIR="$HOME/aztec/keys"
+
+  if [[ ! -f "$KEYSTORE_FILE" ]]; then
+    printf "${RED}$(t "add_validators_prereq_fail")${NC}\n" "$KEYSTORE_FILE"
+    return 1
+  fi
+
+  mkdir -p "$KEYS_DIR"
+
+  local existing_count
+  existing_count=$(jq '.validators | length' "$KEYSTORE_FILE" 2>/dev/null) || existing_count=0
+  if [[ -z "$existing_count" || "$existing_count" -lt 1 ]]; then
+    printf "${RED}$(t "add_validators_prereq_fail")${NC}\n" "$KEYSTORE_FILE (validators)"
+    return 1
+  fi
+
+  local max_add=$((10 - existing_count))
+  if [[ "$max_add" -le 0 ]]; then
+    printf "${RED}$(t "add_validators_max_reached")${NC}\n" "$existing_count" "0"
+    return 1
+  fi
+
+  local FIRST_BLS REQUIRE_BLS=false
+  FIRST_BLS=$(jq -r '.validators[0].attester.bls // empty' "$KEYSTORE_FILE")
+  if [[ -n "$FIRST_BLS" && "$FIRST_BLS" != "null" ]]; then
+    REQUIRE_BLS=true
+    echo -e "${YELLOW}$(t "add_validators_existing_bls")${NC}"
+  else
+    echo -e "${YELLOW}$(t "add_validators_existing_no_bls")${NC}"
+  fi
+
+  local FEE_RECIPIENT COINBASE
+  FEE_RECIPIENT=$(jq -r '.validators[0].feeRecipient // empty' "$KEYSTORE_FILE")
+  COINBASE=$(jq -r '.validators[0].coinbase // empty' "$KEYSTORE_FILE")
+
+  printf "${YELLOW}$(t "add_validators_fee_coinbase_keep")${NC}\n" "$FEE_RECIPIENT" "$COINBASE"
+  read -r fee_coinbase_line
+  if [[ -n "${fee_coinbase_line// }" ]]; then
+    IFS=',' read -r FEE_RECIPIENT COINBASE <<< "$fee_coinbase_line"
+    FEE_RECIPIENT=$(echo "$FEE_RECIPIENT" | tr -d ' ')
+    COINBASE=$(echo "$COINBASE" | tr -d ' ')
+  fi
+
+  if [[ -z "$FEE_RECIPIENT" || -z "$COINBASE" ]]; then
+    printf "${RED}$(t "add_validators_prereq_fail")${NC}\n" "feeRecipient/coinbase"
+    return 1
+  fi
+
+  FEE_RECIPIENT=$(echo "$FEE_RECIPIENT" | tr '[:upper:]' '[:lower:]')
+  COINBASE=$(echo "$COINBASE" | tr '[:upper:]' '[:lower:]')
+
+  echo -e "\n${CYAN}$(t "validator_setup_header")${NC}"
+  read -p "$(t "multiple_validators_prompt")" -n 1 -r
+  echo
+  local VALIDATOR_MODE_REPLY=$REPLY
+
+  local -a VALIDATOR_PRIVATE_KEYS_ARRAY=()
+  local -a VALIDATOR_ADDRESSES_ARRAY=()
+  local -a VALIDATOR_BLS_PRIVATE_KEYS_ARRAY=()
+  local HAS_BLS_KEYS=$REQUIRE_BLS
+
+  if [[ $VALIDATOR_MODE_REPLY =~ ^[Yy]$ ]]; then
+    echo -e "\n${GREEN}$(t "multi_validator_mode")${NC}"
+    if [[ "$REQUIRE_BLS" == true ]]; then
+      echo -e "${YELLOW}$(t "multi_validator_format")${NC}"
+      local i
+      for ((i = 1; i <= max_add; i++)); do
+        read -p "Validator $i (or press Enter to finish): " KEY_ADDRESS_BLS_PAIR
+        [[ -z "$KEY_ADDRESS_BLS_PAIR" ]] && break
+        IFS=',' read -r PRIVATE_KEY ADDRESS PRIVATE_BLS _IGNORED_PUBLIC_BLS <<< "$KEY_ADDRESS_BLS_PAIR"
+        PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+        [[ ! "$PRIVATE_KEY" =~ ^0x ]] && PRIVATE_KEY="0x$PRIVATE_KEY"
+        ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+        PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
+        VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+        VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+        VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
+      done
+    else
+      echo -e "${YELLOW}Enter validator private keys and addresses (up to $max_add, format: private_key,address):${NC}"
+      local j
+      for ((j = 1; j <= max_add; j++)); do
+        read -p "Validator $j (or press Enter to finish): " KEY_ADDRESS_PAIR
+        [[ -z "$KEY_ADDRESS_PAIR" ]] && break
+        IFS=',' read -r PRIVATE_KEY ADDRESS <<< "$KEY_ADDRESS_PAIR"
+        PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+        [[ ! "$PRIVATE_KEY" =~ ^0x ]] && PRIVATE_KEY="0x$PRIVATE_KEY"
+        ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+        VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+        VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+        VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("")
+      done
+    fi
+  else
+    echo -e "\n${GREEN}$(t "single_validator_mode")${NC}"
+    read -p "$(t "enter_validator_key") " PRIVATE_KEY
+    read -p "Enter validator address: " ADDRESS
+    PRIVATE_KEY=$(echo "$PRIVATE_KEY" | tr -d ' ')
+    [[ ! "$PRIVATE_KEY" =~ ^0x ]] && PRIVATE_KEY="0x$PRIVATE_KEY"
+    ADDRESS=$(echo "$ADDRESS" | tr -d ' ')
+    VALIDATOR_PRIVATE_KEYS_ARRAY+=("$PRIVATE_KEY")
+    VALIDATOR_ADDRESSES_ARRAY+=("$ADDRESS")
+    if [[ "$REQUIRE_BLS" == true ]]; then
+      read -p "$(t "single_validator_bls_private") " PRIVATE_BLS
+      PRIVATE_BLS=$(echo "$PRIVATE_BLS" | tr -d ' ')
+      VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("$PRIVATE_BLS")
+    else
+      VALIDATOR_BLS_PRIVATE_KEYS_ARRAY+=("")
+    fi
+  fi
+
+  local _ni
+  for _ni in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+    VALIDATOR_ADDRESSES_ARRAY[$_ni]=$(echo "${VALIDATOR_ADDRESSES_ARRAY[$_ni]}" | tr '[:upper:]' '[:lower:]')
+  done
+
+  if [[ ${#VALIDATOR_ADDRESSES_ARRAY[@]} -eq 0 ]]; then
+    echo -e "${YELLOW}$(t "add_validators_aborted")${NC}"
+    return 1
+  fi
+
+  local CURRENT_PUBLISHER
+  CURRENT_PUBLISHER=$(jq -r '.validators[0].publisher[0] // empty' "$KEYSTORE_FILE")
+  if [[ -z "$CURRENT_PUBLISHER" || "$CURRENT_PUBLISHER" == "null" ]]; then
+    CURRENT_PUBLISHER=$(jq -r '.validators[0].attester.eth // empty' "$KEYSTORE_FILE")
+  fi
+  CURRENT_PUBLISHER=$(echo "$CURRENT_PUBLISHER" | tr '[:upper:]' '[:lower:]')
+  if [[ -z "$CURRENT_PUBLISHER" ]]; then
+    echo -e "${RED}$(t "add_validators_current_publisher_missing")${NC}"
+    return 1
+  fi
+
+  echo ""
+  printf "${YELLOW}$(t "add_validators_current_publisher_show")${NC}\n" "$CURRENT_PUBLISHER"
+  read -p "$(t "add_validators_use_current_publisher_prompt")" -n 1 -r
+  echo
+  local USE_CURRENT_PUBLISHER=false
+  [[ $REPLY =~ ^[Yy]$ ]] && USE_CURRENT_PUBLISHER=true
+
+  declare -A SEEN_EXISTING
+  local a
+  for a in $(jq -r '.validators[].attester.eth' "$KEYSTORE_FILE"); do
+    SEEN_EXISTING["$(echo "$a" | tr '[:upper:]' '[:lower:]')"]=1
+  done
+
+  local idx
+  for idx in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+    local addr_l
+    addr_l=$(echo "${VALIDATOR_ADDRESSES_ARRAY[$idx]}" | tr '[:upper:]' '[:lower:]')
+    if [[ -n "${SEEN_EXISTING[$addr_l]}" ]]; then
+      printf "${RED}$(t "add_validators_duplicate")${NC}\n" "${VALIDATOR_ADDRESSES_ARRAY[$idx]}"
+      return 1
+    fi
+    local k2
+    for k2 in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+      [[ "$k2" -eq "$idx" ]] && continue
+      if [[ "$(echo "${VALIDATOR_ADDRESSES_ARRAY[$k2]}" | tr '[:upper:]' '[:lower:]')" == "$addr_l" ]]; then
+        printf "${RED}$(t "add_validators_duplicate")${NC}\n" "${VALIDATOR_ADDRESSES_ARRAY[$idx]}"
+        return 1
+      fi
+    done
+  done
+
+  if [[ "$REQUIRE_BLS" == true ]]; then
+    for idx in "${!VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[@]}"; do
+      if [[ -z "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$idx]}" ]]; then
+        echo -e "${RED}BLS private key required for each new validator.${NC}"
+        return 1
+      fi
+    done
+  fi
+
+  local KEYSTORE_BACKUP="${KEYSTORE_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+  cp "$KEYSTORE_FILE" "$KEYSTORE_BACKUP"
+  echo -e "${GREEN}$(t "add_validators_backup")${NC} $KEYSTORE_BACKUP"
+
+  local max_num=0
+  local f n
+  shopt -s nullglob
+  for f in "$KEYS_DIR"/validator_*.yml; do
+    [[ -f "$f" ]] || continue
+    n=$(basename "$f" .yml)
+    n=${n#validator_}
+    if [[ "$n" =~ ^[0-9]+$ ]] && (( n > max_num )); then max_num=$n; fi
+  done
+  shopt -u nullglob
+  local start_idx=$((max_num + 1))
+
+  local NEW_JSON
+  NEW_JSON=$(mktemp)
+  echo '[]' > "$NEW_JSON"
+
+  local i pub
+  for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+    if [[ "$USE_CURRENT_PUBLISHER" == true ]]; then
+      pub="$CURRENT_PUBLISHER"
+    else
+      pub="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
+    fi
+    local obj
+    if [[ "$HAS_BLS_KEYS" == true ]]; then
+      obj=$(jq -n \
+        --arg eth "${VALIDATOR_ADDRESSES_ARRAY[$i]}" \
+        --arg bls "${VALIDATOR_BLS_PRIVATE_KEYS_ARRAY[$i]}" \
+        --arg pub "$pub" \
+        --arg coin "$COINBASE" \
+        --arg fee "$FEE_RECIPIENT" \
+        '{attester:{eth:$eth, bls:$bls}, publisher:[$pub], coinbase:$coin, feeRecipient:$fee}')
+    else
+      obj=$(jq -n \
+        --arg eth "${VALIDATOR_ADDRESSES_ARRAY[$i]}" \
+        --arg pub "$pub" \
+        --arg coin "$COINBASE" \
+        --arg fee "$FEE_RECIPIENT" \
+        '{attester:{eth:$eth}, publisher:[$pub], coinbase:$coin, feeRecipient:$fee}')
+    fi
+    jq --argjson o "$obj" '. + [$o]' "$NEW_JSON" > "${NEW_JSON}.tmp" && mv "${NEW_JSON}.tmp" "$NEW_JSON"
+  done
+
+  local MERGED_TMP
+  MERGED_TMP=$(mktemp)
+  if ! jq --slurpfile new "$NEW_JSON" '.validators += $new[0]' "$KEYSTORE_FILE" > "$MERGED_TMP"; then
+    echo -e "${RED}$(t "add_validators_aborted")${NC}"
+    rm -f "$NEW_JSON" "$MERGED_TMP"
+    return 1
+  fi
+
+  if ! jq empty "$MERGED_TMP" 2>/dev/null; then
+    echo -e "${RED}$(t "add_validators_aborted")${NC}"
+    rm -f "$NEW_JSON" "$MERGED_TMP"
+    return 1
+  fi
+
+  mv "$MERGED_TMP" "$KEYSTORE_FILE"
+  rm -f "$NEW_JSON"
+
+  for i in "${!VALIDATOR_PRIVATE_KEYS_ARRAY[@]}"; do
+    local KEY_FILE="$KEYS_DIR/validator_$((start_idx + i)).yml"
+    cat > "$KEY_FILE" <<EOF
+type: "file-raw"
+keyType: "SECP256K1"
+privateKey: "${VALIDATOR_PRIVATE_KEYS_ARRAY[$i]}"
+EOF
+    echo -e "${GREEN}Created SECP256K1 key file: $KEY_FILE${NC}"
+  done
+
+  local ENV_FILE="$HOME/.env-aztec-agent"
+  local append_csv=""
+  for i in "${!VALIDATOR_ADDRESSES_ARRAY[@]}"; do
+    [[ -n "$append_csv" ]] && append_csv+=","
+    append_csv+="${VALIDATOR_ADDRESSES_ARRAY[$i]}"
+  done
+
+  if [[ -f "$ENV_FILE" ]]; then
+    local tmp_env
+    tmp_env=$(mktemp)
+    grep -v '^VALIDATORS=' "$ENV_FILE" > "$tmp_env" || true
+    local old_v=""
+    if grep -q '^VALIDATORS=' "$ENV_FILE"; then
+      old_v=$(grep '^VALIDATORS=' "$ENV_FILE" | tail -n1)
+      old_v="${old_v#VALIDATORS=}"
+      old_v="${old_v#\"}"
+      old_v="${old_v%\"}"
+      old_v=$(echo "$old_v" | tr '[:upper:]' '[:lower:]')
+    fi
+    if [[ -n "$old_v" ]]; then
+      printf 'VALIDATORS="%s,%s"\n' "$old_v" "$append_csv" >> "$tmp_env"
+    else
+      printf 'VALIDATORS="%s"\n' "$append_csv" >> "$tmp_env"
+    fi
+    mv "$tmp_env" "$ENV_FILE"
+  else
+    printf 'VALIDATORS="%s"\n' "$append_csv" > "$ENV_FILE"
+  fi
+  echo -e "${GREEN}$(t "add_validators_env_updated")${NC}"
+
+  echo -e "${GREEN}$(t "add_validators_merged")${NC}"
+
+  echo -e "\n${YELLOW}$(t "add_validators_restarting")${NC}"
+  if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qx 'web3signer'; then
+    docker restart web3signer 2>/dev/null || true
+    sleep 5
+  fi
+
+  local compose_dir=""
+  if [[ -f "$HOME/aztec/docker-compose.yml" ]]; then
+    compose_dir="$HOME/aztec"
+  else
+    local raw_cp
+    raw_cp=$(_read_env_var "$(_ensure_env_file)" "COMPOSE_PATH")
+    raw_cp="${raw_cp#\"}"
+    raw_cp="${raw_cp%\"}"
+    if [[ -n "$raw_cp" && -f "$raw_cp/docker-compose.yml" ]]; then
+      compose_dir="$raw_cp"
+    fi
+  fi
+
+  if [[ -n "$compose_dir" ]]; then
+    (cd "$compose_dir" && docker compose restart) || echo -e "${YELLOW}docker compose restart returned non-zero${NC}"
+    echo -e "${GREEN}$(t "add_validators_done")${NC}"
+  else
+    echo -e "${YELLOW}$(t "add_validators_no_compose")${NC}"
+  fi
+
+  return 0
+}
+
+# === Remove validators (keystore + keys + .env-aztec-agent) ===
+function remove_aztec_validators() {
+  echo -e "\n${CYAN}$(t "remove_validators_title")${NC}"
+
+  if ! command -v jq >/dev/null 2>&1; then
+    echo -e "${RED}$(t "add_validators_jq_required")${NC}"
+    return 1
+  fi
+
+  local KEYSTORE_FILE="$HOME/aztec/config/keystore.json"
+  local KEYS_DIR="$HOME/aztec/keys"
+
+  if [[ ! -f "$KEYSTORE_FILE" ]]; then
+    printf "${RED}$(t "remove_validators_no_keystore")${NC}\n" "$KEYSTORE_FILE"
+    return 1
+  fi
+
+  local n
+  n=$(jq '.validators | length' "$KEYSTORE_FILE" 2>/dev/null) || n=0
+  if [[ -z "$n" || "$n" -lt 1 ]]; then
+    printf "${RED}$(t "remove_validators_no_keystore")${NC}\n" "$KEYSTORE_FILE"
+    return 1
+  fi
+
+  if [[ "$n" -eq 1 ]]; then
+    echo -e "${RED}$(t "remove_validators_only_one")${NC}"
+    return 1
+  fi
+
+  echo -e "\n${YELLOW}$(t "remove_validators_list_header")${NC}"
+  local li
+  for ((li = 0; li < n; li++)); do
+    local addr_show
+    addr_show=$(jq -r ".validators[$li].attester.eth" "$KEYSTORE_FILE")
+    echo -e "  ${CYAN}$((li + 1)))${NC} $addr_show"
+  done
+
+  read -rp "$(t "remove_validators_prompt")" input_line
+  input_line=$(echo "$input_line" | tr ',' ' ')
+  read -ra TOKENS <<< "$input_line"
+
+  declare -A SEEN_NUM
+  declare -a REMOVE_ONE=()
+  local t num
+  for t in "${TOKENS[@]}"; do
+    num=$(echo "$t" | tr -d ' ')
+    [[ -z "$num" ]] && continue
+    if [[ ! "$num" =~ ^[0-9]+$ ]]; then
+      printf "${RED}$(t "remove_validators_invalid_num")${NC}\n" "$num" "$n"
+      return 1
+    fi
+    if [[ "$num" -lt 1 || "$num" -gt "$n" ]]; then
+      printf "${RED}$(t "remove_validators_invalid_num")${NC}\n" "$num" "$n"
+      return 1
+    fi
+    [[ -n "${SEEN_NUM[$num]}" ]] && continue
+    SEEN_NUM[$num]=1
+    REMOVE_ONE+=("$num")
+  done
+
+  if [[ ${#REMOVE_ONE[@]} -eq 0 ]]; then
+    echo -e "${RED}$(t "remove_validators_empty")${NC}"
+    return 1
+  fi
+
+  local remaining=$((n - ${#REMOVE_ONE[@]}))
+  if [[ "$remaining" -lt 1 ]]; then
+    echo -e "${RED}$(t "remove_validators_would_remove_all")${NC}"
+    return 1
+  fi
+
+  declare -a REMOVE_ZERO=()
+  for num in "${REMOVE_ONE[@]}"; do
+    REMOVE_ZERO+=( $((num - 1)) )
+  done
+
+  local DEL_JSON
+  DEL_JSON='['
+  local first=true
+  local z
+  for z in "${REMOVE_ZERO[@]}"; do
+    if [[ "$first" == true ]]; then
+      first=false
+    else
+      DEL_JSON+=','
+    fi
+    DEL_JSON+="$z"
+  done
+  DEL_JSON+=']'
+
+  mkdir -p "$KEYS_DIR"
+
+  declare -a KEPT_ZERO=()
+  local i
+  for ((i = 0; i < n; i++)); do
+    local skip=false
+    for z in "${REMOVE_ZERO[@]}"; do
+      [[ "$z" -eq "$i" ]] && skip=true
+    done
+    [[ "$skip" == false ]] && KEPT_ZERO+=("$i")
+  done
+
+  local TMP_KEYS
+  TMP_KEYS=$(mktemp -d)
+  local j k
+  j=0
+  for k in "${KEPT_ZERO[@]}"; do
+    local oldf="$KEYS_DIR/validator_$((k + 1)).yml"
+    if [[ ! -f "$oldf" ]]; then
+      printf "${RED}$(t "remove_validators_key_missing")${NC}\n" "$((k + 1))" "$oldf"
+      rm -rf "$TMP_KEYS"
+      return 1
+    fi
+    cp "$oldf" "$TMP_KEYS/validator_$((j + 1)).yml"
+    j=$((j + 1))
+  done
+
+  local KEYSTORE_BACKUP="${KEYSTORE_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+  cp "$KEYSTORE_FILE" "$KEYSTORE_BACKUP"
+  echo -e "${GREEN}$(t "remove_validators_backup")${NC} $KEYSTORE_BACKUP"
+
+  local MERGED_TMP
+  MERGED_TMP=$(mktemp)
+  if ! jq --argjson del_idx "$DEL_JSON" '
+    .validators = (
+      .validators
+      | to_entries
+      | map(select(.key | tonumber as $k | (($del_idx | index($k)) == null)))
+      | map(.value)
+    )
+  ' "$KEYSTORE_FILE" > "$MERGED_TMP"; then
+    echo -e "${RED}$(t "remove_validators_aborted")${NC}"
+    rm -rf "$TMP_KEYS" "$MERGED_TMP"
+    return 1
+  fi
+
+  if ! jq empty "$MERGED_TMP" 2>/dev/null; then
+    echo -e "${RED}$(t "remove_validators_aborted")${NC}"
+    rm -rf "$TMP_KEYS" "$MERGED_TMP"
+    return 1
+  fi
+
+  mv "$MERGED_TMP" "$KEYSTORE_FILE"
+  echo -e "${GREEN}$(t "remove_validators_keystore_updated")${NC}"
+
+  shopt -s nullglob
+  rm -f "$KEYS_DIR"/validator_*.yml
+  shopt -u nullglob
+  for ((j = 0; j < ${#KEPT_ZERO[@]}; j++)); do
+    mv "$TMP_KEYS/validator_$((j + 1)).yml" "$KEYS_DIR/validator_$((j + 1)).yml"
+  done
+  rm -rf "$TMP_KEYS"
+  echo -e "${GREEN}$(t "remove_validators_keys_renumbered")${NC}"
+
+  declare -A RM_ADDR
+  for num in "${REMOVE_ONE[@]}"; do
+    local zi=$((num - 1))
+    local ra
+    ra=$(jq -r ".validators[$zi].attester.eth" "$KEYSTORE_BACKUP" | tr '[:upper:]' '[:lower:]')
+    RM_ADDR["$ra"]=1
+  done
+
+  local ENV_FILE="$HOME/.env-aztec-agent"
+  if [[ -f "$ENV_FILE" ]] && grep -q '^VALIDATORS=' "$ENV_FILE"; then
+    local old_v
+    old_v=$(grep '^VALIDATORS=' "$ENV_FILE" | tail -n1)
+    old_v="${old_v#VALIDATORS=}"
+    old_v="${old_v#\"}"
+    old_v="${old_v%\"}"
+    local tmp_env
+    tmp_env=$(mktemp)
+    grep -v '^VALIDATORS=' "$ENV_FILE" > "$tmp_env" || true
+    local new_csv=""
+    local part
+    IFS=',' read -ra PARTS <<< "$old_v"
+    for part in "${PARTS[@]}"; do
+      part=$(echo "$part" | tr -d ' ' | tr '[:upper:]' '[:lower:]')
+      [[ -z "$part" ]] && continue
+      [[ -n "${RM_ADDR[$part]}" ]] && continue
+      [[ -n "$new_csv" ]] && new_csv+=","
+      new_csv+="$part"
+    done
+    if [[ -n "$new_csv" ]]; then
+      printf 'VALIDATORS="%s"\n' "$new_csv" >> "$tmp_env"
+    fi
+    mv "$tmp_env" "$ENV_FILE"
+    echo -e "${GREEN}$(t "remove_validators_env_updated")${NC}"
+  fi
+
+  echo -e "\n${YELLOW}$(t "remove_validators_restarting")${NC}"
+  if docker ps -a --format '{{.Names}}' 2>/dev/null | grep -qx 'web3signer'; then
+    docker restart web3signer 2>/dev/null || true
+    sleep 5
+  fi
+
+  local compose_dir=""
+  if [[ -f "$HOME/aztec/docker-compose.yml" ]]; then
+    compose_dir="$HOME/aztec"
+  else
+    local raw_cp
+    raw_cp=$(_read_env_var "$(_ensure_env_file)" "COMPOSE_PATH")
+    raw_cp="${raw_cp#\"}"
+    raw_cp="${raw_cp%\"}"
+    if [[ -n "$raw_cp" && -f "$raw_cp/docker-compose.yml" ]]; then
+      compose_dir="$raw_cp"
+    fi
+  fi
+
+  if [[ -n "$compose_dir" ]]; then
+    (cd "$compose_dir" && docker compose restart) || echo -e "${YELLOW}docker compose restart returned non-zero${NC}"
+    echo -e "${GREEN}$(t "remove_validators_done")${NC}"
+  else
+    echo -e "${YELLOW}$(t "remove_validators_no_compose")${NC}"
+  fi
+
+  return 0
 }
 
 # === Delete Aztec node ===
@@ -8644,6 +9883,8 @@ main_menu() {
     echo -e "${CYAN}$(t "option22")${NC}"
     echo -e "${CYAN}$(t "option23")${NC}"
     echo -e "${CYAN}$(t "option24")${NC}"
+    echo -e "${CYAN}$(t "option25")${NC}"
+    echo -e "${CYAN}$(t "option26")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -8677,6 +9918,8 @@ main_menu() {
       22) change_rpc_url; command_executed=true ;;
       23) check_updates_safely; command_executed=true ;;
       24) check_error_definitions_updates_safely; command_executed=true ;;
+      25) add_aztec_validators; command_executed=true ;;
+      26) remove_aztec_validators; command_executed=true ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

@@ -35,15 +35,21 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 08-03-2026
+## 📌 Son Güncellemeler 24-03-2026
 
-- Test ağı rollup sözleşme adresi güncellendi: `0xf6D0D42aCE06829bECB78C74F49879528fC632c1`.
-
-⚠️ SADECE TEST AĞI — 7 Mart 20:30 UTC ve sonrasında 24 saat içinde Aztec düğümünü `4.1.0-rc.2` sürümüne güncellemek için Sürüm Düşürme seçeneğini kullanın. Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
+- **L1 inclusion / Committee** bloğu Telegram'da: doğrulayıcı işlemlerinin L1'e dahil edilmesinin doğrulanması, slot başlıkları ve imzaları (node ve L1), calldata rollup'ı için durum gösterge tablosu.
+  - **L1 doğrulaması için bağımlılıklar**: `eth_abi` Python paketinin kontrol edilmesi/kurulması; pip bağımlılıklarının **`pip3_or_pym` / `pip3_or_pym_available`** üzerinden kurulması (geri dönüş olarak `python3 -m pip` kullanılır).
+  - aztec_l1_extract_signers.py - izleme aracı betiği için L1 calldata kod çözücü, izleme kurulumu sırasında otomatik olarak oluşturulur.
+- **25 ve 26 numaralı seçenekler** eklendi: node tamamen yeniden kurulmadan doğrulayıcı ekleme ve kaldırma — keystore, `$HOME/aztec/keys` içinde YAML anahtarları, `~/.env-aztec-agent` içinde `VALIDATORS`, keystore yedeği, web3signer ve docker compose yeniden başlatma.
+  - **25. seçenek için**: mevcut keystore'daki BLS'ye uygun şekilde yeni doğrulayıcı girişi, maksimum 10 doğrulayıcı, çift kayıt kontrolü, feeRecipient/coinbase (ilk doğrulayıcıdan varsayılan olarak alınır), Ethereum adreslerinin **küçük harfe** normalleştirilmesi, keystore'daki **mevcut publisher**'ın tüm yeni doğrulayıcılar için mi yoksa her doğrulayıcı için ayrı publisher olarak mı kullanılacağına dair soru.
+  - **26. seçenek için**: numaralandırılmış attester adresleri listesi, virgülle ayrılmış numaralarla silme, tek doğrulayıcının silinmesini engelleme, silme işleminden sonra `validator_1.yml` … dosyalarının yeniden numaralandırılması, adreslerin `VALIDATORS` listesinden çıkarılması.
+- Yeni ve etkilenen metinlerin **İngilizce, Rusça ve Türkçe**'ye çevirileri (25–26 menüleri, L1/committee, `eth_abi`, doğrulayıcı format düzeltmeleri vb.).
+- Rollup sözleşmesi: kullanılmayan tek bir imza yerine — cast çağrılarında ve oluşturulan ajanda (`check_blocks`) **`FUNCTION_SIG_BLOCK`** ve **`FUNCTION_SIG_CHECKPOINT`** kullanımı.
+- **Node kurulumu**: genel BLS anahtarları kurulum mantığından çıkarıldı. Özel BLS anahtarları doğrudan keystore.json içinde kullanılır (resmi belgelere uygun şekilde). Ayrı `bls_validator_*.yml` dosyalarının oluşturulması kaldırıldı; BLS keystore içinde kalır; genel BLS alanı olmayan **çoklu doğrulayıcı** formatı, genel BLS giriş satırı kaldırıldı.
 
 **version_control.json**
 
-SHA256: `dec50d122eccbbf6763e50ac970fd3626151909cea829c455359df81b380dd4e`
+SHA256: `9ce26c85554b5731d4cbe1cc336f8a2f4df8ca4b7575e901b23384252834c00c`
 
 **error_definitions.json**
 
@@ -51,6 +57,12 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 08-03-2026
+
+- Test ağı rollup sözleşme adresi güncellendi: `0xf6D0D42aCE06829bECB78C74F49879528fC632c1`.
+
+⚠️ SADECE TEST AĞI — 7 Mart 20:30 UTC ve sonrasında 24 saat içinde Aztec düğümünü `4.1.0-rc.2` sürümüne güncellemek için Sürüm Düşürme seçeneğini kullanın. Eski izleme aracısını silin (seçenek 3) ve yeni bir aracı oluşturun (seçenek 2).
 
 ### 07-03-2026
 

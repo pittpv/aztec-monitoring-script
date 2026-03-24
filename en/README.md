@@ -35,15 +35,21 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 08-03-2026
+## 📌 Latest Updates 24-03-2026
 
-- Testnet rollup contract address updated to: `0xf6D0D42aCE06829bECB78C74F49879528fC632c1`.
-
-⚠️ TESTNET ONLY — use Downgrade option to upgrade Aztec node to version `4.1.0-rc.2` at 20:30 UTC (March 7) and within 24 hours after that. Delete the old monitoring agent (option 3) and create a new agent (option 2)
+- **L1 inclusion / Committee** block in Telegram: verification of validator transaction inclusion in L1, headers and slot signatures (node and L1), status legend for calldata rollup.
+  - **Dependencies for L1 verification**: checking/installing the Python package `eth_abi`; installing pip dependencies via **`pip3_or_pym` / `pip3_or_pym_available`** (fallback to `python3 -m pip`).
+  - aztec_l1_extract_signers.py - calldata decoder for L1 for the monitoring agent script, created automatically during monitoring installation.
+- Added **options 25 and 26**: adding and removing validators without a full node reinstall — keystore, YAML keys in `$HOME/aztec/keys`, `VALIDATORS` in `~/.env-aztec-agent`, keystore backup, restart of web3signer and docker compose.
+  - For **option 25**: input of new validators considering BLS as per existing keystore, limit of 10 validators, duplicate check, feeRecipient/coinbase (defaults to the first validator), normalization of Ethereum addresses to **lowercase**, prompt regarding **current publisher** from keystore for all new validators or a separate publisher per validator.
+  - For **option 26**: numbered list of attester addresses, deletion by comma-separated numbers, prevention of deleting the sole validator, renumbering of `validator_1.yml` … after deletion, subtraction of addresses from `VALIDATORS`.
+- **Translations** of new and affected strings into **English, Russian, and Turkish** (menus 25–26, L1/committee, `eth_abi`, validator format fixes, etc.).
+- Rollup contract: instead of a single unused signature — **`FUNCTION_SIG_BLOCK`** and **`FUNCTION_SIG_CHECKPOINT`** in cast calls and in the generated agent (`check_blocks`).
+- **Node installation**: public BLS keys removed from the installation logic. Private BLS keys are used directly in keystore.json (according to official documentation). Generation of separate `bls_validator_*.yml` removed; BLS remains in keystore; **multi-validator** format without a public BLS field, public BLS input string removed.
 
 **version_control.json**
 
-SHA256: `dec50d122eccbbf6763e50ac970fd3626151909cea829c455359df81b380dd4e`
+SHA256: `9ce26c85554b5731d4cbe1cc336f8a2f4df8ca4b7575e901b23384252834c00c`
 
 **error_definitions.json**
 
@@ -51,6 +57,12 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 <details>
 <summary>📅 Version History</summary>
+
+### 08-03-2026
+
+- Testnet rollup contract address updated to: `0xf6D0D42aCE06829bECB78C74F49879528fC632c1`.
+
+⚠️ TESTNET ONLY — use Downgrade option to upgrade Aztec node to version `4.1.0-rc.2` at 20:30 UTC (March 7) and within 24 hours after that. Delete the old monitoring agent (option 3) and create a new agent (option 2).
 
 ### 07-03-2026
 

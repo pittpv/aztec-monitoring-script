@@ -69,12 +69,14 @@ Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı 
 Örnek:
 `0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e`
 
-BLS anahtarları seçeneği seçilirse, katı formatta işlem yapılır:
+**BLS anahtarları** seçildiyse **üç alanlı** biçimi kullanın (SECP256K1 özel anahtar, eth adresi, BLS özel anahtar):
 
-`0x_ile_özel_anahtar,doğrulayıcı_adresi,0x_ile_BLS_özel_anahtar,public_BLS_adresi`
+`0x_ile_özel_anahtar,doğrulayıcı_adresi,0x_ile_BLS_özel_anahtar`
 
 Örnek:
-`0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e,0xa1b2c3d4e5f6...,0x12d4720c311e6d2e0826738a071fa06743f6cb8efd586ed718c3b020f09b5c8d`
+`0xa1b2c3d4e5f6...,0x742d35Cc6634C0532925a3b844Bc454e4438f44e,0xa1b2c3d4e5f6...`
+
+BLS verileri **`keystore.json`** içinde tutulur; ayrı **`bls_validator_*.yml`** dosyaları **oluşturulmaz**. Web3signer için yalnızca SECP256K1 anahtarını içeren **`validator_N.yml`** dosyaları oluşturulur. Dördüncü virgülle ayrılmış değer (public BLS) girilirse **yok sayılır** — eski giriş biçimiyle geriye dönük uyumluluk içindir.
 
 ⚠️ Eğer **tüm** validatörlerin işlemleri için Sepolia ETH ödemek amacıyla **tek bir adres** kullanmayı planlıyorsanız, önce o adresin verilerini girin. Tüm validatörlerin verilerini girdikten sonra script, ilk adresin tüm validatörler için publisher adresi olarak kullanılıp kullanılmayacağını soracaktır (`Use first address as publisher for all validators?`) - **`y`** seçin.
 
@@ -96,7 +98,7 @@ Herhangi bir nedenden dolayı bir Aztec L2 adresi oluşturamıyorsanız, `0x0000
 
 ![L2 adresini girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/5.jpg)
 
-> **Önemli:** Betik, gerekli tüm yapılandırma dosyalarını (web3signer için `/root/aztec/keys` içinde `YML` ve `/root/aztec/config` içinde `keystore.json`) otomatik olarak oluşturacaktır.
+> **Önemli:** Betik gerekli yapılandırma dosyalarını oluşturur: `$HOME/aztec/keys` altında `validator_N.yml` (web3signer için SECP256K1); `$HOME/aztec/config` altında `keystore.json` (uygunsa BLS alanları dahil).
 
 ## Docker Compose Yapılandırması
 
@@ -106,7 +108,7 @@ Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak 
 *   **`CONSENSUS_BEACON_URL`** — Beacon Chain için RPC URL'niz. **Önemli:** Mainnet için mainnet Beacon Chain RPC kullanın, testnet için Sepolia testnet Beacon Chain RPC kullanın.
 *   **`COINBASE`** — Ethereum cüzdan adresiniz. Doğrulayıcınızın adresini girin.
 *   **`P2P_IP`** — Bu parametre betik tarafından otomatik olarak belirlenecektir.
-    **Sunucuda VPN kullanıyorsanız**, node kurulumunu tamamladıktan sonra gerçek IP adresini `/root/aztec` klasöründeki `.env` dosyasına **manuel olarak** girmelisiniz.
+    **Sunucuda VPN kullanıyorsanız**, node kurulumunu tamamladıktan sonra gerçek IP adresini `$HOME/aztec` altındaki `.env` dosyasına **manuel olarak** girmelisiniz.
 
     ![RPC ve diğer verileri girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -121,7 +123,7 @@ RPC adreslerini girdikten sonra betik, düğüm için ağ seçimi yapmanızı is
 
 > **Önemli:** 
 > *   Seçilen ağ, düğümünüzün hangi ağda çalışacağını belirler
-> *   Düğüm verileri farklı dizinlerde saklanacaktır: mainnet için `/root/.aztec/mainnet/data/` ve testnet için `/root/.aztec/testnet/data/`
+> *   Düğüm verileri farklı dizinlerde saklanacaktır: mainnet için `$HOME/.aztec/mainnet/data/` ve testnet için `$HOME/.aztec/testnet/data/`
 > *   Seçilen ağ için doğru RPC adreslerini kullandığınızdan emin olun
 > *   Seçilen ağ, `~/.env-aztec-agent` dosyasındaki `NETWORK` değişkenine kaydedilir
 
@@ -154,12 +156,23 @@ Düğüm kurulumu şu anda tamamlanmıştır.
 1.  Betiğin ana menüsünden `1` seçeneğini seçerek **düğümün senkronizasyon durumunu kontrol edin**.
 2.  Ana menüdeki `2` seçeneği aracılığıyla kullanışlı düğüm izleme için **izleme aracısını kurun**.
 3.  **Kritik hata tanımları dosyasını**, `24` seçeneğini kullanarak indirin.
-4.  **Doğrulayıcı durumunu kontrol edin ve kuyruk pozisyonu izlemesini ayarlayın** `9` seçeneğini kullanarak
+4.  **Doğrulayıcı durumunu kontrol edin ve kuyruk pozisyonu izlemesini ayarlayın** `9` seçeneğini kullanarak.
+
+Betiği güncelledikten sonra güncel bildirimler için eski izleme aracısını silmeniz (`3`) ve yenisini oluşturmanız (`2`) önerilir (uygun olduğunda Telegram’da **L1 inclusion / Committee** bloğu dahil). Rollup calldata ayrıştırması Python `eth_abi` paketini kullanır; betik bağımlılıkları kontrol eder ve gerekirse `pip3` veya `python3 -m pip` ile kurar.
 
 Ana menüde bulunan betiğin diğer özelliklerini de incelediğinizden emin olun, örneğin:
 *   Konteynerleri başlatma ve durdurma
 *   Düğüm sürümünü düşürme (bir güncellemede sorun çıkması durumunda)
 *   Logları ve istatistikleri görüntüleme
+
+## Tam Yeniden Kurulum Olmadan Doğrulayıcı Ekleme veya Kaldırma (Seçenek 25 ve 26)
+
+Düğüm zaten kuruluysa ve `11` ile tam yeniden kurulum **olmadan** doğrulayıcı kümesini değiştirmeniz gerekiyorsa:
+
+*   **Seçenek 25** — Yeni doğrulayıcı ekleyin (çalıştırma başına en fazla 10): `keystore.json`, `$HOME/aztec/keys` altındaki `validator_N.yml`, `~/.env-aztec-agent` içindeki `VALIDATORS`, isteğe bağlı keystore yedeklemesi, ardından web3signer ve `docker compose` yeniden başlatılır. Giriş biçimi ve BLS kontrolleri mevcut keystore ile uyumludur; Ethereum adresleri **küçük harfe** normalize edilir; betik **publisher** (tüm yeni doğrulayıcılar için tek veya doğrulayıcı başına) ve feeRecipient/coinbase sorar.
+*   **Seçenek 26** — Gösterilen attester listesinden numaraya göre doğrulayıcı kaldırın; son doğrulayıcı kaldırılamaz; kaldırma sonrası `validator_N.yml` yeniden numaralandırılır ve `VALIDATORS` güncellenir.
+
+Yedekleme ve servis yeniden başlatmaları için betiğin uyarılarını izleyin.
 
 ## Düğümü Yeniden Kurma ve BLS Anahtarlarını Ekleme (Seçenek 18)
 
@@ -168,8 +181,8 @@ Düğümü yeniden kurarken (seçenek 11) veya daha sonra BLS anahtarı eklerken
 ### Düğüm Kurulumu: BLS ile veya BLS Olmadan
 
 - **BLS anahtarlarıyla** — Kurulum sırasında (seçenek 11), “BLS anahtarlarınız var mı?” sorusuna **`y`** yanıtı verin ve her doğrulayıcı için veriyi şu biçimde girin:  
-  `özel_anahtar,adres,özel_BLS,genel_BLS`.  
-  Betik hemen `keystore.json` ve BLS YML dosyalarını oluşturur. Ek BLS adımı gerekmez.
+  `özel_anahtar,adres,özel_BLS`.  
+  Betik hemen `keystore.json` (BLS JSON içinde) ve yalnızca SECP256K1 içeren `validator_N.yml` dosyalarını oluşturur. Ayrı `bls_validator_*.yml` kullanılmaz.
 
 - **BLS anahtarları olmadan** — **`n`** yanıtı verin. Betik yalnızca doğrulayıcıların eth adresleriyle (bls alanı olmadan) `keystore.json` oluşturur. BLS anahtarlarını aşağıda anlatıldığı gibi seçenek 18 ile sonradan ekleyebilirsiniz.
 
