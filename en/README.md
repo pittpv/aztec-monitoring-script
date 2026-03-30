@@ -35,7 +35,27 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 24-03-2026
+## 📌 Latest Updates 30-03-2026
+
+- Rollup contract updated to `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
+- Added **Option 27** to find and display the ADMIN API KEY
+- Added **Node.js ≥24.12.0** dependency and installation with user consent
+- Updated **Option 11** — Aztec node installation
+  - Logic aligned with the updated native script for installing Aztec binaries
+  - Fixed web3signer launch command (chain id is set correctly for mainnet/testnet)
+
+**version_control.json**
+
+SHA256: `9e3cdcb3c7b60f461b3799f3ec61d8028d65ed537162fd0acad08ce8c102e1f1`
+
+**error_definitions.json**
+
+SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
+
+<details>
+<summary>📅 Version History</summary>
+
+### 24-03-2026
 
 - **L1 inclusion / Committee** block in Telegram: verification of validator transaction inclusion in L1, headers and slot signatures (node and L1), status legend for calldata rollup.
   - **Dependencies for L1 verification**: checking/installing the Python package `eth_abi`; installing pip dependencies via **`pip3_or_pym` / `pip3_or_pym_available`** (fallback to `python3 -m pip`).
@@ -46,17 +66,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 - **Translations** of new and affected strings into **English, Russian, and Turkish** (menus 25–26, L1/committee, `eth_abi`, validator format fixes, etc.).
 - Rollup contract: instead of a single unused signature — **`FUNCTION_SIG_BLOCK`** and **`FUNCTION_SIG_CHECKPOINT`** in cast calls and in the generated agent (`check_blocks`).
 - **Node installation**: public BLS keys removed from the installation logic. Private BLS keys are used directly in keystore.json (according to official documentation). Generation of separate `bls_validator_*.yml` removed; BLS remains in keystore; **multi-validator** format without a public BLS field, public BLS input string removed.
-
-**version_control.json**
-
-SHA256: `9ce26c85554b5731d4cbe1cc336f8a2f4df8ca4b7575e901b23384252834c00c`
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 08-03-2026
 

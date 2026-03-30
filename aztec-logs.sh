@@ -11,7 +11,8 @@ NC='\033[0m' # No Color
 
 
 # === Language settings ===
-LANG=""
+# Use SCRIPT_LANG (not LANG) so we do not override the shell locale (LANG/LC_*).
+SCRIPT_LANG=""
 declare -A TRANSLATIONS
 
 # Global status maps (will be filled in check_validator_main)
@@ -21,7 +22,7 @@ declare -gA STATUS_COLOR
 # Translation function
 t() {
   local key=$1
-  echo "${TRANSLATIONS[$LANG,$key]}"
+  echo "${TRANSLATIONS[$SCRIPT_LANG,$key]}"
 }
 
 # Initialize languages
@@ -33,10 +34,10 @@ init_languages() {
   read -p "> " lang_choice
 
   case $lang_choice in
-    1) LANG="en" ;;
-    2) LANG="ru" ;;
-    3) LANG="tr" ;;
-    *) LANG="en" ;;
+    1) SCRIPT_LANG="en" ;;
+    2) SCRIPT_LANG="ru" ;;
+    3) SCRIPT_LANG="tr" ;;
+    *) SCRIPT_LANG="en" ;;
   esac
 
   # English translations
@@ -86,6 +87,7 @@ init_languages() {
   TRANSLATIONS["en,add_validators_use_current_publisher_prompt"]="Use this publisher for all new validators? (y/n) "
   TRANSLATIONS["en,add_validators_current_publisher_missing"]="❌ Could not read publisher from keystore (validators[0].publisher or attester)."
   TRANSLATIONS["en,option26"]="26. Remove validators"
+  TRANSLATIONS["en,option27"]="27. Find Admin API key in logs"
   TRANSLATIONS["en,remove_validators_title"]="=== Remove validators ==="
   TRANSLATIONS["en,remove_validators_no_keystore"]="❌ keystore.json not found: %s"
   TRANSLATIONS["en,remove_validators_only_one"]="❌ Cannot remove the only validator. Use option 12 to delete the node if needed."
@@ -312,6 +314,10 @@ init_languages() {
   TRANSLATIONS["en,gov_was"]="⚠️ Was:"
   TRANSLATIONS["en,gov_now"]="Now:"
   TRANSLATIONS["en,gov_no_changes"]="✅ No changes detected."
+  TRANSLATIONS["en,search_admin_api"]="🔍 Searching for Admin API key in 'aztec' container logs..."
+  TRANSLATIONS["en,admin_api_found"]="✅ Admin API key:"
+  TRANSLATIONS["en,admin_api_not_found"]="❌ Admin API key not found in logs."
+  TRANSLATIONS["en,admin_api_reset_hint"]="If you miss the key in the startup logs, use AZTEC_RESET_ADMIN_API_KEY=true to regenerate it on the next restart."
   TRANSLATIONS["en,token_prompt"]="Enter Telegram Bot Token:"
   TRANSLATIONS["en,chatid_prompt"]="Enter Telegram Chat ID:"
   TRANSLATIONS["en,removing_agent"]="🗑 Removing agent and systemd task..."
@@ -494,6 +500,8 @@ init_languages() {
   TRANSLATIONS["en,creating_env"]="📝 Creating .env file..."
   TRANSLATIONS["en,creating_compose"]="🛠️ Creating docker-compose.yml with Watchtower"
   TRANSLATIONS["en,compose_created"]="✅ docker-compose.yml created"
+  TRANSLATIONS["en,install_admin_api_notice"]="Admin API (Aztec v4+): on first start the node prints a random admin API key once to stdout — save it. Admin RPC on port 8880 requires header x-api-key or Authorization: Bearer (GET /status is exempt). If lost: set AZTEC_RESET_ADMIN_API_KEY=true for one restart, or AZTEC_ADMIN_API_KEY_HASH for a known key."
+  TRANSLATIONS["en,install_web3signer_l1_chain"]="Web3Signer eth1 --chain-id=%s (NETWORK=%s, L1 %s)"
   TRANSLATIONS["en,starting_node"]="🚀 Starting Aztec node..."
   TRANSLATIONS["en,showing_logs"]="📄 Showing last 200 lines of logs..."
   TRANSLATIONS["en,logs_starting"]="Logs will start in 5 seconds... Press Ctrl+C to exit logs"
@@ -669,6 +677,12 @@ init_languages() {
   TRANSLATIONS["en,installing_bc"]="Installing bc..."
   TRANSLATIONS["en,installing_python3"]="Installing Python3..."
   TRANSLATIONS["en,installing_eth_abi"]="Installing eth_abi..."
+  TRANSLATIONS["en,installing_nvm"]="Installing nvm..."
+  TRANSLATIONS["en,installing_nvm_node"]="Installing Node.js via nvm (LTS)..."
+  TRANSLATIONS["en,node_lts_below_min"]="LTS is below the required minimum; installing the minimum Node.js version..."
+  TRANSLATIONS["en,node_min_failed"]="❌ Node.js %s or newer is required. Load nvm in this shell: source ~/.nvm/nvm.sh"
+  TRANSLATIONS["en,node_version_too_old"]="Node.js v%s is below the minimum required (%s)"
+  TRANSLATIONS["en,node_ok_min"]="Node.js v%s (minimum %s)"
   # Web3signer restart translations
   TRANSLATIONS["en,bls_restarting_web3signer"]="Restarting web3signer to load new key"
   TRANSLATIONS["en,bls_web3signer_restarted"]="Web3signer successfully restarted"
@@ -778,6 +792,7 @@ init_languages() {
   TRANSLATIONS["ru,add_validators_use_current_publisher_prompt"]="Использовать его для всех новых валидаторов? (y/n) "
   TRANSLATIONS["ru,add_validators_current_publisher_missing"]="❌ Не удалось прочитать publisher из keystore (validators[0].publisher или attester)."
   TRANSLATIONS["ru,option26"]="26. Удалить валидаторов"
+  TRANSLATIONS["ru,option27"]="27. Найти Admin API key в логах"
   TRANSLATIONS["ru,remove_validators_title"]="=== Удаление валидаторов ==="
   TRANSLATIONS["ru,remove_validators_no_keystore"]="❌ Нет keystore.json: %s"
   TRANSLATIONS["ru,remove_validators_only_one"]="❌ Нельзя удалить единственного валидатора. Для полного удаления ноды используйте п. 12."
@@ -1006,6 +1021,10 @@ init_languages() {
   TRANSLATIONS["ru,gov_was"]="⚠️ Было:"
   TRANSLATIONS["ru,gov_now"]="Стало:"
   TRANSLATIONS["ru,gov_no_changes"]="✅ Изменений не обнаружено."
+  TRANSLATIONS["ru,search_admin_api"]="🔍 Поиск Admin API key в логах контейнера 'aztec'..."
+  TRANSLATIONS["ru,admin_api_found"]="✅ Admin API key:"
+  TRANSLATIONS["ru,admin_api_not_found"]="❌ Admin API key не найден в логах."
+  TRANSLATIONS["ru,admin_api_reset_hint"]="Если вы пропустили ключ в логах запуска, используйте AZTEC_RESET_ADMIN_API_KEY=true — при следующем перезапуске ключ будет сгенерирован заново."
   TRANSLATIONS["ru,token_prompt"]="Введите Telegram Bot Token:"
   TRANSLATIONS["ru,chatid_prompt"]="Введите Telegram Chat ID:"
   TRANSLATIONS["ru,agent_added"]="✅ Агент добавлен в systemd и будет выполняться каждую минуту."
@@ -1243,6 +1262,8 @@ init_languages() {
   TRANSLATIONS["ru,creating_env"]="📝 Заполнение файла .env..."
   TRANSLATIONS["ru,creating_compose"]="🛠️ Создание docker-compose.yml c Watchtower"
   TRANSLATIONS["ru,compose_created"]="✅ docker-compose.yml создан"
+  TRANSLATIONS["ru,install_admin_api_notice"]="Admin API (Aztec v4+): при первом запуске нода один раз выводит случайный ключ в stdout — сохраните его. К admin RPC на порту 8880 нужны заголовки x-api-key или Authorization: Bearer (исключение: GET /status). Потеряли ключ: AZTEC_RESET_ADMIN_API_KEY=true на один перезапуск или AZTEC_ADMIN_API_KEY_HASH."
+  TRANSLATIONS["ru,install_web3signer_l1_chain"]="Web3Signer eth1 --chain-id=%s (NETWORK=%s, L1 %s)"
   TRANSLATIONS["ru,starting_node"]="🚀 Запуск ноды Aztec..."
   TRANSLATIONS["ru,showing_logs"]="📄 Показываю последние 200 строк логов..."
   TRANSLATIONS["ru,logs_starting"]="Логи запустятся через 5 секунд... Нажмите Ctrl+C чтобы выйти из логов"
@@ -1367,6 +1388,12 @@ init_languages() {
   TRANSLATIONS["ru,installing_bc"]="Устанавливается bc..."
   TRANSLATIONS["ru,installing_python3"]="Устанавливается Python3..."
   TRANSLATIONS["ru,installing_eth_abi"]="Устанавливается eth_abi..."
+  TRANSLATIONS["ru,installing_nvm"]="Устанавливается nvm..."
+  TRANSLATIONS["ru,installing_nvm_node"]="Установка Node.js через nvm (LTS)..."
+  TRANSLATIONS["ru,node_lts_below_min"]="LTS ниже требуемого минимума; устанавливается минимальная версия Node.js..."
+  TRANSLATIONS["ru,node_min_failed"]="❌ Требуется Node.js %s или новее. Загрузите nvm: source ~/.nvm/nvm.sh"
+  TRANSLATIONS["ru,node_version_too_old"]="Node.js v%s ниже требуемого минимума (%s)"
+  TRANSLATIONS["ru,node_ok_min"]="Node.js v%s (минимум %s)"
 
   TRANSLATIONS["ru,bls_restarting_web3signer"]="Перезапускаем web3signer для загрузки нового ключа"
   TRANSLATIONS["ru,bls_web3signer_restarted"]="Web3signer успешно перезапущен"
@@ -1476,6 +1503,7 @@ init_languages() {
   TRANSLATIONS["tr,add_validators_use_current_publisher_prompt"]="Tüm yeni doğrulayıcılar için bunu kullanılsın mı? (y/n) "
   TRANSLATIONS["tr,add_validators_current_publisher_missing"]="❌ Keystore’dan publisher okunamadı (validators[0].publisher veya attester)."
   TRANSLATIONS["tr,option26"]="26. Doğrulayıcı kaldır"
+  TRANSLATIONS["tr,option27"]="27. Loglarda Admin API anahtarını bul"
   TRANSLATIONS["tr,remove_validators_title"]="=== Doğrulayıcı kaldırma ==="
   TRANSLATIONS["tr,remove_validators_no_keystore"]="❌ keystore.json yok: %s"
   TRANSLATIONS["tr,remove_validators_only_one"]="❌ Tek doğrulayıcı kaldırılamaz. Gerekirse düğümü silmek için seçenek 12."
@@ -1704,6 +1732,10 @@ init_languages() {
   TRANSLATIONS["tr,gov_was"]="⚠️ Önceki:"
   TRANSLATIONS["tr,gov_now"]="Şimdi:"
   TRANSLATIONS["tr,gov_no_changes"]="✅ Değişiklik tespit edilmedi."
+  TRANSLATIONS["tr,search_admin_api"]="🔍 'aztec' konteyner loglarında Admin API anahtarı aranıyor..."
+  TRANSLATIONS["tr,admin_api_found"]="✅ Admin API anahtarı:"
+  TRANSLATIONS["tr,admin_api_not_found"]="❌ Loglarda Admin API anahtarı bulunamadı."
+  TRANSLATIONS["tr,admin_api_reset_hint"]="Başlangıç loglarında anahtarı kaçırdıysanız, bir sonraki yeniden başlatmada yeniden oluşturmak için AZTEC_RESET_ADMIN_API_KEY=true kullanın."
   TRANSLATIONS["tr,token_prompt"]="Telegram Bot Token'ını girin:"
   TRANSLATIONS["tr,chatid_prompt"]="Telegram Chat ID'yi girin:"
   TRANSLATIONS["tr,agent_added"]="✅ Aracı systemd'a eklendi ve her dakika çalışacak."
@@ -1938,6 +1970,8 @@ init_languages() {
   TRANSLATIONS["tr,env_created"]="✅ .env dosyası oluşturuldu"
   TRANSLATIONS["tr,creating_compose"]="🛠️ Watchtower ile docker-compose.yml oluşturuluyor"
   TRANSLATIONS["tr,compose_created"]="✅ docker-compose.yml oluşturuldu"
+  TRANSLATIONS["tr,install_admin_api_notice"]="Admin API (Aztec v4+): ilk başlatmada düğüm yönetici API anahtarını stdout'ta bir kez yazar — kaydedin. 8880 admin RPC için x-api-key veya Authorization: Bearer gerekir (GET /status hariç). Anahtar kaybolduysa: AZTEC_RESET_ADMIN_API_KEY=true veya AZTEC_ADMIN_API_KEY_HASH."
+  TRANSLATIONS["tr,install_web3signer_l1_chain"]="Web3Signer eth1 --chain-id=%s (NETWORK=%s, L1 %s)"
   TRANSLATIONS["tr,starting_node"]="🚀 Aztec node başlatılıyor..."
   TRANSLATIONS["tr,showing_logs"]="📄 Son 200 log satırı gösteriliyor..."
   TRANSLATIONS["tr,logs_starting"]="Loglar 5 saniye içinde başlayacak... Loglardan çıkmak için Ctrl+C'ye basın"
@@ -2066,6 +2100,12 @@ init_languages() {
   TRANSLATIONS["tr,installing_bc"]="bc yükleniyor..."
   TRANSLATIONS["tr,installing_python3"]="Python3 yükleniyor..."
   TRANSLATIONS["tr,installing_eth_abi"]="eth_abi yükleniyor..."
+  TRANSLATIONS["tr,installing_nvm"]="nvm yükleniyor..."
+  TRANSLATIONS["tr,installing_nvm_node"]="Node.js nvm ile yükleniyor (LTS)..."
+  TRANSLATIONS["tr,node_lts_below_min"]="LTS gerekli minimumun altında; minimum Node.js sürümü yükleniyor..."
+  TRANSLATIONS["tr,node_min_failed"]="❌ Node.js %s veya daha yeni gerekli. nvm yükleyin: source ~/.nvm/nvm.sh"
+  TRANSLATIONS["tr,node_version_too_old"]="Node.js v%s gerekli minimumun altında (%s)"
+  TRANSLATIONS["tr,node_ok_min"]="Node.js v%s (minimum %s)"
 
   TRANSLATIONS["tr,bls_restarting_web3signer"]="Yeni anahtarı yüklemek için web3signer yeniden başlatılıyor"
   TRANSLATIONS["tr,bls_web3signer_restarted"]="Web3signer başarıyla yeniden başlatıldı"
@@ -2129,7 +2169,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.9.0"
+SCRIPT_VERSION="2.10.0"
 ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
@@ -2141,7 +2181,8 @@ CONTRACT_ADDRESS="0xf6D0D42aCE06829bECB78C74F49879528fC632c1"  # Testnet 4.1.0 r
 #CONTRACT_ADDRESS="0x5932fcb01b6f63550c8bd91055613752480b6455"  # Testnet 4.0.4 rollup address
 #CONTRACT_ADDRESS="0x66a41cb55f9a1e38a45a2ac8685f12a61fbfab77"  # Testnet 3.0.3 rollup address
 #CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet current rollup address
-CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet rollup address
+#CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet 2.1.11 rollup address
+CONTRACT_ADDRESS_MAINNET="0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962"  # Mainnet 4.1.2 rollup address
 
 # GSE contract addresses
 GSE_ADDRESS_TESTNET="0xb6a38a51a6c1de9012f9d8ea9745ef957212eaac" # Testnet new GSE address
@@ -2158,6 +2199,9 @@ L2_BLOCK_PROPOSED_TOPIC0_TESTNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f
 
 # Required tools
 REQUIRED_TOOLS=("cast" "curl" "grep" "sed" "jq" "bc" "python3")
+
+# Minimum Node.js (semver); nvm LTS install may be followed by explicit install if LTS is lower
+MIN_NODE_VERSION="24.12.0"
 
 # Agent paths
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
@@ -2249,6 +2293,27 @@ pip3_or_pym() {
   fi
 }
 
+# Semver compare: true if $1 >= $2 (requires sort -V)
+version_ge() {
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | head -n1)" = "$2" ]
+}
+
+load_nvm() {
+  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  if [ -s "$NVM_DIR/nvm.sh" ]; then
+    # shellcheck source=/dev/null
+    . "$NVM_DIR/nvm.sh"
+  elif [ -s "/usr/local/opt/nvm/nvm.sh" ]; then
+    export NVM_DIR="/usr/local/opt/nvm"
+    # shellcheck source=/dev/null
+    . "/usr/local/opt/nvm/nvm.sh"
+  fi
+  # Activate default alias so `node` is the nvm-managed binary (not system /usr/bin/node).
+  if type nvm &>/dev/null; then
+    nvm use default &>/dev/null || true
+  fi
+}
+
 # === Dependency check ===
 check_dependencies() {
   missing=()
@@ -2263,6 +2328,7 @@ check_dependencies() {
     ["jq"]="jq"
     ["bc"]="bc"
     ["python3"]="python3"
+    ["node_nvm"]="Node.js"
   )
 
   # Проверяем основные утилиты
@@ -2276,6 +2342,20 @@ check_dependencies() {
       echo -e "${GREEN}✅ $display_name $(t "installed")${NC}"
     fi
   done
+
+  load_nvm
+  if command -v node &>/dev/null; then
+    _node_ver=$(node -v 2>/dev/null | sed 's/^v//')
+    if version_ge "$_node_ver" "$MIN_NODE_VERSION"; then
+      echo -e "${GREEN}✅ $(printf "$(t "node_ok_min")" "$_node_ver" "$MIN_NODE_VERSION")${NC}"
+    else
+      echo -e "${YELLOW}⚠️  $(printf "$(t "node_version_too_old")" "$_node_ver" "$MIN_NODE_VERSION")${NC}"
+      missing+=("node_nvm")
+    fi
+  else
+    echo -e "${RED}❌ ${tool_names[node_nvm]} $(t "not_installed")${NC}"
+    missing+=("node_nvm")
+  fi
 
   # Отдельная проверка для python-пакетов
   if command -v python3 &>/dev/null; then
@@ -2312,6 +2392,8 @@ check_dependencies() {
         missing_display+=("curl_cffi")
       elif [ "$tool" == "python3_eth_abi" ]; then
         missing_display+=("eth_abi")
+      elif [ "$tool" == "node_nvm" ]; then
+        missing_display+=("Node.js (>=${MIN_NODE_VERSION})")
       else
         missing_display+=("${tool_names[$tool]:-$tool}")
       fi
@@ -2417,6 +2499,33 @@ check_dependencies() {
               rm -f get-pip.py
             fi
             ;;
+
+          node_nvm)
+            echo -e "\n${CYAN}$(t "installing_nvm_node")${NC}"
+            export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+            if [ ! -s "$NVM_DIR/nvm.sh" ]; then
+              echo -e "${CYAN}$(t "installing_nvm")${NC}"
+              if ! command -v curl &>/dev/null; then
+                echo -e "${RED}curl is required to install nvm.${NC}"
+                exit 1
+              fi
+              curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+            fi
+            load_nvm
+            nvm install --lts
+            nvm alias default 'lts/*'
+            load_nvm
+            hash -r 2>/dev/null || true
+            _nv=$(node -v 2>/dev/null | sed 's/^v//')
+            if [ -n "$_nv" ] && ! version_ge "$_nv" "$MIN_NODE_VERSION"; then
+              echo -e "${YELLOW}$(t "node_lts_below_min")${NC}"
+              nvm install "$MIN_NODE_VERSION"
+              nvm alias default "$MIN_NODE_VERSION"
+            fi
+            load_nvm
+            nvm use default &>/dev/null || true
+            hash -r 2>/dev/null || true
+            ;;
         esac
       done
     else
@@ -2451,6 +2560,18 @@ check_dependencies() {
         echo -e "\n${YELLOW}$(t "curl_cffi_optional")${NC}"
       fi
     fi
+  fi
+
+  load_nvm
+  if command -v node &>/dev/null; then
+    _nv=$(node -v 2>/dev/null | sed 's/^v//')
+    if ! version_ge "$_nv" "$MIN_NODE_VERSION"; then
+      printf "$(t "node_min_failed")\n" "$MIN_NODE_VERSION"
+      exit 1
+    fi
+  else
+    printf "$(t "node_min_failed")\n" "$MIN_NODE_VERSION"
+    exit 1
   fi
 
   # Request RPC URL from user and create .env file
@@ -3289,6 +3410,39 @@ find_governance_proposer_payload() {
   return 0
 }
 
+# === Find Admin API key in logs (Aztec v4+ startup banner) ===
+find_admin_api_key() {
+  echo -e "\n${BLUE}$(t "search_admin_api")${NC}"
+
+  container_id=$(docker ps --format "{{.ID}} {{.Names}}" | grep aztec | grep -vE 'watchtower|otel|prometheus|grafana' | head -n 1 | awk '{print $1}')
+
+  if [ -z "$container_id" ]; then
+    echo -e "\n${RED}$(t "container_not_found")${NC}"
+    return 1
+  fi
+
+  tmp_log=$(mktemp)
+  docker logs "$container_id" 2>&1 | sed -r "s/\x1B\[[0-9;]*[mK]//g" > "$tmp_log" &
+  spinner $!
+
+  admin_key=""
+  first_line=$(grep -an 'ADMIN API KEY' "$tmp_log" | head -n 1 | cut -d: -f1)
+  if [ -n "$first_line" ]; then
+    admin_key=$(tail -n +"$first_line" "$tmp_log" | head -n 60 | grep -oE '[a-f0-9]{64}' | head -n 1)
+  fi
+
+  rm -f "$tmp_log"
+
+  if [ -n "$admin_key" ]; then
+    echo -e "\n${GREEN}$(t "admin_api_found")${NC} $admin_key"
+    return 0
+  fi
+
+  echo -e "\n${RED}$(t "admin_api_not_found")${NC}"
+  echo -e "${YELLOW}$(t "admin_api_reset_hint")${NC}"
+  return 1
+}
+
 # === Create agent and systemd task ===
 create_systemd_agent() {
   local env_file
@@ -3566,7 +3720,7 @@ FUNCTION_SIG_CHECKPOINT="$FUNCTION_SIG_CHECKPOINT"
 TELEGRAM_BOT_TOKEN="$TELEGRAM_BOT_TOKEN"
 TELEGRAM_CHAT_ID="$TELEGRAM_CHAT_ID"
 LOG_FILE="$LOG_FILE"
-LANG="$LANG"
+SCRIPT_LANG="$SCRIPT_LANG"
 L2_BLOCK_PROPOSED_TOPIC0_MAINNET="$L2_BLOCK_PROPOSED_TOPIC0_MAINNET"
 L2_BLOCK_PROPOSED_TOPIC0_TESTNET="$L2_BLOCK_PROPOSED_TOPIC0_TESTNET"
 
@@ -6861,6 +7015,24 @@ function check_validator {
   validator_submenu
 }
 
+# Ethereum L1 chain ID for Web3Signer eth1 mode (must match Aztec --network L1)
+web3signer_eth1_chain_id_for_network() {
+  case "${1:-testnet}" in
+    mainnet) echo 1 ;;
+    testnet) echo 11155111 ;;
+    *) echo 11155111 ;;
+  esac
+}
+
+# Human-readable L1 name for Web3Signer notice (chain-id 11155111 = Sepolia)
+web3signer_l1_name_for_network() {
+  case "${1:-testnet}" in
+    mainnet) echo "Ethereum" ;;
+    testnet) echo "Sepolia" ;;
+    *) echo "Sepolia" ;;
+  esac
+}
+
 # === Main installation function (merged from install_aztec.sh) ===
 install_aztec_node_main() {
     set -e
@@ -6907,12 +7079,39 @@ install_aztec_node_main() {
     sleep 5
     curl -L https://install.aztec.network -o install-aztec.sh
     chmod +x install-aztec.sh
-    bash install-aztec.sh
+    # Official installer runs `exec $SHELL` at the end unless NO_NEW_SHELL=1 (would stop this script until user exits the nested shell).
+    NO_NEW_SHELL=1 bash install-aztec.sh
 
-    echo 'export PATH="$HOME/.aztec/bin:$PATH"' >> ~/.bash_profile
-    source ~/.bash_profile
+    # Official installer prints "start a fresh shell" because PATH is only updated for new logins.
+    # In practice, Aztec CLI may be available via:
+    # - ~/.aztec/bin (aztec-up)
+    # - ~/.aztec/current/bin
+    # - ~/.aztec/current/node_modules/.bin (symlink to scripts/aztec.sh)
+    local aztec_paths=(
+      "$HOME/.aztec/bin"
+      "$HOME/.aztec/current/bin"
+      "$HOME/.aztec/current/node_modules/.bin"
+    )
 
-    if ! command -v aztec &>/dev/null; then
+    for p in "${aztec_paths[@]}"; do
+      [[ -d "$p" ]] && export PATH="$p:$PATH"
+    done
+
+    # Persist for typical Ubuntu shells (interactive bash reads ~/.bashrc; login shells read ~/.profile/~/.bash_profile).
+    local aztec_path_line='export PATH="$HOME/.aztec/bin:$HOME/.aztec/current/bin:$HOME/.aztec/current/node_modules/.bin:$PATH"'
+    for rc in ~/.bashrc ~/.profile ~/.bash_profile; do
+      if [[ -e "$rc" ]] && ! grep -qF '.aztec/current/node_modules/.bin' "$rc" 2>/dev/null; then
+        echo "$aztec_path_line" >> "$rc"
+      fi
+    done
+
+    # Rehash in this process so `command -v` sees newly available binaries.
+    hash -r 2>/dev/null || true
+
+    if ! command -v aztec &>/dev/null && \
+       [[ ! -x "$HOME/.aztec/bin/aztec" ]] && \
+       [[ ! -x "$HOME/.aztec/current/bin/aztec" ]] && \
+       [[ ! -x "$HOME/.aztec/current/node_modules/.bin/aztec" ]]; then
         echo -e "\n${RED}$(t "aztec_not_installed")${NC}"
         return 1
     fi
@@ -7261,6 +7460,7 @@ networks:
 EOF
 
     echo -e "\n${GREEN}$(t "compose_created")${NC}"
+    echo -e "\n${YELLOW}$(t "install_admin_api_notice")${NC}"
 
     # Check if Watchtower is already installed
     if [ -d "$HOME/watchtower" ]; then
@@ -7320,6 +7520,14 @@ EOF
     docker stop web3signer 2>/dev/null || true
     docker rm web3signer 2>/dev/null || true
 
+    # L1 chain-id must match NETWORK= in ~/.env-aztec-agent (same as other script options)
+    NETWORK_VALUE="${NETWORK:-testnet}"
+    if [[ -f "$ENV_FILE" ]]; then
+      _net_from_env=$(grep '^NETWORK=' "$ENV_FILE" 2>/dev/null | tail -n1 | cut -d= -f2- | tr -d '\r' | tr -d "\"' ")
+      [[ -n "$_net_from_env" ]] && NETWORK_VALUE="$_net_from_env"
+    fi
+    WEB3SIGNER_CHAIN_ID=$(web3signer_eth1_chain_id_for_network "$NETWORK_VALUE")
+
     # Run web3signer container
     docker run -d \
       --name web3signer \
@@ -7332,9 +7540,12 @@ EOF
       --http-listen-port=10500 \
       --http-host-allowlist="*" \
       --key-store-path=/keys \
-      eth1 --chain-id=11155111
+      eth1 --chain-id="${WEB3SIGNER_CHAIN_ID}"
 
     echo -e "${GREEN}web3signer started successfully${NC}"
+    _ws_l1_name=$(web3signer_l1_name_for_network "$NETWORK_VALUE")
+    _ws_msg=$(printf "$(t "install_web3signer_l1_chain")" "$WEB3SIGNER_CHAIN_ID" "$NETWORK_VALUE" "$_ws_l1_name")
+    echo -e "\n${CYAN}${_ws_msg}${NC}"
 
     # Wait a moment for web3signer to initialize
     echo -e "${YELLOW}Waiting for web3signer to initialize...${NC}"
@@ -9885,6 +10096,7 @@ main_menu() {
     echo -e "${CYAN}$(t "option24")${NC}"
     echo -e "${CYAN}$(t "option25")${NC}"
     echo -e "${CYAN}$(t "option26")${NC}"
+    echo -e "${CYAN}$(t "option27")${NC}"
     echo -e "${RED}$(t "option0")${NC}"
     echo -e "${BLUE}================================${NC}"
 
@@ -9920,6 +10132,7 @@ main_menu() {
       24) check_error_definitions_updates_safely; command_executed=true ;;
       25) add_aztec_validators; command_executed=true ;;
       26) remove_aztec_validators; command_executed=true ;;
+      27) find_admin_api_key; command_executed=true ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac

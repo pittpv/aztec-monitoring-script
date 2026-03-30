@@ -35,7 +35,27 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 24-03-2026
+## 📌 Son Güncellemeler 30-03-2026
+
+- Rollup sözleşmesi güncellendi: `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
+- ADMIN API KEY bulma ve görüntüleme için **27. seçenek** eklendi
+- **Node.js ≥24.12.0** bağımlılığı ve kullanıcı onayıyla kurulum eklendi
+- **11. seçenek** güncellendi — Aztec düğüm kurulumu
+  - Aztec ikilileri için güncellenmiş yerel kurulum betiğiyle çalışma mantığı güncellendi
+  - web3signer başlatma komutu düzeltildi (mainnet/testnet için chain id doğru ayarlanır)
+
+**version_control.json**
+
+SHA256: `9e3cdcb3c7b60f461b3799f3ec61d8028d65ed537162fd0acad08ce8c102e1f1`
+
+**error_definitions.json**
+
+SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 24-03-2026
 
 - **L1 inclusion / Committee** bloğu Telegram'da: doğrulayıcı işlemlerinin L1'e dahil edilmesinin doğrulanması, slot başlıkları ve imzaları (node ve L1), calldata rollup'ı için durum gösterge tablosu.
   - **L1 doğrulaması için bağımlılıklar**: `eth_abi` Python paketinin kontrol edilmesi/kurulması; pip bağımlılıklarının **`pip3_or_pym` / `pip3_or_pym_available`** üzerinden kurulması (geri dönüş olarak `python3 -m pip` kullanılır).
@@ -46,17 +66,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 - Yeni ve etkilenen metinlerin **İngilizce, Rusça ve Türkçe**'ye çevirileri (25–26 menüleri, L1/committee, `eth_abi`, doğrulayıcı format düzeltmeleri vb.).
 - Rollup sözleşmesi: kullanılmayan tek bir imza yerine — cast çağrılarında ve oluşturulan ajanda (`check_blocks`) **`FUNCTION_SIG_BLOCK`** ve **`FUNCTION_SIG_CHECKPOINT`** kullanımı.
 - **Node kurulumu**: genel BLS anahtarları kurulum mantığından çıkarıldı. Özel BLS anahtarları doğrudan keystore.json içinde kullanılır (resmi belgelere uygun şekilde). Ayrı `bls_validator_*.yml` dosyalarının oluşturulması kaldırıldı; BLS keystore içinde kalır; genel BLS alanı olmayan **çoklu doğrulayıcı** formatı, genel BLS giriş satırı kaldırıldı.
-
-**version_control.json**
-
-SHA256: `9ce26c85554b5731d4cbe1cc336f8a2f4df8ca4b7575e901b23384252834c00c`
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 08-03-2026
 

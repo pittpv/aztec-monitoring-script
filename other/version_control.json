@@ -330,5 +330,16 @@
       "Node install: multi-validator YAML without per-validator public BLS files; EN/RU/TR translations"
     ],
     "NOTICE": "After updating the script, remove the old monitoring agent and install a new one."
+  },
+  {
+    "VERSION": "2.10.0",
+    "UPDATE_DATE": "30.03.2026",
+    "CHANGES": [
+      "Rollup contract updated: 0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962",
+      "Option 27: find and display ADMIN API KEY",
+      "Node.js 24.12.0+ dependency with user-consent installation",
+      "Option 11 node install: updated native Aztec binary install script flow; web3signer launch fixes chain id for mainnet/testnet"
+    ],
+    "NOTICE": "After updating the script, remove the old monitoring agent and install a new one."
   }
 ]
