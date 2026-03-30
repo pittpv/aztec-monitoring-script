@@ -37,7 +37,7 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 
 ## 📌 Son Güncellemeler 30-03-2026
 
-- Rollup sözleşmesi güncellendi: `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
+- Mainnet rollup sözleşmesi güncellendi: `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
 - ADMIN API KEY bulma ve görüntüleme için **27. seçenek** eklendi
 - **Node.js ≥24.12.0** bağımlılığı ve kullanıcı onayıyla kurulum eklendi
 - **11. seçenek** güncellendi — Aztec düğüm kurulumu

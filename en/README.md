@@ -37,7 +37,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 ## 📌 Latest Updates 30-03-2026
 
-- Rollup contract updated to `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
+- Mainnet rollup contract updated to `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
 - Added **Option 27** to find and display the ADMIN API KEY
 - Added **Node.js ≥24.12.0** dependency and installation with user consent
 - Updated **Option 11** — Aztec node installation
