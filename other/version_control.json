@@ -341,5 +341,13 @@
       "Option 11 node install: updated native Aztec binary install script flow; web3signer launch fixes chain id for mainnet/testnet"
     ],
     "NOTICE": "After updating the script, remove the old monitoring agent and install a new one."
+  },
+  {
+    "VERSION": "2.10.1",
+    "UPDATE_DATE": "01.04.2026",
+    "CHANGES": [
+      "Fixed CheckpointProposed event TOPIC0 signature — incorrect value caused L1 verification to fail"
+    ],
+    "NOTICE": "After updating the script, remove the old monitoring agent and install a new one."
   }
 ]

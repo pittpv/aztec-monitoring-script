@@ -35,18 +35,13 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 30-03-2026
+## 📌 Latest Updates 01-04-2026
 
-- Mainnet rollup contract updated to `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
-- Added **Option 27** to find and display the ADMIN API KEY
-- Added **Node.js ≥24.12.0** dependency and installation with user consent
-- Updated **Option 11** — Aztec node installation
-  - Logic aligned with the updated native script for installing Aztec binaries
-  - Fixed web3signer launch command (chain id is set correctly for mainnet/testnet)
+- Fixed the TOPIC0 signature of the CheckpointProposed event. The incorrect value caused L1 verification to fail
 
 **version_control.json**
 
-SHA256: `9e3cdcb3c7b60f461b3799f3ec61d8028d65ed537162fd0acad08ce8c102e1f1`
+SHA256: `9b2fbcd7303655ecff2461f905a65cc6223bb850f46bdfbc0d587582a172c089`
 
 **error_definitions.json**
 
@@ -54,6 +49,15 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 <details>
 <summary>📅 Version History</summary>
+
+### 30-03-2026
+
+- Mainnet rollup contract updated to `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
+- Added **Option 27** to find and display the ADMIN API KEY
+- Added **Node.js ≥24.12.0** dependency and installation with user consent
+- Updated **Option 11** — Aztec node installation
+  - Logic aligned with the updated native script for installing Aztec binaries
+  - Fixed web3signer launch command (chain id is set correctly for mainnet/testnet)
 
 ### 24-03-2026
 

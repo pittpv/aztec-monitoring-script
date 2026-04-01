@@ -35,18 +35,13 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 30-03-2026
+## 📌 Son Güncellemeler 01-04-2026
 
-- Mainnet rollup sözleşmesi güncellendi: `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
-- ADMIN API KEY bulma ve görüntüleme için **27. seçenek** eklendi
-- **Node.js ≥24.12.0** bağımlılığı ve kullanıcı onayıyla kurulum eklendi
-- **11. seçenek** güncellendi — Aztec düğüm kurulumu
-  - Aztec ikilileri için güncellenmiş yerel kurulum betiğiyle çalışma mantığı güncellendi
-  - web3signer başlatma komutu düzeltildi (mainnet/testnet için chain id doğru ayarlanır)
+- CheckpointProposed olayının TOPIC0 imzası düzeltildi. Yanlış değer L1 doğrulamasının çalışmamasına neden oluyordu
 
 **version_control.json**
 
-SHA256: `9e3cdcb3c7b60f461b3799f3ec61d8028d65ed537162fd0acad08ce8c102e1f1`
+SHA256: `9b2fbcd7303655ecff2461f905a65cc6223bb850f46bdfbc0d587582a172c089`
 
 **error_definitions.json**
 
@@ -54,6 +49,15 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 30-03-2026
+
+- Mainnet rollup sözleşmesi güncellendi: `0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962`
+- ADMIN API KEY bulma ve görüntüleme için **27. seçenek** eklendi
+- **Node.js ≥24.12.0** bağımlılığı ve kullanıcı onayıyla kurulum eklendi
+- **11. seçenek** güncellendi — Aztec düğüm kurulumu
+  - Aztec ikilileri için güncellenmiş yerel kurulum betiğiyle çalışma mantığı güncellendi
+  - web3signer başlatma komutu düzeltildi (mainnet/testnet için chain id doğru ayarlanır)
 
 ### 24-03-2026
 

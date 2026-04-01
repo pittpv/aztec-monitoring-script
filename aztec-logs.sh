@@ -2169,7 +2169,7 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.10.0"
+SCRIPT_VERSION="2.10.1"
 ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
@@ -2194,7 +2194,8 @@ FUNCTION_SIG_BLOCK="getPendingBlockNumber()"
 FUNCTION_SIG_CHECKPOINT="getPendingCheckpointNumber()"
 
 # L1 rollup event topic0 per network
-L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x9ad613a7ff46b97e0f732b31118d43f39c9ca017bed1efe739b70b0625383589"
+# L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x9ad613a7ff46b97e0f732b31118d43f39c9ca017bed1efe739b70b0625383589" # Ignition
+L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0" # Alpha
 L2_BLOCK_PROPOSED_TOPIC0_TESTNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
 
 # Required tools
