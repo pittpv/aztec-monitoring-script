@@ -37,7 +37,7 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 
 ## 📌 Latest Updates 01-04-2026
 
-- Fixed the TOPIC0 signature of the CheckpointProposed event. The incorrect value caused L1 verification to fail
+- Fixed the TOPIC0 signature of the CheckpointProposed event for **mainnet**. The incorrect value caused L1 verification to fail
 
 **version_control.json**
 
