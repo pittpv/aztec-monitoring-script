@@ -349,5 +349,12 @@
       "Fixed CheckpointProposed event TOPIC0 signature — incorrect value caused L1 verification to fail"
     ],
     "NOTICE": "After updating the script, remove the old monitoring agent and install a new one."
+  },
+  {
+    "VERSION": "2.10.2",
+    "UPDATE_DATE": "06.04.2026",
+    "CHANGES": [
+      "Updated mainnet version references from Aztec node 4.1.2 to 4.1.3"
+    ]
   }
 ]
