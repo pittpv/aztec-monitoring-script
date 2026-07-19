@@ -7,7 +7,245 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 VIOLET='\033[0;35m'
+GRAY='\033[0;90m'
+BOLD='\033[1m'
+DIM='\033[2m'
 NC='\033[0m' # No Color
+
+# === UI helpers (presentation layer only) ===
+UI_MENU_INDEX=0
+UI_MENU_QUICK=""
+UI_MENU_BLOCK_LINES=0
+UI_MENU_NUMERIC_INPUT=""
+
+ui_is_tty() { [[ -t 0 && -t 1 ]]; }
+
+ui_use_color() { [[ -z "${NO_COLOR:-}" ]] && ui_is_tty; }
+
+ui_menu_interactive() {
+  ui_is_tty && [[ "${TERM:-}" != "dumb" ]]
+}
+
+ui_clear_if_tty() {
+  if ui_menu_interactive; then
+    clear
+    UI_MENU_BLOCK_LINES=0
+  fi
+}
+
+ui_menu_block_erase() {
+  if [[ "${UI_MENU_BLOCK_LINES:-0}" -gt 0 ]]; then
+    printf '\033[%dA\033[J' "$UI_MENU_BLOCK_LINES"
+    UI_MENU_BLOCK_LINES=0
+  fi
+}
+
+ui_menu_line() {
+  printf '%b\n' "$1"
+  UI_MENU_BLOCK_LINES=$((UI_MENU_BLOCK_LINES + 1))
+}
+
+ui_menu_end_draw() {
+  printf '\033[?25h' >&2
+}
+
+ui_menu_save_anchor() {
+  UI_MENU_BLOCK_LINES=0
+}
+
+ui_pause() {
+  echo ""
+  echo -e "${YELLOW}$(t press_enter_continue)${NC}"
+  read -r
+}
+
+ui_section() {
+  echo -e "\n${BLUE}── $(t "$1") ──${NC}"
+}
+
+t_opt() {
+  echo "${TRANSLATIONS[$SCRIPT_LANG,option$1]}"
+}
+
+menu_option_name() {
+  local num="$1"
+  local full
+  full=$(t_opt "$num" 2>/dev/null)
+  [[ -z "$full" ]] && return 0
+  if [[ "$full" =~ ^[0-9]+\.[[:space:]]*(.+)$ ]]; then
+    echo "${BASH_REMATCH[1]}"
+  else
+    echo "$full"
+  fi
+}
+
+ui_menu_show_option_input() {
+  local input="$1"
+  local label
+  label=$(menu_option_name "$input")
+  printf '\r\033[K' >&2
+  if [[ -n "$label" ]]; then
+    printf '%s%s — %s' "$(t choose_option) " "$input" "$label" >&2
+  else
+    printf '%s%s' "$(t choose_option) " "$input" >&2
+  fi
+}
+
+ui_menu_read_option_number() {
+  local first="$1"
+  local input="$first"
+
+  ui_menu_end_draw
+  printf '\n' >&2
+  while true; do
+    ui_menu_show_option_input "$input"
+    local c=""
+    IFS= read -rsn1 c || true
+    if [[ -z "$c" ]]; then
+      break
+    fi
+    if [[ "$c" == $'\x7f' || "$c" == $'\b' ]]; then
+      if [[ ${#input} -le 1 ]]; then
+        input=""
+        break
+      fi
+      input="${input%?}"
+    elif [[ "$c" =~ [0-9] ]]; then
+      input+="$c"
+    else
+      break
+    fi
+  done
+  printf '\n' >&2
+  input="${input//[!0-9]/}"
+  UI_MENU_NUMERIC_INPUT="$input"
+}
+
+menu_option_color() {
+  local opt="$1"
+  case "$opt" in
+    9|13) printf '%s' "$GREEN" ;;
+    10|14|0) printf '%s' "$RED" ;;
+    18) printf '%s' "$YELLOW" ;;
+    20|21|22|23) printf '%s' "$NC" ;;
+    *) printf '%s' "$CYAN" ;;
+  esac
+}
+
+ui_menu_resolve_input() {
+  local input="$1"
+  local local_count="$2"
+  local allow_local="${3:-1}"
+
+  input="${input//[!0-9]/}"
+  UI_MENU_QUICK=""
+  if [[ ! "$input" =~ ^[0-9]+$ ]]; then
+    return 1
+  fi
+  if [[ "$input" == "0" ]]; then
+    UI_MENU_QUICK="0"
+    return 0
+  fi
+  if [[ "$input" -ge 1 && "$input" -le 27 ]]; then
+    UI_MENU_QUICK="$input"
+    return 0
+  fi
+  if [[ "$allow_local" == "1" && "$input" -ge 1 && "$input" -le "$local_count" ]]; then
+    UI_MENU_INDEX=$((input - 1))
+    return 0
+  fi
+  return 1
+}
+
+ui_menu_pick_fallback() {
+  local title="$1"
+  shift
+  local -a items=("$@")
+  local count=${#items[@]}
+
+  echo -e "\n${BLUE}${BOLD}${title}${NC}"
+  local item
+  for item in "${items[@]}"; do
+    echo -e "  ${item}"
+  done
+  echo -e "${DIM}$(t menu_hint_quick_jump)${NC}"
+
+  while true; do
+    read -p "$(t choose_option) " input
+    input="${input// /}"
+    local label
+    label=$(menu_option_name "$input")
+    if [[ -n "$label" ]]; then
+      echo -e "${DIM}${input} — ${label}${NC}"
+    fi
+    if ui_menu_resolve_input "$input" "$count"; then
+      return 0
+    fi
+    echo -e "${RED}$(t invalid_choice)${NC}"
+  done
+}
+
+ui_menu_pick() {
+  local title="$1"
+  shift
+  local -a items=("$@")
+  local count=${#items[@]}
+  local selected=0
+
+  UI_MENU_INDEX=0
+  UI_MENU_QUICK=""
+
+  if ! ui_menu_interactive; then
+    ui_menu_pick_fallback "$title" "${items[@]}"
+    return 0
+  fi
+
+  while true; do
+    ui_menu_block_erase
+    printf '\033[?25l'
+
+    ui_menu_line ""
+    ui_menu_line "${BLUE}${BOLD}${title}${NC}"
+    ui_menu_line ""
+    local i=0
+    for item in "${items[@]}"; do
+      if [[ $i -eq $selected ]]; then
+        ui_menu_line "${GREEN}${BOLD}▸ ${item}${NC}"
+      else
+        ui_menu_line "  ${item}"
+      fi
+      ((i++))
+    done
+    ui_menu_line ""
+    ui_menu_line "${DIM}$(t menu_hint_arrows)${NC}"
+    ui_menu_line "${DIM}$(t menu_hint_quick_jump)${NC}"
+
+    local key=""
+    IFS= read -rsn1 key || true
+
+    if [[ -z "$key" ]]; then
+      UI_MENU_INDEX=$selected
+      ui_menu_end_draw
+      return 0
+    elif [[ "$key" == $'\x1b' ]]; then
+      local seq=""
+      IFS= read -rsn2 -t 0.01 seq || true
+      case "$seq" in
+        '[A') [[ $selected -gt 0 ]] && ((selected--)) ;;
+        '[B') [[ $selected -lt $((count - 1)) ]] && ((selected++)) ;;
+      esac
+    elif [[ "$key" =~ [0-9] ]]; then
+      ui_menu_read_option_number "$key"
+      local input="$UI_MENU_NUMERIC_INPUT"
+      [[ -z "$input" ]] && continue
+      if ui_menu_resolve_input "$input" "$count"; then
+        return 0
+      fi
+      echo -e "${RED}$(t invalid_choice)${NC}"
+      sleep 1
+    fi
+  done
+}
 
 
 # === Language settings ===
@@ -41,35 +279,35 @@ init_languages() {
   esac
 
   # English translations
-  TRANSLATIONS["en,welcome"]="Welcome to the Aztec node monitoring script"
+  TRANSLATIONS["en,welcome"]="Welcome to the Aztec Tools"
   TRANSLATIONS["en,title"]="========= Main Menu ========="
   TRANSLATIONS["en,option1"]="1. Check container and node synchronization"
-  TRANSLATIONS["en,option2"]="2. Install node monitoring agent with notifications"
-  TRANSLATIONS["en,option3"]="3. Remove monitoring agent"
-  TRANSLATIONS["en,option4"]="4. View Aztec logs"
-  TRANSLATIONS["en,option5"]="5. Find rollupAddress"
-  TRANSLATIONS["en,option6"]="6. Find PeerID"
-  TRANSLATIONS["en,option7"]="7. Find governanceProposerPayload"
-  TRANSLATIONS["en,option8"]="8. Check Proven L2 Block"
-  TRANSLATIONS["en,option9"]="9. Validator search, status check and queue monitoring"
-  TRANSLATIONS["en,option10"]="10. Publisher balance monitoring"
-  TRANSLATIONS["en,option11"]="11. Install Aztec Node with Watchtower"
-  TRANSLATIONS["en,option12"]="12. Delete Aztec node"
-  TRANSLATIONS["en,option13"]="13. Start Aztec node containers"
-  TRANSLATIONS["en,option14"]="14. Stop Aztec node containers"
-  TRANSLATIONS["en,option15"]="15. Update Aztec node"
-  TRANSLATIONS["en,option16"]="16. Downgrade Aztec node"
-  TRANSLATIONS["en,option17"]="17. Check Aztec version"
-  TRANSLATIONS["en,option18"]="18. Generate BLS keys from mnemonic"
-  TRANSLATIONS["en,option19"]="19. Approve"
-  TRANSLATIONS["en,option20"]="20. Stake"
-  TRANSLATIONS["en,option21"]="21. Claim rewards"
-  TRANSLATIONS["en,option22"]="22. Change RPC URL"
-  TRANSLATIONS["en,option23"]="23. Check for script updates (safe, with hash verification)"
-  TRANSLATIONS["en,option24"]="24. Check for error definitions updates (safe, with hash verification)"
-  TRANSLATIONS["en,option25"]="25. Add validators"
+  TRANSLATIONS["en,option2"]="2. View Aztec logs"
+  TRANSLATIONS["en,option3"]="3. Find rollupAddress"
+  TRANSLATIONS["en,option4"]="4. Find PeerID"
+  TRANSLATIONS["en,option5"]="5. Find governanceProposerPayload"
+  TRANSLATIONS["en,option6"]="6. Check Proven L2 Block"
+  TRANSLATIONS["en,option7"]="7. Check Aztec version"
+  TRANSLATIONS["en,option8"]="8. Find Admin API key in logs"
+  TRANSLATIONS["en,option9"]="9. Install node monitoring agent with notifications"
+  TRANSLATIONS["en,option10"]="10. Remove monitoring agent"
+  TRANSLATIONS["en,option11"]="11. Validator search, status check and queue monitoring"
+  TRANSLATIONS["en,option12"]="12. Publisher balance monitoring"
+  TRANSLATIONS["en,option13"]="13. Install Aztec Node with Watchtower"
+  TRANSLATIONS["en,option14"]="14. Delete Aztec node"
+  TRANSLATIONS["en,option15"]="15. Start Aztec node containers"
+  TRANSLATIONS["en,option16"]="16. Stop Aztec node containers"
+  TRANSLATIONS["en,option17"]="17. Update Aztec node"
+  TRANSLATIONS["en,option18"]="18. Downgrade Aztec node"
+  TRANSLATIONS["en,option19"]="19. Change RPC URL"
+  TRANSLATIONS["en,option20"]="20. Generate BLS keys from mnemonic"
+  TRANSLATIONS["en,option21"]="21. Approve"
+  TRANSLATIONS["en,option22"]="22. Stake"
+  TRANSLATIONS["en,option23"]="23. Claim rewards"
+  TRANSLATIONS["en,option24"]="24. Add validators"
+  TRANSLATIONS["en,option25"]="25. Remove validators"
   TRANSLATIONS["en,add_validators_title"]="=== Add validators to existing node ==="
-  TRANSLATIONS["en,add_validators_prereq_fail"]="❌ Required: %s — run node installation (option 11) first or fix paths."
+  TRANSLATIONS["en,add_validators_prereq_fail"]="❌ Required: %s — run node installation (option 13) first or fix paths."
   TRANSLATIONS["en,add_validators_jq_required"]="❌ jq is required. Install jq and try again."
   TRANSLATIONS["en,add_validators_max_reached"]="❌ Maximum 10 validators total. You have %d; you can add at most %d."
   TRANSLATIONS["en,add_validators_existing_bls"]="Existing keystore uses BLS keys; new validators must include BLS private keys (same format as install)."
@@ -86,11 +324,11 @@ init_languages() {
   TRANSLATIONS["en,add_validators_current_publisher_show"]="Current publisher in keystore: %s"
   TRANSLATIONS["en,add_validators_use_current_publisher_prompt"]="Use this publisher for all new validators? (y/n) "
   TRANSLATIONS["en,add_validators_current_publisher_missing"]="❌ Could not read publisher from keystore (validators[0].publisher or attester)."
-  TRANSLATIONS["en,option26"]="26. Remove validators"
-  TRANSLATIONS["en,option27"]="27. Find Admin API key in logs"
+  TRANSLATIONS["en,option26"]="26. Check for script updates (safe, with hash verification)"
+  TRANSLATIONS["en,option27"]="27. Check for error definitions updates (safe, with hash verification)"
   TRANSLATIONS["en,remove_validators_title"]="=== Remove validators ==="
   TRANSLATIONS["en,remove_validators_no_keystore"]="❌ keystore.json not found: %s"
-  TRANSLATIONS["en,remove_validators_only_one"]="❌ Cannot remove the only validator. Use option 12 to delete the node if needed."
+  TRANSLATIONS["en,remove_validators_only_one"]="❌ Cannot remove the only validator. Use option 14 to delete the node if needed."
   TRANSLATIONS["en,remove_validators_list_header"]="Validators in keystore (number — attester address):"
   TRANSLATIONS["en,remove_validators_prompt"]="Enter numbers to remove (comma-separated, e.g. 1,3): "
   TRANSLATIONS["en,remove_validators_invalid_num"]="❌ Invalid or out-of-range number: %s (valid: 1–%d)"
@@ -106,9 +344,23 @@ init_languages() {
   TRANSLATIONS["en,remove_validators_no_compose"]="⚠️ Could not find docker-compose.yml; restart web3signer and the node manually."
   TRANSLATIONS["en,remove_validators_aborted"]="Aborted."
   TRANSLATIONS["en,option0"]="0. Exit"
+  TRANSLATIONS["en,press_enter_continue"]="Press Enter to continue..."
+  TRANSLATIONS["en,menu_hint_arrows"]="↑↓ — navigate, Enter — select"
+  TRANSLATIONS["en,menu_hint_quick_jump"]="Type option number 0–27 + Enter for quick jump"
+  TRANSLATIONS["en,menu_back"]="← Back to categories"
+  TRANSLATIONS["en,menu_cat_diagnostics"]="Diagnostics & logs"
+  TRANSLATIONS["en,menu_cat_monitoring"]="Monitoring"
+  TRANSLATIONS["en,menu_cat_node"]="Node management"
+  TRANSLATIONS["en,menu_cat_staking"]="Staking & validators"
+  TRANSLATIONS["en,menu_cat_maintenance"]="Updates & maintenance"
+  TRANSLATIONS["en,menu_cat_exit"]="Exit"
+  TRANSLATIONS["en,status_bar_format"]="Script v%s | Network: %s | RPC: %s"
+  TRANSLATIONS["en,enter_validator_addresses_check"]="Enter validator addresses to check (comma separated):"
+  TRANSLATIONS["en,error_fetch_validators_gse"]="Error: Failed to fetch validators using GSE contract method"
+  TRANSLATIONS["en,checking_validators_in_queue"]="Checking %d validators in queue..."
 
   # Update check translations
-  TRANSLATIONS["en,note_check_updates_safely"]="Note: To check for remote updates safely, use the Option 23"
+  TRANSLATIONS["en,note_check_updates_safely"]="Note: To check for remote updates safely, use Option 26"
   TRANSLATIONS["en,local_version_up_to_date"]="The local version control file is up to date"
   TRANSLATIONS["en,safe_update_check"]="Safe Update Check"
   TRANSLATIONS["en,update_check_warning"]="This will download version_control.json from GitHub with SHA256 verification."
@@ -246,7 +498,7 @@ init_languages() {
   TRANSLATIONS["en,bls_new_operator_success"]="All done! You have successfully joined the new testnet"
   TRANSLATIONS["en,bls_restart_node_notice"]="Now restart your node, check that YML files with new private keys have been added to /aztec/keys, and that /aztec/config/keystore.json has been replaced with the new eth addresses of the validators."
   TRANSLATIONS["en,bls_key_extraction_failed"]="Failed to extract keys from generated file"
-  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 18) or add "
+  TRANSLATIONS["en,staking_run_bls_generation_first"]="Please run BLS keys generation first (option 20) or add "
   TRANSLATIONS["en,staking_invalid_bls_file"]="Invalid BLS keys file format"
   TRANSLATIONS["en,staking_failed_generate_address"]="Failed to generate address from private key"
   TRANSLATIONS["en,staking_found_single_validator"]="Found single validator for new operator method"
@@ -267,8 +519,8 @@ init_languages() {
   TRANSLATIONS["en,bls_keys_saved_success"]="BLS keys successfully generated and saved"
   TRANSLATIONS["en,bls_next_steps"]="Next steps:"
   TRANSLATIONS["en,bls_send_eth_step"]="Send 0.1-0.3 Sepolia ETH to the address above"
-  TRANSLATIONS["en,bls_run_approve_step"]="Run option 19 (Approve) to approve stake spending"
-  TRANSLATIONS["en,bls_run_stake_step"]="Run option 20 (Stake) to complete validator staking"
+  TRANSLATIONS["en,bls_run_approve_step"]="Run option 21 (Approve) to approve stake spending"
+  TRANSLATIONS["en,bls_run_stake_step"]="Run option 22 (Stake) to complete validator staking"
   TRANSLATIONS["en,staking_missing_new_operator_info"]="Missing new operator information in BLS file"
   TRANSLATIONS["en,staking_found_validators_new_operator"]="Found validators for new operator method:"
   TRANSLATIONS["en,staking_processing_new_operator"]="Processing validator %s/%s (new operator method)"
@@ -310,10 +562,15 @@ init_languages() {
   TRANSLATIONS["en,search_gov"]="🔍 Searching for governanceProposerPayload in 'aztec' container logs..."
   TRANSLATIONS["en,gov_found"]="Found governanceProposerPayload values:"
   TRANSLATIONS["en,gov_not_found"]="❌ No governanceProposerPayload found."
+  TRANSLATIONS["en,gov_found_results"]="Unique governanceProposerPayload values:"
   TRANSLATIONS["en,gov_changed"]="🛑 GovernanceProposerPayload change detected!"
   TRANSLATIONS["en,gov_was"]="⚠️ Was:"
   TRANSLATIONS["en,gov_now"]="Now:"
   TRANSLATIONS["en,gov_no_changes"]="✅ No changes detected."
+  TRANSLATIONS["en,gov_v5_expected"]="Expected V5UpgradePayload (mainnet AZUP-2):"
+  TRANSLATIONS["en,gov_v5_match"]="✅ Latest payload matches V5UpgradePayload."
+  TRANSLATIONS["en,gov_v5_mismatch"]="⚠️ Latest payload does not match V5UpgradePayload."
+  TRANSLATIONS["en,gov_signal_hint"]="To signal, set in node .env and restart: GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s"
   TRANSLATIONS["en,search_admin_api"]="🔍 Searching for Admin API key in 'aztec' container logs..."
   TRANSLATIONS["en,admin_api_found"]="✅ Admin API key:"
   TRANSLATIONS["en,admin_api_not_found"]="❌ Admin API key not found in logs."
@@ -492,7 +749,7 @@ init_languages() {
   TRANSLATIONS["en,docker_found"]="✅ Docker and docker compose found"
   TRANSLATIONS["en,installing_aztec"]="⬇️ Installing Aztec node..."
   TRANSLATIONS["en,aztec_not_installed"]="❌ Aztec node not installed. Check installation."
-  TRANSLATIONS["en,aztec_installed"]="✅ Aztec node installed"
+  TRANSLATIONS["en,aztec_installed"]="✅ Aztec CLI installed"
   TRANSLATIONS["en,running_aztec_up"]="🚀 Running aztec-up latest..."
   TRANSLATIONS["en,opening_ports"]="🌐 Opening ports 40400 and 8080..."
   TRANSLATIONS["en,ports_opened"]="✅ Ports opened"
@@ -500,7 +757,7 @@ init_languages() {
   TRANSLATIONS["en,creating_env"]="📝 Creating .env file..."
   TRANSLATIONS["en,creating_compose"]="🛠️ Creating docker-compose.yml with Watchtower"
   TRANSLATIONS["en,compose_created"]="✅ docker-compose.yml created"
-  TRANSLATIONS["en,install_admin_api_notice"]="Admin API (Aztec v4+): on first start the node prints a random admin API key once to stdout — save it. Admin RPC on port 8880 requires header x-api-key or Authorization: Bearer (GET /status is exempt). If lost: set AZTEC_RESET_ADMIN_API_KEY=true for one restart, or AZTEC_ADMIN_API_KEY_HASH for a known key."
+  TRANSLATIONS["en,install_admin_api_notice"]="Admin API (Aztec v5+): on first start the node prints a random admin API key once to stdout — save it. Admin RPC on port 8880 requires header x-api-key or Authorization: Bearer (GET /status is exempt). If lost: set AZTEC_RESET_ADMIN_API_KEY=true for one restart, or AZTEC_ADMIN_API_KEY_HASH for a known key."
   TRANSLATIONS["en,install_web3signer_l1_chain"]="Web3Signer eth1 --chain-id=%s (NETWORK=%s, L1 %s)"
   TRANSLATIONS["en,starting_node"]="🚀 Starting Aztec node..."
   TRANSLATIONS["en,showing_logs"]="📄 Showing last 200 lines of logs..."
@@ -694,6 +951,10 @@ init_languages() {
   TRANSLATIONS["en,bls_final_web3signer_restart_failed"]="Final web3signer restart failed"
 
   TRANSLATIONS["en,aztec_rewards_claim"]="Aztec Rewards Claim"
+  TRANSLATIONS["en,claim_gas_key_prompt"]="Enter private key that pays gas (claim is permissionless; rewards go to coinbase). Hidden: "
+  TRANSLATIONS["en,claimable_check_unavailable"]="isRewardsClaimable() is not available on this rollup (v5) — checking balances anyway."
+  TRANSLATIONS["en,staking_asset_label"]="Staking asset (ERC-20):"
+  TRANSLATIONS["en,staking_asset_resolve_failed"]="Failed to resolve staking asset via getStakingAsset(); aborting approve."
   TRANSLATIONS["en,environment_file_not_found"]="Environment file not found"
   TRANSLATIONS["en,rpc_url_not_set"]="RPC_URL not set"
   TRANSLATIONS["en,contract_address_not_set"]="CONTRACT_ADDRESS not set"
@@ -746,35 +1007,35 @@ init_languages() {
   TRANSLATIONS["en,claim_function_not_activated"]="Currently the claim function is not activated in contract"
 
   # Russian translations
-  TRANSLATIONS["ru,welcome"]="Добро пожаловать в скрипт мониторинга ноды Aztec"
+  TRANSLATIONS["ru,welcome"]="Добро пожаловать в Aztec Tools"
   TRANSLATIONS["ru,title"]="========= Главное меню ========="
   TRANSLATIONS["ru,option1"]="1. Проверить контейнер и синхронизацию ноды"
-  TRANSLATIONS["ru,option2"]="2. Установить агент мониторинга ноды с уведомлениями"
-  TRANSLATIONS["ru,option3"]="3. Удалить агент мониторинга"
-  TRANSLATIONS["ru,option4"]="4. Просмотреть логи Aztec"
-  TRANSLATIONS["ru,option5"]="5. Найти rollupAddress"
-  TRANSLATIONS["ru,option6"]="6. Найти PeerID"
-  TRANSLATIONS["ru,option7"]="7. Найти governanceProposerPayload"
-  TRANSLATIONS["ru,option8"]="8. Проверить Proven L2 блок"
-  TRANSLATIONS["ru,option9"]="9. Поиск валидатора, проверка статуса и мониторинг очереди"
-  TRANSLATIONS["ru,option10"]="10. Мониторинг баланса publisher"
-  TRANSLATIONS["ru,option11"]="11. Установить Aztec ноду с Watchtower"
-  TRANSLATIONS["ru,option12"]="12. Удалить ноду Aztec"
-  TRANSLATIONS["ru,option13"]="13. Запустить контейнеры ноды Aztec"
-  TRANSLATIONS["ru,option14"]="14. Остановить контейнеры ноды Aztec"
-  TRANSLATIONS["ru,option15"]="15. Обновить ноду Aztec"
-  TRANSLATIONS["ru,option16"]="16. Сделать даунгрейд ноды Aztec"
-  TRANSLATIONS["ru,option17"]="17. Проверить версию ноды Aztec"
-  TRANSLATIONS["ru,option18"]="18. Сгенерировать BLS ключи из мнемоники"
-  TRANSLATIONS["ru,option19"]="19. Апрув"
-  TRANSLATIONS["ru,option20"]="20. Стейк"
-  TRANSLATIONS["ru,option21"]="21. Получить награды"
-  TRANSLATIONS["ru,option22"]="22. Изменить RPC URL"
-  TRANSLATIONS["ru,option23"]="23. Проверить обновления скрипта (безопасно, с проверкой хеша)"
-  TRANSLATIONS["ru,option24"]="24. Проверить обновления определений ошибок (безопасно, с проверкой хеша)"
-  TRANSLATIONS["ru,option25"]="25. Добавить валидаторов"
+  TRANSLATIONS["ru,option2"]="2. Просмотреть логи Aztec"
+  TRANSLATIONS["ru,option3"]="3. Найти rollupAddress"
+  TRANSLATIONS["ru,option4"]="4. Найти PeerID"
+  TRANSLATIONS["ru,option5"]="5. Найти governanceProposerPayload"
+  TRANSLATIONS["ru,option6"]="6. Проверить Proven L2 блок"
+  TRANSLATIONS["ru,option7"]="7. Проверить версию ноды Aztec"
+  TRANSLATIONS["ru,option8"]="8. Найти Admin API key в логах"
+  TRANSLATIONS["ru,option9"]="9. Установить агент мониторинга ноды с уведомлениями"
+  TRANSLATIONS["ru,option10"]="10. Удалить агент мониторинга"
+  TRANSLATIONS["ru,option11"]="11. Поиск валидатора, проверка статуса и мониторинг очереди"
+  TRANSLATIONS["ru,option12"]="12. Мониторинг баланса publisher"
+  TRANSLATIONS["ru,option13"]="13. Установить Aztec ноду с Watchtower"
+  TRANSLATIONS["ru,option14"]="14. Удалить ноду Aztec"
+  TRANSLATIONS["ru,option15"]="15. Запустить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option16"]="16. Остановить контейнеры ноды Aztec"
+  TRANSLATIONS["ru,option17"]="17. Обновить ноду Aztec"
+  TRANSLATIONS["ru,option18"]="18. Сделать даунгрейд ноды Aztec"
+  TRANSLATIONS["ru,option19"]="19. Изменить RPC URL"
+  TRANSLATIONS["ru,option20"]="20. Сгенерировать BLS ключи из мнемоники"
+  TRANSLATIONS["ru,option21"]="21. Апрув"
+  TRANSLATIONS["ru,option22"]="22. Стейк"
+  TRANSLATIONS["ru,option23"]="23. Получить награды"
+  TRANSLATIONS["ru,option24"]="24. Добавить валидаторов"
+  TRANSLATIONS["ru,option25"]="25. Удалить валидаторов"
   TRANSLATIONS["ru,add_validators_title"]="=== Добавление валидаторов к существующей ноде ==="
-  TRANSLATIONS["ru,add_validators_prereq_fail"]="❌ Нужно: %s — сначала установите ноду (п. 11) или исправьте пути."
+  TRANSLATIONS["ru,add_validators_prereq_fail"]="❌ Нужно: %s — сначала установите ноду (п. 13) или исправьте пути."
   TRANSLATIONS["ru,add_validators_jq_required"]="❌ Нужен jq. Установите jq и повторите."
   TRANSLATIONS["ru,add_validators_max_reached"]="❌ Не более 10 валидаторов всего. Сейчас %d; можно добавить не более %d."
   TRANSLATIONS["ru,add_validators_existing_bls"]="В keystore уже есть BLS; новые валидаторы нужно вводить с BLS (как при установке)."
@@ -791,11 +1052,11 @@ init_languages() {
   TRANSLATIONS["ru,add_validators_current_publisher_show"]="Текущий publisher в keystore: %s"
   TRANSLATIONS["ru,add_validators_use_current_publisher_prompt"]="Использовать его для всех новых валидаторов? (y/n) "
   TRANSLATIONS["ru,add_validators_current_publisher_missing"]="❌ Не удалось прочитать publisher из keystore (validators[0].publisher или attester)."
-  TRANSLATIONS["ru,option26"]="26. Удалить валидаторов"
-  TRANSLATIONS["ru,option27"]="27. Найти Admin API key в логах"
+  TRANSLATIONS["ru,option26"]="26. Проверить обновления скрипта (безопасно, с проверкой хеша)"
+  TRANSLATIONS["ru,option27"]="27. Проверить обновления определений ошибок (безопасно, с проверкой хеша)"
   TRANSLATIONS["ru,remove_validators_title"]="=== Удаление валидаторов ==="
   TRANSLATIONS["ru,remove_validators_no_keystore"]="❌ Нет keystore.json: %s"
-  TRANSLATIONS["ru,remove_validators_only_one"]="❌ Нельзя удалить единственного валидатора. Для полного удаления ноды используйте п. 12."
+  TRANSLATIONS["ru,remove_validators_only_one"]="❌ Нельзя удалить единственного валидатора. Для полного удаления ноды используйте п. 14."
   TRANSLATIONS["ru,remove_validators_list_header"]="Валидаторы в keystore (номер — адрес attester):"
   TRANSLATIONS["ru,remove_validators_prompt"]="Номера для удаления через запятую (например 1,3): "
   TRANSLATIONS["ru,remove_validators_invalid_num"]="❌ Неверный номер: %s (допустимо 1–%d)"
@@ -811,9 +1072,23 @@ init_languages() {
   TRANSLATIONS["ru,remove_validators_no_compose"]="⚠️ docker-compose.yml не найден; перезапустите web3signer и ноду вручную."
   TRANSLATIONS["ru,remove_validators_aborted"]="Отмена."
   TRANSLATIONS["ru,option0"]="0. Выход"
+  TRANSLATIONS["ru,press_enter_continue"]="Нажмите Enter для продолжения..."
+  TRANSLATIONS["ru,menu_hint_arrows"]="↑↓ — навигация, Enter — выбор"
+  TRANSLATIONS["ru,menu_hint_quick_jump"]="Введите номер опции 0–27 + Enter для быстрого перехода"
+  TRANSLATIONS["ru,menu_back"]="← Назад к категориям"
+  TRANSLATIONS["ru,menu_cat_diagnostics"]="Диагностика и логи"
+  TRANSLATIONS["ru,menu_cat_monitoring"]="Мониторинг"
+  TRANSLATIONS["ru,menu_cat_node"]="Управление нодой"
+  TRANSLATIONS["ru,menu_cat_staking"]="Стейкинг и валидаторы"
+  TRANSLATIONS["ru,menu_cat_maintenance"]="Обновления и обслуживание"
+  TRANSLATIONS["ru,menu_cat_exit"]="Выход"
+  TRANSLATIONS["ru,status_bar_format"]="Скрипт v%s | Сеть: %s | RPC: %s"
+  TRANSLATIONS["ru,enter_validator_addresses_check"]="Введите адреса валидаторов для проверки (через запятую):"
+  TRANSLATIONS["ru,error_fetch_validators_gse"]="Ошибка: не удалось получить валидаторов через GSE контракт"
+  TRANSLATIONS["ru,checking_validators_in_queue"]="Проверка %d валидаторов в очереди..."
 
   # Переводы для проверки обновлений
-  TRANSLATIONS["ru,note_check_updates_safely"]="Примечание: Для безопасной проверки удалённых обновлений используйте Опцию 23"
+  TRANSLATIONS["ru,note_check_updates_safely"]="Примечание: Для безопасной проверки удалённых обновлений используйте Опцию 26"
   TRANSLATIONS["ru,local_version_up_to_date"]="Локальный файл контроля версий актуален"
   TRANSLATIONS["ru,safe_update_check"]="Безопасная проверка обновлений"
   TRANSLATIONS["ru,update_check_warning"]="Будет загружен version_control.json из GitHub с проверкой SHA256."
@@ -953,7 +1228,7 @@ init_languages() {
   TRANSLATIONS["ru,bls_new_operator_success"]="Все готово! Вы успешно присоединились к новой тестовой сети"
   TRANSLATIONS["ru,bls_restart_node_notice"]="Теперь перезапустите вашу ноду, проверьте что в /aztec/keys добавились YML-файлы с новыми приватными ключами, а в /aztec/config/keystore.json заменились на новые eth адреса валидаторов"
   TRANSLATIONS["ru,bls_key_extraction_failed"]="Не удалось извлечь ключи из сгенерированного файла"
-  TRANSLATIONS["ru,staking_run_bls_generation_first"]="Пожалуйста, сначала запустите генерацию BLS ключей (опция 18)"
+  TRANSLATIONS["ru,staking_run_bls_generation_first"]="Пожалуйста, сначала запустите генерацию BLS ключей (опция 20)"
   TRANSLATIONS["ru,staking_invalid_bls_file"]="Неверный формат файла BLS ключей"
   TRANSLATIONS["ru,staking_failed_generate_address"]="Не удалось сгенерировать адрес из приватного ключа"
   TRANSLATIONS["ru,staking_found_single_validator"]="Найден один валидатор для метода нового оператора"
@@ -974,8 +1249,8 @@ init_languages() {
   TRANSLATIONS["ru,bls_keys_saved_success"]="BLS ключи успешно сгенерированы и сохранены"
   TRANSLATIONS["ru,bls_next_steps"]="Следующие шаги:"
   TRANSLATIONS["ru,bls_send_eth_step"]="Отправьте 0.1-0.3 Sepolia ETH на указанный выше адрес"
-  TRANSLATIONS["ru,bls_run_approve_step"]="Запустите опцию 19 (Approve) для подтверждения расходов стейкинга"
-  TRANSLATIONS["ru,bls_run_stake_step"]="Запустите опцию 20 (Stake) для завершения стейкинга валидатора"
+  TRANSLATIONS["ru,bls_run_approve_step"]="Запустите опцию 21 (Approve) для подтверждения расходов стейкинга"
+  TRANSLATIONS["ru,bls_run_stake_step"]="Запустите опцию 22 (Stake) для завершения стейкинга валидатора"
   TRANSLATIONS["ru,staking_missing_new_operator_info"]="Отсутствует информация о новом операторе в BLS файле"
   TRANSLATIONS["ru,staking_found_validators_new_operator"]="Найдено валидаторов для метода нового оператора:"
   TRANSLATIONS["ru,staking_processing_new_operator"]="Обработка валидатора %s/%s (метод нового оператора)"
@@ -1017,10 +1292,15 @@ init_languages() {
   TRANSLATIONS["ru,search_gov"]="🔍 Поиск governanceProposerPayload в логах контейнера 'aztec'..."
   TRANSLATIONS["ru,gov_found"]="Найденные значения governanceProposerPayload:"
   TRANSLATIONS["ru,gov_not_found"]="❌ Ни одного governanceProposerPayload не найдено."
+  TRANSLATIONS["ru,gov_found_results"]="Уникальные значения governanceProposerPayload:"
   TRANSLATIONS["ru,gov_changed"]="🛑 Обнаружено изменение governanceProposerPayload!"
   TRANSLATIONS["ru,gov_was"]="⚠️ Было:"
   TRANSLATIONS["ru,gov_now"]="Стало:"
   TRANSLATIONS["ru,gov_no_changes"]="✅ Изменений не обнаружено."
+  TRANSLATIONS["ru,gov_v5_expected"]="Ожидаемый V5UpgradePayload (mainnet AZUP-2):"
+  TRANSLATIONS["ru,gov_v5_match"]="✅ Последний payload совпадает с V5UpgradePayload."
+  TRANSLATIONS["ru,gov_v5_mismatch"]="⚠️ Последний payload не совпадает с V5UpgradePayload."
+  TRANSLATIONS["ru,gov_signal_hint"]="Для signaling добавьте в .env ноды и перезапустите: GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s"
   TRANSLATIONS["ru,search_admin_api"]="🔍 Поиск Admin API key в логах контейнера 'aztec'..."
   TRANSLATIONS["ru,admin_api_found"]="✅ Admin API key:"
   TRANSLATIONS["ru,admin_api_not_found"]="❌ Admin API key не найден в логах."
@@ -1254,7 +1534,7 @@ init_languages() {
   TRANSLATIONS["ru,docker_found"]="✅ Docker и docker compose найдены"
   TRANSLATIONS["ru,installing_aztec"]="⬇️ Установка ноды Aztec..."
   TRANSLATIONS["ru,aztec_not_installed"]="❌ Aztec нода не установлена. Проверьте установку."
-  TRANSLATIONS["ru,aztec_installed"]="✅ Aztec нода установлена"
+  TRANSLATIONS["ru,aztec_installed"]="✅ Aztec CLI установлен"
   TRANSLATIONS["ru,running_aztec_up"]="🚀 Запуск aztec-up latest..."
   TRANSLATIONS["ru,opening_ports"]="🌐 Открытие портов 40400 и 8080..."
   TRANSLATIONS["ru,ports_opened"]="✅ Порты открыты"
@@ -1262,7 +1542,7 @@ init_languages() {
   TRANSLATIONS["ru,creating_env"]="📝 Заполнение файла .env..."
   TRANSLATIONS["ru,creating_compose"]="🛠️ Создание docker-compose.yml c Watchtower"
   TRANSLATIONS["ru,compose_created"]="✅ docker-compose.yml создан"
-  TRANSLATIONS["ru,install_admin_api_notice"]="Admin API (Aztec v4+): при первом запуске нода один раз выводит случайный ключ в stdout — сохраните его. К admin RPC на порту 8880 нужны заголовки x-api-key или Authorization: Bearer (исключение: GET /status). Потеряли ключ: AZTEC_RESET_ADMIN_API_KEY=true на один перезапуск или AZTEC_ADMIN_API_KEY_HASH."
+  TRANSLATIONS["ru,install_admin_api_notice"]="Admin API (Aztec v5+): при первом запуске нода один раз выводит случайный ключ в stdout — сохраните его. К admin RPC на порту 8880 нужны заголовки x-api-key или Authorization: Bearer (исключение: GET /status). Потеряли ключ: AZTEC_RESET_ADMIN_API_KEY=true на один перезапуск или AZTEC_ADMIN_API_KEY_HASH."
   TRANSLATIONS["ru,install_web3signer_l1_chain"]="Web3Signer eth1 --chain-id=%s (NETWORK=%s, L1 %s)"
   TRANSLATIONS["ru,starting_node"]="🚀 Запуск ноды Aztec..."
   TRANSLATIONS["ru,showing_logs"]="📄 Показываю последние 200 строк логов..."
@@ -1405,6 +1685,10 @@ init_languages() {
   TRANSLATIONS["ru,bls_final_web3signer_restart_failed"]="Финальный перезапуск web3signer не удался"
 
   TRANSLATIONS["ru,aztec_rewards_claim"]="Aztec Rewards Claim"
+  TRANSLATIONS["ru,claim_gas_key_prompt"]="Введите приватный ключ для оплаты газа (claim permissionless; награды уходят на coinbase). Скрытый ввод: "
+  TRANSLATIONS["ru,claimable_check_unavailable"]="isRewardsClaimable() недоступна на этом rollup (v5) — проверяем балансы дальше."
+  TRANSLATIONS["ru,staking_asset_label"]="Стейкинг-актив (ERC-20):"
+  TRANSLATIONS["ru,staking_asset_resolve_failed"]="Не удалось получить staking asset через getStakingAsset(); approve отменён."
   TRANSLATIONS["ru,environment_file_not_found"]="Файл окружения не найден"
   TRANSLATIONS["ru,rpc_url_not_set"]="RPC_URL не установлен"
   TRANSLATIONS["ru,contract_address_not_set"]="CONTRACT_ADDRESS не установлен"
@@ -1457,35 +1741,35 @@ init_languages() {
   TRANSLATIONS["ru,claim_function_not_activated"]="В настоящее время функция клейма неактивирована в контракте"
 
   # Turkish translations
-  TRANSLATIONS["tr,welcome"]="Aztec düğüm izleme betiğine hoş geldiniz"
+  TRANSLATIONS["tr,welcome"]="Aztec Tools'a hoş geldiniz"
   TRANSLATIONS["tr,title"]="========= Ana Menü ========="
   TRANSLATIONS["tr,option1"]="1. Konteyner ve düğüm senkronizasyonunun kontrol et"
-  TRANSLATIONS["tr,option2"]="2. Bildirimlerle düğüm izleme aracısını yükleyin"
-  TRANSLATIONS["tr,option3"]="3. İzleme aracısını kaldır"
-  TRANSLATIONS["tr,option4"]="4. Aztec loglarını görüntüle"
-  TRANSLATIONS["tr,option5"]="5. rollupAddress bul"
-  TRANSLATIONS["tr,option6"]="6. PeerID bul"
-  TRANSLATIONS["tr,option7"]="7. governanceProposerPayload bul"
-  TRANSLATIONS["tr,option8"]="8. Kanıtlanmış L2 Bloğunu Kontrol Et"
-  TRANSLATIONS["tr,option9"]="9. Validator arama, durum kontrolü ve sıra izleme"
-  TRANSLATIONS["tr,option10"]="10. Publisher bakiye izleme"
-  TRANSLATIONS["tr,option11"]="11. Watchtower ile birlikte Aztec Node Kurulumu"
-  TRANSLATIONS["tr,option12"]="12. Aztec düğümünü sil"
-  TRANSLATIONS["tr,option13"]="13. Aztec düğüm konteynerlerini başlat"
-  TRANSLATIONS["tr,option14"]="14. Aztec düğüm konteynerlerini durdur"
-  TRANSLATIONS["tr,option15"]="15. Aztec düğümünü güncelle"
-  TRANSLATIONS["tr,option16"]="16. Aztec düğümünü eski sürüme düşür"
-  TRANSLATIONS["tr,option17"]="17. Aztek sürümünü kontrol edin"
-  TRANSLATIONS["tr,option18"]="18. Mnemonic'ten BLS anahtarları oluştur"
-  TRANSLATIONS["tr,option19"]="19. Approve"
-  TRANSLATIONS["tr,option20"]="20. Stake"
-  TRANSLATIONS["tr,option21"]="21. Ödülleri talep edin"
-  TRANSLATIONS["tr,option22"]="22. RPC URL'sini değiştir"
-  TRANSLATIONS["tr,option23"]="23. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
-  TRANSLATIONS["tr,option24"]="24. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
-  TRANSLATIONS["tr,option25"]="25. Doğrulayıcı ekle"
+  TRANSLATIONS["tr,option2"]="2. Aztec loglarını görüntüle"
+  TRANSLATIONS["tr,option3"]="3. rollupAddress bul"
+  TRANSLATIONS["tr,option4"]="4. PeerID bul"
+  TRANSLATIONS["tr,option5"]="5. governanceProposerPayload bul"
+  TRANSLATIONS["tr,option6"]="6. Kanıtlanmış L2 Bloğunu Kontrol Et"
+  TRANSLATIONS["tr,option7"]="7. Aztek sürümünü kontrol edin"
+  TRANSLATIONS["tr,option8"]="8. Loglarda Admin API anahtarını bul"
+  TRANSLATIONS["tr,option9"]="9. Bildirimlerle düğüm izleme aracısını yükleyin"
+  TRANSLATIONS["tr,option10"]="10. İzleme aracısını kaldır"
+  TRANSLATIONS["tr,option11"]="11. Validator arama, durum kontrolü ve sıra izleme"
+  TRANSLATIONS["tr,option12"]="12. Publisher bakiye izleme"
+  TRANSLATIONS["tr,option13"]="13. Watchtower ile birlikte Aztec Node Kurulumu"
+  TRANSLATIONS["tr,option14"]="14. Aztec düğümünü sil"
+  TRANSLATIONS["tr,option15"]="15. Aztec düğüm konteynerlerini başlat"
+  TRANSLATIONS["tr,option16"]="16. Aztec düğüm konteynerlerini durdur"
+  TRANSLATIONS["tr,option17"]="17. Aztec düğümünü güncelle"
+  TRANSLATIONS["tr,option18"]="18. Aztec düğümünü eski sürüme düşür"
+  TRANSLATIONS["tr,option19"]="19. RPC URL'sini değiştir"
+  TRANSLATIONS["tr,option20"]="20. Mnemonic'ten BLS anahtarları oluştur"
+  TRANSLATIONS["tr,option21"]="21. Approve"
+  TRANSLATIONS["tr,option22"]="22. Stake"
+  TRANSLATIONS["tr,option23"]="23. Ödülleri talep edin"
+  TRANSLATIONS["tr,option24"]="24. Doğrulayıcı ekle"
+  TRANSLATIONS["tr,option25"]="25. Doğrulayıcı kaldır"
   TRANSLATIONS["tr,add_validators_title"]="=== Mevcut düğüme doğrulayıcı ekleme ==="
-  TRANSLATIONS["tr,add_validators_prereq_fail"]="❌ Gerekli: %s — önce düğüm kurulumunu (seçenek 11) yapın veya yolları düzeltin."
+  TRANSLATIONS["tr,add_validators_prereq_fail"]="❌ Gerekli: %s — önce düğüm kurulumunu (seçenek 13) yapın veya yolları düzeltin."
   TRANSLATIONS["tr,add_validators_jq_required"]="❌ jq gerekli. jq kurup tekrar deneyin."
   TRANSLATIONS["tr,add_validators_max_reached"]="❌ Toplam en fazla 10 doğrulayıcı. Şu an %d; en fazla %d eklenebilir."
   TRANSLATIONS["tr,add_validators_existing_bls"]="Mevcut keystore BLS kullanıyor; yeni doğrulayıcılar BLS ile girilmeli (kurulumdaki gibi)."
@@ -1502,11 +1786,11 @@ init_languages() {
   TRANSLATIONS["tr,add_validators_current_publisher_show"]="Keystore’daki mevcut publisher: %s"
   TRANSLATIONS["tr,add_validators_use_current_publisher_prompt"]="Tüm yeni doğrulayıcılar için bunu kullanılsın mı? (y/n) "
   TRANSLATIONS["tr,add_validators_current_publisher_missing"]="❌ Keystore’dan publisher okunamadı (validators[0].publisher veya attester)."
-  TRANSLATIONS["tr,option26"]="26. Doğrulayıcı kaldır"
-  TRANSLATIONS["tr,option27"]="27. Loglarda Admin API anahtarını bul"
+  TRANSLATIONS["tr,option26"]="26. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
+  TRANSLATIONS["tr,option27"]="27. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)"
   TRANSLATIONS["tr,remove_validators_title"]="=== Doğrulayıcı kaldırma ==="
   TRANSLATIONS["tr,remove_validators_no_keystore"]="❌ keystore.json yok: %s"
-  TRANSLATIONS["tr,remove_validators_only_one"]="❌ Tek doğrulayıcı kaldırılamaz. Gerekirse düğümü silmek için seçenek 12."
+  TRANSLATIONS["tr,remove_validators_only_one"]="❌ Tek doğrulayıcı kaldırılamaz. Gerekirse düğümü silmek için seçenek 14."
   TRANSLATIONS["tr,remove_validators_list_header"]="Keystore’daki doğrulayıcılar (numara — attester adresi):"
   TRANSLATIONS["tr,remove_validators_prompt"]="Kaldırılacak numaralar (virgülle, örn. 1,3): "
   TRANSLATIONS["tr,remove_validators_invalid_num"]="❌ Geçersiz numara: %s (geçerli: 1–%d)"
@@ -1522,9 +1806,23 @@ init_languages() {
   TRANSLATIONS["tr,remove_validators_no_compose"]="⚠️ docker-compose.yml bulunamadı; web3signer ve düğümü elle yeniden başlatın."
   TRANSLATIONS["tr,remove_validators_aborted"]="İptal."
   TRANSLATIONS["tr,option0"]="0. Çıkış"
+  TRANSLATIONS["tr,press_enter_continue"]="Devam etmek için Enter'a basın..."
+  TRANSLATIONS["tr,menu_hint_arrows"]="↑↓ — gezin, Enter — seç"
+  TRANSLATIONS["tr,menu_hint_quick_jump"]="Hızlı geçiş için 0–27 seçenek numarasını yazın + Enter"
+  TRANSLATIONS["tr,menu_back"]="← Kategorilere dön"
+  TRANSLATIONS["tr,menu_cat_diagnostics"]="Teşhis ve loglar"
+  TRANSLATIONS["tr,menu_cat_monitoring"]="İzleme"
+  TRANSLATIONS["tr,menu_cat_node"]="Düğüm yönetimi"
+  TRANSLATIONS["tr,menu_cat_staking"]="Staking ve doğrulayıcılar"
+  TRANSLATIONS["tr,menu_cat_maintenance"]="Güncellemeler ve bakım"
+  TRANSLATIONS["tr,menu_cat_exit"]="Çıkış"
+  TRANSLATIONS["tr,status_bar_format"]="Script v%s | Ağ: %s | RPC: %s"
+  TRANSLATIONS["tr,enter_validator_addresses_check"]="Kontrol için doğrulayıcı adreslerini girin (virgülle ayrılmış):"
+  TRANSLATIONS["tr,error_fetch_validators_gse"]="Hata: GSE sözleşme yöntemiyle doğrulayıcılar alınamadı"
+  TRANSLATIONS["tr,checking_validators_in_queue"]="Kuyrukta %d doğrulayıcı kontrol ediliyor..."
 
   # Güncelleme kontrolü çevirileri
-  TRANSLATIONS["tr,note_check_updates_safely"]="Not: Uzaktan güncellemeleri güvenli bir şekilde kontrol etmek için Seçenek 23'ü kullanın"
+  TRANSLATIONS["tr,note_check_updates_safely"]="Not: Uzaktan güncellemeleri güvenli bir şekilde kontrol etmek için Seçenek 26'ü kullanın"
   TRANSLATIONS["tr,local_version_up_to_date"]="Yerel sürüm kontrol dosyası güncel"
   TRANSLATIONS["tr,safe_update_check"]="Güvenli Güncelleme Kontrolü"
   TRANSLATIONS["tr,update_check_warning"]="Bu, SHA256 doğrulaması ile GitHub'dan version_control.json dosyasını indirecektir."
@@ -1664,7 +1962,7 @@ init_languages() {
   TRANSLATIONS["tr,bls_new_operator_success"]="Hepsi tamam! Yeni test ağına başarıyla katıldınız"
   TRANSLATIONS["tr,bls_restart_node_notice"]="Şimdi düğümünüzü yeniden başlatın, yeni özel anahtarlara sahip YML dosyalarının /aztec/keys'e eklendiğini ve /aztec/config/keystore.json'un doğrulayıcıların yeni eth adresleriyle değiştirildiğini kontrol edin."
   TRANSLATIONS["tr,bls_key_extraction_failed"]="Oluşturulan dosyadan anahtarlar çıkarılamadı"
-  TRANSLATIONS["tr,staking_run_bls_generation_first"]="Lütfen önce BLS anahtarı oluşturmayı çalıştırın (seçenek 18)"
+  TRANSLATIONS["tr,staking_run_bls_generation_first"]="Lütfen önce BLS anahtarı oluşturmayı çalıştırın (seçenek 20)"
   TRANSLATIONS["tr,staking_invalid_bls_file"]="Geçersiz BLS anahtar dosyası formatı"
   TRANSLATIONS["tr,staking_failed_generate_address"]="Özel anahtardan adres oluşturulamadı"
   TRANSLATIONS["tr,staking_found_single_validator"]="Yeni operatör yöntemi için tek validatör bulundu"
@@ -1685,8 +1983,8 @@ init_languages() {
   TRANSLATIONS["tr,bls_keys_saved_success"]="BLS anahtarları başarıyla oluşturuldu ve kaydedildi"
   TRANSLATIONS["tr,bls_next_steps"]="Sonraki adımlar:"
   TRANSLATIONS["tr,bls_send_eth_step"]="Yukarıdaki adrese 0.1-0.3 Sepolia ETH gönderin"
-  TRANSLATIONS["tr,bls_run_approve_step"]="Stake harcamasını onaylamak için seçenek 19'u (Approve) çalıştırın"
-  TRANSLATIONS["tr,bls_run_stake_step"]="Validator staking'i tamamlamak için seçenek 20'yi (Stake) çalıştırın"
+  TRANSLATIONS["tr,bls_run_approve_step"]="Stake harcamasını onaylamak için seçenek 21'u (Approve) çalıştırın"
+  TRANSLATIONS["tr,bls_run_stake_step"]="Validator staking'i tamamlamak için seçenek 22'yi (Stake) çalıştırın"
   TRANSLATIONS["tr,staking_missing_new_operator_info"]="BLS dosyasında yeni operatör bilgisi eksik"
   TRANSLATIONS["tr,staking_found_validators_new_operator"]="Yeni operatör yöntemi için validatörler bulundu:"
   TRANSLATIONS["tr,staking_processing_new_operator"]="Validatör %s/%s işleniyor (yeni operatör yöntemi)"
@@ -1728,10 +2026,15 @@ init_languages() {
   TRANSLATIONS["tr,search_gov"]="🔍 'aztec' konteyner loglarında governanceProposerPayload aranıyor..."
   TRANSLATIONS["tr,gov_found"]="Bulunan governanceProposerPayload değerleri:"
   TRANSLATIONS["tr,gov_not_found"]="❌ governanceProposerPayload bulunamadı."
+  TRANSLATIONS["tr,gov_found_results"]="Benzersiz governanceProposerPayload değerleri:"
   TRANSLATIONS["tr,gov_changed"]="🛑 GovernanceProposerPayload değişikliği tespit edildi!"
   TRANSLATIONS["tr,gov_was"]="⚠️ Önceki:"
   TRANSLATIONS["tr,gov_now"]="Şimdi:"
   TRANSLATIONS["tr,gov_no_changes"]="✅ Değişiklik tespit edilmedi."
+  TRANSLATIONS["tr,gov_v5_expected"]="Beklenen V5UpgradePayload (mainnet AZUP-2):"
+  TRANSLATIONS["tr,gov_v5_match"]="✅ Son payload V5UpgradePayload ile eşleşiyor."
+  TRANSLATIONS["tr,gov_v5_mismatch"]="⚠️ Son payload V5UpgradePayload ile eşleşmiyor."
+  TRANSLATIONS["tr,gov_signal_hint"]="Sinyal için düğüm .env dosyasına ekleyip yeniden başlatın: GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s"
   TRANSLATIONS["tr,search_admin_api"]="🔍 'aztec' konteyner loglarında Admin API anahtarı aranıyor..."
   TRANSLATIONS["tr,admin_api_found"]="✅ Admin API anahtarı:"
   TRANSLATIONS["tr,admin_api_not_found"]="❌ Loglarda Admin API anahtarı bulunamadı."
@@ -1961,7 +2264,7 @@ init_languages() {
   TRANSLATIONS["tr,docker_found"]="✅ Docker ve docker compose bulundu"
   TRANSLATIONS["tr,installing_aztec"]="⬇️ Aztec yükleniyor..."
   TRANSLATIONS["tr,aztec_not_installed"]="❌ Aztec yüklü değil. Kurulumu kontrol edin."
-  TRANSLATIONS["tr,aztec_installed"]="✅ Aztec yüklendi"
+  TRANSLATIONS["tr,aztec_installed"]="✅ Aztec CLI yüklendi"
   TRANSLATIONS["tr,running_aztec_up"]="🚀 aztec-up latest çalıştırılıyor..."
   TRANSLATIONS["tr,opening_ports"]="🌐 40400 ve 8080 portları açılıyor..."
   TRANSLATIONS["tr,ports_opened"]="✅ Portlar açıldı"
@@ -1970,7 +2273,7 @@ init_languages() {
   TRANSLATIONS["tr,env_created"]="✅ .env dosyası oluşturuldu"
   TRANSLATIONS["tr,creating_compose"]="🛠️ Watchtower ile docker-compose.yml oluşturuluyor"
   TRANSLATIONS["tr,compose_created"]="✅ docker-compose.yml oluşturuldu"
-  TRANSLATIONS["tr,install_admin_api_notice"]="Admin API (Aztec v4+): ilk başlatmada düğüm yönetici API anahtarını stdout'ta bir kez yazar — kaydedin. 8880 admin RPC için x-api-key veya Authorization: Bearer gerekir (GET /status hariç). Anahtar kaybolduysa: AZTEC_RESET_ADMIN_API_KEY=true veya AZTEC_ADMIN_API_KEY_HASH."
+  TRANSLATIONS["tr,install_admin_api_notice"]="Admin API (Aztec v5+): ilk başlatmada düğüm yönetici API anahtarını stdout'ta bir kez yazar — kaydedin. 8880 admin RPC için x-api-key veya Authorization: Bearer gerekir (GET /status hariç). Anahtar kaybolduysa: AZTEC_RESET_ADMIN_API_KEY=true veya AZTEC_ADMIN_API_KEY_HASH."
   TRANSLATIONS["tr,install_web3signer_l1_chain"]="Web3Signer eth1 --chain-id=%s (NETWORK=%s, L1 %s)"
   TRANSLATIONS["tr,starting_node"]="🚀 Aztec node başlatılıyor..."
   TRANSLATIONS["tr,showing_logs"]="📄 Son 200 log satırı gösteriliyor..."
@@ -2117,6 +2420,10 @@ init_languages() {
   TRANSLATIONS["tr,bls_final_web3signer_restart_failed"]="Son web3signer yeniden başlatma işlemi başarısız oldu"
 
   TRANSLATIONS["tr,aztec_rewards_claim"]="Aztec Ödül Talep"
+  TRANSLATIONS["tr,claim_gas_key_prompt"]="Gaz ödeyecek özel anahtarı girin (claim izinsiz; ödüller coinbase'e gider). Gizli: "
+  TRANSLATIONS["tr,claimable_check_unavailable"]="isRewardsClaimable() bu rollup'ta yok (v5) — bakiyeler yine de kontrol edilecek."
+  TRANSLATIONS["tr,staking_asset_label"]="Staking varlığı (ERC-20):"
+  TRANSLATIONS["tr,staking_asset_resolve_failed"]="getStakingAsset() ile staking varlığı alınamadı; approve iptal."
   TRANSLATIONS["tr,environment_file_not_found"]="Ortam dosyası bulunamadı"
   TRANSLATIONS["tr,rpc_url_not_set"]="RPC_URL ayarlanmamış"
   TRANSLATIONS["tr,contract_address_not_set"]="CONTRACT_ADDRESS ayarlanmamış"
@@ -2169,33 +2476,49 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="2.10.1"
+SCRIPT_VERSION="3.0.0"
 ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Configuration ===
+# Default node image (v5 docs: https://docs.aztec.network/operate/testnet/operators/setup/running_a_node)
+AZTEC_IMAGE_TAG="5.0.0"
+
 # Contract addresses (Rollup addresses)
-CONTRACT_ADDRESS="0xf6D0D42aCE06829bECB78C74F49879528fC632c1"  # Testnet 4.1.0 rollup address
+# Mainnet: https://forum.aztec.network/t/proposal-v5-payload-deployed/8606
+#CONTRACT_ADDRESS="0xf6D0D42aCE06829bECB78C74F49879528fC632c1"  # Testnet 4.1.0 rollup address
 #CONTRACT_ADDRESS="0x5932fcb01b6f63550c8bd91055613752480b6455"  # Testnet 4.0.4 rollup address
 #CONTRACT_ADDRESS="0x66a41cb55f9a1e38a45a2ac8685f12a61fbfab77"  # Testnet 3.0.3 rollup address
-#CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet current rollup address
+#CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet legacy rollup address
+CONTRACT_ADDRESS="0xfe6061806cac748085904a010d2d9e33b8031741"  # Testnet v5 rollup address
 #CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet 2.1.11 rollup address
-CONTRACT_ADDRESS_MAINNET="0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962"  # Mainnet 4.1.2 rollup address
+#CONTRACT_ADDRESS_MAINNET="0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962"  # Mainnet 4.1.2 rollup (pre-v5)
+CONTRACT_ADDRESS_MAINNET="0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34"  # Mainnet v5 rollup (AZUP-2)
 
 # GSE contract addresses
 GSE_ADDRESS_TESTNET="0xb6a38a51a6c1de9012f9d8ea9745ef957212eaac" # Testnet new GSE address
 #GSE_ADDRESS_TESTNET="0xFb243b9112Bb65785A4A8eDAf32529accf003614" # Testnet current GSE address
 GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
 
-# Function signatures for rollup contract cast calls
-FUNCTION_SIG_BLOCK="getPendingBlockNumber()"
-FUNCTION_SIG_CHECKPOINT="getPendingCheckpointNumber()"
+# Staking ERC-20 fallbacks if getStakingAsset() fails (prefer live cast call)
+# Pre-v5 STAKE: 0x5595cb9ed193cac2c0bc5393313bc6115817954b
+STAKING_ASSET_MAINNET_FALLBACK="0xa27ec0006e59f245217ff08cd52a7e8b169e62d2"
 
-# L1 rollup event topic0 per network
-# L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x9ad613a7ff46b97e0f732b31118d43f39c9ca017bed1efe739b70b0625383589" # Ignition
-L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0" # Alpha
+# V5 governance upgrade payload (mainnet) — set GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS when signaling
+V5_UPGRADE_PAYLOAD_ADDRESS="0x1bbde48410bf7ad05208cd77de2bfb0e8f8803d8"
+
+# Function signatures for rollup cast calls (v5 Rollup ABI @ 0x91ff8bbd...):
+# getPendingBlockNumber() removed — tip is checkpoint-based.
+FUNCTION_SIG_BLOCK="getPendingCheckpointNumber()"
+FUNCTION_SIG_CHECKPOINT="getPendingCheckpointNumber()"
+FUNCTION_SIG_PROVEN_CHECKPOINT="getProvenCheckpointNumber()"
+
+# L1 rollup event topic0 = CheckpointProposed(uint256,bytes32,bytes32[],bytes32,bytes32)
+# Verified on mainnet Rollup 0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34
+# (legacy Ignition L2BlockProposed(uint256,bytes32,bytes32[]) = 0x9ad613a7...)
+L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
 L2_BLOCK_PROPOSED_TOPIC0_TESTNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
 
 # Required tools
@@ -2208,23 +2531,54 @@ MIN_NODE_VERSION="24.12.0"
 AGENT_SCRIPT_PATH="$HOME/aztec-monitor-agent"
 LOG_FILE="$AGENT_SCRIPT_PATH/agent.log"
 
+# Embedded ANSI banner (no external file required)
+print_aztec_banner() {
+  cat << 'AZTEC_BANNER_EOF'
+[?25l[0m[38;5;16;48;5;16m                                           [38;5;232m▃▄▄ ▖  ▂▃▂                           [0m
+[38;5;16;48;5;16m                [38;5;232m╷ [38;5;234;48;5;232m┏[38;5;233;48;5;16m▏  [38;5;232m▂ ▃ [38;5;16;48;5;232m┊┊      [38;5;236;48;5;233m┌[38;5;233;48;5;232m╴[38;5;17m╷          [38;5;233m╻[38;5;234m╴  [38;5;233m▂▃▁   [38;5;232;48;5;16m▄[48;5;232m [48;5;16m▁▃▃▃▃▄▃▂╷▃  ▁▂▂ ▁    [0m
+[38;5;16;48;5;16m        [38;5;232m▗▄▅╸ ┌[38;5;16;48;5;232m╴[48;5;16m [38;5;232m▂▃[48;5;17m▍[38;5;17;48;5;232m▏[38;5;233m▁    ┊▃ ╵[38;5;54;48;5;234m▁[38;5;24m┒[48;5;233m [38;5;233;48;5;232m┎▗[48;5;54m▌[38;5;17;48;5;233m▘[38;5;60m│[38;5;90;48;5;234m▃[48;5;233m [38;5;233;48;5;232m▄▃[48;5;23m▊[48;5;233m [38;5;235m▁[48;5;234m [48;5;233m [38;5;23m▂[38;5;24m▃[38;5;23m▂[38;5;233;48;5;234m╴[38;5;17;48;5;233m▄[38;5;233;48;5;17m┈╴[38;5;25;48;5;233m▃[38;5;17;48;5;232m▄[48;5;233m╷ [38;5;233;48;5;232m▄▅[38;5;232;48;5;233m┊[38;5;233;48;5;232m▃▗▃▄[38;5;234m▁┌[38;5;233m▂▂▂▂[38;5;89;48;5;233m▁[38;5;131;48;5;234m▃[38;5;124;48;5;235m╾[38;5;234;48;5;233m▖[38;5;233;48;5;232m▁▂ [38;5;232;48;5;16m▖  [0m
+[38;5;16;48;5;16m    [38;5;232m▂▁[48;5;232m       [38;5;17m╴ [38;5;8m╺[38;5;232;48;5;234m┈[38;5;8;48;5;233m▁[48;5;234m▁[38;5;236;48;5;232m▁[48;5;234m┈[38;5;60m╺[38;5;239m▖[48;5;233m  [38;5;17m▄▅[38;5;233;48;5;234m┊ [38;5;235;48;5;17m╴    [38;5;60m▗[38;5;24m╴[38;5;61m│[38;5;24;48;5;60m▇[48;5;17m   [38;5;31m╷[38;5;235;48;5;23m▇[38;5;17;48;5;233m╻[38;5;233;48;5;237m▊[48;5;17m [38;5;240;48;5;236m╏[38;5;236;48;5;235m╶[38;5;89m╴[48;5;17m [38;5;233m╻ [38;5;31;48;5;4m▝[38;5;25;48;5;24m╸[48;5;17m      [38;5;232;48;5;233m┈[38;5;234m╹[38;5;17;48;5;234m▄[48;5;17m [38;5;233m┈[38;5;235;48;5;234m╶[38;5;53m╷[48;5;235m╸[38;5;132m▂[38;5;168;48;5;236m▅[38;5;53;48;5;131m▃[38;5;17;48;5;53m▄[38;5;38;48;5;17m╶[38;5;31;48;5;23m╸[38;5;23;48;5;17m▏[38;5;19;48;5;234m╼[48;5;233m [38;5;233;48;5;232m▁ [48;5;16m [0m
+[38;5;16;48;5;16m   [48;5;232m┊[38;5;233m▂ [48;5;233m [48;5;234m▌[38;5;234;48;5;232m▆[48;5;233m┈ [38;5;17;48;5;234m╷[38;5;45;48;5;17m╺[38;5;38m╾[38;5;23;48;5;233m▁[38;5;234m╴[38;5;233;48;5;54m▇[48;5;8m▇[48;5;234m┊[38;5;238;48;5;235m╷[48;5;234m╷[48;5;17m [38;5;4;48;5;23m▇[48;5;17m    [38;5;53m▁[38;5;17;48;5;233m▎[38;5;234;48;5;232m╶[38;5;17;48;5;233m╴[38;5;4;48;5;17m┌  [38;5;54m│[38;5;8;48;5;233m╷[48;5;234m [38;5;233;48;5;17m▇[38;5;32;48;5;4m╻[38;5;24m╶[38;5;18;48;5;38m▉[38;5;32;48;5;17m▊[38;5;234;48;5;239m┫[38;5;24;48;5;17m┃[38;5;234;48;5;25m▊[38;5;54;48;5;4m▎[38;5;24m╴[38;5;4;48;5;238m▇[38;5;237;48;5;17m┋▏[38;5;17;48;5;4m▎┊[38;5;233;48;5;17m▄[38;5;24m╺[48;5;18m╵[38;5;17m┺[38;5;18;48;5;4m▄[38;5;4;48;5;234m▎[38;5;17;48;5;233m▖[48;5;234m┈[38;5;31;48;5;17m╺[38;5;25m┉[38;5;54;48;5;4m▗[38;5;61m▂[38;5;53m╸[38;5;132;48;5;53m▂[38;5;168m▄[38;5;180;48;5;132m╸[38;5;25;48;5;168m▄[48;5;96m▆[38;5;38;48;5;24m▃[38;5;45m╼[38;5;53;48;5;31m▄[48;5;44m▆[38;5;167;48;5;238m─[38;5;131;48;5;235m━[38;5;233m┊[38;5;232;48;5;233m▇[48;5;232m [48;5;16m [0m
+[38;5;16;48;5;16m  [38;5;232m▗[48;5;232m [38;5;233m╺[38;5;235;48;5;233m▁[38;5;17;48;5;234m▗[48;5;17m [38;5;53m▂  ▃[38;5;54m▁ [38;5;53m▁ ╹[38;5;236m╺[38;5;17;48;5;25m▊[38;5;25;48;5;4m▎[38;5;24;48;5;17m╵[38;5;17;48;5;4m▉[38;5;18m╴ ▃[38;5;53m╵[38;5;17m▗[38;5;18m┈[38;5;233;48;5;17m┊[38;5;235m┅[38;5;17;48;5;234m╴[38;5;4;48;5;25m▋[38;5;18;48;5;17m▏[48;5;233m [38;5;235;48;5;234m┊┊[38;5;237;48;5;235m┊[38;5;234;48;5;17m╴[38;5;17;48;5;32m▎[48;5;25m [38;5;25;48;5;38m▉[38;5;32;48;5;4m▌[48;5;17m [38;5;23;48;5;233m╹[38;5;17;48;5;31m▊[48;5;24m▃[38;5;25;48;5;17m╸[38;5;17;48;5;24m▅[38;5;238;48;5;17m╵[38;5;17;48;5;18m▖[38;5;53m╹[38;5;61;48;5;235m▏[48;5;233m  [38;5;234;48;5;54m▌[38;5;17;48;5;18m▆[38;5;97;48;5;55m╶[38;5;54;48;5;233m▎[38;5;233;48;5;53m▉[38;5;17;48;5;234m┊[38;5;59m▁[38;5;233m┊[38;5;97;48;5;60m▗[38;5;168;48;5;61m╼[38;5;132;48;5;97m▝[38;5;4;48;5;137m▆[38;5;61;48;5;96m▆[38;5;74;48;5;61m╼[38;5;55;48;5;32m▄[38;5;54;48;5;38m▆[38;5;89;48;5;236m━[38;5;234;48;5;53m▅[38;5;235;48;5;125m▇[38;5;233;48;5;235m▅[48;5;234m▇[48;5;233m [48;5;232m▏  [48;5;16m [0m
+[38;5;16;48;5;16m  [48;5;232m▌ [38;5;234m▁[38;5;235;48;5;233m▁[38;5;60;48;5;236m▂[38;5;61;48;5;53m▁[38;5;235;48;5;234m▏[38;5;31;48;5;17m╺[38;5;81;48;5;23m━[38;5;74;48;5;4m▖[38;5;17m▃[38;5;4;48;5;17m▄[48;5;60m▌[38;5;60;48;5;53m▆[38;5;97;48;5;54m▁[38;5;53;48;5;17m╷[38;5;30;48;5;23m▗[38;5;42m─[38;5;43;48;5;6m╼[38;5;71;48;5;24m▂[38;5;31m▁[38;5;61;48;5;18m▂[38;5;4;48;5;61m▋[38;5;25;48;5;17m▊[38;5;4;48;5;235m▘[38;5;17;48;5;61m▉[38;5;61;48;5;17m▏[38;5;238;48;5;235m┊[38;5;233;48;5;17m╴[38;5;17;48;5;24m▎[38;5;23;48;5;17m▝[38;5;124;48;5;236m╶[38;5;1;48;5;237m┄[38;5;17;48;5;18m▊[48;5;17m [48;5;24m▊[38;5;4;48;5;32m▎[38;5;18;48;5;26m▖[38;5;32m▄[48;5;4m▌[38;5;23;48;5;17m╴ [38;5;238m╷[38;5;23m▃[38;5;17;48;5;240m▉[38;5;4;48;5;24m┊[38;5;24;48;5;17m▁[38;5;25;48;5;4m▝[38;5;62;48;5;55m▇[38;5;101;48;5;4m▗[38;5;180;48;5;17m▗[38;5;102m▗[38;5;17;48;5;4m▆[38;5;53;48;5;17m╷[38;5;25;48;5;61m▂[38;5;61;48;5;24m▏[38;5;24;48;5;17m╸[38;5;17;48;5;66m▊[38;5;243;48;5;23m▘[38;5;59m┚[38;5;4;48;5;61m▍[38;5;98;48;5;54m┛[38;5;54;48;5;68m▆[38;5;61;48;5;18m╹[38;5;55;48;5;91m▅[48;5;132m▇[38;5;24;48;5;18m┈[38;5;4;48;5;234m▌[38;5;24;48;5;17m▁[48;5;235m▁[38;5;23;48;5;233m▁ [38;5;17m╷[38;5;233;48;5;234m┈[38;5;238m╷[38;5;234;48;5;232m╸ [48;5;16m [0m
+[38;5;16;48;5;16m [38;5;234m▗[38;5;17;48;5;232m▁[38;5;53;48;5;233m╶[38;5;234m╴[38;5;23m▗[38;5;233;48;5;53m▆[38;5;234;48;5;125m▃[48;5;5m▂[38;5;90;48;5;233m▄[48;5;236m▂[38;5;54;48;5;235m▂[38;5;235;48;5;240m▊[38;5;175;48;5;17m▄[38;5;97;48;5;60m▖[38;5;25m▃[38;5;32m▗[38;5;37;48;5;24m╼[38;5;100;48;5;237m▁[38;5;184;48;5;236m▅[38;5;190m▅[48;5;235m▄[38;5;226;48;5;8m▂[38;5;184;48;5;238m▁[38;5;235;48;5;66m▄[38;5;77;48;5;60m┉[38;5;78;48;5;23m▄ [38;5;65;48;5;237m▁[38;5;148;48;5;236m▁[38;5;113;48;5;23m▂[38;5;149m▂[38;5;107m▃[38;5;101;48;5;237m▃[38;5;65;48;5;238m▃[38;5;80;48;5;24m─[38;5;51m─[38;5;38m╾─╼[38;5;234;48;5;38m▂▂[38;5;45;48;5;23m━━━[38;5;234;48;5;38m▃▃[38;5;38;48;5;25m▇[38;5;235;48;5;38m▁[38;5;38;48;5;30m┈[38;5;44;48;5;66m─[38;5;108;48;5;240m╌[38;5;64;48;5;239m╻[38;5;71m┈╺[38;5;107;48;5;23m▃[38;5;119m▁[38;5;36;48;5;24m▃[38;5;97;48;5;30m╸[38;5;78;48;5;24m▃[38;5;80m━[38;5;235;48;5;38m▄[38;5;142;48;5;24m▁[38;5;184;48;5;23m▂[38;5;185m▂[38;5;143;48;5;24m▂[38;5;236;48;5;32m▅[38;5;38;48;5;23m━[38;5;31;48;5;25m▃[48;5;17m [38;5;233;48;5;234m┊┈[48;5;233m  [38;5;236;48;5;125m▇[38;5;233;48;5;236m▇[48;5;232m   [38;5;232;48;5;16m▍[0m
+[38;5;16;48;5;16m [38;5;232m▁[48;5;17m▇[38;5;233m▉[48;5;23m▉[38;5;234m▉[38;5;37m┱[38;5;31;48;5;234m▖[38;5;234;48;5;53m▉[48;5;54m [38;5;54;48;5;90m▇[38;5;90;48;5;60m▘[38;5;54;48;5;90m▆[48;5;97m▇[38;5;17m▅[38;5;4;48;5;61m▆[38;5;36;48;5;24m╱[38;5;148;48;5;234m╺[38;5;235;48;5;148m▃[38;5;236m▖[38;5;184;48;5;190m╷  [38;5;8;48;5;184m▅[38;5;235;48;5;58m▆[38;5;249;48;5;23m▝[38;5;3;48;5;157m▆[38;5;58;48;5;149m━[38;5;226;48;5;238m▄[48;5;58m▄[38;5;190;48;5;235m▅[48;5;236m▅[48;5;234m▆[48;5;235m▆[48;5;234m▇[38;5;235;48;5;142m▗[38;5;148;48;5;234m▗[38;5;191;48;5;235m▆[48;5;238m▆[48;5;234m▇▇▇[48;5;237m▇[38;5;190;48;5;186m▄▄▄[38;5;185;48;5;237m▌[38;5;239;48;5;80m▆[38;5;184;48;5;235m▆[38;5;190;48;5;234m▆[48;5;235m▆[48;5;237m▆[38;5;227m▆[38;5;190;48;5;8m▆[48;5;237m▆[38;5;191;48;5;238m▆[38;5;106;48;5;236m▏[38;5;234;48;5;71m▇[38;5;235m▅[38;5;184;48;5;236m▃[38;5;190m▅[48;5;3m▇[48;5;191m▉[38;5;227;48;5;190m▘[38;5;154m▂[38;5;190;48;5;226m▄[38;5;154;48;5;190m▁[48;5;237m▆[38;5;148;48;5;234m▖[38;5;235;48;5;30m▅[38;5;113;48;5;236m▖[38;5;53;48;5;17m╺[38;5;234;48;5;53m▉[38;5;91;48;5;233m▄[38;5;24;48;5;17m╼[38;5;232;48;5;234m┊[38;5;17;48;5;232m▁  [38;5;232;48;5;16m▊[0m
+[38;5;232;48;5;232m  [48;5;233m▋[38;5;233;48;5;232m▎[38;5;24;48;5;234m┏[38;5;18m┐[38;5;24m▖[38;5;234;48;5;233m▖[38;5;232m╴[38;5;233;48;5;243m▋[38;5;242;48;5;17m▎[38;5;17;48;5;4m▆[48;5;54m▁[38;5;4m▆[38;5;237;48;5;17m╷[38;5;29;48;5;23m▗[38;5;235;48;5;35m▗[38;5;100;48;5;235m▗[38;5;235;48;5;148m▘[38;5;64;48;5;190m▗[38;5;100m▏  [38;5;185;48;5;234m▏[38;5;29;48;5;235m└[38;5;190;48;5;236m▗[48;5;190m [38;5;235;48;5;148m▗[38;5;234;48;5;190m▆[48;5;148m▆[38;5;236;48;5;184m▇[38;5;184;48;5;58m▃[48;5;190m  [38;5;237;48;5;148m▄[38;5;234;48;5;58m▉[38;5;235;48;5;148m▂[38;5;233m▃[38;5;235;48;5;190m▄[38;5;236m▄[38;5;3m▖[38;5;184m╵ [38;5;235m▄[38;5;233;48;5;154m▄[38;5;234;48;5;190m▄[38;5;106;48;5;234m▋ [38;5;190;48;5;237m▝[38;5;58;48;5;190m▄▄[38;5;234m▄[38;5;235m▄▄[38;5;234;48;5;154m▃[38;5;148;48;5;237m▊[48;5;234m [38;5;184;48;5;236m▗[38;5;100;48;5;190m▘[38;5;154m╴[38;5;64;48;5;154m▗[38;5;234;48;5;112m▄[38;5;233;48;5;106m▆[38;5;234;48;5;65m▇[38;5;233;48;5;71m▇[38;5;235;48;5;148m▆[38;5;8;48;5;154m▖[38;5;234;48;5;112m▗[38;5;17;48;5;234m┈[38;5;30m▂[38;5;6;48;5;78m▚[38;5;67;48;5;24m▖[38;5;25;48;5;17m▄[38;5;17;48;5;91m▇[38;5;54;48;5;17m▁[38;5;234;48;5;233m▁[38;5;17;48;5;54m▆[48;5;233m▖[48;5;232m [38;5;232;48;5;16m▋[0m
+[38;5;16;48;5;232m▉[38;5;233m▗[38;5;234m▝[38;5;233;48;5;16m▎[38;5;25;48;5;17m┋┋[38;5;24m▋[38;5;233;48;5;234m┊[38;5;53m╎[38;5;17;48;5;236m┈[38;5;89m▁[38;5;95;48;5;23m▇[38;5;53;48;5;236m╸[38;5;65;48;5;23m▁[38;5;106;48;5;237m╱[48;5;236m▘[38;5;184m▄[38;5;190;48;5;184m╴[38;5;236;48;5;148m▄[38;5;234;48;5;235m╴[48;5;190m [38;5;190;48;5;184m▉▉[38;5;235;48;5;234m▏[38;5;100m╺[38;5;236;48;5;148m▄[38;5;17m▆[38;5;23;48;5;235m╶[48;5;234m╴[38;5;142m▗[38;5;58;48;5;190m▘ [38;5;101m▗[38;5;149;48;5;234m▘[38;5;24m▗[48;5;233m▃[38;5;235m╺[38;5;233;48;5;234m╴[38;5;4;48;5;233m▝[38;5;234;48;5;238m▇[48;5;190m▎  [38;5;184;48;5;234m▏[38;5;53;48;5;235m╴[38;5;233;48;5;234m╴ [38;5;1m╴[38;5;236;48;5;190m▃[38;5;8m▃[38;5;237m▃[38;5;100;48;5;235m▁[48;5;234m▁▁[38;5;8m▁[38;5;237m╵[38;5;226;48;5;8m▗[38;5;215;48;5;184m╴[38;5;203;48;5;149m▁[38;5;236;48;5;148m▗[38;5;233;48;5;234m┊[38;5;17;48;5;233m▝[38;5;143;48;5;234m▗[38;5;236;48;5;185m▝[38;5;233;48;5;234m┊[48;5;233m [38;5;234;48;5;8m▇[38;5;17;48;5;234m╷[38;5;24;48;5;236m▝[38;5;4;48;5;31m▆[38;5;17;48;5;25m▁[38;5;24;48;5;68m▇[38;5;97;48;5;24m╺[38;5;91;48;5;17m▇[38;5;55;48;5;53m▎[48;5;17m▅[38;5;92m▖[38;5;233;48;5;18m▃[38;5;4;48;5;232m▘[48;5;16m [0m
+[38;5;16;48;5;232m▉[38;5;233m▁[38;5;232;48;5;16m╎▘[48;5;233m╴[38;5;233;48;5;234m┈[38;5;237m▘[38;5;24;48;5;17m▗[38;5;126;48;5;60m▝[38;5;4;48;5;89m▆▆[38;5;37;48;5;239m▁[38;5;38;48;5;60m┏[38;5;235;48;5;106m▅[38;5;142;48;5;235m▄[38;5;184;48;5;106m▇[38;5;58;48;5;148m▗[38;5;184;48;5;236m▂[48;5;234m▃[48;5;236m▄[48;5;190m [38;5;119m▂[38;5;154;48;5;236m▉[38;5;234;48;5;233m▎[38;5;19;48;5;17m▖[38;5;233;48;5;4m▅[38;5;17;48;5;234m┊[38;5;234;48;5;235m┊[38;5;142;48;5;234m▆[48;5;190m [38;5;155m▁[38;5;234;48;5;149m▗[48;5;239m▇[38;5;237;48;5;235m╵[38;5;24;48;5;17m▁[38;5;234;48;5;23m▄[38;5;30;48;5;235m▝[38;5;236;48;5;30m▄[38;5;23;48;5;234m▃[38;5;233m╴[38;5;234;48;5;190m▎[38;5;209m▂[38;5;215;48;5;226m▋[38;5;184;48;5;234m▎[38;5;89;48;5;235m┃[38;5;234;48;5;233m╴[38;5;70m▃[38;5;235;48;5;100m▌[38;5;178m▇[38;5;209;48;5;184m╾[38;5;64m▁[38;5;239m▁[38;5;64;48;5;190m▁[38;5;237m▗[38;5;236;48;5;3m▇[38;5;235;48;5;106m▉[38;5;226;48;5;184m╴[38;5;154;48;5;173m▗[38;5;178;48;5;203m▃[38;5;100;48;5;234m▎[38;5;233;48;5;235m┊[38;5;142m▅[38;5;83;48;5;155m▁[38;5;119;48;5;190m▁[38;5;64;48;5;112m▝[38;5;112;48;5;235m▖[38;5;234;48;5;233m╹[38;5;31;48;5;234m╶[38;5;233m╴[38;5;53m▖[38;5;234;48;5;233m▏[38;5;233;48;5;54m▄[48;5;17m╴[38;5;53;48;5;234m╹[38;5;54;48;5;233m▝[38;5;233;48;5;91m▅[38;5;232;48;5;53m▇[38;5;233;48;5;16m╴  [0m
+[7m[38;5;16m [0m[38;5;16;48;5;233m▇[38;5;233;48;5;232m╻[38;5;53m▗[38;5;232;48;5;233m╴[38;5;234;48;5;53m▅[38;5;53;48;5;236m╵[38;5;17;48;5;31m▌[38;5;38;48;5;24m▌[38;5;235;48;5;31m▄[38;5;142;48;5;23m▂[38;5;184m▃[38;5;190;48;5;235m▄[38;5;64;48;5;190m▘[38;5;226;48;5;184m╴[38;5;173;48;5;190m▗[38;5;203m▅[38;5;173;48;5;184m▆[38;5;106;48;5;148m▁[38;5;58;48;5;184m▖[38;5;154;48;5;43m▎[38;5;79m┊[38;5;154;48;5;236m▊[38;5;236;48;5;234m╴[38;5;19;48;5;233m▌[38;5;23m╺[38;5;184;48;5;236m▗[38;5;43;48;5;149m▗[48;5;155m▆[38;5;42;48;5;113m▘[38;5;185;48;5;236m▘[48;5;233m [38;5;235;48;5;234m▝┊[38;5;106;48;5;237m▆[38;5;190;48;5;234m▇[38;5;234;48;5;142m▗[38;5;235;48;5;236m▇[38;5;4;48;5;233m▗[38;5;234m╶[38;5;235;48;5;190m▎[38;5;113;48;5;209m▁[38;5;79;48;5;179m╻[38;5;226;48;5;234m▎[38;5;233;48;5;53m▆[38;5;1;48;5;233m▗[38;5;234;48;5;23m▇[38;5;190;48;5;236m▗[38;5;179;48;5;234m▆▆[38;5;142;48;5;235m▆[38;5;234;48;5;17m╴[38;5;233;48;5;234m╴[38;5;234;48;5;58m▇[38;5;19;48;5;17m┨[38;5;234;48;5;148m▊[38;5;190;48;5;78m▌[38;5;43;48;5;113m▄[38;5;78;48;5;148m▃[38;5;106;48;5;235m▏[38;5;53;48;5;233m▁[38;5;235;48;5;234m▁[38;5;113;48;5;236m▝[38;5;72;48;5;44m▆[38;5;107;48;5;235m▘[38;5;4;48;5;233m▂ [38;5;23;48;5;17m╷[38;5;89;48;5;234m╺[38;5;234;48;5;236m▇[38;5;53;48;5;234m▝[48;5;235m╹[48;5;17m▘[38;5;74;48;5;24m━[38;5;126;48;5;53m┭[38;5;5;48;5;234m▖[38;5;233;48;5;232m▋[48;5;16m  [38;5;232m╴[0m
+[38;5;16;48;5;16m  [48;5;232m╴[48;5;233m [38;5;89;48;5;234m╻[38;5;17;48;5;53m▉[38;5;90;48;5;24m▖[38;5;23;48;5;38m╺[38;5;24;48;5;17m▎[38;5;234;48;5;100m▆[38;5;236;48;5;142m━[38;5;77;48;5;154m▂[38;5;43m▄[38;5;79;48;5;112m━[38;5;235;48;5;148m▂[38;5;234;48;5;142m▃▅[38;5;233;48;5;106m▆[48;5;233m [38;5;234;48;5;154m▍[38;5;78;48;5;44m▏[38;5;77;48;5;79m▗[38;5;148;48;5;233m▊[38;5;233;48;5;18m▉[38;5;58;48;5;17m▁[38;5;234;48;5;113m▘[38;5;44;48;5;154m▃[38;5;43;48;5;119m┎[38;5;148;48;5;71m╱[38;5;184;48;5;235m▂[38;5;226m▂[38;5;185m▃[38;5;149;48;5;233m▄[38;5;143;48;5;236m▆[38;5;44;48;5;173m▁[38;5;78m▂[38;5;106;48;5;234m▏[38;5;18m▘[38;5;233;48;5;19m▋[38;5;235;48;5;233m╵[38;5;248;48;5;113m▖[38;5;77;48;5;43m▂[38;5;44;48;5;154m▊[38;5;148;48;5;233m▍[38;5;19;48;5;17m┃[38;5;53;48;5;233m╺ [38;5;106;48;5;236m▂[38;5;184;48;5;66m▃[38;5;240;48;5;107m╹[38;5;184;48;5;65m▄[38;5;185;48;5;17m▄[38;5;150;48;5;4m▄[48;5;17m▄[38;5;155;48;5;236m▃[38;5;191;48;5;234m▃[38;5;234;48;5;71m━[38;5;23;48;5;44m▅[38;5;24m╴[38;5;190;48;5;72m╲[38;5;142;48;5;235m▂[38;5;233m▇[38;5;235;48;5;234m╸[38;5;64m▘[38;5;235;48;5;233m╺[38;5;233;48;5;235m╴[38;5;142m▄[38;5;210;48;5;237m▇[38;5;204;48;5;179m▅▅[38;5;236;48;5;137m▗[38;5;235;48;5;142m▆[38;5;236;48;5;234m╷[38;5;31m▗[38;5;38;48;5;54m▖[48;5;17m [48;5;233m [48;5;232m [48;5;16m  [0m
+[38;5;16;48;5;232m▉┊┊ [48;5;233m [38;5;53;48;5;17m╶[38;5;60;48;5;4m╶[38;5;17;48;5;25m▄[38;5;106;48;5;235m▗[38;5;237;48;5;113m▘[38;5;73m┎[48;5;154m▅[38;5;71;48;5;65m▋[38;5;106;48;5;234m▘[38;5;18;48;5;233m╶[38;5;233;48;5;4m▃[48;5;18m▄[48;5;234m┊[48;5;233m [38;5;234;48;5;112m▏[38;5;113;48;5;43m▘[38;5;44;48;5;79m▉[38;5;154;48;5;237m▋[38;5;190;48;5;234m▂[38;5;100;48;5;236m▝[38;5;31;48;5;38m╴[38;5;74m╶[38;5;179;48;5;44m▝[38;5;44;48;5;179m▅[38;5;79;48;5;185m▇[38;5;83;48;5;43m╼[38;5;138m─[38;5;23;48;5;80m▂[38;5;233;48;5;73m▂[38;5;235;48;5;80m▃[38;5;233;48;5;66m▃[38;5;235;48;5;233m▗[38;5;236m▁[38;5;233;48;5;19m▋[48;5;233m [38;5;85;48;5;240m┗[38;5;154;48;5;44m▘[38;5;44;48;5;71m▉[38;5;112;48;5;235m▘[38;5;26;48;5;17m┃[38;5;235;48;5;233m╶[38;5;53m╸[38;5;148;48;5;234m▝[38;5;41;48;5;78m▃[38;5;233m▁[38;5;23;48;5;44m▂[38;5;234m▁▁▁[38;5;236m▁[38;5;77;48;5;29m▉[38;5;36;48;5;23m▂[38;5;234;48;5;30m▌[38;5;23;48;5;68m▖[38;5;45;48;5;103m▅[38;5;44;48;5;155m▆[38;5;80;48;5;142m▅[48;5;100m▄[38;5;185;48;5;66m╸[38;5;38;48;5;101m▄[38;5;74;48;5;143m▅[38;5;38;48;5;174m▇[48;5;133m▇[38;5;23;48;5;38m▁[38;5;235;48;5;31m▄[38;5;17;48;5;233m▁[38;5;19m▂[38;5;54;48;5;17m▁╻[38;5;53m▗[48;5;233m▏[38;5;16m▇[48;5;16m   [0m
+[38;5;16;48;5;16m [48;5;232m▋[38;5;235;48;5;233m▗[38;5;53m▂[38;5;89;48;5;17m▃[48;5;235m╱[38;5;64;48;5;234m▗[38;5;234;48;5;77m▘[38;5;38;48;5;71m┷[38;5;132;48;5;29m▝[38;5;148;48;5;73m▆[48;5;78m▇[38;5;190;48;5;240m━[38;5;143;48;5;234m▆[38;5;149;48;5;237m━[38;5;233;48;5;64m▄[48;5;234m┈[38;5;23m╵[38;5;8m▁[38;5;77;48;5;148m▝[38;5;118;48;5;78m┙[38;5;74;48;5;132m▃[38;5;72;48;5;226m▇[38;5;235;48;5;77m▅[38;5;234;48;5;30m▉[38;5;233;48;5;44m▃[48;5;43m▄▅[48;5;37m▆[38;5;234m▇[38;5;31;48;5;17m▁[38;5;32;48;5;4m▂[38;5;4;48;5;233m▃ [38;5;53;48;5;234m▁[38;5;126;48;5;235m▂▅[38;5;90;48;5;233m▃[38;5;17;48;5;25m▋[48;5;234m╶[38;5;31;48;5;17m╶[38;5;23;48;5;45m▏[38;5;38;48;5;23m▘[38;5;53;48;5;233m╶[38;5;25;48;5;17m┗[38;5;234m┊[38;5;166;48;5;234m╺[38;5;1;48;5;233m╸[38;5;71;48;5;234m▊[38;5;234;48;5;233m╷[38;5;53m▁[38;5;235;48;5;234m┄[38;5;89m▄[38;5;126;48;5;235m▃[38;5;53;48;5;148m▉[38;5;112;48;5;239m▏[38;5;89;48;5;233m▂  [38;5;233;48;5;37m▆[38;5;234;48;5;45m▅[48;5;39m▄▃▃[38;5;23;48;5;38m▃[38;5;235;48;5;39m▄[38;5;17;48;5;31m▃▆[38;5;4;48;5;233m╺▂[38;5;17;48;5;19m▘[48;5;55m▂[48;5;91m▃[38;5;4;48;5;17m▏[38;5;17;48;5;233m▏[38;5;234m╴[38;5;233;48;5;232m╴[48;5;16m   [0m
+[7m[38;5;16m [0m[38;5;16;48;5;232m▉[38;5;235;48;5;234m╶[38;5;53;48;5;89m▌[38;5;233m━[38;5;53;48;5;233m▂[38;5;233;48;5;64m▇[38;5;17;48;5;233m▃[38;5;22m▏[38;5;70;48;5;236m╱[38;5;236;48;5;148m▄[38;5;234;48;5;107m▅[38;5;233;48;5;71m▇[38;5;53;48;5;17m▂[38;5;235;48;5;234m╻[48;5;17m╼[38;5;89;48;5;234m▂[48;5;233m▖[38;5;234;48;5;151m▊[38;5;113;48;5;112m▁[38;5;29;48;5;113m▗[38;5;234;48;5;71m▅[38;5;233;48;5;234m╴[48;5;17m▚[38;5;17;48;5;234m╴[38;5;78m▂[38;5;38;48;5;233m▄[38;5;31;48;5;234m▅[38;5;38;48;5;23m╸[38;5;234;48;5;25m▅[38;5;235m▇[38;5;233;48;5;234m┈[38;5;5m╴[38;5;234;48;5;53m▋[38;5;53;48;5;90m▁[38;5;126;48;5;162m▖[38;5;163m┊ [38;5;235;48;5;5m━[38;5;54;48;5;234m▁[38;5;17;48;5;53m▉[38;5;23;48;5;44m▋[38;5;24;48;5;234m┖[38;5;5m▗[38;5;54;48;5;17m┏[38;5;104;48;5;54m▂[38;5;97;48;5;17m▅[38;5;90;48;5;235m▄[38;5;148;48;5;95m┃[38;5;203;48;5;234m▃[38;5;167m▃[38;5;125;48;5;53m▃[48;5;162m▁[38;5;203m┐[38;5;168;48;5;184m▉[38;5;184;48;5;167m▏[38;5;53;48;5;161m▝[38;5;125;48;5;235m▃[38;5;53m▏[38;5;88;48;5;234m╷[38;5;234;48;5;233m╷[38;5;4m▂▄[48;5;232m [38;5;38;48;5;17m│[38;5;17;48;5;234m▝[38;5;54m▃[48;5;233m▅[38;5;4;48;5;62m▋[38;5;55;48;5;19m▄[38;5;233;48;5;18m╺[48;5;4m▅[38;5;53;48;5;234m└▗[48;5;233m▖[38;5;16;48;5;232m┊[48;5;16m    [0m
+[38;5;16;48;5;16m  [38;5;232;48;5;235m▉[38;5;53;48;5;233m╴[38;5;234;48;5;53m▅[38;5;19;48;5;17m▗[38;5;17;48;5;55m▘[38;5;55;48;5;17m▍[38;5;4;48;5;233m▃[38;5;234m╵[38;5;17m┙[38;5;235m▁[38;5;53;48;5;234m▂╴[38;5;89m─[38;5;53;48;5;125m▎[38;5;167;48;5;162m╌[38;5;236;48;5;161m▝[38;5;237;48;5;241m▇[38;5;234;48;5;251m▅[38;5;233;48;5;234m╴[38;5;89m╺▁[38;5;167;48;5;235m▄[38;5;236;48;5;143m▂[38;5;24;48;5;114m▄[48;5;72m▇[48;5;17m╸[38;5;32m▂[38;5;31;48;5;23m▁[38;5;24;48;5;17m▗[38;5;31;48;5;23m┙[38;5;17;48;5;24m▇[38;5;5;48;5;234m▘[38;5;54;48;5;235m▅[48;5;162m▊[38;5;162;48;5;54m▍[38;5;53;48;5;126m▄[38;5;4;48;5;55m▖[38;5;91;48;5;53m▅[38;5;53;48;5;17m┙[38;5;237;48;5;43m▋[38;5;60;48;5;17m▗[38;5;81;48;5;54m▂[38;5;97;48;5;60m╷[38;5;61;48;5;110m▆[38;5;134;48;5;98m╻[48;5;53m [38;5;142;48;5;8m▊[38;5;235;48;5;161m▆[38;5;89;48;5;235m╶[38;5;53;48;5;236m╵[48;5;162m▋[38;5;198;48;5;125m▋[38;5;126;48;5;203m▇[48;5;125m [38;5;89;48;5;162m▃[38;5;203;48;5;125m▆[38;5;202;48;5;89m▖[38;5;89;48;5;235m╍[38;5;125;48;5;17m▘[38;5;234;48;5;53m━[38;5;53;48;5;90m▝[38;5;233;48;5;53m▊[38;5;32;48;5;5m▝[38;5;90;48;5;54m▂[38;5;5m▁[38;5;90;48;5;5m▗[38;5;17;48;5;53m▝[38;5;233;48;5;235m▉[38;5;232;48;5;4m▅[38;5;233;48;5;17m▇[48;5;232m▌[38;5;17m▗▃[38;5;233m╹[38;5;234m╾[38;5;16m┈[48;5;16m  [0m
+[38;5;16;48;5;16m  [48;5;232m╴[38;5;17;48;5;233m╶[38;5;54;48;5;235m━[48;5;17m▇[38;5;55;48;5;54m▚[48;5;55m [48;5;18m▆[38;5;54;48;5;17m▅[48;5;234m▆[38;5;17;48;5;53m▁[38;5;233m▃[38;5;53;48;5;17m▇[38;5;89;48;5;235m╵[38;5;125m▝[38;5;53;48;5;161m┏[38;5;125m┓[48;5;197m▁[48;5;233m▍[38;5;162;48;5;236m▗[38;5;125;48;5;235m▅[38;5;235;48;5;125m▆[38;5;236;48;5;234m▘[38;5;238m╹[38;5;23m╴[38;5;233;48;5;23m▇[38;5;25m▝[38;5;17;48;5;32m▄[38;5;32;48;5;17m▘[38;5;233;48;5;234m▆[38;5;232;48;5;233m┈[38;5;234m╷[38;5;232m┈[38;5;52m╴[38;5;234;48;5;126m▊[38;5;163;48;5;17m▎[38;5;126;48;5;53m┗[38;5;53;48;5;17m╵[38;5;5m╵[38;5;235m┊[38;5;17;48;5;42m▋[48;5;17m [38;5;53;48;5;74m▆[38;5;54;48;5;61m▅[38;5;4m▃▆[38;5;238;48;5;235m╹[38;5;234;48;5;106m▇[38;5;89;48;5;234m▗[38;5;234;48;5;236m▉[38;5;89;48;5;235m╴[38;5;53;48;5;161m▊[38;5;161;48;5;53m▌  [38;5;234m▇[48;5;203m▇[38;5;235;48;5;125m▇[38;5;53;48;5;236m╸[38;5;17;48;5;54m▇[48;5;236m [38;5;110;48;5;54m▃[38;5;53;48;5;234m▝[48;5;126m▃[48;5;125m▁[38;5;234;48;5;5m▇[38;5;233;48;5;53m▆[38;5;234;48;5;235m▉[38;5;235;48;5;233m╵[38;5;234;48;5;232m└[38;5;53;48;5;233m╾[38;5;234;48;5;232m▁[38;5;17m▝[38;5;232;48;5;4m▅[48;5;16m   [38;5;16;48;5;233m▆[48;5;16m [0m
+[38;5;16;48;5;16m  [48;5;232m┈[38;5;53m▂[38;5;17m╼[38;5;233;48;5;17m▍[48;5;4m▃[38;5;18;48;5;54m▆[38;5;54;48;5;90m▘[38;5;90;48;5;54m▍[38;5;233m▄[38;5;5;48;5;235m▘[38;5;53;48;5;233m▁╻[38;5;235m╴[48;5;89m▆[38;5;53;48;5;125m▝[38;5;235m▅[38;5;161;48;5;53m┫[38;5;89;48;5;234m╸[38;5;234;48;5;161m▋[38;5;125;48;5;235m▏[38;5;236;48;5;23m▉[38;5;24;48;5;234m▘[38;5;101;48;5;235m▖[38;5;232;48;5;233m╴[38;5;235m▗[38;5;237m▁[38;5;236m▁[38;5;232m╴[38;5;31m▁[38;5;23;48;5;232m▁[38;5;232;48;5;233m┊[38;5;236m╵[38;5;233;48;5;234m╴[38;5;234;48;5;162m▉[38;5;162;48;5;17m▎[38;5;89m▁[38;5;232;48;5;233m┈[38;5;234;48;5;89m▇[38;5;24;48;5;17m▁[38;5;17;48;5;43m▌[38;5;30;48;5;236m▏[48;5;17m [38;5;236;48;5;234m▁[38;5;17;48;5;235m┈[38;5;53m╵[38;5;237;48;5;234m╸[38;5;233m╴[38;5;238m▃[38;5;237m▖[38;5;233m╴[38;5;235;48;5;167m▉[38;5;167;48;5;17m▍[38;5;234m▗[38;5;233;48;5;234m╴[38;5;17m╴[38;5;233m┈[38;5;16;48;5;232m┈[38;5;233m┄[48;5;4m▊[38;5;17;48;5;233m▏[38;5;235;48;5;55m▍[38;5;234;48;5;53m▗[38;5;235;48;5;233m╸[38;5;233;48;5;89m▚[48;5;53m▇[38;5;89;48;5;233m▁[38;5;53m▂[38;5;234;48;5;232m┊[38;5;17m╻[38;5;232;48;5;16m▄[38;5;16;48;5;233m▇[38;5;234;48;5;232m▝[38;5;233m╷[48;5;16m     [0m
+[38;5;16;48;5;16m  [38;5;232m╵[38;5;16;48;5;235m▇[48;5;16m [38;5;4;48;5;233m┃[38;5;234;48;5;232m╴[38;5;16;48;5;17m▄[38;5;232;48;5;5m▆[38;5;234;48;5;53m▃[48;5;232m [38;5;53;48;5;233m╶[38;5;235;48;5;5m▇[38;5;233;48;5;53m▉[38;5;53;48;5;233m▏[38;5;234;48;5;89m▉[38;5;125;48;5;235m▌[38;5;235;48;5;233m▏[38;5;59;48;5;234m╹[38;5;232;48;5;233m╴[48;5;167m▋[38;5;88;48;5;234m▏[38;5;236;48;5;162m▅[38;5;233;48;5;234m╴[38;5;235;48;5;17m╶[38;5;238;48;5;235m╶[38;5;18;48;5;233m▂[38;5;17m▂ ▂[48;5;23m▇[38;5;25;48;5;233m▁[38;5;4m▁[38;5;232m╴[38;5;17m▂[38;5;232m┈[48;5;234m╴[38;5;17;48;5;233m▂[38;5;233;48;5;17m┊[38;5;4m▗▏[38;5;237;48;5;31m▆[48;5;17m  [38;5;234;48;5;233m╵[38;5;235m╵ [38;5;236m▝[38;5;237;48;5;234m┕[38;5;235;48;5;233m▝[38;5;234;48;5;23m▇[38;5;232;48;5;234m┈[38;5;233;48;5;236m▉[38;5;89;48;5;234m▘[38;5;233;48;5;17m▆[48;5;233m [38;5;234m┊[38;5;235;48;5;232m▖ [38;5;233m┊[38;5;235;48;5;233m╷[38;5;16;48;5;232m╴[38;5;26;48;5;17m┗[38;5;234;48;5;232m╶[38;5;233m╴[38;5;232;48;5;233m╴[38;5;235;48;5;126m▋[38;5;53;48;5;162m▂[38;5;89;48;5;234m▏[38;5;233;48;5;232m╶╶[38;5;234m╴[38;5;233m▁[48;5;16m▁[38;5;232m▁╴ [48;5;232m [48;5;16m  [0m
+[7m[38;5;16m [0m[38;5;1;48;5;16m    [38;5;17;48;5;232m┗[38;5;18m▁[38;5;4;48;5;233m▁[38;5;17;48;5;232m▎[48;5;233m▍[38;5;233;48;5;17m▇[38;5;4;48;5;233m╸[38;5;232m┈[48;5;126m▎[38;5;234m▗[38;5;52;48;5;232m╹[38;5;232;48;5;233m┈▇[38;5;16m╴[38;5;234;48;5;232m▁[48;5;167m▋[38;5;89;48;5;17m▏[38;5;53m╹[38;5;24m┈ [38;5;233;48;5;237m┈[38;5;17;48;5;18m▇[38;5;4;48;5;17m╸[38;5;18m╽[38;5;60m╶[38;5;97m╴[38;5;17;48;5;25m▇[38;5;232;48;5;17m▇[48;5;233m▆▆[38;5;233;48;5;236m▉[38;5;238;48;5;233m▎[38;5;17m┩[38;5;232;48;5;17m▂[38;5;18m▝[38;5;4m▘[38;5;237;48;5;234m╿[38;5;235m╶[38;5;24;48;5;17m▂[38;5;25;48;5;233m▂[48;5;17m▂[38;5;17;48;5;234m▏[38;5;238m╺[38;5;130;48;5;237m┗[38;5;89;48;5;235m┕[38;5;53m┚[38;5;234;48;5;238m▇[48;5;237m▇[38;5;53;48;5;235m▏[38;5;236;48;5;234m▏[38;5;233m╴[38;5;88;48;5;52m┓[48;5;233m [48;5;232m  [38;5;16m┈┊[38;5;17;48;5;233m▄[48;5;232m [38;5;53;48;5;233m╹[38;5;89;48;5;234m╶[48;5;233m [48;5;232m╹  [38;5;235m╴[38;5;233m▁╴ ╶[38;5;232;48;5;17m▇[38;5;16;48;5;233m▆[48;5;16m   [0m
+[7m[38;5;16m [0m[38;5;1;48;5;16m    [48;5;232m [38;5;232;48;5;17m▇[48;5;232m  [38;5;17m▍[38;5;16m▆▇[38;5;232;48;5;16m╵▁[38;5;233;48;5;232m╴[38;5;232;48;5;233m┈[38;5;53;48;5;232m╺[38;5;232;48;5;233m┊[38;5;17;48;5;232m▃[48;5;233m▂[38;5;235;48;5;167m▌[38;5;131;48;5;235m▎[38;5;234;48;5;239m▆[38;5;232;48;5;17m▅[38;5;233;48;5;234m┈[38;5;232;48;5;233m╴[38;5;233;48;5;232m╵┄[48;5;17m [48;5;233m [48;5;232m  ╴ [38;5;17m▁[38;5;232;48;5;234m▉[38;5;53;48;5;232m▎[48;5;233m┍[48;5;232m [38;5;4m▗[48;5;233m▖[38;5;23;48;5;234m│[38;5;4;48;5;17m╺[38;5;18m┗[38;5;17;48;5;25m▄[38;5;39;48;5;24m▘[38;5;4;48;5;233m▎ [38;5;237;48;5;234m╹[38;5;234;48;5;233m╏[38;5;17m▃ [38;5;233;48;5;53m▉[38;5;89;48;5;234m▖[38;5;233;48;5;53m▆[38;5;53;48;5;234m━[38;5;166;48;5;89m╻[38;5;53;48;5;234m▁[38;5;234;48;5;233m╵[38;5;17;48;5;234m┶[38;5;234;48;5;233m╌[38;5;235m─[38;5;17m▖[38;5;234m╶▏[38;5;235m╻ [38;5;232m┊[38;5;234m╺[48;5;232m     [38;5;232;48;5;16m┳╵    [0m
+[7m[38;5;16m [0m[38;5;1;48;5;16m     [38;5;16;48;5;232m▅ [38;5;233m▝[38;5;17;48;5;233m▘[48;5;232m  [38;5;233m╵  ┈[38;5;234;48;5;233m╵[38;5;53m╺[48;5;235m╃[48;5;233m╸[38;5;233;48;5;89m▆[48;5;233m [48;5;232m┈ [38;5;232;48;5;233m╴[48;5;17m╴[48;5;233m┊┈[48;5;17m▇[48;5;233m▗[38;5;233;48;5;232m▘┊╹[38;5;18;48;5;233m▗[48;5;17m▊[38;5;233;48;5;53m▊[38;5;53;48;5;232m▍[38;5;54;48;5;233m╹[38;5;232;48;5;17m▅[38;5;233;48;5;4m▋[38;5;17;48;5;233m▍[38;5;24;48;5;17m╻[38;5;232;48;5;233m╴[38;5;233;48;5;17m▅▅[38;5;17;48;5;233m╹▎[38;5;233;48;5;17m▆[48;5;232m▍ [38;5;232;48;5;17m▅[48;5;232m [38;5;233;48;5;125m▊[38;5;125;48;5;235m▌[38;5;53;48;5;233m▖[38;5;233;48;5;234m▉[38;5;125;48;5;235m╹[38;5;234;48;5;54m▆[38;5;4;48;5;234m━[48;5;17m [38;5;17;48;5;233m▍[38;5;234m▄[38;5;17m▌ [38;5;125;48;5;234m╺[38;5;53m╸╶[48;5;233m╴ [38;5;17m▁▁[48;5;232m▃ [38;5;232;48;5;16m╴      [0m
+[38;5;16;48;5;16m        [48;5;232m▆╴[38;5;233m▂▃[38;5;17m╴ [38;5;16m▅[48;5;16m  [48;5;232m┈[38;5;233m▂[38;5;16;48;5;233m▂▆[38;5;17;48;5;232m▂[38;5;232;48;5;17m▘[38;5;53m▂[38;5;235m▄[48;5;233m▗[48;5;17m [38;5;233m╴[38;5;232;48;5;233m┊[38;5;17;48;5;232m▃[38;5;233m╵[38;5;232;48;5;233m▇[48;5;232m [38;5;17m▝[38;5;233;48;5;17m▃[38;5;232;48;5;233m┊[38;5;233;48;5;235m▇[48;5;232m╹[38;5;17m╶[38;5;232;48;5;233m▇ [38;5;17m▝[38;5;233;48;5;232m▗   [38;5;232;48;5;233m▇[48;5;232m [38;5;16m▅ [48;5;16m  [38;5;233;48;5;53m▋[38;5;89;48;5;235m▘[38;5;232;48;5;233m▅▆ [38;5;233;48;5;232m▏╸[38;5;17;48;5;233m┆[38;5;233;48;5;17m▄[38;5;17;48;5;233m━▖[38;5;232m▄[48;5;234m▅[38;5;234;48;5;233m▁[38;5;232m▇[48;5;232m [48;5;233m▇[48;5;17m▇[38;5;233m▆[38;5;232m▆[48;5;233m▇[48;5;16m▘      [0m
+[38;5;16;48;5;16m       [38;5;232m╼[48;5;232m [38;5;16;48;5;233m▅▇[48;5;16m  [38;5;232m╺   [38;5;16;48;5;233m▇[48;5;16m  [38;5;232;48;5;233m▘[48;5;17m▄▅[48;5;234m▇[48;5;233m▇[38;5;233;48;5;232m╵[38;5;17;48;5;233m┃[38;5;232m▋[38;5;233;48;5;232m╱▘[38;5;16m▃[38;5;233m▃[38;5;16m▇▃[38;5;233m━[38;5;16m▅ ▅▅▄[38;5;232;48;5;16m▘ [38;5;233;48;5;232m▝[38;5;232;48;5;16m▏ [38;5;16;48;5;232m▉[38;5;232;48;5;16m▘     [48;5;233m▋▃[38;5;234;48;5;232m▘ [38;5;232;48;5;233m▇[48;5;232m [38;5;16m▆[38;5;233m▝[38;5;232;48;5;16m▘[38;5;16;48;5;233m▇[48;5;17m▇[48;5;16m  [48;5;233m▇▅[38;5;233;48;5;16m━▖[38;5;232m╶[38;5;16;48;5;232m▅▆[38;5;232;48;5;16m╺╸      [0m
+[7m[38;5;16m [0m[38;5;1;48;5;16m                   [38;5;16;48;5;233m▇[48;5;16m     [48;5;232m▇▇[48;5;16m   [48;5;232m▇[48;5;16m          [48;5;232m▇[48;5;16m         [48;5;232m▇▆[48;5;16m                          [0m
+[?25h
+AZTEC_BANNER_EOF
+  printf '\033[?25h'
+}
+
 function show_logo() {
-    # Inline logo function (merged from logo.sh)
     local b=$'\033[34m' # Blue
     local y=$'\033[33m' # Yellow
     local r=$'\033[0m'  # Reset
+    local l=$'\033[38;5;190m'
+    local bl=$'\033[38;5;16m'
+    local c=$'\033[0;36m'
 
-    echo
     echo
     echo -e "${NC}$(t "welcome")${NC}"
     echo
-    echo "${b}$(echo "  █████╗ ███████╗████████╗███████╗ ██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ██╔══██╗╚══███╔╝╚══██╔══╝██╔════╝██╔════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ███████║  ███╔╝    ██║   █████╗  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ██╔══██║ ███╔╝     ██║   ██╔══╝  ██║" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ██║  ██║███████╗   ██║   ███████╗╚██████╗" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo "${b}$(echo " ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝ ╚═════╝" | sed -E "s/(█+)/${y}\1${b}/g")${r}"
-    echo
+
+    print_aztec_banner
 
     # Information in frame
     local info_lines=(
@@ -2248,15 +2602,38 @@ function show_logo() {
     local bottom_border="╚$(printf '═%.0s' $(seq 1 $((max_len + 2))))╝"
 
     # Print frame
-    echo -e "${b}${top_border}${r}"
+    echo -e "${c}${top_border}${r}"
     for line in "${info_lines[@]}"; do
       local clean_line=$(echo "$line" | sed -E 's/\x1B\[[0-9;]*[mK]//g')
       local line_length=$(echo -n "$clean_line" | wc -m)
       local padding=$((max_len - line_length))
-      printf "${b}║ ${y}%s%*s ${b}║\n" "$line" "$padding" ""
+      printf "${c}║ ${r}%s%*s ${c}║\n" "$line" "$padding" ""
     done
-    echo -e "${b}${bottom_border}${r}"
+    echo -e "${c}${bottom_border}${r}"
     echo
+
+    # Read-only status bar (no secrets)
+    local env_file="$HOME/.env-aztec-agent"
+    local network_display="—"
+    local rpc_display="—"
+    if [[ -f "$env_file" ]]; then
+      # shellcheck disable=SC1090
+      source "$env_file" 2>/dev/null || true
+      [[ -n "${NETWORK:-}" ]] && network_display="$NETWORK"
+      local rpc_source="${RPC_URL:-}"
+      if [[ -n "$rpc_source" ]]; then
+        rpc_display=$(echo "$rpc_source" | sed -E 's|(https?://[^/?#]+).*|\1|')
+      fi
+    fi
+    printf -v _status_line "$(t status_bar_format)" "$SCRIPT_VERSION" "$network_display" "$rpc_display"
+    if ui_use_color; then
+      echo -e "${DIM}${_status_line}${NC}"
+    else
+      echo "$_status_line"
+    fi
+    echo
+
+    ui_menu_save_anchor
 }
 
 # === Helper function to get network and RPC settings ===
@@ -2278,6 +2655,31 @@ get_network_settings() {
     fi
 
     echo "$network|$rpc_url|$contract_address"
+}
+
+# Resolve staking ERC-20 for approve/deposit (v5: Rollup.getStakingAsset())
+get_staking_asset() {
+    local rollup_address="$1"
+    local rpc_url="$2"
+    local network="${3:-}"
+    local asset=""
+
+    asset=$(cast call "$rollup_address" "getStakingAsset()(address)" --rpc-url "$rpc_url" 2>/dev/null | tr -d '[:space:]')
+    if [[ ! "$asset" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+        local raw
+        raw=$(cast call "$rollup_address" "getStakingAsset()" --rpc-url "$rpc_url" 2>/dev/null | tr -d '[:space:]')
+        if [[ "$raw" =~ ^0x[a-fA-F0-9]{64}$ ]]; then
+            asset="0x${raw: -40}"
+        fi
+    fi
+    if [[ ! "$asset" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+        if [[ "$network" == "mainnet" ]]; then
+            asset="$STAKING_ASSET_MAINNET_FALLBACK"
+        else
+            asset=""
+        fi
+    fi
+    echo "$asset"
 }
 
 # Prefer pip3 when available; fall back to python3 -m pip (minimal/old installs).
@@ -3068,7 +3470,7 @@ check_aztec_container_logs() {
     download_error_definitions() {
         if [ ! -f "$ERROR_DEFINITIONS_FILE" ]; then
             echo -e "\n${YELLOW}Warning: Error definitions file not found at $ERROR_DEFINITIONS_FILE${NC}"
-            echo -e "${YELLOW}Please download the Error definitions file with Option 24${NC}"
+            echo -e "${YELLOW}Please download the Error definitions file with Option 27${NC}"
             return 1
         fi
         return 0
@@ -3147,7 +3549,7 @@ check_aztec_container_logs() {
             ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
         )
         error_solutions=(
-            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 14\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 13"
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 16\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 15"
         )
     fi
 
@@ -3408,10 +3810,21 @@ find_governance_proposer_payload() {
     echo -e "\n${GREEN}$(t "gov_no_changes")${NC}"
   fi
 
+  local latest_payload expected_payload
+  latest_payload="${payloads_array[${#payloads_array[@]}-1]}"
+  expected_payload=$(echo "$V5_UPGRADE_PAYLOAD_ADDRESS" | tr '[:upper:]' '[:lower:]')
+  echo -e "\n${CYAN}$(t "gov_v5_expected")${NC} $V5_UPGRADE_PAYLOAD_ADDRESS"
+  if [ "$latest_payload" = "$expected_payload" ]; then
+    echo -e "${GREEN}$(t "gov_v5_match")${NC}"
+  else
+    echo -e "${YELLOW}$(t "gov_v5_mismatch")${NC}"
+  fi
+  printf "${YELLOW}$(t "gov_signal_hint")${NC}\n" "$V5_UPGRADE_PAYLOAD_ADDRESS"
+
   return 0
 }
 
-# === Find Admin API key in logs (Aztec v4+ startup banner) ===
+# === Find Admin API key in logs (Aztec v5+ startup banner) ===
 find_admin_api_key() {
   echo -e "\n${BLUE}$(t "search_admin_api")${NC}"
 
@@ -3572,7 +3985,11 @@ then one signer address per line (lowercase 0x-prefixed).
 Handles:
 - propose() v1 selector 0x85b98fd8 (legacy header; slot at header[5])
 - propose() v2 selector 0x48aeda19 (Ignition / blob path; slot at propose_arg0[3][2])
-- Multicall3.aggregate3() 0x82ad56cb wrapping either propose variant
+- propose() v5 selector 0x72636df9 (v5 Rollup; like v1 header + trailing uint256; slot at header[5])
+- Multicall3.aggregate3() 0x82ad56cb wrapping any propose variant
+
+Verified against mainnet tx 0x23d6dbcc6006623cc94158615da8c030fe13614ae0ba9050e0c81c091a7afd49
+(CheckpointProposed on 0x91ff8bbd...).
 
 Requires: pip3 install eth_abi
 """
@@ -3584,6 +4001,8 @@ import sys
 PROPOSE_SELECTOR_V1 = bytes.fromhex("85b98fd8")
 # New propose (e.g. mainnet blob commits; see 4byte 0x48aeda19)
 PROPOSE_SELECTOR_V2 = bytes.fromhex("48aeda19")
+# v5 Rollup propose (AZUP-2 / CheckpointProposed era)
+PROPOSE_SELECTOR_V5 = bytes.fromhex("72636df9")
 AGGREGATE3_SELECTOR = bytes.fromhex("82ad56cb")
 
 PROPOSE_ABI_TYPES_V1 = [
@@ -3602,9 +4021,18 @@ PROPOSE_ABI_TYPES_V2 = [
     "bytes",
 ]
 
+# v5: same shape as v1 but ProposedHeader ends with an extra uint256
+PROPOSE_ABI_TYPES_V5 = [
+    "(bytes32,(int256),(bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint256,address,bytes32,(uint128,uint128),uint256,uint256))",
+    "(bytes,bytes)",
+    "address[]",
+    "(uint8,bytes32,bytes32)",
+    "bytes",
+]
+
 
 def _is_propose_selector(sel: bytes) -> bool:
-    return sel in (PROPOSE_SELECTOR_V1, PROPOSE_SELECTOR_V2)
+    return sel in (PROPOSE_SELECTOR_V1, PROPOSE_SELECTOR_V2, PROPOSE_SELECTOR_V5)
 
 
 def extract_propose_calldata(data: bytes) -> bytes | None:
@@ -3650,6 +4078,16 @@ def _slot_and_signers_from_decoded(propose_data: bytes) -> tuple[int, list] | No
         # propose_arg0[3] = (bytes32, (bytes32^3), uint256, uint256, address, bytes32, (uint128,uint128), uint256)
         inner_header = decoded[0][3]
         slot = int(inner_header[2])
+        signers = decoded[2]
+        return slot, list(signers)
+    if sel == PROPOSE_SELECTOR_V5:
+        try:
+            decoded = decode(PROPOSE_ABI_TYPES_V5, body)
+        except Exception:
+            return None
+        # Same slot index as v1; header has one extra trailing uint256
+        header = decoded[0][2]
+        slot = int(header[5])
         signers = decoded[2]
         return slot, list(signers)
     return None
@@ -4041,16 +4479,10 @@ validator_in_json_committee() {
 rollup_epoch_for_checkpoint() {
   local cn="\$1"
   local raw dec
-  if [[ "\$NETWORK" == "mainnet" ]]; then
+  # v5 first: getEpochForCheckpoint; legacy fallback: getEpochForBlock
+  raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForCheckpoint(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
+  if [ -z "\$raw" ] || [[ "\$raw" == *Error* ]] || [[ "\$raw" == *"revert"* ]]; then
     raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForBlock(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
-    if [ -z "\$raw" ] || [[ "\$raw" == *Error* ]] || [[ "\$raw" == *"revert"* ]]; then
-      raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForCheckpoint(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
-    fi
-  else
-    raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForCheckpoint(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
-    if [ -z "\$raw" ] || [[ "\$raw" == *Error* ]] || [[ "\$raw" == *"revert"* ]]; then
-      raw=\$(cast call "\$CONTRACT_ADDRESS" "getEpochForBlock(uint256)(uint256)" "\$cn" --rpc-url "\$RPC_URL" 2>/dev/null | grep -vE '^Warning:' | tr -d '[:space:]')
-    fi
   fi
   [ -z "\$raw" ] && echo "" && return
   if [[ "\$raw" =~ ^[0-9]+$ ]]; then
@@ -4064,9 +4496,9 @@ rollup_epoch_for_checkpoint() {
   fi
 }
 
-# topic0 = keccak256("L2BlockProposed(uint256,bytes32,bytes32[])") — verify with: cast sig-event "L2BlockProposed(uint256,bytes32,bytes32[])"
-L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x9ad613a7ff46b97e0f732b31118d43f39c9ca017bed1efe739b70b0625383589"
-L2_BLOCK_PROPOSED_TOPIC0_TESTNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
+# topic0 defaults injected above from parent:
+# CheckpointProposed(uint256,bytes32,bytes32[],bytes32,bytes32) = 0x6ff492bf...
+# topics[1] = indexed checkpointNumber
 
 sync_l1_proposed_logs() {
   debug_log "sync_l1_proposed_logs started"
@@ -4123,7 +4555,7 @@ sync_l1_proposed_logs() {
   touch "\$seen_file"
   touch "\$pending_file"
 
-  # Apply decoded L2BlockProposed calldata: update grids where slot is L1-eligible; set _l1_matched
+  # Apply decoded CheckpointProposed tx (propose calldata): update grids where slot is L1-eligible; set _l1_matched
   local _l1_matched slot_l1 epoch_l1 signers_in idx icon v_lower elig msg_id l1_sf epoch_state
   l1_apply_decoded_event() {
     local key="\$1" l2_bn="\$2" dec_out="\$3"
@@ -5239,11 +5671,28 @@ check_proven_block() {
 
     echo -e "\n${BLUE}$(t "get_proven_block")${NC}"
 
-    # Фоновый процесс получения блока
+    # Proven tip via v5 RPC (docs: aztec_getChainTips → .result.proven.number)
     (
-        curl -s -X POST -H 'Content-Type: application/json' \
-          -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
-          http://localhost:$AZTEC_PORT | jq -r ".result.proven.number"
+        rpc_url="http://localhost:$AZTEC_PORT"
+        proven=""
+        resp=$(curl -s -X POST -H 'Content-Type: application/json' \
+          -d '{"jsonrpc":"2.0","method":"aztec_getChainTips","params":[],"id":67}' \
+          "$rpc_url" 2>/dev/null)
+        # Official docs use .result.proven.number; nested .proven.block.number kept as fallback
+        proven=$(echo "$resp" | jq -r '.result.proven.number // .result.proven.block.number // empty' 2>/dev/null)
+        if [[ -z "$proven" || "$proven" == "null" ]]; then
+          resp=$(curl -s -X POST -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","method":"aztec_getBlockNumber","params":[{"tag":"proven"}],"id":67}' \
+            "$rpc_url" 2>/dev/null)
+          proven=$(echo "$resp" | jq -r '.result // empty' 2>/dev/null)
+        fi
+        if [[ -z "$proven" || "$proven" == "null" ]]; then
+          resp=$(curl -s -X POST -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","method":"node_getL2Tips","params":[],"id":67}' \
+            "$rpc_url" 2>/dev/null)
+          proven=$(echo "$resp" | jq -r '.result.proven.number // .result.proven.block.number // empty' 2>/dev/null)
+        fi
+        echo "$proven"
     ) > /tmp/proven_block.tmp &
     pid1=$!
     spinner $pid1
@@ -5261,11 +5710,18 @@ check_proven_block() {
 
     echo -e "\n${BLUE}$(t "get_sync_proof")${NC}"
 
-    # Фоновый процесс получения proof
+    # Фоновый процесс получения proof (v5 aztec_* prefix; fallback to node_* alias)
     (
-        curl -s -X POST -H 'Content-Type: application/json' \
-          -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
-          http://localhost:$AZTEC_PORT | jq -r ".result"
+        rpc_url="http://localhost:$AZTEC_PORT"
+        proof=$(curl -s -X POST -H 'Content-Type: application/json' \
+          -d "{\"jsonrpc\":\"2.0\",\"method\":\"aztec_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
+          "$rpc_url" 2>/dev/null | jq -r '.result // empty' 2>/dev/null)
+        if [[ -z "$proof" || "$proof" == "null" ]]; then
+          proof=$(curl -s -X POST -H 'Content-Type: application/json' \
+            -d "{\"jsonrpc\":\"2.0\",\"method\":\"node_getArchiveSiblingPath\",\"params\":[\"$PROVEN_BLOCK\",\"$PROVEN_BLOCK\"],\"id\":68}" \
+            "$rpc_url" 2>/dev/null | jq -r '.result // empty' 2>/dev/null)
+        fi
+        echo "$proof"
     ) > /tmp/sync_proof.tmp &
     pid2=$!
     spinner $pid2
@@ -5865,7 +6321,7 @@ check_validator_queue(){
     fi
 
     echo -e "${YELLOW}$(t "fetching_queue")${NC}"
-    echo -e "${GRAY}Checking ${#validator_addresses[@]} validators in queue...${NC}"
+    echo -e "${GRAY}$(printf "$(t checking_validators_in_queue)" "${#validator_addresses[@]}")${NC}"
     local temp_file
     temp_file=$(mktemp)
 
@@ -6787,7 +7243,7 @@ check_validator_main() {
 
     # Используем функцию для получения списка валидаторов через GSE контракт
     if ! get_validators_via_gse "$network" "$ROLLUP_ADDRESS" "$GSE_ADDRESS"; then
-        echo -e "${RED}Error: Failed to fetch validators using GSE contract method${NC}"
+        echo -e "${RED}$(t error_fetch_validators_gse)${NC}"
         return 1
     fi
 
@@ -6795,7 +7251,7 @@ check_validator_main() {
 
     # Запрашиваем адреса валидаторов для проверки
     echo ""
-    echo -e "${BOLD}Enter validator addresses to check (comma separated):${NC}"
+    echo -e "${BOLD}$(t enter_validator_addresses_check)${NC}"
     read -p "> " input_addresses
 
     # Парсим введенные адреса
@@ -6942,9 +7398,7 @@ validator_submenu() {
             1)
                 # Check another set of validators
                 check_validator_main
-                echo ""
-                echo -e "${YELLOW}Press Enter to continue...${NC}"
-                read -r
+                ui_pause
                 ;;
             2)
                 # Set up queue position notification for validator
@@ -6968,30 +7422,26 @@ validator_submenu() {
                     fi
                 done
                 echo ""
-                echo -e "${YELLOW}Press Enter to continue...${NC}"
-                read -r
+                ui_pause
                 ;;
             3)
                 # Check validator in queue
                 read -p "$(t "enter_address") " validator_address
                 check_validator_queue "$validator_address"
                 echo ""
-                echo -e "${YELLOW}Press Enter to continue...${NC}"
-                read -r
+                ui_pause
                 ;;
             4)
                 # List active monitors
                 list_monitor_scripts "$MONITOR_DIR"
                 echo ""
-                echo -e "${YELLOW}Press Enter to continue...${NC}"
-                read -r
+                ui_pause
                 ;;
             5)
                 # Remove existing monitoring
                 remove_monitor_scripts "$MONITOR_DIR"
                 echo ""
-                echo -e "${YELLOW}Press Enter to continue...${NC}"
-                read -r
+                ui_pause
                 ;;
             0)
                 echo -e "\n${CYAN}$(t "exiting")${NC}"
@@ -7000,8 +7450,7 @@ validator_submenu() {
             *)
                 echo -e "\n${RED}$(t "invalid_input")${NC}"
                 echo ""
-                echo -e "${YELLOW}Press Enter to continue...${NC}"
-                read -r
+                ui_pause
                 ;;
         esac
     done
@@ -7373,12 +7822,18 @@ EOF
     echo -e "\n${GREEN}$(t "creating_env")${NC}"
     read -p "ETHEREUM_RPC_URL: " ETHEREUM_RPC_URL
     read -p "CONSENSUS_BEACON_URL: " CONSENSUS_BEACON_URL
+    read -p "ETHEREUM_DEBUG_HOSTS [${ETHEREUM_RPC_URL}]: " ETHEREUM_DEBUG_HOSTS
+    ETHEREUM_DEBUG_HOSTS=${ETHEREUM_DEBUG_HOSTS:-$ETHEREUM_RPC_URL}
 
-    # Create .env file без COINBASE
+    # Create .env (v5 operator env shape; see running_a_node docs)
     cat > .env <<EOF
 ETHEREUM_RPC_URL=${ETHEREUM_RPC_URL}
 CONSENSUS_BEACON_URL=${CONSENSUS_BEACON_URL}
+ETHEREUM_DEBUG_HOSTS=${ETHEREUM_DEBUG_HOSTS}
 P2P_IP=${DEFAULT_IP}
+P2P_PORT=${p2p_port}
+AZTEC_PORT=${http_port}
+AZTEC_ADMIN_PORT=8880
 EOF
 
     # Запрашиваем выбор сети
@@ -7391,6 +7846,12 @@ EOF
         1)
             NETWORK="mainnet"
             DATA_DIR="$HOME/.aztec/mainnet/data/"
+            # V5 AZUP-2 signaling payload (mainnet) — https://forum.aztec.network/t/proposal-v5-payload-deployed/8606
+            if ! grep -q '^GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=' .env 2>/dev/null; then
+              printf 'GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s\n' "$V5_UPGRADE_PAYLOAD_ADDRESS" >> .env
+            else
+              sed -i "s|^GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=.*|GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=$V5_UPGRADE_PAYLOAD_ADDRESS|" .env
+            fi
             ;;
         2)
             NETWORK="testnet"
@@ -7432,19 +7893,22 @@ services:
     container_name: aztec-sequencer
     networks:
       - aztec
-    image: aztecprotocol/aztec:latest
+    image: aztecprotocol/aztec:${AZTEC_IMAGE_TAG}
     restart: unless-stopped
     environment:
       ETHEREUM_HOSTS: \${ETHEREUM_RPC_URL}
       L1_CONSENSUS_HOST_URLS: \${CONSENSUS_BEACON_URL}
+      ETHEREUM_DEBUG_HOSTS: \${ETHEREUM_DEBUG_HOSTS:-\${ETHEREUM_RPC_URL}}
       DATA_DIRECTORY: /data
       KEY_STORE_DIRECTORY: /config
       P2P_IP: \${P2P_IP}
+      P2P_PORT: \${P2P_PORT:-${p2p_port}}
       LOG_LEVEL: info;debug:node:sentinel
       AZTEC_PORT: ${http_port}
       AZTEC_ADMIN_PORT: 8880
+      GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS: \${GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS:-}
     entrypoint: >
-      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --archiver --sequencer --network $NETWORK'
+      sh -c 'node --no-warnings /usr/src/yarn-project/aztec/dest/bin/index.js start --node --sequencer --network $NETWORK'
     ports:
       - ${p2p_port}:${p2p_port}/tcp
       - ${p2p_port}:${p2p_port}/udp
@@ -8389,8 +8853,13 @@ function start_aztec_containers() {
         done <<< "$existing_sessions"
       fi
 
+      local gov_env_prefix=""
+      if [[ "$network" == "mainnet" ]]; then
+        gov_env_prefix="GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=$V5_UPGRADE_PAYLOAD_ADDRESS "
+      fi
+
       if screen -dmS "$session_name" && \
-         screen -S "$session_name" -p 0 -X stuff "aztec start --node --archiver --sequencer \
+         screen -S "$session_name" -p 0 -X stuff "${gov_env_prefix}aztec start --node --sequencer \
 --network $network \
 --l1-rpc-urls $ethereum_rpc_url \
 --l1-consensus-host-urls $consensus_beacon_url \
@@ -8455,13 +8924,32 @@ approve_with_all_keys() {
     local rpc_url=$(echo "$settings" | cut -d'|' -f2)
     local contract_address=$(echo "$settings" | cut -d'|' -f3)
 
-    local rpc_providers=(
-        "$rpc_url"
-        "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://sepolia.drpc.org"
-        "https://rpc.sepolia.org"
-        "https://1rpc.io/sepolia"
-    )
+    local staking_asset
+    staking_asset=$(get_staking_asset "$contract_address" "$rpc_url" "$network")
+    if [[ ! "$staking_asset" =~ ^0x[a-fA-F0-9]{40}$ ]]; then
+        echo -e "${RED}$(t "staking_asset_resolve_failed")${NC}"
+        return 1
+    fi
+    echo -e "${CYAN}$(t "staking_asset_label") ${YELLOW}$staking_asset${NC}"
+    echo -e "${CYAN}$(t "using_contract") $contract_address${NC}"
+
+    local rpc_providers
+    if [[ "$network" == "mainnet" ]]; then
+        rpc_providers=(
+            "$rpc_url"
+            "https://ethereum.publicnode.com"
+            "https://rpc.flashbots.net"
+            "https://1rpc.io/eth"
+        )
+    else
+        rpc_providers=(
+            "$rpc_url"
+            "https://ethereum-sepolia-rpc.publicnode.com"
+            "https://sepolia.drpc.org"
+            "https://rpc.sepolia.org"
+            "https://1rpc.io/sepolia"
+        )
+    fi
     local key_files
     local private_key
     local current_rpc_url
@@ -8528,7 +9016,7 @@ approve_with_all_keys() {
                 # On retry use next RPC — your node may have different mempool view
                 try_rpc_url="${rpc_providers[$(((key_index + attempt - 1) % rpc_count))]}"
                 echo "Gas price: $gas_price wei, RPC: $try_rpc_url (attempt $attempt/$max_attempts)"
-                send_output=$(cast send 0x5595cb9ed193cac2c0bc5393313bc6115817954b \
+                send_output=$(cast send "$staking_asset" \
                     "approve(address,uint256)" \
                     "$contract_address" \
                     200000ether \
@@ -9776,27 +10264,21 @@ claim_rewards() {
     echo -e "${CYAN}$(t "using_contract") $contract_address${NC}"
     echo -e "${CYAN}$(t "using_rpc") $rpc_url${NC}"
 
-    # Check if rewards are claimable
+    # Claimability probe (optional on v5: isRewardsClaimable / getEarliest... are absent from deployed ABI)
     echo -e "\n${BLUE}🔍 $(t "checking_rewards_claimable")${NC}"
-    local claimable_result
-    claimable_result=$(cast call "$contract_address" "isRewardsClaimable()" --rpc-url "$rpc_url" 2>/dev/null)
-
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}❌ $(t "failed_check_rewards_claimable")${NC}"
-        return 1
-    fi
-
-    if [ "$claimable_result" != "0x1" ]; then
+    local claimable_result claimable_dec=""
+    claimable_result=$(cast call "$contract_address" "isRewardsClaimable()" --rpc-url "$rpc_url" 2>/dev/null) || claimable_result=""
+    if [ -z "$claimable_result" ]; then
+        echo -e "${YELLOW}⚠️  $(t "claimable_check_unavailable")${NC}"
+    else
+        claimable_dec=$(cast --to-dec "$claimable_result" 2>/dev/null || echo "0")
+        if [ "$claimable_dec" != "1" ]; then
             echo -e "${RED}❌ $(t "rewards_not_claimable")${NC}"
-
-            # Get earliest claimable timestamp for information
-            local timestamp_result
-            timestamp_result=$(cast call "$contract_address" "getEarliestRewardsClaimableTimestamp()" --rpc-url "$rpc_url" 2>/dev/null)
-
-            if [ $? -eq 0 ] && [ -n "$timestamp_result" ]; then
-                local timestamp_dec
-                timestamp_dec=$(cast --to-dec "$timestamp_result" 2>/dev/null)
-                if [ $? -eq 0 ]; then
+            local timestamp_result timestamp_dec
+            timestamp_result=$(cast call "$contract_address" "getEarliestRewardsClaimableTimestamp()" --rpc-url "$rpc_url" 2>/dev/null) || timestamp_result=""
+            if [ -n "$timestamp_result" ]; then
+                timestamp_dec=$(cast --to-dec "$timestamp_result" 2>/dev/null || echo "")
+                if [ -n "$timestamp_dec" ]; then
                     if [ "$timestamp_dec" -eq "0" ]; then
                         echo -e "${YELLOW}ℹ️  $(t "claim_function_not_activated")${NC}"
                     else
@@ -9808,9 +10290,9 @@ claim_rewards() {
                 fi
             fi
             return 1
+        fi
+        echo -e "${GREEN}✅ $(t "rewards_are_claimable")${NC}"
     fi
-
-    echo -e "${GREEN}✅ $(t "rewards_are_claimable")${NC}"
 
     # Extract validator addresses from keystore
     if [ ! -f "$KEYSTORE_FILE" ]; then
@@ -9930,6 +10412,17 @@ claim_rewards() {
 
     printf "${GREEN}✅ $(t "found_unique_addresses_with_rewards") ${#addresses_with_rewards[@]}${NC}\n"
 
+    # claimSequencerRewards is permissionless; rewards always go to the coinbase argument.
+    # Aztec keystore.json is not an Ethereum cast keystore — ask for a gas-paying private key once.
+    local claim_pk=""
+    read -sp "$(t "claim_gas_key_prompt")" claim_pk
+    echo ""
+    claim_pk="${claim_pk#0x}"
+    if [[ ! "$claim_pk" =~ ^[a-fA-F0-9]{64}$ ]]; then
+        echo -e "${RED}❌ $(t "failed_send_transaction")${NC}"
+        return 1
+    fi
+
     # Claim rewards
     local claimed_count=0
     local failed_count=0
@@ -9969,12 +10462,11 @@ claim_rewards() {
             [yY]|yes)
                 echo -e "${BLUE}🚀 $(t "claiming_rewards")${NC}"
 
-                # Send claim transaction
+                # Send claim transaction (permissionless; coinbase receives tokens)
                 local tx_hash
                 tx_hash=$(cast send "$contract_address" "claimSequencerRewards(address)" "$address" \
                     --rpc-url "$rpc_url" \
-                    --keystore "$KEYSTORE_FILE" \
-                    --from "$address" 2>/dev/null)
+                    --private-key "0x$claim_pk" 2>/dev/null)
 
                 if [ $? -eq 0 ] && [ -n "$tx_hash" ]; then
                     echo -e "${GREEN}✅ $(t "transaction_sent") $tx_hash${NC}"
@@ -10067,83 +10559,135 @@ claim_rewards() {
 }
 
 # === Main menu ===
+main_menu_flat_pick() {
+  local n c
+  echo -e "\n${BLUE}$(t "title")${NC}"
+  for n in $(seq 1 27); do
+    c=$(menu_option_color "$n")
+    echo -e "${c}$(t_opt "$n")${NC}"
+  done
+  echo -e "${RED}$(t "option0")${NC}"
+  echo -e "${BLUE}================================${NC}"
+  read -p "$(t "choose_option") " MAIN_MENU_CHOICE
+}
+
+main_menu_select_option() {
+  if ! ui_menu_interactive; then
+    main_menu_flat_pick
+    return 0
+  fi
+
+  local -a cat_keys=(
+    menu_cat_diagnostics
+    menu_cat_monitoring
+    menu_cat_node
+    menu_cat_staking
+    menu_cat_maintenance
+    menu_cat_exit
+  )
+
+  while true; do
+    local -a cat_labels=()
+    local key label
+    for key in "${cat_keys[@]}"; do
+      label="$(t "$key")"
+      cat_labels+=("$label")
+    done
+
+    ui_menu_pick "$(t "title")" "${cat_labels[@]}"
+
+    if [[ -n "$UI_MENU_QUICK" ]]; then
+      MAIN_MENU_CHOICE="$UI_MENU_QUICK"
+      return 0
+    fi
+
+    local cat_idx=$UI_MENU_INDEX
+    if [[ $cat_idx -eq 5 ]]; then
+      MAIN_MENU_CHOICE="0"
+      return 0
+    fi
+
+    local -a opt_ids=()
+    case $cat_idx in
+      0) opt_ids=(1 2 3 4 5 6 7 8) ;;
+      1) opt_ids=(9 10 11 12) ;;
+      2) opt_ids=(13 14 15 16 17 18 19) ;;
+      3) opt_ids=(20 21 22 23 24 25) ;;
+      4) opt_ids=(26 27) ;;
+      *) continue ;;
+    esac
+
+    local -a item_labels=()
+    local id c
+    for id in "${opt_ids[@]}"; do
+      c=$(menu_option_color "$id")
+      item_labels+=("${c}$(t_opt "$id")${NC}")
+    done
+    item_labels+=("${DIM}$(t menu_back)${NC}")
+
+    ui_menu_pick "$(t "${cat_keys[$cat_idx]}")" "${item_labels[@]}"
+
+    if [[ -n "$UI_MENU_QUICK" ]]; then
+      MAIN_MENU_CHOICE="$UI_MENU_QUICK"
+      return 0
+    fi
+
+    if [[ $UI_MENU_INDEX -eq ${#opt_ids[@]} ]]; then
+      continue
+    fi
+
+    if [[ $UI_MENU_INDEX -ge 0 && $UI_MENU_INDEX -lt ${#opt_ids[@]} ]]; then
+      MAIN_MENU_CHOICE="${opt_ids[$UI_MENU_INDEX]}"
+      return 0
+    fi
+  done
+}
+
 main_menu() {
   show_logo
   while true; do
-    echo -e "\n${BLUE}$(t "title")${NC}"
-    echo -e "${CYAN}$(t "option1")${NC}"
-    echo -e "${GREEN}$(t "option2")${NC}"
-    echo -e "${RED}$(t "option3")${NC}"
-    echo -e "${CYAN}$(t "option4")${NC}"
-    echo -e "${CYAN}$(t "option5")${NC}"
-    echo -e "${CYAN}$(t "option6")${NC}"
-    echo -e "${CYAN}$(t "option7")${NC}"
-    echo -e "${CYAN}$(t "option8")${NC}"
-    echo -e "${CYAN}$(t "option9")${NC}"
-    echo -e "${CYAN}$(t "option10")${NC}"
-    echo -e "${GREEN}$(t "option11")${NC}"
-    echo -e "${RED}$(t "option12")${NC}"
-    echo -e "${CYAN}$(t "option13")${NC}"
-    echo -e "${CYAN}$(t "option14")${NC}"
-    echo -e "${CYAN}$(t "option15")${NC}"
-    echo -e "${YELLOW}$(t "option16")${NC}"
-    echo -e "${CYAN}$(t "option17")${NC}"
-    echo -e "${NC}$(t "option18")${NC}"
-    echo -e "${NC}$(t "option19")${NC}"
-    echo -e "${NC}$(t "option20")${NC}"
-    echo -e "${NC}$(t "option21")${NC}"
-    echo -e "${CYAN}$(t "option22")${NC}"
-    echo -e "${CYAN}$(t "option23")${NC}"
-    echo -e "${CYAN}$(t "option24")${NC}"
-    echo -e "${CYAN}$(t "option25")${NC}"
-    echo -e "${CYAN}$(t "option26")${NC}"
-    echo -e "${CYAN}$(t "option27")${NC}"
-    echo -e "${RED}$(t "option0")${NC}"
-    echo -e "${BLUE}================================${NC}"
-
-    read -p "$(t "choose_option") " choice
+    main_menu_select_option
+    choice="$MAIN_MENU_CHOICE"
 
     # Flag to track if a valid command was executed
     command_executed=false
 
     case "$choice" in
       1) check_aztec_container_logs; command_executed=true ;;
-      2) create_systemd_agent; command_executed=true ;;
-      3) remove_systemd_agent; command_executed=true ;;
-      4) view_container_logs; command_executed=true ;;
-      5) find_rollup_address; command_executed=true ;;
-      6) find_peer_id; command_executed=true ;;
-      7) find_governance_proposer_payload; command_executed=true ;;
-      8) check_proven_block; command_executed=true ;;
-      9) check_validator; command_executed=true ;;
-      10) manage_publisher_balance_monitoring; command_executed=true ;;
-      11) install_aztec; command_executed=true ;;
-      12) delete_aztec; command_executed=true ;;
-      13) start_aztec_containers; command_executed=true ;;
-      14) stop_aztec_containers; command_executed=true ;;
-      15) update_aztec; command_executed=true ;;
-      16) downgrade_aztec; command_executed=true ;;
-      17) check_aztec_version; command_executed=true ;;
-      18) generate_bls_keys; command_executed=true ;;
-      19) approve_with_all_keys; command_executed=true ;;
-      20) stake_validators; command_executed=true ;;
-      21) claim_rewards; command_executed=true ;;
-      22) change_rpc_url; command_executed=true ;;
-      23) check_updates_safely; command_executed=true ;;
-      24) check_error_definitions_updates_safely; command_executed=true ;;
-      25) add_aztec_validators; command_executed=true ;;
-      26) remove_aztec_validators; command_executed=true ;;
-      27) find_admin_api_key; command_executed=true ;;
+      2) view_container_logs; command_executed=true ;;
+      3) find_rollup_address; command_executed=true ;;
+      4) find_peer_id; command_executed=true ;;
+      5) find_governance_proposer_payload; command_executed=true ;;
+      6) check_proven_block; command_executed=true ;;
+      7) check_aztec_version; command_executed=true ;;
+      8) find_admin_api_key; command_executed=true ;;
+      9) create_systemd_agent; command_executed=true ;;
+      10) remove_systemd_agent; command_executed=true ;;
+      11) check_validator; command_executed=true ;;
+      12) manage_publisher_balance_monitoring; command_executed=true ;;
+      13) install_aztec; command_executed=true ;;
+      14) delete_aztec; command_executed=true ;;
+      15) start_aztec_containers; command_executed=true ;;
+      16) stop_aztec_containers; command_executed=true ;;
+      17) update_aztec; command_executed=true ;;
+      18) downgrade_aztec; command_executed=true ;;
+      19) change_rpc_url; command_executed=true ;;
+      20) generate_bls_keys; command_executed=true ;;
+      21) approve_with_all_keys; command_executed=true ;;
+      22) stake_validators; command_executed=true ;;
+      23) claim_rewards; command_executed=true ;;
+      24) add_aztec_validators; command_executed=true ;;
+      25) remove_aztec_validators; command_executed=true ;;
+      26) check_updates_safely; command_executed=true ;;
+      27) check_error_definitions_updates_safely; command_executed=true ;;
       0) echo -e "\n${GREEN}$(t "goodbye")${NC}"; exit 0 ;;
       *) echo -e "\n${RED}$(t "invalid_choice")${NC}" ;;
     esac
 
     # Wait for Enter before showing menu again (only for valid commands)
     if [ "$command_executed" = true ]; then
-      echo ""
-      echo -e "${YELLOW}Press Enter to continue...${NC}"
-      read -r
-      clear
+      ui_pause
+      ui_clear_if_tty
       show_logo
     fi
   done

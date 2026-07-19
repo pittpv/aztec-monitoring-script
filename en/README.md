@@ -35,13 +35,28 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 01-04-2026
+## 📌 Latest Updates 15-07-2026
 
-- Fixed the TOPIC0 signature of the CheckpointProposed event for **mainnet**. The incorrect value caused L1 verification to fail
+⚠️ Upgrade the node to **Aztec v5** (image `5.0.0+`) and rebuild docker-compose **without `--archiver`**. Remove the old monitoring agent (**option 10**) and install a new one (**option 9**).
+
+- Compatibility with the **Aztec v5 (AZUP-2)** protocol
+- Mainnet rollup: `0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34`
+- Testnet rollup: `0xfe6061806cac748085904a010d2d9e33b8031741`
+- Network tip via `getPendingCheckpointNumber()`; **CheckpointProposed** event (topic0 `0x6ff492bf…`)
+- `propose()` **v5** decoder (`0x72636df9`) for L1 committee in the agent
+- Node install: image `5.0.0`, no `--archiver`, `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS`, `ETHEREUM_DEBUG_HOSTS`
+- JSON-RPC: `aztec_getChainTips` / `aztec_*` with legacy `node_*` fallback
+- Approve via `getStakingAsset()`; Claim without `isRewardsClaimable` (absent from v5 ABI), gas paid with a separate key
+- Agent: `getEpochForCheckpoint` first, legacy `getEpochForBlock` fallback
+- **New menu UI**: options grouped by categories; some option numbers changed (see Usage)
+  - `↑` / `↓` — navigate, `Enter` — select
+  - option number `0–27` + `Enter` — quick jump (from categories or a submenu)
+  - in submenus: “← Back to categories”
+  - status bar: script version, network, RPC
 
 **version_control.json**
 
-SHA256: `9b2fbcd7303655ecff2461f905a65cc6223bb850f46bdfbc0d587582a172c089`
+SHA256: `e4f7e348fcf8ba5e3d8ab02e62b4289821924c54f377841dfecfbf1d160bfd28`
 
 **error_definitions.json**
 
@@ -49,6 +64,10 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 <details>
 <summary>📅 Version History</summary>
+
+### 01-04-2026
+
+- Fixed the TOPIC0 signature of the CheckpointProposed event for **mainnet**. The incorrect value caused L1 verification to fail
 
 ### 30-03-2026
 
@@ -493,45 +512,62 @@ Many thanks to `@xtoun` (Discord) for the hint with the solution and to everyone
    * Enter RPC URL (RPC must be available at `http://localhost:8545` or `http://127.0.0.1:8545` or `http://YOUR_EXTERNAL_IP:PORT`)
    * Enter the network type (mainnet, testnet)
    * Configure the Telegram bot
-   * Enable monitoring (option 2)
-   * Downloading the critical error definitions file (option 24)
+   * Enable monitoring (**option 9**)
+   * Downloading the critical error definitions file (**option 27**)
 
 ❗️To obtain slot statistics, the node **must** have the log level set to: `info;debug:node:sentinel` or `debug`
 
 ## 🖥️ Usage
 
-Main menu:
+The menu is grouped into categories. In an interactive terminal:
 
-1. Check container and node synchronization
-2. Install node monitoring agent with notifications
-3. Remove monitoring agent
-4. View Aztec logs
-5. Find rollupAddress
-6. Find PeerID
-7. Find governanceProposerPayload
-8. Check Proven L2 Block
-9. Validator search, status check and queue monitoring
-10. Publisher balance monitoring
-11. Install Aztec Node with Watchtower
-12. Delete Aztec node
-13. Start Aztec node containers
-14. Stop Aztec node containers
-15. Update Aztec node
-16. Downgrade Aztec node
-17. Check Aztec version
-18. Generate BLS keys from mnemonic
-19. Approve
-20. Stake
-21. Claim rewards
-22. Change RPC URL
-23. Check for script updates (safe, with hash verification)
-24. Check for error definitions updates (safe, with hash verification)
+- `↑` / `↓` — move between items, `Enter` — select
+- type an option number `0–27` and press `Enter` for a quick jump (from the categories screen or a submenu)
+- in a submenu, choose “← Back to categories” to return
+- if the terminal is non-interactive, a flat list 1–27 with number input is shown
 
-`0.` 🚪 Exit
+### Diagnostics & logs
+1. Check container and node synchronization  
+2. View Aztec logs  
+3. Find rollupAddress  
+4. Find PeerID  
+5. Find governanceProposerPayload  
+6. Check Proven L2 Block  
+7. Check Aztec version  
+8. Find Admin API key in logs  
+
+### Monitoring
+9. Install node monitoring agent with notifications  
+10. Remove monitoring agent  
+11. Validator search, status check and queue monitoring  
+12. Publisher balance monitoring  
+
+### Node management
+13. Install Aztec Node with Watchtower  
+14. Delete Aztec node  
+15. Start Aztec node containers  
+16. Stop Aztec node containers  
+17. Update Aztec node  
+18. Downgrade Aztec node  
+19. Change RPC URL  
+
+### Staking & validators
+20. Generate BLS keys from mnemonic  
+21. Approve  
+22. Stake  
+23. Claim rewards  
+24. Add validators  
+25. Remove validators  
+
+### Updates & maintenance
+26. Check for script updates (safe, with hash verification)  
+27. Check for error definitions updates (safe, with hash verification)  
+
+`0.` 🚪 Exit  
 
 ## 🚀 Using the Node Monitoring Agent
 
-After running the script, select the option to `Install node monitoring agent with notifications`:
+After running the script, select **option 9** (`Install node monitoring agent with notifications`):
 
 - Creates an agent at `~/aztec-monitor-agent`
 - Set up a systemd service and timer (run every 37 seconds)
@@ -547,7 +583,7 @@ After running the script, select the option to `Install node monitoring agent wi
   - Statistics for each slot while validator to the committee (successful/missed attestation, proposed/mined/missed block)
 - Clears the log file when it reaches 1 MB in normal mode and 10 MB in `DEBUG=true` mode, saving the very first report.
 
-❗️On the **first** run, you must use **option 24** to download the `error_definitions.json` file containing critical errors.
+❗️On the **first** run, you must use **option 27** to download the `error_definitions.json` file containing critical errors.
 
 ### Requirements for Monitoring Agent:
 
@@ -560,9 +596,9 @@ After running the script, select the option to `Install node monitoring agent wi
 
 If there is an update for the monitoring agent, first update the entire script. Then delete the old agent and create a new one. The ChatID and Telegram token you previously entered are automatically assigned to the new agent.
 
-## 🚀 Installing the Aztec node v 4.0.4
+## 🚀 Installing the Aztec node
 
-To install the Aztec node, select **option 11** and follow the script instructions.
+To install the Aztec node, select **option 13** and follow the script instructions.
 
 A step-by-step description of the node installation process can be found here: [Aztec-Install-by-Script.md](https://github.com/pittpv/aztec-monitoring-script/blob/main/en/Aztec-Install-by-Script.md)
 

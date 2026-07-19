@@ -1,14 +1,14 @@
-# BLS: Key Generation, Approve and Stake (Options 18, 19, 20)
+# BLS: Key Generation, Approve and Stake (Options 20, 21, 22)
 
-Detailed description of **option 18** (BLS key generation and sub-options), **option 19** (Approve), and **option 20** (Stake) in the aztec-logs script for Aztec validator staking.
+Detailed description of **option 20** (BLS key generation and sub-options), **option 21** (Approve), and **option 22** (Stake) in the aztec-logs script for Aztec validator staking.
 
 ---
 
-## Option 18 — Generate BLS Keys from Mnemonic
+## Option 20 — Generate BLS Keys from Mnemonic
 
-When you select **18** in the main menu, the **"BLS Keys Generation and Transfer"** submenu opens with four ways to work with BLS keys.
+When you select **20** in the menu (category “Staking & validators”, or by typing the option number), the **"BLS Keys Generation and Transfer"** submenu opens with four ways to work with BLS keys.
 
-### Option 18 submenu
+### Option 20 submenu
 
 | # | Description |
 |---|-------------|
@@ -19,7 +19,7 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
 
 ---
 
-### Sub-option 18-1: New Operator Address
+### Sub-option 20-1: New Operator Address
 
 **Purpose:** Replace the validator operator: for each existing validator a **new** ETH address and new BLS key are generated. The old address remains in the contract (for withdrawals etc.), while staking is tied to the new operator.
 
@@ -41,13 +41,13 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
 
 **Important:**  
 - Save all new data (mnemonic if used again, new addresses and BLS). Private keys are also stored in `bls-filtered-pk.json`.  
-- The script then suggests: send 0.1–0.3 Sepolia ETH to the new address, then run **option 19 (Approve)** and **option 20 (Stake)**.
+- The script then suggests: send 0.1–0.3 Sepolia ETH to the new address, then run **option 21 (Approve)** and **option 22 (Stake)**.
 
 **When to use:** Changing the validator operator (new wallet and new BLS keys while keeping old addresses in the system).
 
 ---
 
-### Sub-option 18-2: Existing Addresses (from one mnemonic)
+### Sub-option 20-2: Existing Addresses (from one mnemonic)
 
 **Purpose:** Get BLS keys for **existing** validator ETH addresses when all those addresses are derived from **one** mnemonic phrase.
 
@@ -61,13 +61,13 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
 5. Takes the list of validator addresses from keystore **in the same order** and builds **`bls-filtered-pk.json`**: only the pairs (ETH private + BLS private) whose addresses match keystore. Entry order matches keystore.
 6. Temporary files `bls.json` and `bls-ethwallet.json` are removed.
 
-**Result:** In `$HOME/aztec/bls-filtered-pk.json` you have only keys that match validators in keystore. Format is “old”: no `new_operator_info`, only `attester.eth`, `attester.bls`, `feeRecipient`. You can then run **option 19** and **option 20** (old staking format).
+**Result:** In `$HOME/aztec/bls-filtered-pk.json` you have only keys that match validators in keystore. Format is “old”: no `new_operator_info`, only `attester.eth`, `attester.bls`, `feeRecipient`. You can then run **option 21** and **option 22** (old staking format).
 
 **When to use:** All validators from one seed phrase, addresses already in keystore — you only need to add or refresh BLS keys.
 
 ---
 
-### Sub-option 18-3: Add BLS Keys to keystore.json
+### Sub-option 20-3: Add BLS Keys to keystore.json
 
 **Purpose:** Write BLS private keys from `bls-filtered-pk.json` into `$HOME/aztec/config/keystore.json` (into `attester.bls` for each validator by matching ETH address).
 
@@ -79,11 +79,11 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
 4. For each validator in keystore, by `attester.eth` (address) it looks up the matching BLS from bls-filtered-pk and updates `attester.bls`.
 5. Saves the updated keystore and prints a short report.
 
-**When to use:** Only after BLS generation (sub-option 18-1 or 18-2) and only if BLS were derived from a seed phrase or you built `bls-filtered-pk.json` correctly yourself. Do not use with arbitrary files.
+**When to use:** Only after BLS generation (sub-option 20-1 or 20-2) and only if BLS were derived from a seed phrase or you built `bls-filtered-pk.json` correctly yourself. Do not use with arbitrary files.
 
 ---
 
-### Sub-option 18-4: Dashboard Keystores (recommended)
+### Sub-option 20-4: Dashboard Keystores (recommended)
 
 **Purpose:** Create files for the **staking dashboard** (Aztec docs: sequencer_management etc.): private keystore and staker_output.
 
@@ -103,13 +103,13 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
    - **dashboard_keystore.json** — private keystore,
    - **dashboard_keystore_staker_output.json** — for the staking dashboard.
 
-**When to use:** Preparing keys specifically for the Aztec staking web dashboard, not for options 19/20 in this script.
+**When to use:** Preparing keys specifically for the Aztec staking web dashboard, not for options 21/22 in this script.
 
 ---
 
-## Option 19 — Approve
+## Option 21 — Approve
 
-**Purpose:** Allow the staking (rollup) smart contract to spend your staking token (approve up to 200000 ether in token units). Without this step, option 20 (Stake) cannot debit the token from your wallet.
+**Purpose:** Allow the staking (rollup) smart contract to spend your staking token (approve up to 200000 ether in token units). Without this step, option 22 (Stake) cannot debit the token from your wallet.
 
 **What the script does:**
 
@@ -119,27 +119,27 @@ When you select **18** in the main menu, the **"BLS Keys Generation and Transfer
 4. For each key:
    - Computes ETH address and fetches **nonce** (pending) so nonces are not duplicated when sending several transactions in a row.
    - Gas: 50% above current gas price, minimum 10 gwei; on “replacement transaction underpriced” it retries with doubled gas and the next RPC.
-   - Calls **ERC-20 approve**: token contract `0x5595cb9ed193cac2c0bc5393313bc6115817954b`, method `approve(address,uint256)` — spender is the staking (rollup) contract address, amount `200000 ether` (in token wei).
+   - Resolves the staking token via rollup `getStakingAsset()` (on failure — mainnet fallback `0xa27ec0006e59f245217ff08cd52a7e8b169e62d2`). Calls **ERC-20 approve**: method `approve(address,uint256)` — spender is the rollup contract, amount `200000 ether` (in token wei).
    - Uses a list of RPCs (primary + fallback Sepolia); different validators use different RPCs in rotation; ~12 second pause between transactions.
 
 **Important:**  
 - `$HOME/aztec/keys/` must contain YML files with the private keys of the wallets you will stake from.  
 - If a transaction is stuck (pending), the script suggests cancelling or speeding it up (e.g. via MetaMask), then running Approve again.
 
-**Order:** Approve (19) runs **after** BLS generation (18) and **before** Stake (20). For the “new operator” method (18-1), fund the new addresses with ETH for gas before 19.
+**Order:** Approve (21) runs **after** BLS generation (20) and **before** Stake (22). For the “new operator” method (20-1), fund the new addresses with ETH for gas before 21.
 
 ---
 
-## Option 20 — Stake
+## Option 22 — Stake
 
 **Purpose:** Register the validator on the network (call the staking contract): bind the BLS key and validator data to the rollup contract. Uses data from `bls-filtered-pk.json` and, when needed, from `keystore.json`.
 
 **What the script does:**
 
-1. Checks that `$HOME/aztec/bls-filtered-pk.json` exists. If not — suggests running option 18 first.
+1. Checks that `$HOME/aztec/bls-filtered-pk.json` exists. If not — suggests running option 20 first.
 2. Detects bls-filtered-pk format:
-   - if the first validator has **`new_operator_info`** — **new format** (new operator method, 18-1);
-   - otherwise — **old format** (existing addresses, 18-2).
+   - if the first validator has **`new_operator_info`** — **new format** (new operator method, 20-1);
+   - otherwise — **old format** (existing addresses, 20-2).
 3. Network, RPC, and rollup contract address come from script settings.
 
 Behaviour then differs.
@@ -178,9 +178,9 @@ Validator links (mainnet/testnet) are printed the same as in the old format.
 
 ## Short step sequence
 
-1. **Option 18** — choose the right sub-option (1: new operator, 2: existing addresses from mnemonic, 3: add BLS to keystore, 4: dashboard).
-2. For **18-1**: fund the new addresses with 0.1–0.3 Sepolia ETH.
-3. **Option 19** — Approve for all keys in `$HOME/aztec/keys/*.yml` (except bls).
-4. **Option 20** — Stake using data from `bls-filtered-pk.json` (format is detected automatically).
+1. **Option 20** — choose the right sub-option (1: new operator, 2: existing addresses from mnemonic, 3: add BLS to keystore, 4: dashboard).
+2. For **20-1**: fund the new addresses with 0.1–0.3 Sepolia ETH.
+3. **Option 21** — Approve for all keys in `$HOME/aztec/keys/*.yml` (except bls).
+4. **Option 22** — Stake using data from `bls-filtered-pk.json` (format is detected automatically).
 
 After a successful Stake, validators appear in the explorer (e.g. dashtec.xyz), and the node can use the updated keystore and keys from `keys/`.

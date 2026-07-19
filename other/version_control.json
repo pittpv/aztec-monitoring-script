@@ -349,5 +349,19 @@
       "Fixed CheckpointProposed event TOPIC0 signature — incorrect value caused L1 verification to fail"
     ],
     "NOTICE": "After updating the script, remove the old monitoring agent and install a new one."
+  },
+  {
+    "VERSION": "3.0.0",
+    "UPDATE_DATE": "15.07.2026",
+    "CHANGES": [
+      "Aztec v5 (AZUP-2) compatibility: mainnet rollup 0x91ff8bbd…, testnet rollup 0xfe606180…",
+      "Tip via getPendingCheckpointNumber(); CheckpointProposed topic0; propose() v5 decoder 0x72636df9 for L1 committee",
+      "Node install: image 5.0.0, no --archiver, GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS, ETHEREUM_DEBUG_HOSTS",
+      "JSON-RPC aztec_getChainTips / aztec_*; approve via getStakingAsset(); claim without isRewardsClaimable (absent on v5 ABI)",
+      "Agent: getEpochForCheckpoint first with legacy getEpochForBlock fallback",
+      "New categorized menu UI: arrow navigation, Enter to select, quick jump by option number 0–27; some option numbers renumbered"
+    ],
+    "NOTICE": "Upgrade node to Aztec v5 (image 5.0.0+), rebuild docker-compose without --archiver. Remove the old monitoring agent (option 10) and install a new one (option 9).",
+    "COLOR": "red"
   }
 ]

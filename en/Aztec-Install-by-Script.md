@@ -19,11 +19,15 @@ curl -o aztec-logs.sh https://raw.githubusercontent.com/pittpv/aztec-monitoring-
 
 After launch, the script will check for the necessary system software (such as `docker`, `docker-compose`, `jq`, etc.) and offer to install it if missing. **Agree to the installation** by answering `y` (yes).
 
-In the script's main menu, you will be presented with a list of options. To begin the node installation:
+The script menu is organized into **categories**. In an interactive terminal: `↑` / `↓` — navigate, `Enter` — select; or type an option number `0–27` and press `Enter` for a quick jump.
 
-1.  **Select item `11` from the main menu and press Enter.**
+To begin the node installation:
+
+1.  **Open the “Node management” category → option `13`**, or type **`13`** and press Enter.
 
     ![Script Main Menu](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/1.jpg)
+
+> **Note:** The screenshot may still show the older flat option list; the current menu is categorized. Option numbers match the Usage section in the README.
 
 ## Port Check and Dependency Installation
 
@@ -102,12 +106,14 @@ If you wish, you can later replace it with a real L2 address.
 
 ## Docker Compose Configuration
 
-For the final node setup, the script will request data to generate the `docker-compose.yml` file:
+For the final node setup, the script will request data to generate the `docker-compose.yml` file (**Aztec v5** image, e.g. `5.0.0`):
 
 *   **`ETHEREUM_RPC_URL`** — Your RPC URL for Ethereum L1. **Important:** For mainnet, use mainnet RPC; for testnet, use Sepolia testnet RPC.
 *   **`CONSENSUS_BEACON_URL`** — Your RPC URL for the Beacon Chain. **Important:** For mainnet, use mainnet Beacon Chain RPC; for testnet, use Sepolia testnet Beacon Chain RPC.
-*   **`COINBASE`** — The Ethereum wallet address. Enter the address of your validator.
+*   **`ETHEREUM_DEBUG_HOSTS`** — Debug RPC (defaults to the same value as `ETHEREUM_RPC_URL`; you can leave it empty and press Enter).
 *   **`P2P_IP`** — This parameter will be determined automatically by the script. **If you are using a VPN on the server**, after completing the node installation, you must enter the real IP address **manually** in the `.env` file under `$HOME/aztec`
+
+> **Aztec v5:** compose is created **without** the `--archiver` flag; volumes: data → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. On mainnet, `.env` also sets `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` for signaling.
 
     ![Entering RPC and other data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -152,38 +158,38 @@ The node installation is now complete.
 
 ## Next Steps
 
-1.  **Check the node's sync status** by selecting option `1` in the script's main menu.
-2.  **Install the monitoring agent** for convenient node monitoring via option `2` in the main menu.
-3.  **Download the critical error definitions file** using option `24`.
-4.  **Check the validator status and set up queue position monitoring** using option `9`.
+1.  **Check the node's sync status** by selecting option `1` in the script menu.
+2.  **Install the monitoring agent** for convenient node monitoring via option `9`.
+3.  **Download the critical error definitions file** using option `27`.
+4.  **Check the validator status and set up queue position monitoring** using option `11`.
 
-After updating the script, it is recommended to **remove the old monitoring agent** (option `3`) and **create a new one** (option `2`) so notifications stay current (including the **L1 inclusion / Committee** block in Telegram when applicable). Rollup calldata parsing uses the Python package `eth_abi`; the script checks dependencies and installs them via `pip3` or `python3 -m pip` if needed.
+After updating the script, it is recommended to **remove the old monitoring agent** (option `10`) and **create a new one** (option `9`) so notifications stay current (including the **L1 inclusion / Committee** block in Telegram when applicable). Rollup calldata parsing uses the Python package `eth_abi`; the script checks dependencies and installs them via `pip3` or `python3 -m pip` if needed.
 
-Be sure to explore other features of the script available in the main menu, such as:
+Be sure to explore other features of the script available in the menu, such as:
 *   Starting and stopping containers
 *   Downgrading the node version (in case of issues with an update)
 *   Viewing logs and statistics
 
-## Adding or Removing Validators Without a Full Node Reinstall (Options 25 and 26)
+## Adding or Removing Validators Without a Full Node Reinstall (Options 24 and 25)
 
-If the node is already deployed and you need to change the validator set **without** a full reinstall via option `11`:
+If the node is already deployed and you need to change the validator set **without** a full reinstall via option `13`:
 
-*   **Option 25** — Add new validators (up to 10 per run): updates `keystore.json`, `validator_N.yml` under `$HOME/aztec/keys`, the `VALIDATORS` variable in `~/.env-aztec-agent`, optional keystore backup, then restarts web3signer and `docker compose`. Input format and BLS checks match the existing keystore; Ethereum addresses are normalized to **lowercase**; the script asks about **publisher** (one for all new validators or per validator) and feeRecipient/coinbase.
-*   **Option 26** — Remove validators by number from the displayed attester list; you cannot remove the last validator; after removal, `validator_N.yml` files are renumbered and `VALIDATORS` is updated.
+*   **Option 24** — Add new validators (up to 10 per run): updates `keystore.json`, `validator_N.yml` under `$HOME/aztec/keys`, the `VALIDATORS` variable in `~/.env-aztec-agent`, optional keystore backup, then restarts web3signer and `docker compose`. Input format and BLS checks match the existing keystore; Ethereum addresses are normalized to **lowercase**; the script asks about **publisher** (one for all new validators or per validator) and feeRecipient/coinbase.
+*   **Option 25** — Remove validators by number from the displayed attester list; you cannot remove the last validator; after removal, `validator_N.yml` files are renumbered and `VALIDATORS` is updated.
 
 Follow the script prompts for backup and service restarts.
 
-## Reinstalling the Node and Adding BLS Keys (Option 18)
+## Reinstalling the Node and Adding BLS Keys (Option 20)
 
-When reinstalling the node (option 11) or adding BLS keys later, it helps to understand the two installation modes and how **option 18** (Generate BLS keys) sub-options work with them.
+When reinstalling the node (option 13) or adding BLS keys later, it helps to understand the two installation modes and how **option 20** (Generate BLS keys) sub-options work with them.
 
 ### Installing the Node: With or Without BLS
 
-- **With BLS keys** — During installation (option 11), when asked “Do you have BLS keys?” answer **`y`** and enter, for each validator, data in the format:  
+- **With BLS keys** — During installation (option 13), when asked “Do you have BLS keys?” answer **`y`** and enter, for each validator, data in the format:  
   `private_key,address,private_BLS`.  
   The script will create `keystore.json` (BLS in the JSON) and `validator_N.yml` (SECP256K1 only) immediately. Separate `bls_validator_*.yml` files are not used.
 
-- **Without BLS keys** — Answer **`n`**. The script will create `keystore.json` with only the validators’ eth addresses (no `bls` field). You can add BLS keys later via option 18, as described below.
+- **Without BLS keys** — Answer **`n`**. The script will create `keystore.json` with only the validators’ eth addresses (no `bls` field). You can add BLS keys later via option 20, as described below.
 
 ### Script-Internal File
 
@@ -191,58 +197,58 @@ The file **`bls-filtered-pk.json`** is created and used **only by the script**. 
 
 ---
 
-### Variant A: BLS from the Same Mnemonic as the Addresses in Keystore (Options 18-2 and 18-3)
+### Variant A: BLS from the Same Mnemonic as the Addresses in Keystore (Options 20-2 and 20-3)
 
 Use this when you installed the node with a validator whose eth address comes from your mnemonic, and you now want to generate BLS keys for that address from the same mnemonic.
 
-1. **Option 18 → sub-option 2** (existing addresses from mnemonic).
+1. **Option 20 → sub-option 2** (existing addresses from mnemonic).
 2. Enter your mnemonic phrase and the **number of wallets** to generate (e.g. 30 or 50). The script will generate keys for that many indices, then keep only those whose eth address matches the addresses in `keystore.json`.  
    Result: **`bls-filtered-pk.json`** is created with keys for exactly the addresses you added as validators when installing the node.
-3. If the node was installed **without BLS**, run **Option 18 → sub-option 3** (add BLS keys to keystore). The script will copy BLS from `bls-filtered-pk.json` into `keystore.json`.
+3. If the node was installed **without BLS**, run **Option 20 → sub-option 3** (add BLS keys to keystore). The script will copy BLS from `bls-filtered-pk.json` into `keystore.json`.
 4. Then you can either:
-    - **Variant 1:** Run **options 19 (Approve)** and **20 (Stake)** to stake the validator.
-    - **Variant 2 (dashboard key):** Run **Option 18 → sub-option 4** (dashboard keystores). Enter the **same number of addresses** as in step 2 (e.g. 30). The script will create files in the new format with all generated addresses. Open the created file, **manually remove the extra entries** and keep only the one that corresponds to your validator.
+    - **Variant 1:** Run **options 21 (Approve)** and **22 (Stake)** to stake the validator.
+    - **Variant 2 (dashboard key):** Run **Option 20 → sub-option 4** (dashboard keystores). Enter the **same number of addresses** as in step 2 (e.g. 30). The script will create files in the new format with all generated addresses. Open the created file, **manually remove the extra entries** and keep only the one that corresponds to your validator.
 
 ---
 
-### Variant B: New Operator Address (Option 18-1)
+### Variant B: New Operator Address (Option 20-1)
 
 Use this when you want to create a **new** eth address and BLS keys (e.g. to switch to a new wallet).
 
-1. **Option 18 → sub-option 1** (new operator address).
+1. **Option 20 → sub-option 1** (new operator address).
 2. Enter your old private key (or keys separated by commas). The script will generate new keys and create **`bls-filtered-pk.json`** with `new_operator_info` for each validator.
-3. Fund the new eth address with Sepolia ETH (0.1–0.3), then run **options 19 (Approve)** and **20 (Stake)**. Option 20 will **update `keystore.json`** on successful stake, replacing the old address with the new operator address and creating YML files with the new keys.
-4. **Option 18-3** is not used in this flow — keystore address replacement is done in option 20.
+3. Fund the new eth address with Sepolia ETH (0.1–0.3), then run **options 21 (Approve)** and **22 (Stake)**. Option 22 will **update `keystore.json`** on successful stake, replacing the old address with the new operator address and creating YML files with the new keys.
+4. **Option 20-3** is not used in this flow — keystore address replacement is done in option 22.
 
 ---
 
-### Variant C: Dashboard Keystores Only (Option 18-4)
+### Variant C: Dashboard Keystores Only (Option 20-4)
 
 When you only need keystores for the staking dashboard (docs.aztec.network), without changing the node configuration:
 
-- **Option 18 → sub-option 4.** Choose new mnemonic (1) or enter existing (2), and enter the number of validator identities. The script will create **`dashboard_keystore.json`** and **`dashboard_keystore_staker_output.json`** in `$HOME/aztec/`. The node’s `keystore.json` and `bls-filtered-pk.json` are not modified.
+- **Option 20 → sub-option 4.** Choose new mnemonic (1) or enter existing (2), and enter the number of validator identities. The script will create **`dashboard_keystore.json`** and **`dashboard_keystore_staker_output.json`** in `$HOME/aztec/`. The node’s `keystore.json` and `bls-filtered-pk.json` are not modified.
 
 If you specify **more than one** validator identity, the created files will contain data for **all** generated addresses. To use only the entries you need, open the file and **manually remove the rest**, so that the dashboard uses only one address (or the subset you need).
 
 ---
 
-### Quick Reference: Option 18 Sub-options
+### Quick Reference: Option 20 Sub-options
 
 | Sub-option | Purpose | Does it change `keystore.json`? |
 |------------|---------|---------------------------------|
-| **18-1** | New operator address; then 19 and 20 (20 updates keystore) | Not directly; updated in option 20 |
-| **18-2** | BLS from mnemonic for addresses already in keystore from installation | No; only creates `bls-filtered-pk.json` |
-| **18-3** | Copy BLS from `bls-filtered-pk.json` into `keystore.json` | Yes |
-| **18-4** | Dashboard keystores (separate files in `$HOME/aztec/`) | No |
+| **20-1** | New operator address; then 21 and 22 (22 updates keystore) | Not directly; updated in option 22 |
+| **20-2** | BLS from mnemonic for addresses already in keystore from installation | No; only creates `bls-filtered-pk.json` |
+| **20-3** | Copy BLS from `bls-filtered-pk.json` into `keystore.json` | Yes |
+| **20-4** | Dashboard keystores (separate files in `$HOME/aztec/`) | No |
 
 ## Troubleshooting
 
-### Aztec node fails to start with RPC from sepolia-auto-install and firewall (Option 13)
+### Aztec node fails to start with RPC from sepolia-auto-install and firewall (option 13 of the sepolia-auto-install script)
 
 <details>
 <summary>Solution</summary>
 
-If your RPC was installed with the [sepolia-auto-install](https://github.com/pittpv/sepolia-auto-install/) script and the firewall is enabled in it (Option 13), you need to allow the Docker network subnet used by the Aztec node. Get the subnet with either:
+If your RPC was installed with the [sepolia-auto-install](https://github.com/pittpv/sepolia-auto-install/) script and the firewall is enabled in it (option 13 of **that** RPC script, not the Aztec menu), you need to allow the Docker network subnet used by the Aztec node. Get the subnet with either:
 
 ```bash
 docker network inspect -f '{{range .IPAM.Config}}{{.Subnet}}{{end}}' aztec

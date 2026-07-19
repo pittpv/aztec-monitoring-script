@@ -1,14 +1,14 @@
-# BLS: Anahtar Üretimi, Approve ve Stake (Seçenekler 18, 19, 20)
+# BLS: Anahtar Üretimi, Approve ve Stake (Seçenekler 20, 21, 22)
 
-Aztec doğrulayıcı staking’i için aztec-logs betiğindeki **18** (BLS anahtar üretimi ve alt seçenekler), **19** (Approve) ve **20** (Stake) seçeneklerinin ayrıntılı açıklaması.
+Aztec doğrulayıcı staking’i için aztec-logs betiğindeki **20** (BLS anahtar üretimi ve alt seçenekler), **21** (Approve) ve **22** (Stake) seçeneklerinin ayrıntılı açıklaması.
 
 ---
 
-## Seçenek 18 — Mnemonic’ten BLS Anahtarları Üret
+## Seçenek 20 — Mnemonic’ten BLS Anahtarları Üret
 
-Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yoluyla **"BLS Keys Generation and Transfer"** alt menüsü açılır.
+Menüde («Staking ve doğrulayıcılar» kategorisi veya numara ile hızlı geçiş) **20** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yoluyla **"BLS Keys Generation and Transfer"** alt menüsü açılır.
 
-### Seçenek 18 alt menüsü
+### Seçenek 20 alt menüsü
 
 | # | Açıklama |
 |---|----------|
@@ -19,7 +19,7 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
 
 ---
 
-### Alt seçenek 18-1: Yeni operatör adresi
+### Alt seçenek 20-1: Yeni operatör adresi
 
 **Amaç:** Doğrulayıcı operatörünü değiştirmek: her mevcut doğrulayıcı için **yeni** bir ETH adresi ve yeni BLS anahtarı üretilir. Eski adres sözleşmede kalır (çekim vb. için), staking ise yeni operatöre bağlanır.
 
@@ -41,13 +41,13 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
 
 **Önemli:**  
 - Tüm yeni verileri (tekrar kullanılacak mnemonic, yeni adresler ve BLS) **kaydedin**. Özel anahtarlar ayrıca `bls-filtered-pk.json` içinde saklanır.  
-- Betik ardından şunları önerir: yeni adrese 0.1–0.3 Sepolia ETH gönderin, sonra **19 (Approve)** ve **20 (Stake)** seçeneklerini çalıştırın.
+- Betik ardından şunları önerir: yeni adrese 0.1–0.3 Sepolia ETH gönderin, sonra **21 (Approve)** ve **22 (Stake)** seçeneklerini çalıştırın.
 
 **Ne zaman kullanılır:** Doğrulayıcı operatörünü değiştirirken (sistemde eski adresler dururken yeni cüzdan ve yeni BLS anahtarları).
 
 ---
 
-### Alt seçenek 18-2: Mevcut adresler (tek mnemonic’ten)
+### Alt seçenek 20-2: Mevcut adresler (tek mnemonic’ten)
 
 **Amaç:** Tüm bu adresler **tek** bir mnemonic ifadeden türetilmişse **zaten var olan** doğrulayıcı ETH adreleri için BLS anahtarları almak.
 
@@ -61,13 +61,13 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
 5. Keystore’daki doğrulayıcı adres listesini **aynı sırada** alır ve **`bls-filtered-pk.json`** oluşturur: yalnızca adresleri keystore ile eşleşen (ETH özel + BLS özel) çiftler. Girdi sırası keystore ile aynıdır.
 6. Geçici `bls.json` ve `bls-ethwallet.json` dosyaları silinir.
 
-**Sonuç:** `$HOME/aztec/bls-filtered-pk.json` içinde yalnızca keystore’daki doğrulayıcılarla eşleşen anahtarlar vardır. Format “eski”: `new_operator_info` yok, yalnızca `attester.eth`, `attester.bls`, `feeRecipient`. Ardından **19** ve **20** (eski staking formatı) çalıştırılabilir.
+**Sonuç:** `$HOME/aztec/bls-filtered-pk.json` içinde yalnızca keystore’daki doğrulayıcılarla eşleşen anahtarlar vardır. Format “eski”: `new_operator_info` yok, yalnızca `attester.eth`, `attester.bls`, `feeRecipient`. Ardından **21** ve **22** (eski staking formatı) çalıştırılabilir.
 
 **Ne zaman kullanılır:** Tüm doğrulayıcılar tek seed ifadesinden, adresler zaten keystore’da — yalnızca BLS anahtarlarını eklemek veya güncellemek gerekiyor.
 
 ---
 
-### Alt seçenek 18-3: BLS anahtarlarını keystore.json’a ekle
+### Alt seçenek 20-3: BLS anahtarlarını keystore.json’a ekle
 
 **Amaç:** `bls-filtered-pk.json` içindeki BLS özel anahtarlarını `$HOME/aztec/config/keystore.json` dosyasına yazmak (her doğrulayıcı için ETH adresi eşleşmesine göre `attester.bls` alanına).
 
@@ -79,11 +79,11 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
 4. Keystore’daki her doğrulayıcı için `attester.eth` (adres) alanına göre bls-filtered-pk’den ilgili BLS’i bulur ve `attester.bls` günceller.
 5. Güncellenmiş keystore’u kaydeder ve kısa bir rapor yazdırır.
 
-**Ne zaman kullanılır:** Yalnızca BLS üretiminden (18-1 veya 18-2) sonra ve yalnızca BLS’ler seed ifadesinden türetildiyse veya `bls-filtered-pk.json` dosyasını kendiniz doğru oluşturduysanız. Rastgele dosyalarla kullanmayın.
+**Ne zaman kullanılır:** Yalnızca BLS üretiminden (20-1 veya 20-2) sonra ve yalnızca BLS’ler seed ifadesinden türetildiyse veya `bls-filtered-pk.json` dosyasını kendiniz doğru oluşturduysanız. Rastgele dosyalarla kullanmayın.
 
 ---
 
-### Alt seçenek 18-4: Dashboard keystore’ları (tavsiye edilen)
+### Alt seçenek 20-4: Dashboard keystore’ları (tavsiye edilen)
 
 **Amaç:** **Staking dashboard** için dosyalar oluşturmak (Aztec dokümantasyonu: sequencer_management vb.): özel keystore ve staker_output.
 
@@ -103,13 +103,13 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
    - **dashboard_keystore.json** — özel keystore,
    - **dashboard_keystore_staker_output.json** — staking dashboard için.
 
-**Ne zaman kullanılır:** Anahtarları özellikle Aztec staking web dashboard’u için hazırlarken; bu betikteki 19/20 seçenekleri için değil.
+**Ne zaman kullanılır:** Anahtarları özellikle Aztec staking web dashboard’u için hazırlarken; bu betikteki 21/22 seçenekleri için değil.
 
 ---
 
-## Seçenek 19 — Approve
+## Seçenek 21 — Approve
 
-**Amaç:** Staking (rollup) akıllı sözleşmesinin staking token’ınızı harcamasına izin vermek (token biriminde 200000 ether’e kadar approve). Bu adım olmadan 20 (Stake) seçeneği token’ı cüzdanınızdan çekemez.
+**Amaç:** Staking (rollup) akıllı sözleşmesinin staking token’ınızı harcamasına izin vermek (token biriminde 200000 ether’e kadar approve). Bu adım olmadan 22 (Stake) seçeneği token’ı cüzdanınızdan çekemez.
 
 **Betik ne yapar:**
 
@@ -119,27 +119,27 @@ Ana menüde **18** seçildiğinde, BLS anahtarlarıyla çalışmanın dört yolu
 4. Her anahtar için:
    - ETH adresini hesaplar ve **nonce** (pending) alır; ardışık birkaç işlemde nonce tekrarlanmasın diye.
    - Gas: mevcut gas fiyatının %50 üstü, en az 10 gwei; “replacement transaction underpriced” hatasında gas iki katına çıkarılıp sonraki RPC ile tekrar dener.
-   - **ERC-20 approve** çağrısı: token sözleşmesi `0x5595cb9ed193cac2c0bc5393313bc6115817954b`, metot `approve(address,uint256)` — spender staking (rollup) sözleşme adresi, miktar `200000 ether` (token wei cinsinden).
+   - Staking token adresini rollup üzerinden `getStakingAsset()` ile alır (hata durumunda — mainnet yedek `0xa27ec0006e59f245217ff08cd52a7e8b169e62d2`). **ERC-20 approve** çağrısı: metot `approve(address,uint256)` — spender rollup adresi, miktar `200000 ether` (token wei cinsinden).
    - RPC listesi (birincil + yedek Sepolia) kullanılır; farklı doğrulayıcılar için farklı RPC’ler dönüşümlü; işlemler arasında ~12 saniye bekleme.
 
 **Önemli:**  
 - `$HOME/aztec/keys/` içinde stake edeceğiniz cüzdanların özel anahtarlarını içeren YML dosyaları olmalıdır.  
 - İşlem takılı (pending) kalırsa betik iptal veya hızlandırma (örn. MetaMask) önerir, ardından Approve’u tekrar çalıştırmanızı söyler.
 
-**Sıra:** Approve (19), BLS üretiminden (18) **sonra** ve Stake’ten (20) **önce** çalıştırılır. “Yeni operatör” yöntemi (18-1) için 19’dan önce yeni adreslere gas için ETH yollanmalıdır.
+**Sıra:** Approve (21), BLS üretiminden (20) **sonra** ve Stake’ten (22) **önce** çalıştırılır. “Yeni operatör” yöntemi (20-1) için 21’den önce yeni adreslere gas için ETH yollanmalıdır.
 
 ---
 
-## Seçenek 20 — Stake
+## Seçenek 22 — Stake
 
 **Amaç:** Doğrulayıcıyı ağda kaydetmek (staking sözleşmesini çağırmak): BLS anahtarını ve doğrulayıcı verilerini rollup sözleşmesine bağlamak. `bls-filtered-pk.json` ve gerektiğinde `keystore.json` verileri kullanılır.
 
 **Betik ne yapar:**
 
-1. `$HOME/aztec/bls-filtered-pk.json` dosyasının varlığını kontrol eder. Yoksa önce 18’i çalıştırmanızı önerir.
+1. `$HOME/aztec/bls-filtered-pk.json` dosyasının varlığını kontrol eder. Yoksa önce 20’yi çalıştırmanızı önerir.
 2. bls-filtered-pk formatını tespit eder:
-   - ilk doğrulayıcıda **`new_operator_info`** varsa — **yeni format** (yeni operatör yöntemi, 18-1);
-   - yoksa — **eski format** (mevcut adresler, 18-2).
+   - ilk doğrulayıcıda **`new_operator_info`** varsa — **yeni format** (yeni operatör yöntemi, 20-1);
+   - yoksa — **eski format** (mevcut adresler, 20-2).
 3. Ağ, RPC ve rollup sözleşme adresi betik ayarlarından gelir.
 
 Davranış sonra farklılaşır.
@@ -178,9 +178,9 @@ Doğrulayıcı linkleri (mainnet/testnet) eski formatta olduğu gibi yazdırıl�
 
 ## Kısa adım sırası
 
-1. **Seçenek 18** — uygun alt seçeneği seçin (1: yeni operatör, 2: mnemonic’ten mevcut adresler, 3: keystore’a BLS ekleme, 4: dashboard).
-2. **18-1** için: yeni adreslere 0.1–0.3 Sepolia ETH gönderin.
-3. **Seçenek 19** — `$HOME/aztec/keys/*.yml` içindeki tüm anahtarlar için Approve (bls hariç).
-4. **Seçenek 20** — `bls-filtered-pk.json` verileriyle Stake (format otomatik tespit edilir).
+1. **Seçenek 20** — uygun alt seçeneği seçin (1: yeni operatör, 2: mnemonic’ten mevcut adresler, 3: keystore’a BLS ekleme, 4: dashboard).
+2. **20-1** için: yeni adreslere 0.1–0.3 Sepolia ETH gönderin.
+3. **Seçenek 21** — `$HOME/aztec/keys/*.yml` içindeki tüm anahtarlar için Approve (bls hariç).
+4. **Seçenek 22** — `bls-filtered-pk.json` verileriyle Stake (format otomatik tespit edilir).
 
 Başarılı Stake’ten sonra doğrulayıcılar explorer’da (örn. dashtec.xyz) görünür ve düğüm güncellenmiş keystore ve `keys/` içindeki anahtarları kullanabilir.

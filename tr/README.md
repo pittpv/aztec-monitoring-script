@@ -35,13 +35,28 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 01-04-2026
+## 📌 Son Güncellemeler 15-07-2026
 
-- CheckpointProposed olayının TOPIC0 imzası düzeltildi. Yanlış değer L1 doğrulamasının çalışmamasına neden oluyordu
+⚠️ Düğümü **Aztec v5** sürümüne yükseltin (imaj `5.0.0+`) ve docker-compose dosyasını **`--archiver` olmadan** yeniden oluşturun. Eski izleme aracısını silin (**seçenek 10**) ve yenisini kurun (**seçenek 9**).
+
+- **Aztec v5 (AZUP-2)** protokolü ile uyumluluk
+- Mainnet rollup: `0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34`
+- Testnet rollup: `0xfe6061806cac748085904a010d2d9e33b8031741`
+- Ağ ucu: `getPendingCheckpointNumber()`; **CheckpointProposed** olayı (topic0 `0x6ff492bf…`)
+- L1 committee için `propose()` **v5** çözücü (`0x72636df9`)
+- Düğüm kurulumu: imaj `5.0.0`, `--archiver` yok, `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS`, `ETHEREUM_DEBUG_HOSTS`
+- JSON-RPC: `aztec_getChainTips` / `aztec_*` ve eski `node_*` yedek yolu
+- Approve: `getStakingAsset()`; Claim: `isRewardsClaimable` yok (v5 ABI), gaz için ayrı anahtar
+- Ajan: önce `getEpochForCheckpoint`, ardından `getEpochForBlock` yedek yolu
+- **Yeni menü arayüzü**: seçenekler kategorilere ayrıldı; bazı numaralar değişti (bkz. Kullanım)
+  - `↑` / `↓` — gezinme, `Enter` — seçim
+  - seçenek numarası `0–27` + `Enter` — hızlı geçiş (kategorilerden veya alt menüden)
+  - alt menülerde: «← Kategorilere dön»
+  - durum çubuğu: betik sürümü, ağ, RPC
 
 **version_control.json**
 
-SHA256: `9b2fbcd7303655ecff2461f905a65cc6223bb850f46bdfbc0d587582a172c089`
+SHA256: `e4f7e348fcf8ba5e3d8ab02e62b4289821924c54f377841dfecfbf1d160bfd28`
 
 **error_definitions.json**
 
@@ -49,6 +64,10 @@ SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e`
 
 <details>
 <summary>📅 Sürüm Geçmişi</summary>
+
+### 01-04-2026
+
+- CheckpointProposed olayının TOPIC0 imzası düzeltildi. Yanlış değer L1 doğrulamasının çalışmamasına neden oluyordu
 
 ### 30-03-2026
 
@@ -492,45 +511,62 @@ Tek validator modu için aynı veriler ayrı ayrı sağlanır.
   * RPC URL'sini girin (RPC'ye `http://localhost:8545` veya `http://127.0.0.1:8545` veya `http://YOUR_EXTERNAL_IP:PORT` adresinden erişilebilir olmalıdır)
   * Ağ türünü girin (mainnet, testnet)
   * Telegram botunu yapılandırın
-  * İzlemeyi etkinleştirin (seçenek 2)
-  * Kritik hata tanımlarının indirilmesi (seçenek 24)
+  * İzlemeyi etkinleştirin (**seçenek 9**)
+  * Kritik hata tanımlarının indirilmesi (**seçenek 27**)
 
 ❗️Yuva istatistiklerini elde etmek için, düğümün günlük düzeyinin şu şekilde ayarlanmış olması **gerekir**: `info;debug:node:sentinel` veya `debug`
 
 ## 🖥️ Kullanım
 
-Ana menü:
+Menü kategorilere ayrılmıştır. Etkileşimli terminalde:
 
-1. Konteyner ve düğüm senkronizasyonunun kontrol et
-2. Bildirimlerle düğüm izleme aracısını yükleyin
-3. İzleme aracısını kaldır
-4. Aztec loglarını görüntüle
-5. rollupAddress bul
-6. PeerID bul
-7. governanceProposerPayload bul
-8. Kanıtlanmış L2 Bloğunu Kontrol Et
-9. Validator arama, durum kontrolü ve sıra izleme
-10. Publisher bakiye izleme
-11. Watchtower ile birlikte Aztec Node Kurulumu
-12. Aztec düğümünü sil
-13. Aztec düğüm konteynerlerini başlat
-14. Aztec düğüm konteynerlerini durdur
-15. Aztec düğümünü güncelle
-16. Aztec düğümünü eski sürüme düşür
-17. Aztek sürümünü kontrol edin
-18. Mnemonic'ten BLS anahtarları oluştur
-19. Approve
-20. Stake
-21. Ödülleri talep edin
-22. RPC URL'sini değiştir
-23. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)
-24. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)
+- `↑` / `↓` — öğeler arasında gezinme, `Enter` — seçim
+- seçenek numarası `0–27` yazıp `Enter` — hızlı geçiş (kategori ekranından veya alt menüden)
+- alt menüde «← Kategorilere dön» ile geri dönün
+- terminal etkileşimli değilse, numara girişli düz liste 1–27 gösterilir
 
-`0.` 🚪 Çıkış
+### Teşhis ve loglar
+1. Konteyner ve düğüm senkronizasyonunun kontrol et  
+2. Aztec loglarını görüntüle  
+3. rollupAddress bul  
+4. PeerID bul  
+5. governanceProposerPayload bul  
+6. Kanıtlanmış L2 Bloğunu Kontrol Et  
+7. Aztek sürümünü kontrol edin  
+8. Loglarda Admin API anahtarını bul  
+
+### İzleme
+9. Bildirimlerle düğüm izleme aracısını yükleyin  
+10. İzleme aracısını kaldır  
+11. Validator arama, durum kontrolü ve sıra izleme  
+12. Publisher bakiye izleme  
+
+### Düğüm yönetimi
+13. Watchtower ile birlikte Aztec Node Kurulumu  
+14. Aztec düğümünü sil  
+15. Aztec düğüm konteynerlerini başlat  
+16. Aztec düğüm konteynerlerini durdur  
+17. Aztec düğümünü güncelle  
+18. Aztec düğümünü eski sürüme düşür  
+19. RPC URL'sini değiştir  
+
+### Staking ve doğrulayıcılar
+20. Mnemonic'ten BLS anahtarları oluştur  
+21. Approve  
+22. Stake  
+23. Ödülleri talep edin  
+24. Doğrulayıcı ekle  
+25. Doğrulayıcı kaldır  
+
+### Güncellemeler ve bakım
+26. Script güncellemelerini kontrol et (güvenli, hash doğrulama ile)  
+27. Hata tanımları güncellemelerini kontrol et (güvenli, hash doğrulama ile)  
+
+`0.` 🚪 Çıkış  
 
 ## 🚀 Düğüm İzleme Aracını Kullanma
 
-Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını yükleyin` seçeneğini seçin:
+Betiği çalıştırdıktan sonra **seçenek 9**'u seçin (`Bildirimlerle düğüm izleme aracısını yükleyin`):
 
 - `~/aztec-monitor-agent` konumunda bir aracı oluşturur
 - Bir systemd servisi ve zamanlayıcısı kurar (her 37 saniyede bir çalışır)
@@ -546,7 +582,7 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
   - Doğrulayıcı komitedeyken her slot için istatistikler (başarılı/kaçırılmış onaylama, önerilen/kazılmış/kaçırılmış blok)
 - Normal modda 1 MB'a, `DEBUG=true` modunda ise 10 MB'a ulaştığında günlük dosyasını temizler ve ilk raporu kaydeder.
 
-❗️İlk çalıştırmada, kritik hataları içeren `error_definitions.json` dosyasını indirmek için **24. seçeneğin** kullanılması gerekmektedir.
+❗️İlk çalıştırmada, kritik hataları içeren `error_definitions.json` dosyasını indirmek için **27. seçeneğin** kullanılması gerekmektedir.
 
 ### İzleme Aracı Gereksinimleri:
 
@@ -559,9 +595,9 @@ Betiği çalıştırdıktan sonra `Bildirimlerle düğüm izleme aracısını y�
 
 İzleme agent için bir güncelleme varsa, önce tüm betiği güncelleyin. Ardından eski aracı silin ve yeni bir tane oluşturun. Daha önce girdiğiniz ChatID ve Telegram token'ı otomatik olarak yeni araca atanır.
 
-## 🚀 Aztec v 4.0.4 düğümünü kurma
+## 🚀 Aztec düğümünü kurma
 
-Aztec düğümünü kurmak için **seçenek 11**'i seçin ve betik talimatlarını izleyin.
+Aztec düğümünü kurmak için **seçenek 13**'ü seçin ve betik talimatlarını izleyin.
 
 Düğüm kurulum sürecinin adım adım açıklaması burada bulunabilir: [Aztec-Install-by-Script.md](https://github.com/pittpv/aztec-monitoring-script/blob/main/tr/Aztec-Install-by-Script.md)
 
