@@ -106,7 +106,10 @@ Herhangi bir nedenden dolayı bir Aztec L2 adresi oluşturamıyorsanız, `0x0000
 
 ## Docker Compose Yapılandırması
 
-Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak üzere veri isteyecektir (**Aztec v5** imajı, örn. `5.0.0`):
+Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak üzere veri isteyecektir. İmaj ağa göre sabitlenir, `:latest` değildir:
+
+*   **Testnet** — `azteclabs/aztec:6.0.0-rc.1` (yalnızca testnet; bu release candidate mainnet'te çalıştırılamaz)
+*   **Mainnet** — `aztecprotocol/aztec:5.2.0`
 
 *   **`ETHEREUM_RPC_URL`** — Ethereum L1 için RPC URL'niz. **Önemli:** Mainnet için mainnet RPC kullanın, testnet için Sepolia testnet RPC kullanın.
 *   **`CONSENSUS_BEACON_URL`** — Beacon Chain için RPC URL'niz. **Önemli:** Mainnet için mainnet Beacon Chain RPC kullanın, testnet için Sepolia testnet Beacon Chain RPC kullanın.
@@ -114,7 +117,7 @@ Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak 
 *   **`P2P_IP`** — Bu parametre betik tarafından otomatik olarak belirlenecektir.
     **Sunucuda VPN kullanıyorsanız**, node kurulumunu tamamladıktan sonra gerçek IP adresini `$HOME/aztec` altındaki `.env` dosyasına **manuel olarak** girmelisiniz.
 
-> **Aztec v5:** compose **`--archiver` olmadan** oluşturulur; birimler: veri → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. Mainnet’te `.env` ayrıca signaling için `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` ayarlar.
+> Compose **`--archiver` olmadan** oluşturulur; birimler: veri → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. Mainnet’te `.env` ayrıca signaling için `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` ayarlar. Testnet v6 yeni bir rollup’tır: v5 dizinindeki durum kullanılmaz.
 
     ![RPC ve diğer verileri girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -129,7 +132,7 @@ RPC adreslerini girdikten sonra betik, düğüm için ağ seçimi yapmanızı is
 
 > **Önemli:** 
 > *   Seçilen ağ, düğümünüzün hangi ağda çalışacağını belirler
-> *   Düğüm verileri farklı dizinlerde saklanacaktır: mainnet için `$HOME/.aztec/mainnet/data/` ve testnet için `$HOME/.aztec/testnet/data/`
+> *   Düğüm verileri farklı dizinlerde saklanacaktır: mainnet için `$HOME/.aztec/mainnet/data/` ve testnet için `$HOME/.aztec/testnet-v6/data/`. Eski `$HOME/.aztec/testnet/data/` dizini (v5) silinmez ve yeni kurulumda kullanılmaz
 > *   Seçilen ağ için doğru RPC adreslerini kullandığınızdan emin olun
 > *   Seçilen ağ, `~/.env-aztec-agent` dosyasındaki `NETWORK` değişkenine kaydedilir
 

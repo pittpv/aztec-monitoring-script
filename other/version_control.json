@@ -363,5 +363,16 @@
     ],
     "NOTICE": "Upgrade node to Aztec v5 (image 5.0.0+), rebuild docker-compose without --archiver. Remove the old monitoring agent (option 10) and install a new one (option 9).",
     "COLOR": "red"
+  },
+  {
+    "VERSION": "3.1.0",
+    "UPDATE_DATE": "30.09.2026",
+    "CHANGES": [
+      "Testnet v6: rollup 0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9, image azteclabs/aztec:6.0.0-rc.1, fresh data dir ~/.aztec/testnet-v6/data/",
+      "Mainnet stays on aztecprotocol/aztec:5.2.0 and rollup 0x91ff8bbd…; update and downgrade reject v6 and release-candidate tags on mainnet",
+      "Update pulls the pinned image for the detected network instead of aztecprotocol/aztec:latest; downgrade lists tags from that network's Docker Hub org"
+    ],
+    "NOTICE": "TESTNET ONLY for v6: new rollup, use image azteclabs/aztec:6.0.0-rc.1 and a fresh data directory ~/.aztec/testnet-v6/data/. Do not run 6.0.0-rc.1 on mainnet. Mainnet stays on aztecprotocol/aztec:5.2.0. Remove the old monitoring agent (option 10) and install a new one (option 9).",
+    "COLOR": "red"
   }
 ]

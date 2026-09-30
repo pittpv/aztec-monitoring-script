@@ -35,7 +35,30 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 15-07-2026
+## 📌 Son Güncellemeler 30-09-2026
+
+⚠️ **Yalnızca testnet.** Bu yeni bir rollup: v5 durumu taşınmaz. Testnet'i `azteclabs/aztec:6.0.0-rc.1` imajına ve yeni veri dizini `~/.aztec/testnet-v6/data/` konumuna yükseltin. **`6.0.0-rc.1` imajını mainnet'te çalıştırmayın.** Mainnet `aztecprotocol/aztec:5.2.0` üzerinde kalır. Eski izleme aracısını silin (**seçenek 10**) ve yenisini kurun (**seçenek 9**).
+
+- Betik **3.1.0**: imajlar ve veri dizini ağa göre ayrıldı
+- Testnet v6 rollup: `0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9` (2026-09-28 tarihinden beri kanonik)
+- Mainnet rollup değişmedi: `0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34`
+- Testnet kurulum ve güncelleme: `azteclabs/aztec:6.0.0-rc.1`, yeni dizin `~/.aztec/testnet-v6/data/` (eski `~/.aztec/testnet/data/` yerinde kalır)
+- Mainnet `aztecprotocol/aztec:5.2.0` sürümüne sabitlendi. Güncelleme ve sürüm düşürme mainnet'e `6.x` ve release candidate etiketleri atamaz
+- Düğüm güncellemesi, algılanan ağın sabit imajını çeker; `aztecprotocol/aztec:latest` değil
+- Sürüm düşürme, bu ağın Docker Hub kuruluşundaki etiketleri listeler: mainnet — yalnızca kararlı `5.x`, testnet — semver ve `-rc.N`, nightly hariç
+
+**version_control.json**
+
+SHA256: `b769686dce7859cd894b15459454abd23e9e60377724ab1d2bdf2f2ad9132793`
+
+**error_definitions.json**
+
+SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 15-07-2026
 
 ⚠️ Düğümü **Aztec v5** sürümüne yükseltin (imaj `5.0.0+`) ve docker-compose dosyasını **`--archiver` olmadan** yeniden oluşturun. Eski izleme aracısını silin (**seçenek 10**) ve yenisini kurun (**seçenek 9**).
 
@@ -53,17 +76,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
   - seçenek numarası `0–27` + `Enter` — hızlı geçiş (kategorilerden veya alt menüden)
   - alt menülerde: «← Kategorilere dön»
   - durum çubuğu: betik sürümü, ağ, RPC
-
-**version_control.json**
-
-SHA256: `e4f7e348fcf8ba5e3d8ab02e62b4289821924c54f377841dfecfbf1d160bfd28`
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 01-04-2026
 

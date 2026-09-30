@@ -35,7 +35,30 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 15-07-2026
+## 📌 Latest Updates 30-09-2026
+
+⚠️ **Testnet only.** This is a new rollup: v5 state does not carry over. Upgrade testnet to image `azteclabs/aztec:6.0.0-rc.1` and a fresh data directory `~/.aztec/testnet-v6/data/`. **Do not run `6.0.0-rc.1` on mainnet.** Mainnet stays on `aztecprotocol/aztec:5.2.0`. Remove the old monitoring agent (**option 10**) and install a new one (**option 9**).
+
+- Script **3.1.0**: images and the data directory are split by network
+- Testnet v6 rollup: `0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9` (canonical since 2026-09-28)
+- Mainnet rollup unchanged: `0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34`
+- Testnet install and update: `azteclabs/aztec:6.0.0-rc.1`, fresh directory `~/.aztec/testnet-v6/data/` (the old `~/.aztec/testnet/data/` is left in place)
+- Mainnet is pinned to `aztecprotocol/aztec:5.2.0`. Update and downgrade do not assign `6.x` or release-candidate tags on mainnet
+- Node update pulls the pinned image for the detected network, not `aztecprotocol/aztec:latest`
+- Downgrade lists tags from that network's Docker Hub org: mainnet — stable `5.x` only, testnet — semver and `-rc.N`, nightlies excluded
+
+**version_control.json**
+
+SHA256: `b769686dce7859cd894b15459454abd23e9e60377724ab1d2bdf2f2ad9132793`
+
+**error_definitions.json**
+
+SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
+
+<details>
+<summary>📅 Version History</summary>
+
+### 15-07-2026
 
 ⚠️ Upgrade the node to **Aztec v5** (image `5.0.0+`) and rebuild docker-compose **without `--archiver`**. Remove the old monitoring agent (**option 10**) and install a new one (**option 9**).
 
@@ -53,17 +76,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
   - option number `0–27` + `Enter` — quick jump (from categories or a submenu)
   - in submenus: “← Back to categories”
   - status bar: script version, network, RPC
-
-**version_control.json**
-
-SHA256: `e4f7e348fcf8ba5e3d8ab02e62b4289821924c54f377841dfecfbf1d160bfd28`
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 01-04-2026
 

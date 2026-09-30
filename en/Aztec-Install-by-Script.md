@@ -106,14 +106,17 @@ If you wish, you can later replace it with a real L2 address.
 
 ## Docker Compose Configuration
 
-For the final node setup, the script will request data to generate the `docker-compose.yml` file (**Aztec v5** image, e.g. `5.0.0`):
+For the final node setup, the script will request data to generate the `docker-compose.yml` file. The image is pinned per network, not as `:latest`:
+
+*   **Testnet** — `azteclabs/aztec:6.0.0-rc.1` (testnet only; do not run this release candidate on mainnet)
+*   **Mainnet** — `aztecprotocol/aztec:5.2.0`
 
 *   **`ETHEREUM_RPC_URL`** — Your RPC URL for Ethereum L1. **Important:** For mainnet, use mainnet RPC; for testnet, use Sepolia testnet RPC.
 *   **`CONSENSUS_BEACON_URL`** — Your RPC URL for the Beacon Chain. **Important:** For mainnet, use mainnet Beacon Chain RPC; for testnet, use Sepolia testnet Beacon Chain RPC.
 *   **`ETHEREUM_DEBUG_HOSTS`** — Debug RPC (defaults to the same value as `ETHEREUM_RPC_URL`; you can leave it empty and press Enter).
 *   **`P2P_IP`** — This parameter will be determined automatically by the script. **If you are using a VPN on the server**, after completing the node installation, you must enter the real IP address **manually** in the `.env` file under `$HOME/aztec`
 
-> **Aztec v5:** compose is created **without** the `--archiver` flag; volumes: data → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. On mainnet, `.env` also sets `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` for signaling.
+> Compose is created **without** the `--archiver` flag; volumes: data → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. On mainnet, `.env` also sets `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` for signaling. Testnet v6 is a new rollup: state from the v5 directory is not reused.
 
     ![Entering RPC and other data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -128,7 +131,7 @@ Select the desired network by entering the corresponding number (1 or 2).
 
 > **Important:** 
 > *   The selected network determines which network your node will operate on
-> *   Node data will be stored in different directories: `$HOME/.aztec/mainnet/data/` for mainnet and `$HOME/.aztec/testnet/data/` for testnet
+> *   Node data will be stored in different directories: `$HOME/.aztec/mainnet/data/` for mainnet and `$HOME/.aztec/testnet-v6/data/` for testnet. The old `$HOME/.aztec/testnet/data/` directory (v5) is left in place and is not used for a new install
 > *   Make sure you use the correct RPC addresses for the selected network
 > *   The selected network is saved in the `~/.env-aztec-agent` file in the `NETWORK` variable
 

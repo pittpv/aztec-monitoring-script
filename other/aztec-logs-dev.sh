@@ -817,16 +817,19 @@ init_languages() {
   TRANSLATIONS["en,selected_network"]="Selected network:"
   TRANSLATIONS["en,mainnet"]="mainnet"
   TRANSLATIONS["en,testnet"]="testnet"
-  TRANSLATIONS["en,update_title"]="Update Aztec node to latest version"
+  TRANSLATIONS["en,update_title"]="Update Aztec node to the recommended image"
   TRANSLATIONS["en,update_folder_error"]="Error: Folder $HOME/aztec does not exist"
   TRANSLATIONS["en,update_stopping"]="Stopping containers..."
   TRANSLATIONS["en,update_stop_error"]="Error stopping containers"
-  TRANSLATIONS["en,update_pulling"]="Pulling latest aztecprotocol/aztec image..."
+  TRANSLATIONS["en,update_pulling"]="Pulling image %s..."
   TRANSLATIONS["en,update_pull_error"]="Error pulling image"
   TRANSLATIONS["en,update_starting"]="Starting updated node..."
   TRANSLATIONS["en,update_start_error"]="Error starting containers"
-  TRANSLATIONS["en,update_success"]="Aztec node successfully updated to latest version!"
-  TRANSLATIONS["en,tag_check"]="Found tag: %s, replacing with latest"
+  TRANSLATIONS["en,update_success"]="Aztec node successfully updated to %s"
+  TRANSLATIONS["en,tag_check"]="Current image: %s. Setting %s"
+  TRANSLATIONS["en,install_image_pin"]="Node image for this network: %s"
+  TRANSLATIONS["en,testnet_fresh_data"]="v6 testnet is a new rollup. Using a fresh data directory: %s. The previous v5 directory was left in place."
+  TRANSLATIONS["en,image_tag_rejected"]="Tag is not allowed on %s. Mainnet uses aztecprotocol/aztec 5.x (pinned 5.2.0). Testnet uses azteclabs/aztec, including 6.0.0-rc.1. Do not run the testnet release candidate on mainnet."
   TRANSLATIONS["en,downgrade_title"]="Downgrade Aztec node"
   TRANSLATIONS["en,downgrade_fetching"]="Fetching available versions..."
   TRANSLATIONS["en,downgrade_fetch_error"]="Failed to fetch versions"
@@ -836,7 +839,7 @@ init_languages() {
   TRANSLATIONS["en,downgrade_folder_error"]="Error: Folder $HOME/aztec does not exist"
   TRANSLATIONS["en,downgrade_stopping"]="Stopping containers..."
   TRANSLATIONS["en,downgrade_stop_error"]="Error stopping containers"
-  TRANSLATIONS["en,downgrade_pulling"]="Pulling aztecprotocol/aztec image:"
+  TRANSLATIONS["en,downgrade_pulling"]="Pulling image %s..."
   TRANSLATIONS["en,downgrade_pull_error"]="Error pulling image"
   TRANSLATIONS["en,downgrade_updating"]="Updating configuration..."
   TRANSLATIONS["en,downgrade_update_error"]="Error updating docker-compose.yml"
@@ -844,7 +847,7 @@ init_languages() {
   TRANSLATIONS["en,downgrade_start_error"]="Error starting containers"
   TRANSLATIONS["en,downgrade_success"]="Aztec node successfully downgraded to version"
   TRANSLATIONS["en,downgrade_custom_option"]="Custom"
-  TRANSLATIONS["en,downgrade_custom_prompt"]="Enter image version (e.g. 1.2.3 or latest): "
+  TRANSLATIONS["en,downgrade_custom_prompt"]="Enter image tag (mainnet 5.x, testnet 6.0.0-rc.1): "
   TRANSLATIONS["en,stopping_containers"]="Stopping containers..."
   TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
   TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
@@ -1473,16 +1476,19 @@ init_languages() {
   TRANSLATIONS["ru,stopping_web3signer"]="Остановка web3signer..."
   TRANSLATIONS["ru,removing_web3signer_data"]="Удаление данных web3signer..."
   #update
-  TRANSLATIONS["ru,update_title"]="Обновление ноды Aztec до последней версии"
+  TRANSLATIONS["ru,update_title"]="Обновление ноды Aztec до рекомендуемого образа"
   TRANSLATIONS["ru,update_folder_error"]="Ошибка: Папка $HOME/aztec не существует"
   TRANSLATIONS["ru,update_stopping"]="Остановка контейнеров..."
   TRANSLATIONS["ru,update_stop_error"]="Ошибка при остановке контейнеров"
-  TRANSLATIONS["ru,update_pulling"]="Загрузка последнего образа aztecprotocol/aztec..."
+  TRANSLATIONS["ru,update_pulling"]="Загрузка образа %s..."
   TRANSLATIONS["ru,update_pull_error"]="Ошибка при загрузке образа"
   TRANSLATIONS["ru,update_starting"]="Запуск обновленной ноды..."
   TRANSLATIONS["ru,update_start_error"]="Ошибка при запуске контейнеров"
-  TRANSLATIONS["ru,update_success"]="Нода Aztec успешно обновлена до последней версии!"
-  TRANSLATIONS["ru,tag_check"]="Обнаружен тег: %s, заменяем на latest"
+  TRANSLATIONS["ru,update_success"]="Нода Aztec успешно обновлена до %s"
+  TRANSLATIONS["ru,tag_check"]="Текущий образ: %s. Устанавливается %s"
+  TRANSLATIONS["ru,install_image_pin"]="Образ ноды для этой сети: %s"
+  TRANSLATIONS["ru,testnet_fresh_data"]="v6 testnet — новый rollup. Используется чистый каталог данных: %s. Прежний каталог v5 оставлен на месте."
+  TRANSLATIONS["ru,image_tag_rejected"]="Тег недоступен для сети %s. Mainnet использует aztecprotocol/aztec 5.x (закреплён 5.2.0). Testnet использует azteclabs/aztec, включая 6.0.0-rc.1. Release candidate testnet на mainnet запускать нельзя."
   #downgrade
   TRANSLATIONS["ru,downgrade_title"]="Даунгрейд ноды Aztec"
   TRANSLATIONS["ru,downgrade_fetching"]="Получение списка доступных версий..."
@@ -1493,7 +1499,7 @@ init_languages() {
   TRANSLATIONS["ru,downgrade_folder_error"]="Ошибка: Папка $HOME/aztec не существует"
   TRANSLATIONS["ru,downgrade_stopping"]="Остановка контейнеров..."
   TRANSLATIONS["ru,downgrade_stop_error"]="Ошибка при остановке контейнеров"
-  TRANSLATIONS["ru,downgrade_pulling"]="Загрузка образа aztecprotocol/aztec:"
+  TRANSLATIONS["ru,downgrade_pulling"]="Загрузка образа %s..."
   TRANSLATIONS["ru,downgrade_pull_error"]="Ошибка при загрузке образа"
   TRANSLATIONS["ru,downgrade_updating"]="Обновление конфигурации..."
   TRANSLATIONS["ru,downgrade_update_error"]="Ошибка при обновлении docker-compose.yml"
@@ -1501,7 +1507,7 @@ init_languages() {
   TRANSLATIONS["ru,downgrade_start_error"]="Ошибка при запуске контейнеров"
   TRANSLATIONS["ru,downgrade_success"]="Нода Aztec успешно даунгрейднута до версии"
   TRANSLATIONS["ru,downgrade_custom_option"]="Своя"
-  TRANSLATIONS["ru,downgrade_custom_prompt"]="Введите версию образа (например 1.2.3 или latest): "
+  TRANSLATIONS["ru,downgrade_custom_prompt"]="Введите тег образа (mainnet 5.x, testnet 6.0.0-rc.1): "
   #agent
   TRANSLATIONS["ru,agent_systemd_added"]="Агент добавлен (запуск каждые 37 секунд через systemd)"
   TRANSLATIONS["ru,agent_timer_status"]="Статус таймера:"
@@ -2204,16 +2210,19 @@ init_languages() {
   TRANSLATIONS["tr,stopping_web3signer"]="web3signer durduruluyor..."
   TRANSLATIONS["tr,removing_web3signer_data"]="web3signer verileri kaldırılıyor..."
   # Güncelleme
-  TRANSLATIONS["tr,update_title"]="Aztec düğümü en son sürüme güncelleniyor"
+  TRANSLATIONS["tr,update_title"]="Aztec düğümü önerilen imaja güncelleniyor"
   TRANSLATIONS["tr,update_folder_error"]="Hata: $HOME/aztec klasörü mevcut değil"
   TRANSLATIONS["tr,update_stopping"]="Kapsayıcılar durduruluyor..."
   TRANSLATIONS["tr,update_stop_error"]="Kapsayıcılar durdurulurken hata oluştu"
-  TRANSLATIONS["tr,update_pulling"]="Son aztecprotocol/aztec imajı çekiliyor..."
+  TRANSLATIONS["tr,update_pulling"]="%s imajı çekiliyor..."
   TRANSLATIONS["tr,update_pull_error"]="İmaj çekilirken hata oluştu"
   TRANSLATIONS["tr,update_starting"]="Güncellenmiş düğüm başlatılıyor..."
   TRANSLATIONS["tr,update_start_error"]="Kapsayıcılar başlatılırken hata oluştu"
-  TRANSLATIONS["tr,update_success"]="Aztec düğümü başarıyla en son sürüme güncellendi!"
-  TRANSLATIONS["tr,tag_check"]="Etiket bulundu: %s, en son sürümle değiştiriliyor"
+  TRANSLATIONS["tr,update_success"]="Aztec düğümü başarıyla %s imajına güncellendi"
+  TRANSLATIONS["tr,tag_check"]="Mevcut imaj: %s. Ayarlanan: %s"
+  TRANSLATIONS["tr,install_image_pin"]="Bu ağ için düğüm imajı: %s"
+  TRANSLATIONS["tr,testnet_fresh_data"]="v6 testnet yeni bir rollup. Temiz veri dizini kullanılıyor: %s. Önceki v5 dizini yerinde bırakıldı."
+  TRANSLATIONS["tr,image_tag_rejected"]="Etiket %s aginda kullanilamaz. Mainnet aztecprotocol/aztec 5.x (sabit 5.2.0) kullanir. Testnet azteclabs/aztec kullanir, 6.0.0-rc.1 dahil. Testnet release candidate mainnet'te calistirilamaz."
   # Sürüm düşürme
   TRANSLATIONS["tr,downgrade_title"]="Aztec düğümü sürüm düşürülüyor"
   TRANSLATIONS["tr,downgrade_fetching"]="Mevcut sürüm listesi alınıyor..."
@@ -2224,7 +2233,7 @@ init_languages() {
   TRANSLATIONS["tr,downgrade_folder_error"]="Hata: $HOME/aztec klasörü mevcut değil"
   TRANSLATIONS["tr,downgrade_stopping"]="Kapsayıcılar durduruluyor..."
   TRANSLATIONS["tr,downgrade_stop_error"]="Kapsayıcılar durdurulurken hata oluştu"
-  TRANSLATIONS["tr,downgrade_pulling"]="aztecprotocol/aztec imajı çekiliyor:"
+  TRANSLATIONS["tr,downgrade_pulling"]="%s imajı çekiliyor..."
   TRANSLATIONS["tr,downgrade_pull_error"]="İmaj çekilirken hata oluştu"
   TRANSLATIONS["tr,downgrade_updating"]="Yapılandırma güncelleniyor..."
   TRANSLATIONS["tr,downgrade_update_error"]="docker-compose.yml güncellenirken hata oluştu"
@@ -2232,7 +2241,7 @@ init_languages() {
   TRANSLATIONS["tr,downgrade_start_error"]="Kapsayıcılar başlatılırken hata oluştu"
   TRANSLATIONS["tr,downgrade_success"]="Aztec düğümü başarıyla şu sürüme düşürüldü"
   TRANSLATIONS["tr,downgrade_custom_option"]="Özel"
-  TRANSLATIONS["tr,downgrade_custom_prompt"]="Görüntü sürümünü girin (örn. 1.2.3 veya latest): "
+  TRANSLATIONS["tr,downgrade_custom_prompt"]="İmaj etiketini girin (mainnet 5.x, testnet 6.0.0-rc.1): "
   #agent
   TRANSLATIONS["tr,agent_systemd_added"]="Aracı eklendi (systemd ile her 37 saniyede bir çalışıyor)"
   TRANSLATIONS["tr,agent_timer_status"]="Zamanlayıcı durumu:"
@@ -2476,15 +2485,21 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="3.0.0"
+SCRIPT_VERSION="3.1.0"
 ERROR_DEFINITIONS_VERSION="1.0.1"
 
 # Determine script directory for local file access (security: avoid remote code execution)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Configuration ===
-# Default node image (v5 docs: https://docs.aztec.network/operate/testnet/operators/setup/running_a_node)
-AZTEC_IMAGE_TAG="5.0.0"
+# v6 operator split:
+# https://app.notion.com/p/aztecnetwork/v6-Migration-Guide-for-Node-Operators-3dba1f6b0e35802d9bade536f614d950
+# Testnet: azteclabs/aztec:6.0.0-rc.1 (testnet only; do not run on mainnet).
+# Mainnet stays on aztecprotocol/aztec:5.2.0 until v6.0.0 ships (~2026-10-18).
+AZTEC_IMAGE_REPO_TESTNET="azteclabs/aztec"
+AZTEC_IMAGE_TAG_TESTNET="6.0.0-rc.1"
+AZTEC_IMAGE_REPO_MAINNET="aztecprotocol/aztec"
+AZTEC_IMAGE_TAG_MAINNET="5.2.0"
 
 # Contract addresses (Rollup addresses)
 # Mainnet: https://forum.aztec.network/t/proposal-v5-payload-deployed/8606
@@ -2492,7 +2507,8 @@ AZTEC_IMAGE_TAG="5.0.0"
 #CONTRACT_ADDRESS="0x5932fcb01b6f63550c8bd91055613752480b6455"  # Testnet 4.0.4 rollup address
 #CONTRACT_ADDRESS="0x66a41cb55f9a1e38a45a2ac8685f12a61fbfab77"  # Testnet 3.0.3 rollup address
 #CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet legacy rollup address
-CONTRACT_ADDRESS="0xfe6061806cac748085904a010d2d9e33b8031741"  # Testnet v5 rollup address
+#CONTRACT_ADDRESS="0xfe6061806cac748085904a010d2d9e33b8031741"  # Testnet v5 rollup address
+CONTRACT_ADDRESS="0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9"  # Testnet v6 rollup (canonical since 2026-09-28)
 #CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet 2.1.11 rollup address
 #CONTRACT_ADDRESS_MAINNET="0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962"  # Mainnet 4.1.2 rollup (pre-v5)
 CONTRACT_ADDRESS_MAINNET="0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34"  # Mainnet v5 rollup (AZUP-2)
@@ -2680,6 +2696,96 @@ get_staking_asset() {
         fi
     fi
     echo "$asset"
+}
+
+# Image repo:tag for the v6 operator split. Mainnet must not receive the testnet rc.
+aztec_image_repo_for_network() {
+  local network="${1:-testnet}"
+  if [[ "$network" == "mainnet" ]]; then
+    echo "$AZTEC_IMAGE_REPO_MAINNET"
+  else
+    echo "$AZTEC_IMAGE_REPO_TESTNET"
+  fi
+}
+
+aztec_image_tag_for_network() {
+  local network="${1:-testnet}"
+  if [[ "$network" == "mainnet" ]]; then
+    echo "$AZTEC_IMAGE_TAG_MAINNET"
+  else
+    echo "$AZTEC_IMAGE_TAG_TESTNET"
+  fi
+}
+
+aztec_image_ref_for_network() {
+  local network="${1:-testnet}"
+  echo "$(aztec_image_repo_for_network "$network"):$(aztec_image_tag_for_network "$network")"
+}
+
+# v6 testnet is a new rollup and must not reuse the v5 data directory.
+aztec_data_dir_for_network() {
+  local network="${1:-testnet}"
+  if [[ "$network" == "mainnet" ]]; then
+    echo "$HOME/.aztec/mainnet/data/"
+  else
+    echo "$HOME/.aztec/testnet-v6/data/"
+  fi
+}
+
+# Mainnet: stable 5.x on aztecprotocol only. Testnet: semver or X.Y.Z-rc.N on azteclabs.
+aztec_tag_allowed_for_network() {
+  local network="$1"
+  local tag="$2"
+  if [[ "$network" == "mainnet" ]]; then
+    [[ "$tag" =~ ^5\.[0-9]+\.[0-9]+$ ]]
+    return
+  fi
+  [[ "$tag" =~ ^([0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?|latest)$ ]]
+}
+
+# Prefer ~/.env-aztec-agent. If NETWORK is unset, read --network / data path from compose
+# so a mainnet node is not switched to the testnet release candidate by default.
+aztec_effective_network() {
+  local compose="${1:-$HOME/aztec/docker-compose.yml}"
+  local network=""
+  if [[ -f "$HOME/.env-aztec-agent" ]]; then
+    # shellcheck disable=SC1090
+    source "$HOME/.env-aztec-agent"
+    network="${NETWORK:-}"
+  fi
+  if [[ -z "$network" && -f "$compose" ]]; then
+    if grep -q -- '--network mainnet' "$compose" || grep -q '\.aztec/mainnet/data' "$compose"; then
+      network="mainnet"
+    elif grep -q -- '--network testnet' "$compose" || grep -q '\.aztec/testnet' "$compose"; then
+      network="testnet"
+    fi
+  fi
+  [[ -z "$network" ]] && network="testnet"
+  echo "$network"
+}
+
+aztec_compose_set_image() {
+  local compose_file="$1"
+  local image_ref="$2"
+  if [[ ! -f "$compose_file" ]]; then
+    return 1
+  fi
+  if ! grep -qE 'image:[[:space:]]*(aztecprotocol|azteclabs)/aztec:' "$compose_file"; then
+    return 1
+  fi
+  sed -i -E "s#image:[[:space:]]*(aztecprotocol|azteclabs)/aztec:[^[:space:]]+#image: ${image_ref}#" "$compose_file"
+}
+
+# Point a v5 testnet bind mount at the fresh v6 directory. Leave other paths unchanged.
+aztec_compose_use_fresh_testnet_data() {
+  local compose_file="$1"
+  local new_data="$2"
+  mkdir -p "$new_data"
+  if grep -q '\.aztec/testnet/data' "$compose_file"; then
+    sed -i 's|\.aztec/testnet/data/*|.aztec/testnet-v6/data/|g' "$compose_file"
+    return 0
+  fi
+  return 1
 }
 
 # Prefer pip3 when available; fall back to python3 -m pip (minimal/old installs).
@@ -3549,7 +3655,7 @@ check_aztec_container_logs() {
             ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="World state trees are out of sync - node needs resync"
         )
         error_solutions=(
-            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 16\n2. Delete data from the folder: sudo rm -rf $HOME/.aztec/testnet/data/\n3. Run the container. Use option 15"
+            ["ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync"]="1. Stop the node container. Use option 16\n2. Delete data from the folder: sudo rm -rf $(aztec_data_dir_for_network "$network")\n3. Run the container. Use option 15"
         )
     fi
 
@@ -5937,9 +6043,13 @@ delete_aztec_node() {
     fi
 }
 
-# Функция для обновления ноды Aztec до последней версии
+# Функция для обновления ноды Aztec до рекомендуемого образа выбранной сети
 update_aztec_node() {
     echo -e "\n${GREEN}=== $(t "update_title") ===${NC}"
+
+    local network image_ref current_ref
+    network=$(aztec_effective_network "$HOME/aztec/docker-compose.yml")
+    image_ref=$(aztec_image_ref_for_network "$network")
 
     # Переходим в папку с нодой
     cd "$HOME/aztec" || {
@@ -5947,17 +6057,25 @@ update_aztec_node() {
         return 1
     }
 
-    # Проверяем текущий тег в docker-compose.yml
-    CURRENT_TAG=$(grep -oP 'image: aztecprotocol/aztec:\K[^\s]+' docker-compose.yml || echo "")
-
-    if [[ "$CURRENT_TAG" != "latest" ]]; then
-        echo -e "${YELLOW}$(printf "$(t "tag_check")" "$CURRENT_TAG")${NC}"
-        sed -i 's|image: aztecprotocol/aztec:.*|image: aztecprotocol/aztec:latest|' docker-compose.yml
+    current_ref=$(grep -oE 'image:[[:space:]]*(aztecprotocol|azteclabs)/aztec:[^[:space:]]+' docker-compose.yml | head -n 1 | sed -E 's/image:[[:space:]]*//')
+    if [[ "$current_ref" != "$image_ref" ]]; then
+        echo -e "${YELLOW}$(printf "$(t "tag_check")" "${current_ref:-unknown}" "$image_ref")${NC}"
+        aztec_compose_set_image docker-compose.yml "$image_ref" || {
+            echo -e "${RED}$(t "downgrade_update_error")${NC}"
+            return 1
+        }
     fi
 
-    # Обновляем образ
-    echo -e "${YELLOW}$(t "update_pulling")${NC}"
-    docker pull aztecprotocol/aztec:latest || {
+    if [[ "$network" != "mainnet" ]] && grep -q '\.aztec/testnet/data' docker-compose.yml; then
+        local fresh_data
+        fresh_data=$(aztec_data_dir_for_network testnet)
+        aztec_compose_use_fresh_testnet_data docker-compose.yml "$fresh_data"
+        echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$fresh_data")${NC}"
+    fi
+
+    # Обновляем образ сети. Mainnet остаётся на aztecprotocol/aztec:5.2.0.
+    echo -e "${YELLOW}$(printf "$(t "update_pulling")" "$image_ref")${NC}"
+    docker pull "$image_ref" || {
         echo -e "${RED}$(t "update_pull_error")${NC}"
         return 1
     }
@@ -5976,21 +6094,28 @@ update_aztec_node() {
         return 1
     }
 
-    echo -e "${GREEN}$(t "update_success")${NC}"
+    echo -e "${GREEN}$(printf "$(t "update_success")" "$image_ref")${NC}"
 }
 
 # Функция для даунгрейда ноды Aztec
 downgrade_aztec_node() {
     echo -e "\n${GREEN}=== $(t "downgrade_title") ===${NC}"
 
-    # Получаем список доступных тегов с Docker Hub с обработкой пагинации
+    local network image_repo org name
+    network=$(aztec_effective_network "$HOME/aztec/docker-compose.yml")
+    image_repo=$(aztec_image_repo_for_network "$network")
+    org="${image_repo%%/*}"
+    name="${image_repo#*/}"
+
+    # Получаем список доступных тегов с Docker Hub организации этой сети
     echo -e "${YELLOW}$(t "downgrade_fetching")${NC}"
+    echo -e "${CYAN}${image_repo}${NC}"
 
     # Собираем все теги с нескольких страниц
     ALL_TAGS=""
     PAGE=1
     while true; do
-        PAGE_TAGS=$(curl -s "https://hub.docker.com/v2/repositories/aztecprotocol/aztec/tags/?page=$PAGE&page_size=100" | jq -r '.results[].name' 2>/dev/null)
+        PAGE_TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${org}/${name}/tags/?page=$PAGE&page_size=100" | jq -r '.results[].name' 2>/dev/null)
 
         if [ -z "$PAGE_TAGS" ] || [ "$PAGE_TAGS" = "null" ] || [ "$PAGE_TAGS" = "" ]; then
             break
@@ -6010,8 +6135,12 @@ downgrade_aztec_node() {
         return 1
     fi
 
-    # Фильтруем теги: оставляем только latest и стабильные версии (формат X.Y.Z)
-    FILTERED_TAGS=$(echo "$ALL_TAGS" | grep -E '^(latest|[0-9]+\.[0-9]+\.[0-9]+)$' | grep -v -E '.*-(rc|night|alpha|beta|dev|test|unstable|preview).*' | sort -Vr | uniq)
+    # Mainnet: только стабильные 5.x с aztecprotocol. Testnet: semver и X.Y.Z-rc.N с azteclabs, без nightly.
+    if [[ "$network" == "mainnet" ]]; then
+        FILTERED_TAGS=$(echo "$ALL_TAGS" | grep -E '^5\.[0-9]+\.[0-9]+$' | sort -Vr | uniq)
+    else
+        FILTERED_TAGS=$(echo "$ALL_TAGS" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$' | sort -Vr | uniq)
+    fi
 
     # Выводим список тегов с нумерацией
     if [ -z "$FILTERED_TAGS" ]; then
@@ -6039,6 +6168,11 @@ downgrade_aztec_node() {
         fi
     fi
 
+    if ! aztec_tag_allowed_for_network "$network" "$TAG"; then
+        echo -e "${RED}$(printf "$(t "image_tag_rejected")" "$network")${NC}"
+        return 1
+    fi
+
     echo -e "\n${YELLOW}$(t "downgrade_selected") $TAG${NC}"
 
     # Переходим в папку с нодой
@@ -6047,9 +6181,10 @@ downgrade_aztec_node() {
         return 1
     }
 
-    # Обновляем образ до выбранной версии
-    echo -e "${YELLOW}$(t "downgrade_pulling")$TAG...${NC}"
-    docker pull aztecprotocol/aztec:"$TAG" || {
+    # Обновляем образ до выбранной версии в репозитории этой сети
+    local image_ref="${image_repo}:${TAG}"
+    echo -e "${YELLOW}$(printf "$(t "downgrade_pulling")" "$image_ref")${NC}"
+    docker pull "$image_ref" || {
         echo -e "${RED}$(t "downgrade_pull_error")${NC}"
         return 1
     }
@@ -6061,12 +6196,19 @@ downgrade_aztec_node() {
         return 1
     }
 
-    # Изменяем версию в docker-compose.yml
+    # Изменяем образ в docker-compose.yml (организация зависит от сети)
     echo -e "${YELLOW}$(t "downgrade_updating")${NC}"
-    sed -i "s|image: aztecprotocol/aztec:.*|image: aztecprotocol/aztec:$TAG|" docker-compose.yml || {
+    aztec_compose_set_image docker-compose.yml "$image_ref" || {
         echo -e "${RED}$(t "downgrade_update_error")${NC}"
         return 1
     }
+
+    if [[ "$network" != "mainnet" && "$TAG" =~ ^6\. ]] && grep -q '\.aztec/testnet/data' docker-compose.yml; then
+        local fresh_data
+        fresh_data=$(aztec_data_dir_for_network testnet)
+        aztec_compose_use_fresh_testnet_data docker-compose.yml "$fresh_data"
+        echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$fresh_data")${NC}"
+    fi
 
     # Запускаем контейнеры
     echo -e "${YELLOW}$(t "downgrade_starting") $TAG...${NC}"
@@ -7845,8 +7987,9 @@ EOF
     case $network_choice in
         1)
             NETWORK="mainnet"
-            DATA_DIR="$HOME/.aztec/mainnet/data/"
+            DATA_DIR=$(aztec_data_dir_for_network mainnet)
             # V5 AZUP-2 signaling payload (mainnet) — https://forum.aztec.network/t/proposal-v5-payload-deployed/8606
+            # v6 mainnet payload is not published yet (signalling starts 2026-10-07).
             if ! grep -q '^GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=' .env 2>/dev/null; then
               printf 'GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s\n' "$V5_UPGRADE_PAYLOAD_ADDRESS" >> .env
             else
@@ -7855,7 +7998,7 @@ EOF
             ;;
         2)
             NETWORK="testnet"
-            DATA_DIR="$HOME/.aztec/testnet/data/"
+            DATA_DIR=$(aztec_data_dir_for_network testnet)
             ;;
         *)
             echo -e "\n${RED}$(t "invalid_choice")${NC}"
@@ -7863,7 +8006,15 @@ EOF
             ;;
     esac
 
+    mkdir -p "$DATA_DIR"
+    local image_ref
+    image_ref=$(aztec_image_ref_for_network "$NETWORK")
+
     echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}$NETWORK${NC}"
+    echo -e "${CYAN}$(printf "$(t "install_image_pin")" "$image_ref")${NC}"
+    if [[ "$NETWORK" != "mainnet" ]]; then
+        echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$DATA_DIR")${NC}"
+    fi
 
     # Сохраняем/обновляем NETWORK в файле .env-aztec-agent
     ENV_FILE="$HOME/.env-aztec-agent"
@@ -7893,7 +8044,7 @@ services:
     container_name: aztec-sequencer
     networks:
       - aztec
-    image: aztecprotocol/aztec:${AZTEC_IMAGE_TAG}
+    image: ${image_ref}
     restart: unless-stopped
     environment:
       ETHEREUM_HOSTS: \${ETHEREUM_RPC_URL}

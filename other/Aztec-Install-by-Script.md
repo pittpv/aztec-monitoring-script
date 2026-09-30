@@ -106,14 +106,17 @@ BLS хранится в **`keystore.json`**; отдельные файлы `bls_
 
 ## Конфигурация Docker Compose
 
-Для финальной настройки ноды скрипт запросит у вас данные для генерации файла `docker-compose.yml` (образ **Aztec v5**, например `5.0.0`):
+Для финальной настройки ноды скрипт запросит у вас данные для генерации файла `docker-compose.yml`. Образ закрепляется по сети, а не как `:latest`:
+
+*   **Testnet** — `azteclabs/aztec:6.0.0-rc.1` (только testnet; на mainnet этот release candidate запускать нельзя)
+*   **Mainnet** — `aztecprotocol/aztec:5.2.0`
 
 *   **`ETHEREUM_RPC_URL`** — ваш RPC-адрес для Ethereum L1. **Важно:** Для mainnet используйте mainnet RPC, для testnet — Sepolia testnet RPC.
 *   **`CONSENSUS_BEACON_URL`** — ваш RPC-адрес для Beacon Chain. **Важно:** Для mainnet используйте mainnet Beacon Chain RPC, для testnet — Sepolia testnet Beacon Chain RPC.
 *   **`ETHEREUM_DEBUG_HOSTS`** — debug RPC (по умолчанию тот же, что `ETHEREUM_RPC_URL`; можно оставить пустым и нажать Enter).
 *   **`P2P_IP`** — этот параметр скрипт определит автоматически. **Если вы используете VPN на сервере**, то после завершения установки ноды необходимо ввести реальный ip-адрес **вручную** в файле `.env` в папке `$HOME/aztec`
 
-> **Aztec v5:** compose создаётся **без** флага `--archiver`; тома: данные → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. На mainnet в `.env` также задаётся `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` для signaling.
+> Compose создаётся **без** флага `--archiver`; тома: данные → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. На mainnet в `.env` также задаётся `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` для signaling. Testnet v6 — новый роллап: состояние из каталога v5 не подхватывается.
 
     ![Ввод RPC и других данных](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -128,7 +131,7 @@ BLS хранится в **`keystore.json`**; отдельные файлы `bls_
 
 > **Важно:** 
 > *   Выбранная сеть определяет, в какой сети будет работать ваша нода
-> *   Данные ноды будут храниться в разных директориях: `$HOME/.aztec/mainnet/data/` для mainnet и `$HOME/.aztec/testnet/data/` для testnet
+> *   Данные ноды будут храниться в разных директориях: `$HOME/.aztec/mainnet/data/` для mainnet и `$HOME/.aztec/testnet-v6/data/` для testnet. Старый каталог `$HOME/.aztec/testnet/data/` (v5) скрипт не удаляет и при новой установке не использует
 > *   Убедитесь, что используете правильные RPC-адреса для выбранной сети
 > *   Выбранная сеть сохраняется в файле `~/.env-aztec-agent` в переменной `NETWORK`
 
