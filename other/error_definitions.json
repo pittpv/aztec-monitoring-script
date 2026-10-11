@@ -1,10 +1,10 @@
 {
-  "version": "1.0.1",
+  "version": "1.0.2",
   "errors": [
     {
       "pattern": "ERROR: cli Error: World state trees are out of sync, please delete your data directory and re-sync",
       "message": "World state trees are out of sync - node needs resync",
-      "solution": "1. Stop the node container. Use option 13\n2. Delete data from the folder: sudo rm -rf /root/.aztec/testnet/data/\n3. Run the container. Use option 14"
+      "solution": "1. Stop the node container. Use option 16\n2. Delete the v6 data directory mounted in docker-compose.yml: ~/.aztec/testnet-v6/data/ or ~/.aztec/mainnet-v6/data/\n3. Start the node. Use option 15"
     },
     {
       "pattern": "ERROR: Database corruption detected",
@@ -24,17 +24,17 @@
     {
       "pattern": "ERROR: world-state:database Call SYNC_BLOCK failed: Error: Can't synch block: block state does not match world state",
       "message": "Can't sync block: block state does not match world state",
-      "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data"
+      "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/testnet-v6/data or ~/.aztec/mainnet-v6/data"
     },
     {
       "pattern": "ERROR: world-state:database Call SYNC_BLOCK failed: Error: Can't sync block: block state does not match world state",
       "message": "Can't sync block: block state does not match world state",
-      "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data"
+      "solution": "Restart the Aztec node. If the error persists, delete the /data folder. Typically, the path is ~/.aztec/testnet-v6/data or ~/.aztec/mainnet-v6/data"
     },
     {
       "pattern": "WARN: node:blob-sink:client Failed to fetch blobs",
       "message": "Failed to fetch blobs from BEACON. Sync will not complete!",
-      "solution": "1. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
+      "solution": "1. Delete the /data folder. Typically, the path is ~/.aztec/testnet-v6/data or ~/.aztec/mainnet-v6/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
     },
     {
       "pattern": "ERROR: cli KeystoreError: Duplicate attester address found",
@@ -54,7 +54,7 @@
     {
       "pattern": "ERROR: cli Error: The computed genesis archive tree root",
       "message": "Cli Error - The computed genesis archive tree root does not match the expected genesis archive tree root for the rollup deployed at rollup contract.",
-      "solution": "Make sure you have the latest recommended version of the node installed. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
+      "solution": "Make sure you have the latest recommended version of the node installed. Delete the /data folder. Typically, the path is ~/.aztec/testnet-v6/data or ~/.aztec/mainnet-v6/data.\n2. Restart the Aztec node.\n3. If the error persists, check or change your BEACON RPC!"
     },
     {
       "pattern": "ERROR: cli KeystoreError: Duplicate attester address found",
@@ -74,7 +74,7 @@
     {
       "pattern": "ERROR: cli Error: The computed genesis archive tree root",
       "message": "Cli Error - The computed genesis archive tree root does not match the expected genesis archive tree root for the rollup deployed at rollup contract.",
-      "solution": "Make sure you have the latest recommended version of the node installed. Delete the /data folder. Typically, the path is ~/.aztec/name_of_testnet/data. Restart the Aztec node."
+      "solution": "Make sure you have the latest recommended version of the node installed. Delete the /data folder. Typically, the path is ~/.aztec/testnet-v6/data or ~/.aztec/mainnet-v6/data. Restart the Aztec node."
     }
   ]
 }

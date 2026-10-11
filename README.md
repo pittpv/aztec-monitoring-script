@@ -35,7 +35,32 @@
 | 🌐 **Языки** | Поддержка языков Английский/Русский/Турецкий             |
 | ⚙️ **RPC** | Гибкая настройка RPC подключения                         |
 
-## 📌 Последние обновления 30-09-2026
+## 📌 Последние обновления 11-10-2026
+
+⚠️ **Mainnet v6 канонический.** Обновление переводит ноду v5 на образ `azteclabs/aztec:6.0.0` и чистый каталог `~/.aztec/mainnet-v6/data/`. Состояние v5 не переносится, прежний каталог `~/.aztec/mainnet/data/` остаётся на месте. **Не запускайте `6.0.0-rc.1` на mainnet.** Testnet без изменений: `azteclabs/aztec:6.0.0-rc.1`. Удалите старый агент мониторинга (**опция 10**) и установите нового (**опция 9**).
+
+- Скрипт **3.2.0**: mainnet и testnet на v6
+- Mainnet-образ: `azteclabs/aztec:6.0.0` (раньше `aztecprotocol/aztec:5.2.0`)
+- Mainnet rollup v6: `0xe37a2663cc9c119ba41572c40fab0bbb23a5402f` (AZUP-3)
+- Свежий каталог данных: `~/.aztec/mainnet-v6/data/`
+- Обновление ноды v5 переписывает образ и каталог в docker-compose и записывает `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=0x68396cde7891ADCC65F11e8A5Cec1898AF6AD970`
+- Даунгрейд: mainnet — только стабильные `6.x`, testnet — `6.x` и `6.x-rc.N`
+- Testnet без изменений: rollup `0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9`, каталог `~/.aztec/testnet-v6/data/`
+- Запасные RPC для стейкинга и BLS на mainnet больше не ведут на Sepolia
+- `error_definitions.json` **1.0.2**: пути данных v6, остановка — опция 16, старт — опция 15
+
+**version_control.json**
+
+SHA256: `10fd8cc2c93292863ca38c897acb85a73e2a9f230aeee3172003e10fa667f2e2`
+
+**error_definitions.json**
+
+SHA256: `68e0c8a87ca56a2b9da7ce44aa21170a3c14383a164fabfb638e9c7452d5e673`
+
+<details>
+<summary>📅 История версий</summary>
+
+### 30-09-2026
 
 ⚠️ **Только testnet.** Это новый роллап: состояние v5 не переносится. Обновите testnet до образа `azteclabs/aztec:6.0.0-rc.1` и нового каталога данных `~/.aztec/testnet-v6/data/`. **Не запускайте `6.0.0-rc.1` на mainnet.** Mainnet остаётся на `aztecprotocol/aztec:5.2.0`. Удалите старый агент мониторинга (**опция 10**) и установите нового (**опция 9**).
 
@@ -46,17 +71,6 @@
 - Mainnet закреплён на `aztecprotocol/aztec:5.2.0`. Обновление и даунгрейд не назначают на mainnet теги `6.x` и release candidate
 - Обновление ноды скачивает закреплённый образ выбранной сети, а не `aztecprotocol/aztec:latest`
 - Даунгрейд берёт теги Docker Hub организации этой сети: mainnet — только стабильные `5.x`, testnet — semver и `-rc.N`, без nightly
-
-**version_control.json**
-
-SHA256: `b769686dce7859cd894b15459454abd23e9e60377724ab1d2bdf2f2ad9132793`
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
-
-<details>
-<summary>📅 История версий</summary>
 
 ### 15-07-2026
 

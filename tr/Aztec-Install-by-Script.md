@@ -82,9 +82,9 @@ Ardından, doğrulayıcı verilerini girmeniz gerekmektedir. Her doğrulayıcı 
 
 BLS verileri **`keystore.json`** içinde tutulur; ayrı **`bls_validator_*.yml`** dosyaları **oluşturulmaz**. Web3signer için yalnızca SECP256K1 anahtarını içeren **`validator_N.yml`** dosyaları oluşturulur. Dördüncü virgülle ayrılmış değer (public BLS) girilirse **yok sayılır** — eski giriş biçimiyle geriye dönük uyumluluk içindir.
 
-⚠️ Eğer **tüm** validatörlerin işlemleri için Sepolia ETH ödemek amacıyla **tek bir adres** kullanmayı planlıyorsanız, önce o adresin verilerini girin. Tüm validatörlerin verilerini girdikten sonra script, ilk adresin tüm validatörler için publisher adresi olarak kullanılıp kullanılmayacağını soracaktır (`Use first address as publisher for all validators?`) - **`y`** seçin.
+⚠️ Eğer **tüm** validatörlerin işlemleri için L1 gazını (mainnet ETH veya testnette Sepolia ETH) **tek bir adres** ile ödemeyi planlıyorsanız, önce o adresin verilerini girin. Tüm validatörlerin verilerini girdikten sonra script, ilk adresin tüm validatörler için publisher adresi olarak kullanılıp kullanılmayacağını soracaktır (`Use first address as publisher for all validators?`) - **`y`** seçin.
 
-Eğer tüm adreslerde Sepolia ETH varsa, **`n`** seçebilirsiniz.
+Eğer bu gaz bakiyesi tüm adreslerde varsa, **`n`** seçebilirsiniz.
 
 ![Doğrulayıcı verilerini girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
@@ -109,7 +109,7 @@ Herhangi bir nedenden dolayı bir Aztec L2 adresi oluşturamıyorsanız, `0x0000
 Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak üzere veri isteyecektir. İmaj ağa göre sabitlenir, `:latest` değildir:
 
 *   **Testnet** — `azteclabs/aztec:6.0.0-rc.1` (yalnızca testnet; bu release candidate mainnet'te çalıştırılamaz)
-*   **Mainnet** — `aztecprotocol/aztec:5.2.0`
+*   **Mainnet** — `azteclabs/aztec:6.0.0`
 
 *   **`ETHEREUM_RPC_URL`** — Ethereum L1 için RPC URL'niz. **Önemli:** Mainnet için mainnet RPC kullanın, testnet için Sepolia testnet RPC kullanın.
 *   **`CONSENSUS_BEACON_URL`** — Beacon Chain için RPC URL'niz. **Önemli:** Mainnet için mainnet Beacon Chain RPC kullanın, testnet için Sepolia testnet Beacon Chain RPC kullanın.
@@ -117,7 +117,7 @@ Son düğüm kurulumu için betik, `docker-compose.yml` dosyasını oluşturmak 
 *   **`P2P_IP`** — Bu parametre betik tarafından otomatik olarak belirlenecektir.
     **Sunucuda VPN kullanıyorsanız**, node kurulumunu tamamladıktan sonra gerçek IP adresini `$HOME/aztec` altındaki `.env` dosyasına **manuel olarak** girmelisiniz.
 
-> Compose **`--archiver` olmadan** oluşturulur; birimler: veri → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. Mainnet’te `.env` ayrıca signaling için `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` ayarlar. Testnet v6 yeni bir rollup’tır: v5 dizinindeki durum kullanılmaz.
+> Compose **`--archiver` olmadan** oluşturulur; birimler: veri → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. Mainnet’te `.env` dosyasına `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=0x68396cde7891ADCC65F11e8A5Cec1898AF6AD970` (AZUP-3) yazılır. v6 her iki ağda da yeni bir rollup’tır: önceki veri dizinindeki durum kullanılmaz.
 
     ![RPC ve diğer verileri girme](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -132,7 +132,7 @@ RPC adreslerini girdikten sonra betik, düğüm için ağ seçimi yapmanızı is
 
 > **Önemli:** 
 > *   Seçilen ağ, düğümünüzün hangi ağda çalışacağını belirler
-> *   Düğüm verileri farklı dizinlerde saklanacaktır: mainnet için `$HOME/.aztec/mainnet/data/` ve testnet için `$HOME/.aztec/testnet-v6/data/`. Eski `$HOME/.aztec/testnet/data/` dizini (v5) silinmez ve yeni kurulumda kullanılmaz
+> *   Düğüm verileri farklı dizinlerde saklanacaktır: mainnet için `$HOME/.aztec/mainnet-v6/data/` ve testnet için `$HOME/.aztec/testnet-v6/data/`. Önceki `$HOME/.aztec/mainnet/data/` ve `$HOME/.aztec/testnet/data/` dizinleri silinmez ve yeni kurulumda kullanılmaz
 > *   Seçilen ağ için doğru RPC adreslerini kullandığınızdan emin olun
 > *   Seçilen ağ, `~/.env-aztec-agent` dosyasındaki `NETWORK` değişkenine kaydedilir
 
@@ -221,7 +221,7 @@ Yeni bir eth adresi ve BLS anahtarları (örn. yeni cüzdana geçmek için) olu�
 
 1. **Seçenek 20 → alt seçenek 1** (yeni operatör adresi).
 2. Eski özel anahtarınızı (veya virgülle ayrılmış anahtarları) girin. Betik yeni anahtarlar üretir ve her doğrulayıcı için `new_operator_info` içeren **`bls-filtered-pk.json`** oluşturur.
-3. Yeni eth adresine Sepolia ETH (0.1–0.3) gönderin, ardından **21 (Approve)** ve **22 (Stake)** seçeneklerini çalıştırın. Seçenek 22, başarılı stake sonrası **`keystore.json` dosyasını günceller**, eski adresi yeni operatör adresiyle değiştirir ve yeni anahtarlarla YML dosyaları oluşturur.
+3. Yeni eth adresine seçilen ağın gazı için 0.1–0.3 ETH gönderin (mainnet ETH veya testnette Sepolia ETH), ardından **21 (Approve)** ve **22 (Stake)** seçeneklerini çalıştırın. Seçenek 22, başarılı stake sonrası **`keystore.json` dosyasını günceller**, eski adresi yeni operatör adresiyle değiştirir ve yeni anahtarlarla YML dosyaları oluşturur.
 4. Bu akışta **20-3** kullanılmaz — keystore’daki adres değişikliği seçenek 22’de yapılır.
 
 ---

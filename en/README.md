@@ -35,7 +35,32 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 | 🌐 **Languages** | Language support English/Russian/Turkish                 |
 | ⚙️ **RPC**       | Flexible RPC endpoint configuration                      |
 
-## 📌 Latest Updates 30-09-2026
+## 📌 Latest Updates 11-10-2026
+
+⚠️ **Mainnet v6 is canonical.** Update moves a v5 node to image `azteclabs/aztec:6.0.0` and a fresh directory `~/.aztec/mainnet-v6/data/`. v5 state does not carry over; the previous directory `~/.aztec/mainnet/data/` is left in place. **Do not run `6.0.0-rc.1` on mainnet.** Testnet is unchanged: `azteclabs/aztec:6.0.0-rc.1`. Remove the old monitoring agent (**option 10**) and install a new one (**option 9**).
+
+- Script **3.2.0**: mainnet and testnet are both on v6
+- Mainnet image: `azteclabs/aztec:6.0.0` (previously `aztecprotocol/aztec:5.2.0`)
+- Mainnet v6 rollup: `0xe37a2663cc9c119ba41572c40fab0bbb23a5402f` (AZUP-3)
+- Fresh data directory: `~/.aztec/mainnet-v6/data/`
+- Updating a v5 node rewrites the image and data directory in docker-compose and sets `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=0x68396cde7891ADCC65F11e8A5Cec1898AF6AD970`
+- Downgrade: mainnet — stable `6.x` only, testnet — `6.x` and `6.x-rc.N`
+- Testnet unchanged: rollup `0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9`, directory `~/.aztec/testnet-v6/data/`
+- Mainnet staking and BLS fallback RPCs no longer use Sepolia
+- `error_definitions.json` **1.0.2**: v6 data paths, stop is option 16, start is option 15
+
+**version_control.json**
+
+SHA256: `10fd8cc2c93292863ca38c897acb85a73e2a9f230aeee3172003e10fa667f2e2`
+
+**error_definitions.json**
+
+SHA256: `68e0c8a87ca56a2b9da7ce44aa21170a3c14383a164fabfb638e9c7452d5e673`
+
+<details>
+<summary>📅 Version History</summary>
+
+### 30-09-2026
 
 ⚠️ **Testnet only.** This is a new rollup: v5 state does not carry over. Upgrade testnet to image `azteclabs/aztec:6.0.0-rc.1` and a fresh data directory `~/.aztec/testnet-v6/data/`. **Do not run `6.0.0-rc.1` on mainnet.** Mainnet stays on `aztecprotocol/aztec:5.2.0`. Remove the old monitoring agent (**option 10**) and install a new one (**option 9**).
 
@@ -46,17 +71,6 @@ Also check out the Version History under the spoiler, there is a lot of useful i
 - Mainnet is pinned to `aztecprotocol/aztec:5.2.0`. Update and downgrade do not assign `6.x` or release-candidate tags on mainnet
 - Node update pulls the pinned image for the detected network, not `aztecprotocol/aztec:latest`
 - Downgrade lists tags from that network's Docker Hub org: mainnet — stable `5.x` only, testnet — semver and `-rc.N`, nightlies excluded
-
-**version_control.json**
-
-SHA256: `b769686dce7859cd894b15459454abd23e9e60377724ab1d2bdf2f2ad9132793`
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
-
-<details>
-<summary>📅 Version History</summary>
 
 ### 15-07-2026
 

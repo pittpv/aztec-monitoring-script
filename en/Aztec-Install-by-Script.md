@@ -82,9 +82,9 @@ Example:
 
 BLS material is stored in **`keystore.json`**; separate **`bls_validator_*.yml`** files are **not** created. For web3signer, only **`validator_N.yml`** files with the SECP256K1 key are created. A **fourth** comma-separated value (public BLS), if you enter it, is **ignored** — kept for backward compatibility with the old input format.
 
-⚠️ If you plan to use **one address** to pay Sepolia ETH for transactions of **all** validators, then enter the data of that address first. After entering the data of all validators the script will ask whether to use the first address as the publisher address for all validators (`Use first address as publisher for all validators?`) - choose **`y`**.
+⚠️ If you plan to use **one address** to pay L1 gas (mainnet ETH, or Sepolia ETH on testnet) for transactions of **all** validators, then enter the data of that address first. After entering the data of all validators the script will ask whether to use the first address as the publisher address for all validators (`Use first address as publisher for all validators?`) - choose **`y`**.
 
-If Sepolia ETH is present on all addresses, you can choose **`n`**
+If that gas balance is present on all addresses, you can choose **`n`**
 
 ![Entering validator data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/4.jpg)
 
@@ -109,14 +109,14 @@ If you wish, you can later replace it with a real L2 address.
 For the final node setup, the script will request data to generate the `docker-compose.yml` file. The image is pinned per network, not as `:latest`:
 
 *   **Testnet** — `azteclabs/aztec:6.0.0-rc.1` (testnet only; do not run this release candidate on mainnet)
-*   **Mainnet** — `aztecprotocol/aztec:5.2.0`
+*   **Mainnet** — `azteclabs/aztec:6.0.0`
 
 *   **`ETHEREUM_RPC_URL`** — Your RPC URL for Ethereum L1. **Important:** For mainnet, use mainnet RPC; for testnet, use Sepolia testnet RPC.
 *   **`CONSENSUS_BEACON_URL`** — Your RPC URL for the Beacon Chain. **Important:** For mainnet, use mainnet Beacon Chain RPC; for testnet, use Sepolia testnet Beacon Chain RPC.
 *   **`ETHEREUM_DEBUG_HOSTS`** — Debug RPC (defaults to the same value as `ETHEREUM_RPC_URL`; you can leave it empty and press Enter).
 *   **`P2P_IP`** — This parameter will be determined automatically by the script. **If you are using a VPN on the server**, after completing the node installation, you must enter the real IP address **manually** in the `.env` file under `$HOME/aztec`
 
-> Compose is created **without** the `--archiver` flag; volumes: data → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. On mainnet, `.env` also sets `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS` for signaling. Testnet v6 is a new rollup: state from the v5 directory is not reused.
+> Compose is created **without** the `--archiver` flag; volumes: data → `/data`, keystore → `/config`; `LOG_LEVEL: info;debug:node:sentinel`. On mainnet, `.env` sets `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=0x68396cde7891ADCC65F11e8A5Cec1898AF6AD970` (AZUP-3). v6 is a new rollup on both networks: state from the previous data directory is not reused.
 
     ![Entering RPC and other data](https://raw.githubusercontent.com/pittpv/aztec-monitoring-script/main/other/Aztec-Install-by-Script/6.jpg)
 
@@ -131,7 +131,7 @@ Select the desired network by entering the corresponding number (1 or 2).
 
 > **Important:** 
 > *   The selected network determines which network your node will operate on
-> *   Node data will be stored in different directories: `$HOME/.aztec/mainnet/data/` for mainnet and `$HOME/.aztec/testnet-v6/data/` for testnet. The old `$HOME/.aztec/testnet/data/` directory (v5) is left in place and is not used for a new install
+> *   Node data will be stored in different directories: `$HOME/.aztec/mainnet-v6/data/` for mainnet and `$HOME/.aztec/testnet-v6/data/` for testnet. Previous directories `$HOME/.aztec/mainnet/data/` and `$HOME/.aztec/testnet/data/` are left in place and are not used for a new install
 > *   Make sure you use the correct RPC addresses for the selected network
 > *   The selected network is saved in the `~/.env-aztec-agent` file in the `NETWORK` variable
 
@@ -220,7 +220,7 @@ Use this when you want to create a **new** eth address and BLS keys (e.g. to swi
 
 1. **Option 20 → sub-option 1** (new operator address).
 2. Enter your old private key (or keys separated by commas). The script will generate new keys and create **`bls-filtered-pk.json`** with `new_operator_info` for each validator.
-3. Fund the new eth address with Sepolia ETH (0.1–0.3), then run **options 21 (Approve)** and **22 (Stake)**. Option 22 will **update `keystore.json`** on successful stake, replacing the old address with the new operator address and creating YML files with the new keys.
+3. Fund the new eth address with 0.1–0.3 ETH for gas on the selected network (mainnet ETH, or Sepolia ETH on testnet), then run **options 21 (Approve)** and **22 (Stake)**. Option 22 will **update `keystore.json`** on successful stake, replacing the old address with the new operator address and creating YML files with the new keys.
 4. **Option 20-3** is not used in this flow — keystore address replacement is done in option 22.
 
 ---

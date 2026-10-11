@@ -41,7 +41,7 @@ When you select **20** in the menu (category “Staking & validators”, or by t
 
 **Important:**  
 - Save all new data (mnemonic if used again, new addresses and BLS). Private keys are also stored in `bls-filtered-pk.json`.  
-- The script then suggests: send 0.1–0.3 Sepolia ETH to the new address, then run **option 21 (Approve)** and **option 22 (Stake)**.
+- The script then suggests: send 0.1–0.3 ETH for gas on the selected network (mainnet ETH, or Sepolia ETH on testnet) to the new address, then run **option 21 (Approve)** and **option 22 (Stake)**.
 
 **When to use:** Changing the validator operator (new wallet and new BLS keys while keeping old addresses in the system).
 
@@ -89,7 +89,7 @@ When you select **20** in the menu (category “Staking & validators”, or by t
 
 **What the script does:**
 
-1. Uses directory `$HOME/aztec`, GSE address from network settings (mainnet/testnet), RPC from script settings (or default Sepolia).
+1. Uses directory `$HOME/aztec`, GSE address from network settings (mainnet/testnet), RPC from script settings (or a default for that network: Ethereum mainnet, or Sepolia on testnet).
 2. Asks: new mnemonic **(1)** or enter your own **(2)**.
 3. Asks for number of validator identities (e.g. 1 or 5).
 4. Runs `aztec validator-keys new` with:
@@ -119,8 +119,8 @@ When you select **20** in the menu (category “Staking & validators”, or by t
 4. For each key:
    - Computes ETH address and fetches **nonce** (pending) so nonces are not duplicated when sending several transactions in a row.
    - Gas: 50% above current gas price, minimum 10 gwei; on “replacement transaction underpriced” it retries with doubled gas and the next RPC.
-   - Resolves the staking token via rollup `getStakingAsset()` (on failure — mainnet fallback `0xa27ec0006e59f245217ff08cd52a7e8b169e62d2`). Calls **ERC-20 approve**: method `approve(address,uint256)` — spender is the rollup contract, amount `200000 ether` (in token wei).
-   - Uses a list of RPCs (primary + fallback Sepolia); different validators use different RPCs in rotation; ~12 second pause between transactions.
+   - Resolves the staking token via rollup `getStakingAsset()` (on failure — mainnet fallback `0xa27ec0006e59f245217ff08cd52a7e8b169e62d2`, testnet fallback `0x5595cb9ed193cac2c0bc5393313bc6115817954b`). Calls **ERC-20 approve**: method `approve(address,uint256)` — spender is the rollup contract, amount `200000 ether` (in token wei).
+   - Uses a list of RPCs for the selected network (primary plus Ethereum mainnet or Sepolia fallbacks). Different validators use different RPCs in rotation; ~12 second pause between transactions.
 
 **Important:**  
 - `$HOME/aztec/keys/` must contain YML files with the private keys of the wallets you will stake from.  
@@ -179,7 +179,7 @@ Validator links (mainnet/testnet) are printed the same as in the old format.
 ## Short step sequence
 
 1. **Option 20** — choose the right sub-option (1: new operator, 2: existing addresses from mnemonic, 3: add BLS to keystore, 4: dashboard).
-2. For **20-1**: fund the new addresses with 0.1–0.3 Sepolia ETH.
+2. For **20-1**: fund the new addresses with 0.1–0.3 ETH for gas on the selected network (mainnet ETH, or Sepolia ETH on testnet).
 3. **Option 21** — Approve for all keys in `$HOME/aztec/keys/*.yml` (except bls).
 4. **Option 22** — Stake using data from `bls-filtered-pk.json` (format is detected automatically).
 

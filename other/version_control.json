@@ -365,14 +365,16 @@
     "COLOR": "red"
   },
   {
-    "VERSION": "3.1.0",
-    "UPDATE_DATE": "30.09.2026",
+    "VERSION": "3.2.0",
+    "UPDATE_DATE": "11.10.2026",
     "CHANGES": [
-      "Testnet v6: rollup 0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9, image azteclabs/aztec:6.0.0-rc.1, fresh data dir ~/.aztec/testnet-v6/data/",
-      "Mainnet stays on aztecprotocol/aztec:5.2.0 and rollup 0x91ff8bbd…; update and downgrade reject v6 and release-candidate tags on mainnet",
-      "Update pulls the pinned image for the detected network instead of aztecprotocol/aztec:latest; downgrade lists tags from that network's Docker Hub org"
+      "Mainnet v6: image azteclabs/aztec:6.0.0, rollup 0xe37a2663cc9c119ba41572c40fab0bbb23a5402f, fresh data dir ~/.aztec/mainnet-v6/data/",
+      "Update from a v5 mainnet node rewrites the image and data mount; previous ~/.aztec/mainnet/data/ is left in place",
+      "Governance payload AZUP-3 0x68396cde7891ADCC65F11e8A5Cec1898AF6AD970 on install, update, and start",
+      "Downgrade: mainnet stable 6.x only; testnet 6.x and 6.x-rc.N. Do not run 6.0.0-rc.1 on mainnet",
+      "Mainnet staking and BLS RPC fallbacks no longer use Sepolia; error_definitions.json 1.0.2 points at v6 data directories"
     ],
-    "NOTICE": "TESTNET ONLY for v6: new rollup, use image azteclabs/aztec:6.0.0-rc.1 and a fresh data directory ~/.aztec/testnet-v6/data/. Do not run 6.0.0-rc.1 on mainnet. Mainnet stays on aztecprotocol/aztec:5.2.0. Remove the old monitoring agent (option 10) and install a new one (option 9).",
+    "NOTICE": "Mainnet v6 is canonical. Update the node to azteclabs/aztec:6.0.0 and a fresh data directory ~/.aztec/mainnet-v6/data/. v5 data is left in place and is not reused. Do not run 6.0.0-rc.1 on mainnet. Testnet stays on azteclabs/aztec:6.0.0-rc.1. Remove the old monitoring agent (option 10) and install a new one (option 9).",
     "COLOR": "red"
   }
 ]

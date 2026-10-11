@@ -35,7 +35,32 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 | 🌐 **Diller** | Dil desteği İngilizce/Rusça/Türkçe                  |
 | ⚙️ **RPC**       | Esnek RPC uç noktası yapılandırması               |
 
-## 📌 Son Güncellemeler 30-09-2026
+## 📌 Son Güncellemeler 11-10-2026
+
+⚠️ **Mainnet v6 kanonik.** Güncelleme, v5 düğümünü `azteclabs/aztec:6.0.0` imajına ve temiz dizin `~/.aztec/mainnet-v6/data/` konumuna taşır. v5 durumu taşınmaz; önceki dizin `~/.aztec/mainnet/data/` yerinde kalır. **`6.0.0-rc.1` imajını mainnet'te çalıştırmayın.** Testnet değişmedi: `azteclabs/aztec:6.0.0-rc.1`. Eski izleme aracısını silin (**seçenek 10**) ve yenisini kurun (**seçenek 9**).
+
+- Betik **3.2.0**: mainnet ve testnet v6 üzerinde
+- Mainnet imajı: `azteclabs/aztec:6.0.0` (önceden `aztecprotocol/aztec:5.2.0`)
+- Mainnet v6 rollup: `0xe37a2663cc9c119ba41572c40fab0bbb23a5402f` (AZUP-3)
+- Temiz veri dizini: `~/.aztec/mainnet-v6/data/`
+- v5 düğüm güncellemesi docker-compose içindeki imajı ve dizini yeniden yazar ve `GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=0x68396cde7891ADCC65F11e8A5Cec1898AF6AD970` değerini kaydeder
+- Sürüm düşürme: mainnet — yalnızca kararlı `6.x`, testnet — `6.x` ve `6.x-rc.N`
+- Testnet değişmedi: rollup `0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9`, dizin `~/.aztec/testnet-v6/data/`
+- Mainnet staking ve BLS yedek RPC adresleri artık Sepolia kullanmıyor
+- `error_definitions.json` **1.0.2**: v6 veri yolları, durdurma seçenek 16, başlatma seçenek 15
+
+**version_control.json**
+
+SHA256: `10fd8cc2c93292863ca38c897acb85a73e2a9f230aeee3172003e10fa667f2e2`
+
+**error_definitions.json**
+
+SHA256: `68e0c8a87ca56a2b9da7ce44aa21170a3c14383a164fabfb638e9c7452d5e673`
+
+<details>
+<summary>📅 Sürüm Geçmişi</summary>
+
+### 30-09-2026
 
 ⚠️ **Yalnızca testnet.** Bu yeni bir rollup: v5 durumu taşınmaz. Testnet'i `azteclabs/aztec:6.0.0-rc.1` imajına ve yeni veri dizini `~/.aztec/testnet-v6/data/` konumuna yükseltin. **`6.0.0-rc.1` imajını mainnet'te çalıştırmayın.** Mainnet `aztecprotocol/aztec:5.2.0` üzerinde kalır. Eski izleme aracısını silin (**seçenek 10**) ve yenisini kurun (**seçenek 9**).
 
@@ -46,17 +71,6 @@ Ayrıca, spoiler altındaki Sürüm Geçmişine de göz atın, betiğin işlevle
 - Mainnet `aztecprotocol/aztec:5.2.0` sürümüne sabitlendi. Güncelleme ve sürüm düşürme mainnet'e `6.x` ve release candidate etiketleri atamaz
 - Düğüm güncellemesi, algılanan ağın sabit imajını çeker; `aztecprotocol/aztec:latest` değil
 - Sürüm düşürme, bu ağın Docker Hub kuruluşundaki etiketleri listeler: mainnet — yalnızca kararlı `5.x`, testnet — semver ve `-rc.N`, nightly hariç
-
-**version_control.json**
-
-SHA256: `b769686dce7859cd894b15459454abd23e9e60377724ab1d2bdf2f2ad9132793`
-
-**error_definitions.json**
-
-SHA256: `079226a9bcc4d4225966d4472ef74b2882a7381cc3a4235b8bd3a7c32e11752e` 
-
-<details>
-<summary>📅 Sürüm Geçmişi</summary>
 
 ### 15-07-2026
 

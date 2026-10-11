@@ -41,7 +41,7 @@ Menüde («Staking ve doğrulayıcılar» kategorisi veya numara ile hızlı ge�
 
 **Önemli:**  
 - Tüm yeni verileri (tekrar kullanılacak mnemonic, yeni adresler ve BLS) **kaydedin**. Özel anahtarlar ayrıca `bls-filtered-pk.json` içinde saklanır.  
-- Betik ardından şunları önerir: yeni adrese 0.1–0.3 Sepolia ETH gönderin, sonra **21 (Approve)** ve **22 (Stake)** seçeneklerini çalıştırın.
+- Betik ardından şunları önerir: yeni adrese seçilen ağın gazı için 0.1–0.3 ETH gönderin (mainnet ETH veya testnette Sepolia ETH), sonra **21 (Approve)** ve **22 (Stake)** seçeneklerini çalıştırın.
 
 **Ne zaman kullanılır:** Doğrulayıcı operatörünü değiştirirken (sistemde eski adresler dururken yeni cüzdan ve yeni BLS anahtarları).
 
@@ -89,7 +89,7 @@ Menüde («Staking ve doğrulayıcılar» kategorisi veya numara ile hızlı ge�
 
 **Betik ne yapar:**
 
-1. Dizin olarak `$HOME/aztec`, ağ ayarlarından (mainnet/testnet) GSE adresi, betik ayarlarından RPC (veya varsayılan Sepolia) kullanır.
+1. Dizin olarak `$HOME/aztec`, ağ ayarlarından (mainnet/testnet) GSE adresi, betik ayarlarından RPC (veya o ağın varsayılanı: Ethereum mainnet ya da testnette Sepolia) kullanır.
 2. Sorar: yeni mnemonic **(1)** mi kendi girişiniz **(2)** mi?
 3. Doğrulayıcı kimlik sayısını ister (örn. 1 veya 5).
 4. Şu bayraklarla `aztec validator-keys new` çalıştırır:
@@ -119,8 +119,8 @@ Menüde («Staking ve doğrulayıcılar» kategorisi veya numara ile hızlı ge�
 4. Her anahtar için:
    - ETH adresini hesaplar ve **nonce** (pending) alır; ardışık birkaç işlemde nonce tekrarlanmasın diye.
    - Gas: mevcut gas fiyatının %50 üstü, en az 10 gwei; “replacement transaction underpriced” hatasında gas iki katına çıkarılıp sonraki RPC ile tekrar dener.
-   - Staking token adresini rollup üzerinden `getStakingAsset()` ile alır (hata durumunda — mainnet yedek `0xa27ec0006e59f245217ff08cd52a7e8b169e62d2`). **ERC-20 approve** çağrısı: metot `approve(address,uint256)` — spender rollup adresi, miktar `200000 ether` (token wei cinsinden).
-   - RPC listesi (birincil + yedek Sepolia) kullanılır; farklı doğrulayıcılar için farklı RPC’ler dönüşümlü; işlemler arasında ~12 saniye bekleme.
+   - Staking token adresini rollup üzerinden `getStakingAsset()` ile alır (hata durumunda — mainnet yedek `0xa27ec0006e59f245217ff08cd52a7e8b169e62d2`, testnet yedek `0x5595cb9ed193cac2c0bc5393313bc6115817954b`). **ERC-20 approve** çağrısı: metot `approve(address,uint256)` — spender rollup adresi, miktar `200000 ether` (token wei cinsinden).
+   - Seçilen ağın RPC listesi kullanılır (birincil artı Ethereum mainnet veya Sepolia yedekleri); farklı doğrulayıcılar için farklı RPC’ler dönüşümlü; işlemler arasında ~12 saniye bekleme.
 
 **Önemli:**  
 - `$HOME/aztec/keys/` içinde stake edeceğiniz cüzdanların özel anahtarlarını içeren YML dosyaları olmalıdır.  
@@ -179,7 +179,7 @@ Doğrulayıcı linkleri (mainnet/testnet) eski formatta olduğu gibi yazdırıl�
 ## Kısa adım sırası
 
 1. **Seçenek 20** — uygun alt seçeneği seçin (1: yeni operatör, 2: mnemonic’ten mevcut adresler, 3: keystore’a BLS ekleme, 4: dashboard).
-2. **20-1** için: yeni adreslere 0.1–0.3 Sepolia ETH gönderin.
+2. **20-1** için: yeni adreslere seçilen ağın gazı için 0.1–0.3 ETH gönderin (mainnet ETH veya testnette Sepolia ETH).
 3. **Seçenek 21** — `$HOME/aztec/keys/*.yml` içindeki tüm anahtarlar için Approve (bls hariç).
 4. **Seçenek 22** — `bls-filtered-pk.json` verileriyle Stake (format otomatik tespit edilir).
 

@@ -567,9 +567,9 @@ init_languages() {
   TRANSLATIONS["en,gov_was"]="⚠️ Was:"
   TRANSLATIONS["en,gov_now"]="Now:"
   TRANSLATIONS["en,gov_no_changes"]="✅ No changes detected."
-  TRANSLATIONS["en,gov_v5_expected"]="Expected V5UpgradePayload (mainnet AZUP-2):"
-  TRANSLATIONS["en,gov_v5_match"]="✅ Latest payload matches V5UpgradePayload."
-  TRANSLATIONS["en,gov_v5_mismatch"]="⚠️ Latest payload does not match V5UpgradePayload."
+  TRANSLATIONS["en,gov_v6_expected"]="Expected V6UpgradePayload (mainnet AZUP-3):"
+  TRANSLATIONS["en,gov_v6_match"]="✅ Latest payload matches V6UpgradePayload."
+  TRANSLATIONS["en,gov_v6_mismatch"]="⚠️ Latest payload does not match V6UpgradePayload."
   TRANSLATIONS["en,gov_signal_hint"]="To signal, set in node .env and restart: GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s"
   TRANSLATIONS["en,search_admin_api"]="🔍 Searching for Admin API key in 'aztec' container logs..."
   TRANSLATIONS["en,admin_api_found"]="✅ Admin API key:"
@@ -828,8 +828,8 @@ init_languages() {
   TRANSLATIONS["en,update_success"]="Aztec node successfully updated to %s"
   TRANSLATIONS["en,tag_check"]="Current image: %s. Setting %s"
   TRANSLATIONS["en,install_image_pin"]="Node image for this network: %s"
-  TRANSLATIONS["en,testnet_fresh_data"]="v6 testnet is a new rollup. Using a fresh data directory: %s. The previous v5 directory was left in place."
-  TRANSLATIONS["en,image_tag_rejected"]="Tag is not allowed on %s. Mainnet uses aztecprotocol/aztec 5.x (pinned 5.2.0). Testnet uses azteclabs/aztec, including 6.0.0-rc.1. Do not run the testnet release candidate on mainnet."
+  TRANSLATIONS["en,testnet_fresh_data"]="v6 is a new rollup. Using a fresh data directory: %s. The previous directory was left in place."
+  TRANSLATIONS["en,image_tag_rejected"]="Tag is not allowed on %s. Mainnet uses azteclabs/aztec 6.x (pinned 6.0.0), not a release candidate. Testnet uses azteclabs/aztec 6.x, including 6.0.0-rc.1."
   TRANSLATIONS["en,downgrade_title"]="Downgrade Aztec node"
   TRANSLATIONS["en,downgrade_fetching"]="Fetching available versions..."
   TRANSLATIONS["en,downgrade_fetch_error"]="Failed to fetch versions"
@@ -847,7 +847,7 @@ init_languages() {
   TRANSLATIONS["en,downgrade_start_error"]="Error starting containers"
   TRANSLATIONS["en,downgrade_success"]="Aztec node successfully downgraded to version"
   TRANSLATIONS["en,downgrade_custom_option"]="Custom"
-  TRANSLATIONS["en,downgrade_custom_prompt"]="Enter image tag (mainnet 5.x, testnet 6.0.0-rc.1): "
+  TRANSLATIONS["en,downgrade_custom_prompt"]="Enter image tag (mainnet 6.x, testnet 6.x or 6.x-rc.N): "
   TRANSLATIONS["en,stopping_containers"]="Stopping containers..."
   TRANSLATIONS["en,removing_node_data"]="Removing Aztec node data..."
   TRANSLATIONS["en,stopping_watchtower"]="Stopping Watchtower..."
@@ -955,7 +955,7 @@ init_languages() {
 
   TRANSLATIONS["en,aztec_rewards_claim"]="Aztec Rewards Claim"
   TRANSLATIONS["en,claim_gas_key_prompt"]="Enter private key that pays gas (claim is permissionless; rewards go to coinbase). Hidden: "
-  TRANSLATIONS["en,claimable_check_unavailable"]="isRewardsClaimable() is not available on this rollup (v5) — checking balances anyway."
+  TRANSLATIONS["en,claimable_check_unavailable"]="isRewardsClaimable() is not available on this rollup — checking balances anyway."
   TRANSLATIONS["en,staking_asset_label"]="Staking asset (ERC-20):"
   TRANSLATIONS["en,staking_asset_resolve_failed"]="Failed to resolve staking asset via getStakingAsset(); aborting approve."
   TRANSLATIONS["en,environment_file_not_found"]="Environment file not found"
@@ -1300,9 +1300,9 @@ init_languages() {
   TRANSLATIONS["ru,gov_was"]="⚠️ Было:"
   TRANSLATIONS["ru,gov_now"]="Стало:"
   TRANSLATIONS["ru,gov_no_changes"]="✅ Изменений не обнаружено."
-  TRANSLATIONS["ru,gov_v5_expected"]="Ожидаемый V5UpgradePayload (mainnet AZUP-2):"
-  TRANSLATIONS["ru,gov_v5_match"]="✅ Последний payload совпадает с V5UpgradePayload."
-  TRANSLATIONS["ru,gov_v5_mismatch"]="⚠️ Последний payload не совпадает с V5UpgradePayload."
+  TRANSLATIONS["ru,gov_v6_expected"]="Ожидаемый V6UpgradePayload (mainnet AZUP-3):"
+  TRANSLATIONS["ru,gov_v6_match"]="✅ Последний payload совпадает с V6UpgradePayload."
+  TRANSLATIONS["ru,gov_v6_mismatch"]="⚠️ Последний payload не совпадает с V6UpgradePayload."
   TRANSLATIONS["ru,gov_signal_hint"]="Для signaling добавьте в .env ноды и перезапустите: GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s"
   TRANSLATIONS["ru,search_admin_api"]="🔍 Поиск Admin API key в логах контейнера 'aztec'..."
   TRANSLATIONS["ru,admin_api_found"]="✅ Admin API key:"
@@ -1487,8 +1487,8 @@ init_languages() {
   TRANSLATIONS["ru,update_success"]="Нода Aztec успешно обновлена до %s"
   TRANSLATIONS["ru,tag_check"]="Текущий образ: %s. Устанавливается %s"
   TRANSLATIONS["ru,install_image_pin"]="Образ ноды для этой сети: %s"
-  TRANSLATIONS["ru,testnet_fresh_data"]="v6 testnet — новый rollup. Используется чистый каталог данных: %s. Прежний каталог v5 оставлен на месте."
-  TRANSLATIONS["ru,image_tag_rejected"]="Тег недоступен для сети %s. Mainnet использует aztecprotocol/aztec 5.x (закреплён 5.2.0). Testnet использует azteclabs/aztec, включая 6.0.0-rc.1. Release candidate testnet на mainnet запускать нельзя."
+  TRANSLATIONS["ru,testnet_fresh_data"]="v6 — новый rollup. Используется чистый каталог данных: %s. Прежний каталог оставлен на месте."
+  TRANSLATIONS["ru,image_tag_rejected"]="Тег недоступен для сети %s. Mainnet использует azteclabs/aztec 6.x (закреплён 6.0.0), без release candidate. Testnet использует azteclabs/aztec 6.x, включая 6.0.0-rc.1."
   #downgrade
   TRANSLATIONS["ru,downgrade_title"]="Даунгрейд ноды Aztec"
   TRANSLATIONS["ru,downgrade_fetching"]="Получение списка доступных версий..."
@@ -1507,7 +1507,7 @@ init_languages() {
   TRANSLATIONS["ru,downgrade_start_error"]="Ошибка при запуске контейнеров"
   TRANSLATIONS["ru,downgrade_success"]="Нода Aztec успешно даунгрейднута до версии"
   TRANSLATIONS["ru,downgrade_custom_option"]="Своя"
-  TRANSLATIONS["ru,downgrade_custom_prompt"]="Введите тег образа (mainnet 5.x, testnet 6.0.0-rc.1): "
+  TRANSLATIONS["ru,downgrade_custom_prompt"]="Введите тег образа (mainnet 6.x, testnet 6.x или 6.x-rc.N): "
   #agent
   TRANSLATIONS["ru,agent_systemd_added"]="Агент добавлен (запуск каждые 37 секунд через systemd)"
   TRANSLATIONS["ru,agent_timer_status"]="Статус таймера:"
@@ -1692,7 +1692,7 @@ init_languages() {
 
   TRANSLATIONS["ru,aztec_rewards_claim"]="Aztec Rewards Claim"
   TRANSLATIONS["ru,claim_gas_key_prompt"]="Введите приватный ключ для оплаты газа (claim permissionless; награды уходят на coinbase). Скрытый ввод: "
-  TRANSLATIONS["ru,claimable_check_unavailable"]="isRewardsClaimable() недоступна на этом rollup (v5) — проверяем балансы дальше."
+  TRANSLATIONS["ru,claimable_check_unavailable"]="isRewardsClaimable() недоступна на этом rollup — проверяем балансы дальше."
   TRANSLATIONS["ru,staking_asset_label"]="Стейкинг-актив (ERC-20):"
   TRANSLATIONS["ru,staking_asset_resolve_failed"]="Не удалось получить staking asset через getStakingAsset(); approve отменён."
   TRANSLATIONS["ru,environment_file_not_found"]="Файл окружения не найден"
@@ -2037,9 +2037,9 @@ init_languages() {
   TRANSLATIONS["tr,gov_was"]="⚠️ Önceki:"
   TRANSLATIONS["tr,gov_now"]="Şimdi:"
   TRANSLATIONS["tr,gov_no_changes"]="✅ Değişiklik tespit edilmedi."
-  TRANSLATIONS["tr,gov_v5_expected"]="Beklenen V5UpgradePayload (mainnet AZUP-2):"
-  TRANSLATIONS["tr,gov_v5_match"]="✅ Son payload V5UpgradePayload ile eşleşiyor."
-  TRANSLATIONS["tr,gov_v5_mismatch"]="⚠️ Son payload V5UpgradePayload ile eşleşmiyor."
+  TRANSLATIONS["tr,gov_v6_expected"]="Beklenen V6UpgradePayload (mainnet AZUP-3):"
+  TRANSLATIONS["tr,gov_v6_match"]="✅ Son payload V6UpgradePayload ile eşleşiyor."
+  TRANSLATIONS["tr,gov_v6_mismatch"]="⚠️ Son payload V6UpgradePayload ile eşleşmiyor."
   TRANSLATIONS["tr,gov_signal_hint"]="Sinyal için düğüm .env dosyasına ekleyip yeniden başlatın: GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s"
   TRANSLATIONS["tr,search_admin_api"]="🔍 'aztec' konteyner loglarında Admin API anahtarı aranıyor..."
   TRANSLATIONS["tr,admin_api_found"]="✅ Admin API anahtarı:"
@@ -2221,8 +2221,8 @@ init_languages() {
   TRANSLATIONS["tr,update_success"]="Aztec düğümü başarıyla %s imajına güncellendi"
   TRANSLATIONS["tr,tag_check"]="Mevcut imaj: %s. Ayarlanan: %s"
   TRANSLATIONS["tr,install_image_pin"]="Bu ağ için düğüm imajı: %s"
-  TRANSLATIONS["tr,testnet_fresh_data"]="v6 testnet yeni bir rollup. Temiz veri dizini kullanılıyor: %s. Önceki v5 dizini yerinde bırakıldı."
-  TRANSLATIONS["tr,image_tag_rejected"]="Etiket %s aginda kullanilamaz. Mainnet aztecprotocol/aztec 5.x (sabit 5.2.0) kullanir. Testnet azteclabs/aztec kullanir, 6.0.0-rc.1 dahil. Testnet release candidate mainnet'te calistirilamaz."
+  TRANSLATIONS["tr,testnet_fresh_data"]="v6 yeni bir rollup. Temiz veri dizini kullanılıyor: %s. Önceki dizin yerinde bırakıldı."
+  TRANSLATIONS["tr,image_tag_rejected"]="Etiket %s aginda kullanilamaz. Mainnet azteclabs/aztec 6.x (sabit 6.0.0) kullanir, release candidate degil. Testnet azteclabs/aztec 6.x kullanir, 6.0.0-rc.1 dahil."
   # Sürüm düşürme
   TRANSLATIONS["tr,downgrade_title"]="Aztec düğümü sürüm düşürülüyor"
   TRANSLATIONS["tr,downgrade_fetching"]="Mevcut sürüm listesi alınıyor..."
@@ -2241,7 +2241,7 @@ init_languages() {
   TRANSLATIONS["tr,downgrade_start_error"]="Kapsayıcılar başlatılırken hata oluştu"
   TRANSLATIONS["tr,downgrade_success"]="Aztec düğümü başarıyla şu sürüme düşürüldü"
   TRANSLATIONS["tr,downgrade_custom_option"]="Özel"
-  TRANSLATIONS["tr,downgrade_custom_prompt"]="İmaj etiketini girin (mainnet 5.x, testnet 6.0.0-rc.1): "
+  TRANSLATIONS["tr,downgrade_custom_prompt"]="İmaj etiketini girin (mainnet 6.x, testnet 6.x veya 6.x-rc.N): "
   #agent
   TRANSLATIONS["tr,agent_systemd_added"]="Aracı eklendi (systemd ile her 37 saniyede bir çalışıyor)"
   TRANSLATIONS["tr,agent_timer_status"]="Zamanlayıcı durumu:"
@@ -2430,7 +2430,7 @@ init_languages() {
 
   TRANSLATIONS["tr,aztec_rewards_claim"]="Aztec Ödül Talep"
   TRANSLATIONS["tr,claim_gas_key_prompt"]="Gaz ödeyecek özel anahtarı girin (claim izinsiz; ödüller coinbase'e gider). Gizli: "
-  TRANSLATIONS["tr,claimable_check_unavailable"]="isRewardsClaimable() bu rollup'ta yok (v5) — bakiyeler yine de kontrol edilecek."
+  TRANSLATIONS["tr,claimable_check_unavailable"]="isRewardsClaimable() bu rollup'ta yok — bakiyeler yine de kontrol edilecek."
   TRANSLATIONS["tr,staking_asset_label"]="Staking varlığı (ERC-20):"
   TRANSLATIONS["tr,staking_asset_resolve_failed"]="getStakingAsset() ile staking varlığı alınamadı; approve iptal."
   TRANSLATIONS["tr,environment_file_not_found"]="Ortam dosyası bulunamadı"
@@ -2485,33 +2485,26 @@ init_languages() {
   TRANSLATIONS["tr,claim_function_not_activated"]="Şu anda kontratta talep işlevi etkinleştirilmemiş"
 }
 
-SCRIPT_VERSION="3.1.0"
-ERROR_DEFINITIONS_VERSION="1.0.1"
+SCRIPT_VERSION="3.2.0"
+ERROR_DEFINITIONS_VERSION="1.0.2"
 
 # Determine script directory for local file access (security: avoid remote code execution)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # === Configuration ===
-# v6 operator split:
-# https://app.notion.com/p/aztecnetwork/v6-Migration-Guide-for-Node-Operators-3dba1f6b0e35802d9bade536f614d950
-# Testnet: azteclabs/aztec:6.0.0-rc.1 (testnet only; do not run on mainnet).
-# Mainnet stays on aztecprotocol/aztec:5.2.0 until v6.0.0 ships (~2026-10-18).
+# v6 operator split. Both networks use azteclabs images.
+# https://docs.aztec.network/operate/testnet/operators/reference/changelog/v6.md
+# Testnet: 6.0.0-rc.1. Mainnet stable, published once v6 is canonical: 6.0.0.
+# Do not run the testnet release candidate on mainnet.
 AZTEC_IMAGE_REPO_TESTNET="azteclabs/aztec"
 AZTEC_IMAGE_TAG_TESTNET="6.0.0-rc.1"
-AZTEC_IMAGE_REPO_MAINNET="aztecprotocol/aztec"
-AZTEC_IMAGE_TAG_MAINNET="5.2.0"
+AZTEC_IMAGE_REPO_MAINNET="azteclabs/aztec"
+AZTEC_IMAGE_TAG_MAINNET="6.0.0"
 
-# Contract addresses (Rollup addresses)
-# Mainnet: https://forum.aztec.network/t/proposal-v5-payload-deployed/8606
-#CONTRACT_ADDRESS="0xf6D0D42aCE06829bECB78C74F49879528fC632c1"  # Testnet 4.1.0 rollup address
-#CONTRACT_ADDRESS="0x5932fcb01b6f63550c8bd91055613752480b6455"  # Testnet 4.0.4 rollup address
-#CONTRACT_ADDRESS="0x66a41cb55f9a1e38a45a2ac8685f12a61fbfab77"  # Testnet 3.0.3 rollup address
-#CONTRACT_ADDRESS="0xebd99ff0ff6677205509ae73f93d0ca52ac85d67"  # Testnet legacy rollup address
-#CONTRACT_ADDRESS="0xfe6061806cac748085904a010d2d9e33b8031741"  # Testnet v5 rollup address
+# Contract addresses (v6 rollups). v6 is a new genesis on each network.
+# Mainnet: https://forum.aztec.network/t/proposal-v6-payload/8671
 CONTRACT_ADDRESS="0x8c2fb2A68A3d362ab1DE99E06F83f8903160BbD9"  # Testnet v6 rollup (canonical since 2026-09-28)
-#CONTRACT_ADDRESS_MAINNET="0x603bb2c05d474794ea97805e8de69bccfb3bca12"  # Mainnet 2.1.11 rollup address
-#CONTRACT_ADDRESS_MAINNET="0xae2001f7e21d5ecabf6234e9fdd1e76f50f74962"  # Mainnet 4.1.2 rollup (pre-v5)
-CONTRACT_ADDRESS_MAINNET="0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34"  # Mainnet v5 rollup (AZUP-2)
+CONTRACT_ADDRESS_MAINNET="0xe37a2663cc9c119ba41572c40fab0bbb23a5402f"  # Mainnet v6 rollup (AZUP-3)
 
 # GSE contract addresses
 GSE_ADDRESS_TESTNET="0xb6a38a51a6c1de9012f9d8ea9745ef957212eaac" # Testnet new GSE address
@@ -2519,20 +2512,21 @@ GSE_ADDRESS_TESTNET="0xb6a38a51a6c1de9012f9d8ea9745ef957212eaac" # Testnet new G
 GSE_ADDRESS_MAINNET="0xa92ecfd0e70c9cd5e5cd76c50af0f7da93567a4f"
 
 # Staking ERC-20 fallbacks if getStakingAsset() fails (prefer live cast call)
-# Pre-v5 STAKE: 0x5595cb9ed193cac2c0bc5393313bc6115817954b
 STAKING_ASSET_MAINNET_FALLBACK="0xa27ec0006e59f245217ff08cd52a7e8b169e62d2"
+STAKING_ASSET_TESTNET_FALLBACK="0x5595cb9ed193cac2c0bc5393313bc6115817954b"
 
-# V5 governance upgrade payload (mainnet) — set GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS when signaling
-V5_UPGRADE_PAYLOAD_ADDRESS="0x1bbde48410bf7ad05208cd77de2bfb0e8f8803d8"
+# V6 governance upgrade payload (mainnet AZUP-3).
+# https://forum.aztec.network/t/proposal-v6-payload/8671
+# After the payload is executed the node stops signalling on its own.
+V6_UPGRADE_PAYLOAD_ADDRESS="0x68396cde7891ADCC65F11e8A5Cec1898AF6AD970"
 
-# Function signatures for rollup cast calls (v5 Rollup ABI @ 0x91ff8bbd...):
-# getPendingBlockNumber() removed — tip is checkpoint-based.
+# Checkpoint tip. v6 rollups expose getPendingCheckpointNumber().
 FUNCTION_SIG_BLOCK="getPendingCheckpointNumber()"
 FUNCTION_SIG_CHECKPOINT="getPendingCheckpointNumber()"
 FUNCTION_SIG_PROVEN_CHECKPOINT="getProvenCheckpointNumber()"
 
 # L1 rollup event topic0 = CheckpointProposed(uint256,bytes32,bytes32[],bytes32,bytes32)
-# Verified on mainnet Rollup 0x91ff8bbd8ebb07893010d50a48a1609e5ebd8e34
+# Used for v6 testnet. Mainnet v6 uses the same event unless a new propose selector ships.
 # (legacy Ignition L2BlockProposed(uint256,bytes32,bytes32[]) = 0x9ad613a7...)
 L2_BLOCK_PROPOSED_TOPIC0_MAINNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
 L2_BLOCK_PROPOSED_TOPIC0_TESTNET="0x6ff492bf2b4ca1b93a175167d14b3e46085b935cab3f39ca94013000799b93a0"
@@ -2692,7 +2686,7 @@ get_staking_asset() {
         if [[ "$network" == "mainnet" ]]; then
             asset="$STAKING_ASSET_MAINNET_FALLBACK"
         else
-            asset=""
+            asset="$STAKING_ASSET_TESTNET_FALLBACK"
         fi
     fi
     echo "$asset"
@@ -2722,25 +2716,25 @@ aztec_image_ref_for_network() {
   echo "$(aztec_image_repo_for_network "$network"):$(aztec_image_tag_for_network "$network")"
 }
 
-# v6 testnet is a new rollup and must not reuse the v5 data directory.
+# v6 is a new rollup on both networks and must not reuse the previous data directory.
 aztec_data_dir_for_network() {
   local network="${1:-testnet}"
   if [[ "$network" == "mainnet" ]]; then
-    echo "$HOME/.aztec/mainnet/data/"
+    echo "$HOME/.aztec/mainnet-v6/data/"
   else
     echo "$HOME/.aztec/testnet-v6/data/"
   fi
 }
 
-# Mainnet: stable 5.x on aztecprotocol only. Testnet: semver or X.Y.Z-rc.N on azteclabs.
+# Mainnet: stable 6.x on azteclabs, no release candidate. Testnet: 6.x or 6.x-rc.N.
 aztec_tag_allowed_for_network() {
   local network="$1"
   local tag="$2"
   if [[ "$network" == "mainnet" ]]; then
-    [[ "$tag" =~ ^5\.[0-9]+\.[0-9]+$ ]]
+    [[ "$tag" =~ ^6\.[0-9]+\.[0-9]+$ ]]
     return
   fi
-  [[ "$tag" =~ ^([0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?|latest)$ ]]
+  [[ "$tag" =~ ^6\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$ ]]
 }
 
 # Prefer ~/.env-aztec-agent. If NETWORK is unset, read --network / data path from compose
@@ -2754,7 +2748,7 @@ aztec_effective_network() {
     network="${NETWORK:-}"
   fi
   if [[ -z "$network" && -f "$compose" ]]; then
-    if grep -q -- '--network mainnet' "$compose" || grep -q '\.aztec/mainnet/data' "$compose"; then
+    if grep -q -- '--network mainnet' "$compose" || grep -q '\.aztec/mainnet' "$compose"; then
       network="mainnet"
     elif grep -q -- '--network testnet' "$compose" || grep -q '\.aztec/testnet' "$compose"; then
       network="testnet"
@@ -2776,16 +2770,51 @@ aztec_compose_set_image() {
   sed -i -E "s#image:[[:space:]]*(aztecprotocol|azteclabs)/aztec:[^[:space:]]+#image: ${image_ref}#" "$compose_file"
 }
 
-# Point a v5 testnet bind mount at the fresh v6 directory. Leave other paths unchanged.
-aztec_compose_use_fresh_testnet_data() {
+# Mainnet signaling uses the published V6UpgradePayload. Testnet is already on v6 and is left unchanged.
+aztec_env_set_governance_payload() {
+  local env_file="$1"
+  local network="${2:-}"
+  [[ "$network" == "mainnet" ]] || return 0
+  [[ -f "$env_file" ]] || return 0
+  if grep -q '^GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=' "$env_file"; then
+    sed -i "s|^GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=.*|GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=$V6_UPGRADE_PAYLOAD_ADDRESS|" "$env_file"
+  else
+    printf 'GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s\n' "$V6_UPGRADE_PAYLOAD_ADDRESS" >> "$env_file"
+  fi
+}
+
+# Point a pre-v6 bind mount at the fresh v6 directory. A path that is already v6 is left unchanged.
+aztec_compose_use_fresh_v6_data() {
   local compose_file="$1"
-  local new_data="$2"
+  local network="$2"
+  local new_data="$3"
   mkdir -p "$new_data"
-  if grep -q '\.aztec/testnet/data' "$compose_file"; then
+  if [[ "$network" == "mainnet" ]]; then
+    if grep -q '\.aztec/mainnet/data' "$compose_file"; then
+      sed -i 's|\.aztec/mainnet/data/*|.aztec/mainnet-v6/data/|g' "$compose_file"
+      return 0
+    fi
+  elif grep -q '\.aztec/testnet/data' "$compose_file"; then
     sed -i 's|\.aztec/testnet/data/*|.aztec/testnet-v6/data/|g' "$compose_file"
     return 0
   fi
   return 1
+}
+
+# Extra L1 RPCs tried after the operator RPC. Mainnet must not fall back to Sepolia.
+aztec_l1_fallback_rpcs() {
+  local network="${1:-testnet}"
+  if [[ "$network" == "mainnet" ]]; then
+    printf '%s\n' \
+      "https://ethereum-rpc.publicnode.com" \
+      "https://ethereum.publicnode.com" \
+      "https://1rpc.io/eth"
+  else
+    printf '%s\n' \
+      "https://ethereum-sepolia-rpc.publicnode.com" \
+      "https://1rpc.io/sepolia" \
+      "https://sepolia.drpc.org"
+  fi
 }
 
 # Prefer pip3 when available; fall back to python3 -m pip (minimal/old installs).
@@ -3916,16 +3945,19 @@ find_governance_proposer_payload() {
     echo -e "\n${GREEN}$(t "gov_no_changes")${NC}"
   fi
 
-  local latest_payload expected_payload
+  local latest_payload expected_payload network
   latest_payload="${payloads_array[${#payloads_array[@]}-1]}"
-  expected_payload=$(echo "$V5_UPGRADE_PAYLOAD_ADDRESS" | tr '[:upper:]' '[:lower:]')
-  echo -e "\n${CYAN}$(t "gov_v5_expected")${NC} $V5_UPGRADE_PAYLOAD_ADDRESS"
-  if [ "$latest_payload" = "$expected_payload" ]; then
-    echo -e "${GREEN}$(t "gov_v5_match")${NC}"
-  else
-    echo -e "${YELLOW}$(t "gov_v5_mismatch")${NC}"
+  network=$(aztec_effective_network "$HOME/aztec/docker-compose.yml")
+  if [[ "$network" == "mainnet" ]]; then
+    expected_payload=$(echo "$V6_UPGRADE_PAYLOAD_ADDRESS" | tr '[:upper:]' '[:lower:]')
+    echo -e "\n${CYAN}$(t "gov_v6_expected")${NC} $V6_UPGRADE_PAYLOAD_ADDRESS"
+    if [ "$latest_payload" = "$expected_payload" ]; then
+      echo -e "${GREEN}$(t "gov_v6_match")${NC}"
+    else
+      echo -e "${YELLOW}$(t "gov_v6_mismatch")${NC}"
+    fi
+    printf "${YELLOW}$(t "gov_signal_hint")${NC}\n" "$V6_UPGRADE_PAYLOAD_ADDRESS"
   fi
-  printf "${YELLOW}$(t "gov_signal_hint")${NC}\n" "$V5_UPGRADE_PAYLOAD_ADDRESS"
 
   return 0
 }
@@ -6066,14 +6098,18 @@ update_aztec_node() {
         }
     fi
 
-    if [[ "$network" != "mainnet" ]] && grep -q '\.aztec/testnet/data' docker-compose.yml; then
-        local fresh_data
-        fresh_data=$(aztec_data_dir_for_network testnet)
-        aztec_compose_use_fresh_testnet_data docker-compose.yml "$fresh_data"
+    local fresh_data
+    fresh_data=$(aztec_data_dir_for_network "$network")
+    if aztec_compose_use_fresh_v6_data docker-compose.yml "$network" "$fresh_data"; then
         echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$fresh_data")${NC}"
     fi
 
-    # Обновляем образ сети. Mainnet остаётся на aztecprotocol/aztec:5.2.0.
+    if [[ "$network" == "mainnet" ]]; then
+        aztec_env_set_governance_payload "$HOME/aztec/.env" mainnet
+        printf "${YELLOW}$(t "gov_signal_hint")${NC}\n" "$V6_UPGRADE_PAYLOAD_ADDRESS"
+    fi
+
+    # Обновляем образ сети. Mainnet: azteclabs/aztec:6.0.0. Testnet: azteclabs/aztec:6.0.0-rc.1.
     echo -e "${YELLOW}$(printf "$(t "update_pulling")" "$image_ref")${NC}"
     docker pull "$image_ref" || {
         echo -e "${RED}$(t "update_pull_error")${NC}"
@@ -6135,11 +6171,11 @@ downgrade_aztec_node() {
         return 1
     fi
 
-    # Mainnet: только стабильные 5.x с aztecprotocol. Testnet: semver и X.Y.Z-rc.N с azteclabs, без nightly.
+    # Mainnet: стабильные 6.x. Testnet: 6.x и 6.x-rc.N. Оба образа из azteclabs.
     if [[ "$network" == "mainnet" ]]; then
-        FILTERED_TAGS=$(echo "$ALL_TAGS" | grep -E '^5\.[0-9]+\.[0-9]+$' | sort -Vr | uniq)
+        FILTERED_TAGS=$(echo "$ALL_TAGS" | grep -E '^6\.[0-9]+\.[0-9]+$' | sort -Vr | uniq)
     else
-        FILTERED_TAGS=$(echo "$ALL_TAGS" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$' | sort -Vr | uniq)
+        FILTERED_TAGS=$(echo "$ALL_TAGS" | grep -E '^6\.[0-9]+\.[0-9]+(-rc\.[0-9]+)?$' | sort -Vr | uniq)
     fi
 
     # Выводим список тегов с нумерацией
@@ -6203,11 +6239,12 @@ downgrade_aztec_node() {
         return 1
     }
 
-    if [[ "$network" != "mainnet" && "$TAG" =~ ^6\. ]] && grep -q '\.aztec/testnet/data' docker-compose.yml; then
+    if [[ "$TAG" =~ ^6\. ]]; then
         local fresh_data
-        fresh_data=$(aztec_data_dir_for_network testnet)
-        aztec_compose_use_fresh_testnet_data docker-compose.yml "$fresh_data"
-        echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$fresh_data")${NC}"
+        fresh_data=$(aztec_data_dir_for_network "$network")
+        if aztec_compose_use_fresh_v6_data docker-compose.yml "$network" "$fresh_data"; then
+            echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$fresh_data")${NC}"
+        fi
     fi
 
     # Запускаем контейнеры
@@ -7988,13 +8025,8 @@ EOF
         1)
             NETWORK="mainnet"
             DATA_DIR=$(aztec_data_dir_for_network mainnet)
-            # V5 AZUP-2 signaling payload (mainnet) — https://forum.aztec.network/t/proposal-v5-payload-deployed/8606
-            # v6 mainnet payload is not published yet (signalling starts 2026-10-07).
-            if ! grep -q '^GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=' .env 2>/dev/null; then
-              printf 'GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=%s\n' "$V5_UPGRADE_PAYLOAD_ADDRESS" >> .env
-            else
-              sed -i "s|^GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=.*|GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=$V5_UPGRADE_PAYLOAD_ADDRESS|" .env
-            fi
+            # V6 AZUP-3 payload. After execution the node stops signalling on its own.
+            aztec_env_set_governance_payload .env mainnet
             ;;
         2)
             NETWORK="testnet"
@@ -8012,9 +8044,7 @@ EOF
 
     echo -e "\n${GREEN}$(t "selected_network")${NC}: ${YELLOW}$NETWORK${NC}"
     echo -e "${CYAN}$(printf "$(t "install_image_pin")" "$image_ref")${NC}"
-    if [[ "$NETWORK" != "mainnet" ]]; then
-        echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$DATA_DIR")${NC}"
-    fi
+    echo -e "${YELLOW}$(printf "$(t "testnet_fresh_data")" "$DATA_DIR")${NC}"
 
     # Сохраняем/обновляем NETWORK в файле .env-aztec-agent
     ENV_FILE="$HOME/.env-aztec-agent"
@@ -8950,6 +8980,11 @@ function start_aztec_containers() {
         _update_env_var "$env_file" "COMPOSE_PATH" "$compose_path"
       fi
 
+      if [[ "$network" == "mainnet" ]]; then
+        aztec_env_set_governance_payload "$compose_path/.env" mainnet
+        printf "${YELLOW}$(t "gov_signal_hint")${NC}\n" "$V6_UPGRADE_PAYLOAD_ADDRESS"
+      fi
+
       if cd "$compose_path" && docker compose up -d; then
         echo -e "${GREEN}$(t "node_started")${NC}"
       else
@@ -9006,7 +9041,7 @@ function start_aztec_containers() {
 
       local gov_env_prefix=""
       if [[ "$network" == "mainnet" ]]; then
-        gov_env_prefix="GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=$V5_UPGRADE_PAYLOAD_ADDRESS "
+        gov_env_prefix="GOVERNANCE_PROPOSER_PAYLOAD_ADDRESS=$V6_UPGRADE_PAYLOAD_ADDRESS "
       fi
 
       if screen -dmS "$session_name" && \
@@ -9415,7 +9450,7 @@ generate_bls_dashboard_method() {
     fi
 
     if [ -z "$rpc_url" ] || [ "$rpc_url" = "null" ]; then
-        rpc_url="https://ethereum-sepolia-rpc.publicnode.com"
+        rpc_url=$(aztec_l1_fallback_rpcs "$network" | head -n 1)
         echo -e "${YELLOW}RPC not set in .env-aztec-agent, using default: $rpc_url${NC}"
     fi
 
@@ -9759,10 +9794,16 @@ generate_bls_new_operator_method() {
 
     echo -e "${GREEN}Found feeRecipient: $FEE_RECIPIENT_ADDRESS${NC}"
 
-    # Используем стандартный RPC URL вместо запроса у пользователя
-    local RPC_URL="https://ethereum-sepolia-rpc.publicnode.com"
+    local settings network rpc_url
+    settings=$(get_network_settings)
+    network=$(echo "$settings" | cut -d'|' -f1)
+    rpc_url=$(echo "$settings" | cut -d'|' -f2)
+    if [ -z "$rpc_url" ] || [ "$rpc_url" = "null" ]; then
+        rpc_url=$(aztec_l1_fallback_rpcs "$network" | head -n 1)
+    fi
+    local RPC_URL="$rpc_url"
     echo -e "${GREEN}$(t "bls_starting_generation")${NC}"
-    echo -e "${CYAN}Using default RPC: $RPC_URL${NC}"
+    echo -e "${CYAN}Using RPC ($network): $RPC_URL${NC}"
 
     # Создаем папку для временных файлов
     local TEMP_DIR=$(mktemp -d)
@@ -9989,13 +10030,11 @@ stake_validators_old_format() {
     printf "${GREEN}$(t "staking_found_validators")${NC}\n" "$VALIDATOR_COUNT"
     echo ""
 
-    # Список RPC провайдеров
-    local rpc_providers=(
-        "$rpc_url"
-        "https://ethereum-sepolia-rpc.publicnode.com"
-        "https://1rpc.io/sepolia"
-        "https://sepolia.drpc.org"
-    )
+    local rpc_providers=("$rpc_url")
+    local extra_rpc
+    while IFS= read -r extra_rpc; do
+        [[ -n "$extra_rpc" && "$extra_rpc" != "$rpc_url" ]] && rpc_providers+=("$extra_rpc")
+    done < <(aztec_l1_fallback_rpcs "$network")
 
     printf "${YELLOW}$(t "using_contract_address")${NC}\n" "$contract_address"
     echo ""
@@ -10203,12 +10242,11 @@ stake_validators_new_format() {
         # Список RPC провайдеров (используем сохраненный или дефолтный список)
         local rpc_providers=("${VALIDATOR_RPC_URL:-$rpc_url}")
         if [ -z "$VALIDATOR_RPC_URL" ] || [ "$VALIDATOR_RPC_URL" = "null" ]; then
-            rpc_providers=(
-                "$rpc_url"
-                "https://ethereum-sepolia-rpc.publicnode.com"
-                "https://1rpc.io/sepolia"
-                "https://sepolia.drpc.org"
-            )
+            rpc_providers=("$rpc_url")
+            local extra_rpc
+            while IFS= read -r extra_rpc; do
+                [[ -n "$extra_rpc" && "$extra_rpc" != "$rpc_url" ]] && rpc_providers+=("$extra_rpc")
+            done < <(aztec_l1_fallback_rpcs "$network")
         fi
 
         # Цикл по RPC провайдерам
